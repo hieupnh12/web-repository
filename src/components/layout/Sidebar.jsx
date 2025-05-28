@@ -88,6 +88,20 @@ const Sidebar = ({ currentPath = '/dashboard' }) => {
       icon: Settings,
       path: '/account',
       color: 'text-blue-500'
+    },
+    {
+      id: 'permissions',
+      label: 'Phân quyền',
+      icon: UserCircle,
+      path: '/permissions',
+      color: 'text-blue-500'
+    },
+    {
+      id: 'revenue',
+      label: 'Doanh thu',
+      icon: Settings,
+      path: '/revenue',
+      color: 'text-blue-500'
     }
   ];
 
@@ -138,12 +152,7 @@ const Sidebar = ({ currentPath = '/dashboard' }) => {
               >
                 <Icon className={`w-5 h-5 ${isActive ? 'text-blue-500' : item.color}`} />
                 <span className="font-medium flex-1">{item.label}</span>
-                
-                {/* Badge cho Khu vực kho */}
-                {item.badge && (
-                  <div className="w-2 h-2 bg-red-500 rounded-full"></div>
-                )}
-                
+              
                 {/* Arrow cho active item */}
                 {isActive && (
                   <ChevronRight className="w-4 h-4 text-blue-500" />
