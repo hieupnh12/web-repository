@@ -1,7 +1,6 @@
 import React from 'react';
-import { useLocation } from 'react-router-dom';
+import { useLocation, Outlet } from 'react-router-dom';
 import Sidebar from './Sidebar';
-import Header from './Header';
 import Breadcrumb from './Breadcrumb';
 
 // Map paths to titles and breadcrumbs
@@ -46,10 +45,11 @@ const pageConfig = {
   }
 };
 
-const Layout = ({ children }) => {
+const LayoutCommon = () => {
   const location = useLocation();
   const currentPath = location.pathname;
-  const config = pageConfig[currentPath] || { title: 'Dashboard', breadcrumb: [] };
+  const pathKey = currentPath.replace(/^\/(manager|staff)/, '') || '/';
+  const config = pageConfig[pathKey] || { title: 'Dashboard', breadcrumb: [] };
 
   return (
     <div className="flex h-screen bg-gray-50">
@@ -57,9 +57,9 @@ const Layout = ({ children }) => {
       <Sidebar currentPath={currentPath} />
       
       {/* Main content */}
-      <div className="flex-1 flex flex-col overflow-hidden">
+      <div className="flex-1 flex flex-col bg-[#D1E4E2]">
         {/* Header */}
-        <Header title={config.title} />
+        {/* <Header title={config.title} /> */}
         
         {/* Main content area */}
         <main className="flex-1 overflow-y-auto">
@@ -71,7 +71,7 @@ const Layout = ({ children }) => {
             
             {/* Page content */}
             <div className="bg-white rounded-lg shadow-sm min-h-full">
-              {children}
+              <Outlet />
             </div>
           </div>
         </main>
@@ -80,4 +80,5 @@ const Layout = ({ children }) => {
   );
 };
 
-export default Layout;
+
+export default LayoutCommon;
