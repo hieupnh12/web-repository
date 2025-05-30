@@ -26,7 +26,7 @@ export default function ExportForm({
       <div className="flex items-center justify-between bg-white/60 p-4 rounded-2xl shadow-sm flex-wrap gap-4">
         <div className="flex items-center space-x-4">
           <Link
-            to="/addexport"
+            to="addexport"
             className="bg-teal-500 hover:bg-teal-600 text-white px-4 py-2 rounded-lg font-medium"
           >
             Add Patient

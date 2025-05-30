@@ -1,16 +1,17 @@
-import React from 'react';
+import React from "react";
 import {
   RouterProvider,
   createBrowserRouter,
   createRoutesFromElements,
   Route,
-} from 'react-router-dom';
+} from "react-router-dom";
 
-import LayoutCommon from './components/layout/Layout';
+import LayoutCommon from "./components/layout/Layout";
 
 // Các page
-import Dashboard from './pages/Dashboard/Dashboard';
-import ExportStock from './pages/Inventory/ExportStock';
+import Dashboard from "./pages/Dashboard/Dashboard";
+import ExportStock from "./pages/Inventory/ExportStock";
+import Export from "./pages/Inventory/components/Export";
 // import ImportStock from './pages/Inventory/ImportStock';
 // import Products from './pages/Products/Products';
 // import Inventory from './pages/Inventory/Inventory';
@@ -21,7 +22,9 @@ import ExportStock from './pages/Inventory/ExportStock';
 // import Account from './pages/Account/Account';
 
 // Optional: 404 Not Found page
-const NotFound = () => <div className="p-10 text-center text-xl">404 - Không tìm thấy trang</div>;
+const NotFound = () => (
+  <div className="p-10 text-center text-xl">404 - Không tìm thấy trang</div>
+);
 
 const router = createBrowserRouter(
   createRoutesFromElements(
@@ -30,6 +33,11 @@ const router = createBrowserRouter(
       <Route path="manager" element={<LayoutCommon />}>
         <Route index element={<Dashboard />} />
         <Route path="dashboard" element={<Dashboard />} />
+        {/* Route cha: export */}
+        <Route path="export">
+          <Route index element={<ExportStock />} />
+          <Route path="addexport" element={<Export />} />
+        </Route>{" "}
         {/* <Route path="products" element={<Products />} /> */}
         {/* <Route path="inventory" element={<Inventory />} /> */}
         {/* <Route path="storage" element={<Storage />} /> */}

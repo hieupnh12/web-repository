@@ -21,24 +21,35 @@ const Breadcrumb = ({ items = [] }) => {
       )}
 
       {/* Breadcrumb items */}
-      {items.map((item, index) => (
-        <React.Fragment key={index}>
-          {index === items.length - 1 ? (
-            // Last item - not clickable
-            <span className="text-gray-800 font-medium">{item.label}</span>
-          ) : (
-            <>
-              <Link
-                to={item.href || '#'}
-                className="hover:text-blue-600 transition-colors"
-              >
-                {item.label}
-              </Link>
-              <ChevronRight className="w-4 h-4 text-gray-400" />
-            </>
-          )}
-        </React.Fragment>
-      ))}
+{items.map((item, index) => {
+  const isLast = index === items.length - 1;
+  const baseBg = isLast ? 'bg-blue-700 text-white' : 'bg-blue-50 text-blue-800 hover:bg-blue-100';
+  const borderColor = isLast ? 'border-blue-700' : 'border-blue-200';
+
+  const Container = isLast ? 'div' : Link;
+  const containerProps = isLast
+    ? {}
+    : { to: item.href || '#' };
+
+  return (
+    <React.Fragment key={index}>
+      <Container
+        {...containerProps}
+        className={`relative inline-block font-medium text-sm ${baseBg} transition-colors px-4 py-1 border-y ${borderColor} shadow-sm hover:shadow-md`}
+        style={{
+          clipPath: 'polygon(0% 0%, calc(100% - 15px) 0%, 100% 50%, calc(100% - 15px) 100%, 0% 100%, 15px 50%)',
+          marginRight: '-15px', // Overlap items
+        }}
+      >
+        <span>{item.label}</span>
+      </Container>
+    </React.Fragment>
+  );
+})}
+
+
+
+
     </nav>
   );
 };
