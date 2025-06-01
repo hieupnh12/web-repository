@@ -3,8 +3,14 @@ import { Suspense } from "react";
 
 const LoadLazy = ({ children }) => {
   return (
-    <Suspense fallback={<Spin size="large" />}>
-      {children} 
+    <Suspense
+      fallback={
+        <div className="flex items-center justify-center min-h-screen">
+          <Spin size="large" />
+        </div>
+      }
+    >
+      {children}
     </Suspense>
   );
 };
