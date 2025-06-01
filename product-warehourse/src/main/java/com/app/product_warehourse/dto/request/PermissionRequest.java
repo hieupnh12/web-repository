@@ -1,5 +1,6 @@
 package com.app.product_warehourse.dto.request;
 
+
 import jakarta.persistence.Entity;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
@@ -9,9 +10,10 @@ import lombok.experimental.FieldDefaults;
 @NoArgsConstructor
 @AllArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE)
-public class StaffRequest {
-    String fullName;
-    Integer gender;
-    String phoneNumber;
-    String email;
+public class PermissionRequest {
+     Long functionId;
+     boolean canView;
+     boolean canCreate;
+     boolean canUpdate;
+     boolean canDelete;
 }

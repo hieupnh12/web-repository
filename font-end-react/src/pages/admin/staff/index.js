@@ -10,7 +10,7 @@ export default function StaffManager() {
   const fetchData = async () => {
     try {
       const res = await showStaff();
-      setStaffList(res.data); // đảm bảo đúng định dạng
+      setStaffList(res.data.result); // đảm bảo đúng định dạng
       
     } catch (err) {
       console.error("Lỗi khi lấy dữ liệu:", err);

@@ -4,24 +4,20 @@ import jakarta.persistence.*;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
 
-import java.util.Set;
-
 @Data
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE)
 @Entity
-public class Role {
+public class Permission {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    Long id;
-    String name;
-    String description;
+    Long permissionId;
     @ManyToOne
-    Account account;
-    @ManyToMany
-    Set<Permission> permissions;
-
-
+    Functions functions;
+     boolean canView;
+     boolean canCreate;
+     boolean canUpdate;
+     boolean canDelete;
 }

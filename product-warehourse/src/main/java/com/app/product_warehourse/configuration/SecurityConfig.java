@@ -1,6 +1,8 @@
 package com.app.product_warehourse.configuration;
 
 import org.springframework.http.HttpMethod;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.filter.CorsFilter;
 
 
@@ -64,6 +66,11 @@ public class SecurityConfig {
 
         return new CorsFilter(source);
     }
+
+    @Bean
+    PasswordEncoder passwordEncoder() {
+     return new BCryptPasswordEncoder(10);
+   }
 }
 
 //    @Bean
