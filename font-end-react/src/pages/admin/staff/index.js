@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { createStaff } from "../../../services/authService";
 import { notification } from "antd";
+import StaffList from "./showStaff";
 
 export default function Staff() {
   const [formData, setFormData] = useState({
@@ -24,7 +25,8 @@ export default function Staff() {
       errs.email = "Email không hợp lệ";
     if (formData.gender !== "1" && formData.gender !== "0")
       errs.gender = "Chọn giới tính";
-    if (!formData.phoneNumber.trim()) errs.phoneNumber = "Vui lòng nhập số điện thoại";
+    if (!formData.phoneNumber.trim())
+      errs.phoneNumber = "Vui lòng nhập số điện thoại";
     else if (!/^0\d{9,10}$/.test(formData.phoneNumber))
       errs.phoneNumber = "Số điện thoại không hợp lệ";
     setErrors(errs);
@@ -51,7 +53,9 @@ export default function Staff() {
   };
 
   return (
+    <>
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-100 via-white to-green-100 px-4">
+      
       <form
         onSubmit={handleSubmit}
         className="w-full max-w-xl bg-white p-8 rounded-2xl shadow-xl space-y-6 transform transition-all duration-500 hover:scale-[1.01]"
@@ -148,6 +152,12 @@ export default function Staff() {
           Thêm nhân viên
         </button>
       </form>
+
+      
     </div>
+    <div className="bg-gray-100 min-h-screen p-4">
+        <StaffList />
+      </div>
+    </>
   );
 }

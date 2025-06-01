@@ -1,5 +1,5 @@
 import BASE_URL from "../api/axinosInstance"
-import { POST } from "../constants/httpMethod"
+import { GET, POST } from "../constants/httpMethod"
 
 
 export const login = (user) => {
@@ -10,6 +10,12 @@ export const login = (user) => {
  
 export const createStaff = (user) => {
     const response = BASE_URL[POST]("staff", user);
+
+    return response;
+}
+
+export const showStaff = () => {
+    const response = BASE_URL[GET]("staff");
 
     return response;
 }
