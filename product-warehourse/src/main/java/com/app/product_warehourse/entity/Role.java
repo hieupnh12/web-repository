@@ -1,7 +1,8 @@
 package com.app.product_warehourse.entity;
 
-
-import jakarta.persistence.*;
+import jakarta.persistence.Entity;
+import jakarta.persistence.Id;
+import jakarta.persistence.ManyToMany;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
 
@@ -13,15 +14,13 @@ import java.util.Set;
 @AllArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE)
 @Entity
-public class Account {
+public class Role {
     @Id
-    @GeneratedValue(strategy = GenerationType.UUID)
-    String staffId;
-    String userName;
-    String password;
+    String name;
+    String description;
 
-    Integer status;
-    String otp;
+    @ManyToMany
+    Set<Functions> functions;
 
 
 }

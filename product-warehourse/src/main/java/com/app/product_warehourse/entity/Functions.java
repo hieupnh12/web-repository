@@ -1,11 +1,9 @@
 package com.app.product_warehourse.entity;
 
-
-import jakarta.persistence.*;
+import jakarta.persistence.Entity;
+import jakarta.persistence.Id;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
-
-import java.util.Set;
 
 @Data
 @Builder
@@ -13,15 +11,9 @@ import java.util.Set;
 @AllArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE)
 @Entity
-public class Account {
+public class Functions {
     @Id
-    @GeneratedValue(strategy = GenerationType.UUID)
-    String staffId;
-    String userName;
-    String password;
-
+    String functionId;
+    String functionName;
     Integer status;
-    String otp;
-
-
 }

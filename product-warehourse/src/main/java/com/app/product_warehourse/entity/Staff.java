@@ -5,23 +5,23 @@ import jakarta.persistence.*;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
 
-import java.util.Set;
-
 @Data
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE)
 @Entity
-public class Account {
+public class Staff {
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
     String staffId;
-    String userName;
-    String password;
+    String fullName;
+    Integer gender;
+    String phoneNumber;
+    String email;
 
     Integer status;
-    String otp;
-
+    @OneToOne
+    Account account;
 
 }

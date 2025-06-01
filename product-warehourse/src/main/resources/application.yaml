@@ -1,0 +1,15 @@
+server:
+  port: 8080
+  servlet:
+    context-path: /warehouse
+
+spring:
+  datasource:
+    url: "jdbc:mysql://localhost:3306/Warehouse"
+    username: root
+    password: sa130220
+
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: true
