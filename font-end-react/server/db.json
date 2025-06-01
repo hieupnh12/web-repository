@@ -1,0 +1,25 @@
+{
+  "staff": [
+    {
+      "id": 1,
+      "name": "Nguyen Van A",
+      "email": "a@example.com",
+      "gender": "1",
+      "phone": "0123456789"
+    },
+    {
+      "id": "826a",
+      "name": "NGUYEN MINH HIEU",
+      "email": "hieupnh7@gmail.com",
+      "gender": "1",
+      "phone": "0395710052"
+    },
+    {
+      "id": "34d2",
+      "name": "Le Thi C",
+      "email": "c@example.com",
+      "gender": "0",
+      "phone": "0988888888"
+    }
+  ]
+}

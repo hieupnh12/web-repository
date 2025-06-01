@@ -1,5 +1,6 @@
 import React from "react";
 import LoadLazy from "../components/LoadLazy";
+import Staff from "../pages/admin/staff";
 
 const LayoutAdmin = React.lazy(() => import("../layouts/admin/LayoutAdmin"));
 const DashBoard = React.lazy(() => import("../pages/admin/dashboard"));
@@ -24,6 +25,10 @@ const PrivateRoutes = [
             {
                 path: "product",
                 element: <LoadLazy children={<Product />}/>
+            },
+            {
+                path: "staff",
+                element: <LoadLazy children={<Staff />}/>
             },
         ]
     }
