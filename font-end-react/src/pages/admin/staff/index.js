@@ -4,10 +4,10 @@ import { notification } from "antd";
 
 export default function Staff() {
   const [formData, setFormData] = useState({
-    name: "",
+    fullName: "",
     email: "",
     gender: "",
-    phone: "",
+    phoneNumber: "",
   });
 
   const [errors, setErrors] = useState({});
@@ -18,15 +18,15 @@ export default function Staff() {
 
   const validate = () => {
     const errs = {};
-    if (!formData.name.trim()) errs.name = "Vui lòng nhập tên";
+    if (!formData.fullName.trim()) errs.fullName = "Vui lòng nhập tên";
     if (!formData.email.trim()) errs.email = "Vui lòng nhập email";
     else if (!/\S+@\S+\.\S+/.test(formData.email))
       errs.email = "Email không hợp lệ";
     if (formData.gender !== "1" && formData.gender !== "0")
       errs.gender = "Chọn giới tính";
-    if (!formData.phone.trim()) errs.phone = "Vui lòng nhập số điện thoại";
-    else if (!/^0\d{9,10}$/.test(formData.phone))
-      errs.phone = "Số điện thoại không hợp lệ";
+    if (!formData.phoneNumber.trim()) errs.phoneNumber = "Vui lòng nhập số điện thoại";
+    else if (!/^0\d{9,10}$/.test(formData.phoneNumber))
+      errs.phoneNumber = "Số điện thoại không hợp lệ";
     setErrors(errs);
     return Object.keys(errs).length === 0;
   };
@@ -34,17 +34,15 @@ export default function Staff() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (validate()) {
-      console.log("Form submitted:", formData);
-      // Reset nếu cần
       try {
         const res = await createStaff(formData);
-
-        if (res.status === 201) {
+        if (res.status === 200 || res.status === 201) {
           notification.success({
-            message: "thành công",
+            message: "Thêm nhân viên thành công!",
           });
+          console.log("Successfully created staff");
         } else {
-          console.error("Gửi thất bại");
+          console.error("Tạo nhân viên thất bại:", res);
         }
       } catch (error) {
         console.error("Lỗi khi gửi:", error);
@@ -67,13 +65,13 @@ export default function Staff() {
           <label className="block mb-1 font-medium text-gray-700">Họ tên</label>
           <input
             type="text"
-            name="name"
+            name="fullName"
             className="w-full border rounded px-4 py-2 focus:outline-none focus:ring focus:border-blue-300"
-            value={formData.name}
+            value={formData.fullName}
             onChange={handleChange}
           />
-          {errors.name && (
-            <p className="text-red-500 text-sm mt-1">{errors.name}</p>
+          {errors.fullName && (
+            <p className="text-red-500 text-sm mt-1">{errors.fullName}</p>
           )}
         </div>
 
@@ -133,13 +131,13 @@ export default function Staff() {
           </label>
           <input
             type="text"
-            name="phone"
+            name="phoneNumber"
             className="w-full border rounded px-4 py-2 focus:outline-none focus:ring focus:border-blue-300"
-            value={formData.phone}
+            value={formData.phoneNumber}
             onChange={handleChange}
           />
-          {errors.phone && (
-            <p className="text-red-500 text-sm mt-1">{errors.phone}</p>
+          {errors.phoneNumber && (
+            <p className="text-red-500 text-sm mt-1">{errors.phoneNumber}</p>
           )}
         </div>
 
