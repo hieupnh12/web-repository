@@ -1,9 +1,9 @@
 package com.app.product_warehourse.controller;
 
 import com.app.product_warehourse.dto.request.ApiResponse;
-import com.app.product_warehourse.dto.request.StaffRequest;
+import com.app.product_warehourse.dto.request.StaffCreateRequest;
+import com.app.product_warehourse.dto.request.StaffUpdateRequest;
 import com.app.product_warehourse.dto.response.StaffResponse;
-import com.app.product_warehourse.entity.Staff;
 import com.app.product_warehourse.service.StaffService;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
@@ -21,14 +21,14 @@ import java.util.List;
 public class StaffController {
     StaffService staffService;
     @PostMapping
-    public ApiResponse<StaffResponse> addStaff(@RequestBody StaffRequest request) {
+    public ApiResponse<StaffResponse> addStaff(@RequestBody StaffCreateRequest request) {
         return ApiResponse.<StaffResponse>builder()
                 .result(staffService.createStaff(request))
                 .build();
     }
-    @DeleteMapping("/{userId}")
-    public ApiResponse<Void> deleteStaff(@PathVariable String userId) {
-        staffService.deleteStaff(userId);
+    @DeleteMapping("/{staffId}")
+    public ApiResponse<Void> deleteStaff(@PathVariable String staffId) {
+        staffService.deleteStaff(staffId);
         return ApiResponse.<Void>builder().build();
     }
     @GetMapping
@@ -38,4 +38,11 @@ public class StaffController {
                 .result(staffService.getAllStaff())
                 .build();
     }
+    @PutMapping("/{staffId}")
+    public ApiResponse<StaffResponse> updateStaff(@PathVariable String staffId, @RequestBody StaffUpdateRequest request) {
+        return ApiResponse.<StaffResponse>builder()
+                .result(staffService.updateStaff(staffId,request))
+                .build();
+    }
+
 }

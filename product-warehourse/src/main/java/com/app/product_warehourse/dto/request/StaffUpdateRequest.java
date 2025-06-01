@@ -1,6 +1,5 @@
 package com.app.product_warehourse.dto.request;
 
-import jakarta.persistence.Entity;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
 
@@ -9,9 +8,11 @@ import lombok.experimental.FieldDefaults;
 @NoArgsConstructor
 @AllArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE)
-public class StaffRequest {
+public class StaffUpdateRequest {
     String fullName;
     Integer gender;
     String phoneNumber;
     String email;
+    Integer status;
+
 }
