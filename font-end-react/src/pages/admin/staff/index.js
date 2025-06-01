@@ -10,7 +10,8 @@ export default function StaffManager() {
   const fetchData = async () => {
     try {
       const res = await showStaff();
-      setStaffList(res.data.result); // đảm bảo đúng định dạng
+      setStaffList(res.data); // đảm bảo đúng định dạng
+      
     } catch (err) {
       console.error("Lỗi khi lấy dữ liệu:", err);
     }
@@ -25,7 +26,7 @@ export default function StaffManager() {
       <div className="mb-10 flex justify-center">
         <StaffForm onStaffCreated={fetchData} />
       </div>
-      <StaffList staffList={staffList} />
+      <StaffList staffList={staffList} onStaffCreated={fetchData}/>
     </div>
   );
 }

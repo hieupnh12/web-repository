@@ -1,25 +1,32 @@
 {
   "staff": [
     {
-      "id": 1,
-      "name": "Nguyen Van A",
-      "email": "a@example.com",
-      "gender": "1",
-      "phone": "0123456789"
-    },
-    {
-      "id": "826a",
+      "staffId": "826a",
       "name": "NGUYEN MINH HIEU",
       "email": "hieupnh7@gmail.com",
       "gender": "1",
       "phone": "0395710052"
     },
     {
-      "id": "34d2",
+      "staffId": "34d2",
       "name": "Le Thi C",
       "email": "c@example.com",
       "gender": "0",
       "phone": "0988888888"
+    },
+    {
+      "staffId": "3318",
+      "fullName": "NGUYEN MINH HIEU",
+      "email": "hieupnh7@gmail.com",
+      "gender": "0",
+      "phoneNumber": "0395710052"
+    },
+    {
+      "id": "eb99",
+      "fullName": "NGUYEN MINH HIEU",
+      "email": "hieupnh7@gmail.com",
+      "gender": "1",
+      "phoneNumber": "0395710052"
     }
   ]
 }

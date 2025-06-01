@@ -1,5 +1,5 @@
 import BASE_URL from "../api/axinosInstance"
-import { GET, POST } from "../constants/httpMethod"
+import { DELETE, GET, PUT, POST } from "../constants/httpMethod"
 
 
 export const login = (user) => {
@@ -19,3 +19,14 @@ export const showStaff = () => {
 
     return response;
 }
+
+export const deleteStaff = (id) => {
+    const response = BASE_URL[DELETE](`staff/${id}`);
+
+    return response;
+}
+
+export const updateStaff = (id, staffData) => {
+  const response = BASE_URL[PUT](`staff/${id}`, staffData);
+  return response;
+};
