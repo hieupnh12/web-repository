@@ -11,6 +11,8 @@ import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+
 @RestController
 @RequestMapping("/staff")
 @RequiredArgsConstructor
@@ -28,5 +30,12 @@ public class StaffController {
     public ApiResponse<Void> deleteStaff(@PathVariable String userId) {
         staffService.deleteStaff(userId);
         return ApiResponse.<Void>builder().build();
+    }
+    @GetMapping
+    public ApiResponse<List<StaffResponse>> getAllStaff() {
+
+        return ApiResponse.<List<StaffResponse>>builder()
+                .result(staffService.getAllStaff())
+                .build();
     }
 }
