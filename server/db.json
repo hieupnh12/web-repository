@@ -1,8 +1,171 @@
 {
-    "user": [
-        {
-            "id": 1,
-            "s": "sdd"
-        }
-    ]
+  "accounts": [
+    {
+      "idStaff": 1,
+      "userName": "admin1",
+      "password": "admin123",
+      "status": "active",
+      "idRoles": 1
+    },
+    {
+      "idStaff": 2,
+      "userName": "staff1",
+      "password": "staff123",
+      "status": "active",
+      "idRoles": 2
+    }
+  ],
+  "exportReceipts": [
+    {
+      "idExportReciept": 1,
+      "idStaff": 1,
+      "idCustomer": 1,
+      "time": "2025-06-01T10:30:00",
+      "status": "completed",
+      "totalCost": 5000000
+    },
+    {
+      "idExportReciept": 2,
+      "idStaff": 2,
+      "idCustomer": 2,
+      "time": "2025-06-03T14:00:00",
+      "status": "pending",
+      "totalCost": 3000000
+    },
+    {
+      "idExportReciept": 3,
+      "idStaff": 2,
+      "idCustomer": 2,
+      "time": "2025-06-03T14:00:00",
+      "status": "pending",
+      "totalCost": 3000000
+    },
+    {
+      "idExportReciept": 4,
+      "idStaff": 2,
+      "idCustomer": 2,
+      "time": "2025-06-03T14:00:00",
+      "status": "pending",
+      "totalCost": 3000000
+    },
+    {
+      "idExportReciept": 5,
+      "idStaff": 2,
+      "idCustomer": 2,
+      "time": "2025-06-03T14:00:00",
+      "status": "pending",
+      "totalCost": 3000000
+    },
+    {
+      "idExportReciept": 6,
+      "idStaff": 2,
+      "idCustomer": 2,
+      "time": "2025-06-03T14:00:00",
+      "status": "pending",
+      "totalCost": 3000000
+    },
+    {
+      "idExportReciept": 7,
+      "idStaff": 2,
+      "idCustomer": 2,
+      "time": "2025-06-03T14:00:00",
+      "status": "pending",
+      "totalCost": 3000000
+    },
+    {
+      "idExportReciept": 8,
+      "idStaff": 2,
+      "idCustomer": 2,
+      "time": "2025-06-03T14:00:00",
+      "status": "pending",
+      "totalCost": 3000000
+    },
+    {
+      "idExportReciept": 9,
+      "idStaff": 2,
+      "idCustomer": 2,
+      "time": "2025-06-03T14:00:00",
+      "status": "pending",
+      "totalCost": 3000000
+    },
+    {
+      "idExportReciept": 10,
+      "idStaff": 2,
+      "idCustomer": 2,
+      "time": "2025-06-03T14:00:00",
+      "status": "pending",
+      "totalCost": 10000000
+    },
+    {
+      "idExportReciept": 11,
+      "idStaff": 2,
+      "idCustomer": 2,
+      "time": "2025-06-03T14:00:00",
+      "status": "pending",
+      "totalCost": 10000000
+    }
+    
+  ],
+  "customers": [
+    {
+      "idCustomer": 1,
+      "nameCustomer": "Nguyen Van A",
+      "address": "123 Le Loi, HCM",
+      "numberPhone": "0901234567"
+    },
+    {
+      "idCustomer": 2,
+      "nameCustomer": "Tran Thi B",
+      "address": "456 Tran Hung Dao, HN",
+      "numberPhone": "0912345678"
+    }
+  ],
+  "exportReceiptDetails": [
+    {
+      "idExportReciept": 1,
+      "idProductVersion": 101,
+      "quantity": 1,
+      "price": 5000000
+    },
+    {
+      "idExportReciept": 1,
+      "idProductVersion": 102,
+      "quantity": 1,
+      "price": 5000
+    },
+    {
+      "idExportReciept": 1,
+      "idProductVersion": 103,
+      "quantity": 100,
+      "price": 5000000
+    },
+    {
+      "idExportReciept": 1,
+      "idProductVersion": 104,
+      "quantity": 1,
+      "price": 500000
+    },
+    {
+      "idExportReciept": 2,
+      "idProductVersion": 102,
+      "quantity": 2,
+      "price": 1500000
+    }
+  ],
+  "productItems": [
+    {
+      "imei": "123456789012345",
+      "idProductVersion": 101,
+      "idImportReciept": 10,
+      "idExportReciept": 1,
+      "status": "sold"
+    },
+    {
+      "imei": "987654321098765",
+      "idProductVersion": 102,
+      "idImportReciept": 11,
+      "idExportReciept": 2,
+      "status": "reserved"
+    }
+  ]
 }

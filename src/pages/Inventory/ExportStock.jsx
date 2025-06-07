@@ -1,85 +1,71 @@
-import React, { useState } from 'react';
-import ExportForm from './components/ExportForm'
+import React, { useEffect, useState } from "react";
+import ExportForm from "./components/ExportForm";
+import { fetchFullExportReceipts } from "../../services/exportService";
+import useSmartFilter from "../../hooks/useSmartFilter";
 
 export default function ExportStock() {
-  // State cho dữ liệu bảng
-  const [tableData, setTableData] = useState([
-    { id: 1, code: 'Juventus', supplier: 'Juventus', inputBy: 'Thanh Li', time: '2025-05-29' },
-    { id: 2, code: 'Juventus', supplier: 'Juventus', inputBy: 'Thanh Li', time: '2025-05-29' },
-    { id: 3, code: 'Juventus', supplier: 'Juventus', inputBy: 'Thanh Li', time: '2025-05-29' },
-    { id: 4, code: 'Juventus', supplier: 'Juventus', inputBy: 'Thanh Li', time: '2025-05-29' },
-    { id: 5, code: 'Juventus', supplier: 'Juventus', inputBy: 'Thanh Li', time: '2025-05-29' },
-  ]);
+  const [tableData, setTableData] = useState([]);
 
-  // State cho chi tiết nhà cung cấp
-  const [selectedSupplier, setSelectedSupplier] = useState({
-    supplier: 'Juventus',
-    inputBy: 'Thanh Li',
-    time: '--',
-    quantity: 34,
-    priceTotal: '13000 VND',
-    description: 'Note',
+  useEffect(() => {
+    fetchFullExportReceipts()
+      .then((data) => {
+        const sortData = [...data].sort(
+          (a, b) => new Date(b.time) - new Date(a.time)
+        );
+        setTableData(sortData);
+      })
+      .catch((error) => console.log("Lỗi", error));
+  }, []);
+
+  const {
+    filter,
+    setFilter,
+    currentPage,
+    setCurrentPage,
+    paginatedData,
+    totalPages,
+  } = useSmartFilter(tableData, {
+    itemsPerPage: 10,
+    initialFilter: {
+      searchQuery: "",
+      searchField: "all", // default là tìm toàn bộ
+    },
   });
 
-  // State cho bộ lọc
-  const [filter, setFilter] = useState({
-    supplier: '',
-    searchQuery: '',
-  });
-
-  // State cho phân trang
-  const [currentPage, setCurrentPage] = useState(1);
-  const itemsPerPage = 5;
-
-  // Hàm xử lý bộ lọc
-  const handleFilterChange = (newFilter) => {
-    setFilter(newFilter);
-    // Logic lọc dữ liệu (giả lập)
-    const filteredData = tableData.filter((item) => {
-      const matchesSupplier = newFilter.supplier ? item.supplier === newFilter.supplier : true;
-      const matchesSearch = newFilter.searchQuery
-        ? item.code.toLowerCase().includes(newFilter.searchQuery.toLowerCase())
-        : true;
-      return matchesSupplier && matchesSearch;
-    });
-    setTableData(filteredData);
-    setCurrentPage(1); // Reset về trang 1 khi lọc
-  };
-
-  // Hàm reload dữ liệu
   const handleReload = () => {
-    setTableData([
-      { id: 1, code: 'Juventus', supplier: 'Juventus', inputBy: 'Thanh Li', time: '2025-05-29' },
-      { id: 2, code: 'Juventus', supplier: 'Juventus', inputBy: 'Thanh Li', time: '2025-05-29' },
-      { id: 3, code: 'Juventus', supplier: 'Juventus', inputBy: 'Thanh Li', time: '2025-05-29' },
-      { id: 4, code: 'Juventus', supplier: 'Juventus', inputBy: 'Thanh Li', time: '2025-05-29' },
-      { id: 5, code: 'Juventus', supplier: 'Juventus', inputBy: 'Thanh Li', time: '2025-05-29' },
-    ]);
-    setFilter({ supplier: '', searchQuery: '' });
+    const mock = [
+      {
+        idExportReciept: 1,
+        customer: { nameCustomer: "Trần Đức Minh" },
+        idStaff: "Thanh Li",
+        totalCost: 500000,
+        time: "2025-05-29T10:00:00",
+      },
+      {
+        idExportReciept: 2,
+        customer: { nameCustomer: "Lê Văn Thành" },
+        idStaff: "Thanh Li",
+        totalCost: 700000,
+        time: "2025-05-29T11:30:00",
+      },
+    ];
+    setFilter({ searchQuery: "", searchField: "all" });
     setCurrentPage(1);
+    setTableData(mock);
   };
 
-  // Hàm xử lý phân trang
-  const handlePageChange = (page) => {
-    setCurrentPage(page);
-  };
-
-  // Tính dữ liệu hiển thị cho trang hiện tại
-  const paginatedData = tableData.slice(
-    (currentPage - 1) * itemsPerPage,
-    currentPage * itemsPerPage
+  return (
+    <>
+      <ExportForm
+        tableData={paginatedData}
+        filter={filter}
+        onFilterChange={setFilter}
+        onReload={handleReload}
+        currentPage={currentPage}
+        totalPages={totalPages}
+        onPageChange={setCurrentPage}
+      />
+      <div id="modal-root"></div>
+    </>
   );
-
-  return (<>
-    <ExportForm
-      tableData={paginatedData}
-      supplierDetails={selectedSupplier}
-      filter={filter}
-      onFilterChange={handleFilterChange}
-      onReload={handleReload}
-      currentPage={currentPage}
-      totalPages={Math.ceil(tableData.length / itemsPerPage)}
-      onPageChange={handlePageChange}
-    />
-  </>);
 }

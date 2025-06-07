@@ -72,7 +72,7 @@ const Sidebar = () => {
       label: 'Nhà cung cấp',
       icon: Building2,
       path: 'suppliers',
-      color: 'text-yellow-500'
+      color: 'text-blue-500'
     },
     {
       id: 'staff',

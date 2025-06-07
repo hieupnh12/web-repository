@@ -7,49 +7,42 @@ const Breadcrumb = ({ items = [] }) => {
   const basePath = location.pathname.startsWith('/manager') ? '/manager' : '/staff';
 
   return (
-    <nav className="flex items-center space-x-2 text-sm text-gray-600 mb-4">
+    <nav className="flex items-center text-sm text-gray-600 space-x-1 p-2 border-gray-300 border-b" aria-label="breadcrumb">
       {/* Home link */}
       <Link
         to={`${basePath}/dashboard`}
-        className="flex items-center hover:text-blue-600 transition-colors"
+        className="hover:underline text-blue-600 flex items-center"
       >
-        <Home className="w-4 h-4" />
+        <Home className="w-4 h-4 mr-1" />
+        Home
       </Link>
 
-      {items.length > 0 && (
-        <ChevronRight className="w-4 h-4 text-gray-400" />
-      )}
+      {/* Render chevron and breadcrumb items */}
+      {items.map((item, index) => {
+        const isLast = index === items.length - 1;
 
-      {/* Breadcrumb items */}
-{items.map((item, index) => {
-  const isLast = index === items.length - 1;
-  const baseBg = isLast ? 'bg-blue-700 text-white' : 'bg-blue-50 text-blue-800 hover:bg-blue-100';
-  const borderColor = isLast ? 'border-blue-700' : 'border-blue-200';
+        return (
+          <React.Fragment key={index}>
+            <ChevronRight className="w-4 h-4 text-gray-400" />
 
-  const Container = isLast ? 'div' : Link;
-  const containerProps = isLast
-    ? {}
-    : { to: item.href || '#' };
-
-  return (
-    <React.Fragment key={index}>
-      <Container
-        {...containerProps}
-        className={`relative inline-block font-medium text-sm ${baseBg} transition-colors px-4 py-1 border-y ${borderColor} shadow-sm hover:shadow-md`}
-        style={{
-          clipPath: 'polygon(0% 0%, calc(100% - 15px) 0%, 100% 50%, calc(100% - 15px) 100%, 0% 100%, 15px 50%)',
-          marginRight: '-15px', // Overlap items
-        }}
-      >
-        <span>{item.label}</span>
-      </Container>
-    </React.Fragment>
-  );
-})}
-
-
-
-
+            {isLast ? (
+              <span
+                className="text-gray-800"
+                aria-current="page"
+              >
+                {item.label}
+              </span>
+            ) : (
+              <Link
+                to={item.href || '#'}
+                className="hover:underline text-blue-600"
+              >
+                {item.label}
+              </Link>
+            )}
+          </React.Fragment>
+        );
+      })}
     </nav>
   );
 };

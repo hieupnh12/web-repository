@@ -26,4 +26,9 @@ module.exports = {
     },
   },
   plugins: [],
+
+  //Loại bỏ hết các css mặc định của tailwind
+  // corePlugins: {
+  //   preflight: false,
+  // },
 }

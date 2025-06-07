@@ -2,6 +2,7 @@ import React from "react";
 import { useLocation, Outlet } from "react-router-dom";
 import Sidebar from "./Sidebar";
 import Breadcrumb from "./Breadcrumb";
+import Header from "./Header";
 
 // Map paths to titles and breadcrumbs
 const pageConfig = {
@@ -76,14 +77,13 @@ const LayoutCommon = () => {
 
         {/* Main content area */}
         <main className="flex-1 overflow-y-auto">
-          <div className="p-4">
-            {/* Breadcrumb */}
+          <div className="p-2">
+            {/* Page content */}
+            <div className="bg-white rounded-lg shadow-sm min-h-full">
+               {/* Breadcrumb */}
             {config.breadcrumb.length > 0 && (
               <Breadcrumb items={config.breadcrumb} />
             )}
-
-            {/* Page content */}
-            <div className="bg-white rounded-lg shadow-sm min-h-full">
               <Outlet />
             </div>
           </div>

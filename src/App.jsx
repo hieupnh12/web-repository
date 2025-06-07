@@ -12,6 +12,7 @@ import LayoutCommon from "./components/layout/Layout";
 import Dashboard from "./pages/Dashboard/Dashboard";
 import ExportStock from "./pages/Inventory/ExportStock";
 import Export from "./pages/Inventory/components/Export";
+import Login from "./pages/Login/Login";
 // import ImportStock from './pages/Inventory/ImportStock';
 // import Products from './pages/Products/Products';
 // import Inventory from './pages/Inventory/Inventory';
@@ -29,6 +30,9 @@ const NotFound = () => (
 const router = createBrowserRouter(
   createRoutesFromElements(
     <>
+      <Route path="/">
+        <Route index element={<Login />} />
+      </Route>
       {/* Route cho Manager */}
       <Route path="manager" element={<LayoutCommon />}>
         <Route index element={<Dashboard />} />
