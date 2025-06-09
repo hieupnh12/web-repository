@@ -1,8 +1,14 @@
 package com.app.product_warehourse.configuration;
 
 import org.springframework.http.HttpMethod;
+import org.springframework.security.config.Customizer;
+import org.springframework.security.config.annotation.web.builders.HttpSecurity;
+import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationConverter;
+import org.springframework.security.oauth2.server.resource.authentication.JwtGrantedAuthoritiesConverter;
+import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.web.filter.CorsFilter;
 
 
@@ -19,37 +25,37 @@ import javax.crypto.spec.SecretKeySpec;
 //@EnableMethodSecurity
 public class SecurityConfig {
 
-//    private final String[]  PUBLIC_ENDPOINTS =
-//            {"/users", "auth/token", "auth/introspect", "auth/logout", "auth/refresh"
-//            };
+    private final String[]  PUBLIC_ENDPOINTS =
+            {"auth/valid", "auth/login", "auth/logout", "auth/refresh","role"
+            };
 
-//
-//
-//    private CustomJwtDecoder customJwtDecoder;
-//    @Bean
-//    public SecurityFilterChain securityFilterChain(HttpSecurity httpSecurity)
-//            throws Exception {
-//        httpSecurity
-//                .cors(Customizer.withDefaults())
-//                .authorizeHttpRequests(requests ->
-//                        requests.requestMatchers(HttpMethod.POST, PUBLIC_ENDPOINTS).permitAll()
-//
-//                                .anyRequest().authenticated());
-//
-//        httpSecurity.oauth2ResourceServer(oauth2 ->
-//                oauth2.jwt(jwtConfigurer -> jwtConfigurer.decoder(customJwtDecoder)
-//                                .jwtAuthenticationConverter(jwtConverter()))
-//                        .authenticationEntryPoint(new JwtAuthenticationEntryPoint())
-//        );
-//
-//
-//        httpSecurity.csrf(AbstractHttpConfigurer::disable);
-//
-//        return httpSecurity.build();
-//
-//        //     .requestMatchers(HttpMethod.GET, "/users")
-//        //           .hasRole(Role.ADMIN.name())
-//    }
+
+
+    private CustomJwtDecoder customJwtDecoder;
+    @Bean
+    public SecurityFilterChain securityFilterChain(HttpSecurity httpSecurity)
+            throws Exception {
+        httpSecurity
+                .cors(Customizer.withDefaults())
+                .authorizeHttpRequests(requests ->
+                        requests.requestMatchers(HttpMethod.POST, PUBLIC_ENDPOINTS).permitAll()
+
+                                .anyRequest().authenticated());
+
+        httpSecurity.oauth2ResourceServer(oauth2 ->
+                oauth2.jwt(jwtConfigurer -> jwtConfigurer.decoder(customJwtDecoder)
+                                .jwtAuthenticationConverter(jwtConverter()))
+                        .authenticationEntryPoint(new JwtAuthenticationEntryPoint())
+        );
+
+
+        httpSecurity.csrf(AbstractHttpConfigurer::disable);
+
+        return httpSecurity.build();
+
+        //     .requestMatchers(HttpMethod.GET, "/users")
+        //           .hasRole(Role.ADMIN.name())
+    }
 
 
     @Bean
@@ -71,22 +77,18 @@ public class SecurityConfig {
     PasswordEncoder passwordEncoder() {
      return new BCryptPasswordEncoder(10);
    }
+
+        @Bean
+        JwtAuthenticationConverter jwtConverter() {
+        JwtGrantedAuthoritiesConverter grantedAuthoritiesConverter = new JwtGrantedAuthoritiesConverter();
+        grantedAuthoritiesConverter.setAuthorityPrefix("");
+
+        JwtAuthenticationConverter converter = new JwtAuthenticationConverter();
+        converter.setJwtGrantedAuthoritiesConverter(grantedAuthoritiesConverter);
+        return converter;
+    }
 }
 
-//    @Bean
-//    JwtAuthenticationConverter jwtConverter() {
-//        JwtGrantedAuthoritiesConverter grantedAuthoritiesConverter = new JwtGrantedAuthoritiesConverter();
-//        grantedAuthoritiesConverter.setAuthorityPrefix("");
-//
-//        JwtAuthenticationConverter converter = new JwtAuthenticationConverter();
-//        converter.setJwtGrantedAuthoritiesConverter(grantedAuthoritiesConverter);
-//        return converter;
-//    }
 
 
 
-//    @Bean
-//    PasswordEncoder passwordEncoder() {
-//        return new BCryptPasswordEncoder(10);
-//    }
-//}

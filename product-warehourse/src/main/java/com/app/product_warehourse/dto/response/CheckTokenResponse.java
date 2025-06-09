@@ -1,5 +1,6 @@
 package com.app.product_warehourse.dto.response;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
 
@@ -8,6 +9,7 @@ import lombok.experimental.FieldDefaults;
 @NoArgsConstructor
 @AllArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE)
-public class AuthenticationResponse {
-    String token;
+@JsonInclude(JsonInclude.Include.NON_NULL)
+public class CheckTokenResponse {
+    boolean valid;
 }
