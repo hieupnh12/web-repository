@@ -2,6 +2,8 @@ import React, { useEffect, useState } from "react";
 import {
   fetchProducts,
   fetchSuppliers,
+  loadCustomers,
+  loadProductVerson,
 } from "../../../../services/exportService";
 import ProductForm from "./ProductFormBet";
 import ProductList from "./ProductListLeft";
@@ -9,25 +11,55 @@ import ExportTable from "./ExportTableBot";
 import ExportSummary from "./ExportSumary";
 
 const ExportPage = () => {
+  const [form, setForm] = useState({
+    code: "PX001",
+    user: { id: 1, name: "Nhất Sinh" },
+    customer: null,
+    supplier: null,
+    total: 0,
+    products: [], // danh sách sản phẩm đã thêm
+  });
   const [products, setProducts] = useState([]);
   const [selectedProduct, setSelectedProduct] = useState(null);
-  const [supplierList, setSupplierList] = useState([]);
+  const [customers, setCustomers] = useState([]);
 
   useEffect(() => {
-    // fetchProducts().then((res) => setProducts(res.data));
+    loadProductVerson().then((res) => setProducts(res.data));
     // fetchSuppliers().then((res) => setSupplierList(res.data));
+    loadCustomers().then((res) => setCustomers(res.data));
   }, []);
+
+  console.log(products);
+
+  // Set form
+  const handleCustomerChange = (customer) => {
+    setForm(prev => ({ ...prev, customer }));
+  };
+
+    // Thêm sản phẩm
+   const handleProductAdd = (product) => {
+    const newList = [...form.products, product];
+    const newTotal = newList.reduce((sum, p) => sum + p.price * p.quantity, 0);
+    setForm(prev => ({ ...prev, products: newList, total: newTotal }));
+  };
+
+  const handleSubmit = () => {
+    // Gửi toàn bộ dữ liệu lên server
+    console.log("Submit đơn hàng:", form);
+  };
 
   return (
     <div className="flex-1 bg-[#EFF6FF] rounded-2xl p-2 text-xs">
       {/* Top Side: Export Summary */}
         <div className="w-full lg:w-4/4 bg-white rounded-lg shadow p-3 flex flex-col justify-between mb-2">
           <ExportSummary
-            code="PN001"
-            user={{ name: "Nhất Sinh" }}
-            supplier={supplierList}
-            total={10000000}
-            onSubmit={() => {}}
+            code={form.code}
+            user={form.user}
+            customer={form.customer}
+            onCustomerChange={handleCustomerChange}
+            total={form.total}
+            onSubmit={handleSubmit}
+            customers={customers}
           />
         </div>
       <div className="flex flex-col lg:flex-row gap-2">

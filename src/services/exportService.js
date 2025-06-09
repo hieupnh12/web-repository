@@ -59,7 +59,7 @@ export const login = () => {
 
 // api load product in create receipt export
 export const loadProductVerson = () => {
-    const response = BASE_URL[GET]("products");
+    const response = BASE_URL[GET]("exportReceiptDetails");
 
     return response;
 }
