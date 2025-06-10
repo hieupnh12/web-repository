@@ -2,6 +2,7 @@ package com.app.product_warehourse.configuration;
 
 import org.springframework.http.HttpMethod;
 import org.springframework.security.config.Customizer;
+import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
@@ -22,11 +23,11 @@ import javax.crypto.spec.SecretKeySpec;
 
 @Configuration
 //@EnableWebSecurity
-//@EnableMethodSecurity
+@EnableMethodSecurity
 public class SecurityConfig {
 
     private final String[]  PUBLIC_ENDPOINTS =
-            {"auth/valid", "auth/login", "auth/logout", "auth/refresh","role"
+            {"auth/valid", "auth/login", "auth/logout", "auth/refresh"
             };
 
 
@@ -82,6 +83,7 @@ public class SecurityConfig {
         JwtAuthenticationConverter jwtConverter() {
         JwtGrantedAuthoritiesConverter grantedAuthoritiesConverter = new JwtGrantedAuthoritiesConverter();
         grantedAuthoritiesConverter.setAuthorityPrefix("");
+        grantedAuthoritiesConverter.setAuthoritiesClaimName("scope");
 
         JwtAuthenticationConverter converter = new JwtAuthenticationConverter();
         converter.setJwtGrantedAuthoritiesConverter(grantedAuthoritiesConverter);
