@@ -166,6 +166,71 @@
       "idImportReciept": 11,
       "idExportReciept": 2,
       "status": "reserved"
-    }
-  ]
+    },
+     { "imei": "123456789012346", "idProductVersion": 102, "idImportReciept": 1, "idExportReciept": null, "status": "in-stock" },
+    { "imei": "123456789012347", "idProductVersion": 103, "idImportReciept": 2, "idExportReciept": null, "status": "in-stock" },
+    { "imei": "123456789012348", "idProductVersion": 104, "idImportReciept": 2, "idExportReciept": null, "status": "in-stock" },
+    { "imei": "123456789012349", "idProductVersion": 105, "idImportReciept": 3, "idExportReciept": null, "status": "in-stock" },
+    { "imei": "123456789012350", "idProductVersion": 106, "idImportReciept": 3, "idExportReciept": null, "status": "in-stock" },
+    { "imei": "123456789012351", "idProductVersion": 102, "idImportReciept": 3, "idExportReciept": null, "status": "in-stock" },
+    { "imei": "123456789012352", "idProductVersion": 102, "idImportReciept": 3, "idExportReciept": null, "status": "in-stock" }
+  ],
+  "products": [
+    {
+      "idProduct": 1,
+      "nameProduct": "iPhone 15",
+      "picture": "iphone15.jpg",
+      "status": "active",
+      "stockQuantity": 20,
+      "battery": "4000mAh",
+      "rearCamera": "48MP",
+      "frontCamera": "12MP",
+      "screenSize": "6.1",
+      "origin": "USA",
+      "chipset": "A17",
+      "idBrand": 1,
+      "idWarrehouseArea": 1,
+      "operatingSystem": "iOS"
+    },{ "idProduct": 2, "nameProduct": "Samsung S24", "picture": "s24.jpg", "status": "active", "stockQuantity": 8, "battery": "4500mAh", "rearCamera": "50MP", "frontCamera": "10MP", "screenSize": "6.5", "origin": "Korea", "chipset": "Exynos 2400", "idBrand": 2, "idWarrehouseArea": 1, "operatingSystem": "Android" },
+    { "idProduct": 3, "nameProduct": "Xiaomi 14", "picture": "xiaomi14.jpg", "status": "active", "stockQuantity": 15, "battery": "4600mAh", "rearCamera": "50MP", "frontCamera": "32MP", "screenSize": "6.4", "origin": "China", "chipset": "Snapdragon 8 Gen 3", "idBrand": 3, "idWarrehouseArea": 2, "operatingSystem": "Android" },
+    { "idProduct": 4, "nameProduct": "OPPO Reno11", "picture": "reno11.jpg", "status": "active", "stockQuantity": 12, "battery": "5000mAh", "rearCamera": "64MP", "frontCamera": "32MP", "screenSize": "6.7", "origin": "China", "chipset": "Dimensity 8200", "idBrand": 4, "idWarrehouseArea": 2, "operatingSystem": "Android" },
+    { "idProduct": 5, "nameProduct": "Vivo V30", "picture": "v30.jpg", "status": "active", "stockQuantity": 9, "battery": "4800mAh", "rearCamera": "50MP", "frontCamera": "50MP", "screenSize": "6.78", "origin": "China", "chipset": "Snapdragon 7 Gen 3", "idBrand": 5, "idWarrehouseArea": 3, "operatingSystem": "Android" },
+    { "idProduct": 6, "nameProduct": "Realme GT 6", "picture": "gt6.jpg", "status": "active", "stockQuantity": 7, "battery": "5500mAh", "rearCamera": "50MP", "frontCamera": "16MP", "screenSize": "6.74", "origin": "China", "chipset": "Snapdragon 8s Gen 3", "idBrand": 6, "idWarrehouseArea": 3, "operatingSystem": "Android" }
+  ],
+  "rams": [
+    { "idRam": 1, "ramSize": "6GB" },
+    { "idRam": 1, "ramSize": "8GB" },
+    { "idRam": 2, "ramSize": "12GB" }
+    
+  ],
+  "roms": [
+    { "idRom": 1, "romSize": "128GB" },
+    { "idRom": 2, "romSize": "256GB" }
+  ],
+  "colors": [
+    { "idColor": 1, "nameColor": "Black" },
+     { "idColor": 2, "nameColor": "White" },
+    { "idColor": 3, "nameColor": "Blue" }
+  ],
+  "productVersions": [
+  { "idProductVersion": 101, "idProduct": 1, "idColor": 1, "idRam": 1, "idRom": 1, "importPrice": 20000000, "exportPrice": 22000000 },
+  { "idProductVersion": 107, "idProduct": 1, "idColor": 2, "idRam": 2, "idRom": 2, "importPrice": 21500000, "exportPrice": 23500000 },
+  { "idProductVersion": 108, "idProduct": 1, "idColor": 3, "idRam": 1, "idRom": 2, "importPrice": 20500000, "exportPrice": 22500000 },
+
+  { "idProductVersion": 102, "idProduct": 2, "idColor": 2, "idRam": 1, "idRom": 2, "importPrice": 18000000, "exportPrice": 20000000 },
+  { "idProductVersion": 109, "idProduct": 2, "idColor": 1, "idRam": 2, "idRom": 2, "importPrice": 19000000, "exportPrice": 21000000 },
+
+  { "idProductVersion": 103, "idProduct": 3, "idColor": 3, "idRam": 2, "idRom": 2, "importPrice": 15000000, "exportPrice": 17000000 },
+  { "idProductVersion": 110, "idProduct": 3, "idColor": 1, "idRam": 1, "idRom": 1, "importPrice": 14500000, "exportPrice": 16500000 },
+
+  { "idProductVersion": 104, "idProduct": 4, "idColor": 1, "idRam": 2, "idRom": 1, "importPrice": 12000000, "exportPrice": 13500000 },
+  { "idProductVersion": 111, "idProduct": 4, "idColor": 2, "idRam": 1, "idRom": 2, "importPrice": 11800000, "exportPrice": 13200000 },
+
+  { "idProductVersion": 105, "idProduct": 5, "idColor": 2, "idRam": 1, "idRom": 1, "importPrice": 11000000, "exportPrice": 12500000 },
+  { "idProductVersion": 112, "idProduct": 5, "idColor": 3, "idRam": 2, "idRom": 2, "importPrice": 12500000, "exportPrice": 14000000 },
+
+  { "idProductVersion": 106, "idProduct": 6, "idColor": 3, "idRam": 2, "idRom": 2, "importPrice": 17000000, "exportPrice": 19000000 },
+  { "idProductVersion": 113, "idProduct": 6, "idColor": 1, "idRam": 1, "idRom": 1, "importPrice": 16000000, "exportPrice": 18000000 }
+]
+
 }

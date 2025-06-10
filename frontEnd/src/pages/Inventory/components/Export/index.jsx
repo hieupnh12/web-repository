@@ -1,9 +1,8 @@
 import React, { useEffect, useState } from "react";
+import { useQuery } from "@tanstack/react-query";
 import {
-  fetchProducts,
-  fetchSuppliers,
+  getFullProductVersions,
   loadCustomers,
-  loadProductVerson,
 } from "../../../../services/exportService";
 import ProductForm from "./ProductFormBet";
 import ProductList from "./ProductListLeft";
@@ -21,15 +20,21 @@ const ExportPage = () => {
   });
   const [products, setProducts] = useState([]);
   const [selectedProduct, setSelectedProduct] = useState(null);
-  const [customers, setCustomers] = useState([]);
+  const [search, setSearch] = useState("");
+  const [page, setPage] = useState(1);
 
-  useEffect(() => {
-    loadProductVerson().then((res) => setProducts(res.data));
-    // fetchSuppliers().then((res) => setSupplierList(res.data));
-    loadCustomers().then((res) => setCustomers(res.data));
-  }, []);
+  const { data, isLoading, error } = useQuery({
+    queryKey: ["products", { page, limit: 20, search }],
+    queryFn: getFullProductVersions,
+    keepPreviousData: true,
+  });
 
-  console.log(products);
+  const { data: customers = { data: [] } } = useQuery({
+    queryKey: ["customers"],
+    queryFn: loadCustomers,
+  });
+
+  // console.log(data?.data);
 
   // Set form
   const handleCustomerChange = (customer) => {
@@ -48,6 +53,17 @@ const ExportPage = () => {
     console.log("Submit đơn hàng:", form);
   };
 
+  const handleSearch = (searchText) => {
+    setSearch(searchText);
+    setPage(1);
+  };
+
+  const handlePageChange = (newPage) => {
+    setPage(newPage);
+  };
+  if (isLoading && page === 1) return <div>Loading...</div>;
+  if (error) return <div>Error: {error.message}</div>;
+
   return (
     <div className="flex-1 bg-[#EFF6FF] rounded-2xl p-2 text-xs">
       {/* Top Side: Export Summary */}
@@ -59,7 +75,7 @@ const ExportPage = () => {
             onCustomerChange={handleCustomerChange}
             total={form.total}
             onSubmit={handleSubmit}
-            customers={customers}
+            customers={customers.data}
           />
         </div>
       <div className="flex flex-col lg:flex-row gap-2">
@@ -67,8 +83,8 @@ const ExportPage = () => {
         <div className="w-full lg:w-4/4 space-y-2">
           {/* Product List + Form */}
           <div className="flex flex-col md:flex-row gap-2">
-            <ProductList products={products} onSelect={setSelectedProduct} />
-            <ProductForm selected={selectedProduct} />
+            <ProductList products={data?.data || []} onSearch={handleSearch} onSelect={setSelectedProduct} />
+            <ProductForm selected={selectedProduct} onAdd={handleProductAdd}/>
           </div>
 
           {/* Middle: Buttons */}

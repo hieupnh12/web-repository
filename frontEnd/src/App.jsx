@@ -7,6 +7,7 @@ import {
 } from "react-router-dom";
 
 import LayoutCommon from "./components/layout/Layout";
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 
 // Các page
 import Dashboard from "./pages/Dashboard/Dashboard";
@@ -75,8 +76,14 @@ const router = createBrowserRouter(
   }
 );
 
+const queryClient = new QueryClient();
+
 function App() {
-  return <RouterProvider router={router} />;
+  return (
+    <QueryClientProvider client={queryClient}>
+      <RouterProvider router={router} />
+    </QueryClientProvider>
+  );
 }
 
 export default App;
