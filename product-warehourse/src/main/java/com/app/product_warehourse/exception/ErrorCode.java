@@ -16,6 +16,10 @@ public enum ErrorCode {
     UNAUTHENTICATED(1006, "Unauthenticated", HttpStatus.UNAUTHORIZED),
     UNAUTHORIZED(1007, "You do not have permission ", HttpStatus.FORBIDDEN),
     INVALID_DOB(1008, "Invalid date of birth {min} ", HttpStatus.BAD_REQUEST),
+    NOT_FOUND_EMAIL(1009, "Can not found email ", HttpStatus.NOT_FOUND),
+    INVALID_TOKEN(1010, "Invalid token", HttpStatus.UNAUTHORIZED),
+    EXPIRED_TOKEN(1011, "Time expired", HttpStatus.UNAUTHORIZED),
+    ;
 
     ;
 
