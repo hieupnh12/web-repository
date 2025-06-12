@@ -117,7 +117,9 @@ export const getFullProductVersions = async ({ page = 1, limit = 20, search = ''
         importPrice: pv.importPrice,
         exportPrice: pv.exportPrice,
         stockStatus: imeiList.length > 0 ? imeiList[0].status : 'out-of-stock',
-        itemCount: imeiList.length,
+        itemCount: imeiList.filter((imei) => {
+          return imei.status === "in-stock"
+        }).length,
         imeiList
       };
 

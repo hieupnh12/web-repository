@@ -173,7 +173,9 @@
     { "imei": "123456789012349", "idProductVersion": 105, "idImportReciept": 3, "idExportReciept": null, "status": "in-stock" },
     { "imei": "123456789012350", "idProductVersion": 106, "idImportReciept": 3, "idExportReciept": null, "status": "in-stock" },
     { "imei": "123456789012351", "idProductVersion": 102, "idImportReciept": 3, "idExportReciept": null, "status": "in-stock" },
-    { "imei": "123456789012352", "idProductVersion": 102, "idImportReciept": 3, "idExportReciept": null, "status": "in-stock" }
+    { "imei": "123456789012352", "idProductVersion": 102, "idImportReciept": 3, "idExportReciept": null, "status": "in-stock" },
+        { "imei": "123456789012353", "idProductVersion": 109, "idImportReciept": 3, "idExportReciept": null, "status": "in-stock" }
+
   ],
   "products": [
     {
