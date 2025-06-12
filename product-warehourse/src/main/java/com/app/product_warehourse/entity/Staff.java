@@ -5,6 +5,8 @@ import jakarta.persistence.*;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
 
+import java.time.LocalDate;
+
 @Data
 @Builder
 @NoArgsConstructor
@@ -17,10 +19,14 @@ public class Staff {
     String staffId;
     String fullName;
     Integer gender;
+    @Column(name = "birth_date", nullable = false)
+    LocalDate birthDate;
     String phoneNumber;
     String email;
+    @Column(nullable = false)
+    @Builder.Default
+    Boolean status = true;
 
-    Integer status;
     @OneToOne(mappedBy = "staff", cascade = CascadeType.ALL)
     @PrimaryKeyJoinColumn
     Account account;

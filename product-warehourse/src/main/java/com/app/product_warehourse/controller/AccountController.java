@@ -11,6 +11,8 @@ import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+
 @RestController
 @RequestMapping("/account")
 @RequiredArgsConstructor
@@ -23,6 +25,13 @@ public class AccountController {
     public ApiResponse<AccountResponse> createAccount(@PathVariable String staffId,  @RequestBody AccountCreateRequest request) {
         return ApiResponse.<AccountResponse>builder()
                 .result(accountService.createAccount(request,staffId))
+                .build();
+    }
+
+    @GetMapping
+    public ApiResponse<List<AccountResponse>> getAllAccounts() {
+        return ApiResponse.<List<AccountResponse>>builder()
+                .result(accountService.getAllAccounts())
                 .build();
     }
 

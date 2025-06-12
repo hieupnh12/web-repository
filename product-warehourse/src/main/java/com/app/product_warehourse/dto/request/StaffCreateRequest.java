@@ -1,7 +1,10 @@
 package com.app.product_warehourse.dto.request;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
+
+import java.time.LocalDate;
 
 @Data
 @Builder
@@ -11,6 +14,8 @@ import lombok.experimental.FieldDefaults;
 public class StaffCreateRequest {
     String fullName;
     Integer gender;
+    @JsonFormat(pattern = "dd-MM-yyyy")
+    LocalDate birthDate;
     String phoneNumber;
     String email;
 }

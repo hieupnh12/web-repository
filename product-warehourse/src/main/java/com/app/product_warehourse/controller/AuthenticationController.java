@@ -4,6 +4,7 @@ import com.app.product_warehourse.dto.request.*;
 import com.app.product_warehourse.dto.response.AuthenticationResponse;
 import com.app.product_warehourse.dto.response.CheckTokenResponse;
 import com.app.product_warehourse.service.AuthenticationService;
+import com.app.product_warehourse.service.PasswordResetService;
 import com.nimbusds.jose.JOSEException;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
@@ -23,6 +24,7 @@ import java.text.ParseException;
 @Slf4j
 public class AuthenticationController {
     AuthenticationService authenticationService;
+    PasswordResetService passwordResetService;
     
     @PostMapping("/login")
     public ApiResponse<AuthenticationResponse> authenticate(@RequestBody AuthenticationRequest request) {
@@ -49,6 +51,34 @@ public class AuthenticationController {
         return ApiResponse.<AuthenticationResponse>builder()
                 .result(authenticationService.refreshToken(request))
                 .build();
+    }
+
+    @PostMapping("/forgot")
+    public ApiResponse<String> initiatePasswordReset(@RequestBody ConfirmEmailRequest request) throws ParseException, JOSEException {
+        try {
+            passwordResetService.initiatePasswordReset(request);
+            return ApiResponse.<String>builder()
+                    .message("Email khôi phục đã được gửi!")
+                    .build();
+        } catch (Exception e) {
+            return ApiResponse.<String>builder()
+                    .message(e.getMessage())
+                    .build();
+        }
+    }
+
+    @PostMapping("/reset")
+    public ApiResponse<String> resetPassword(@RequestBody PasswordResetRequest request) {
+        try {
+            passwordResetService.resetPassword(request);
+            return ApiResponse.<String>builder()
+                    .message("Đặt lại mật khẩu thành công!")
+                    .build();
+        } catch (Exception e) {
+            return ApiResponse.<String>builder()
+                    .message(e.getMessage())
+                    .build();
+        }
     }
 
 }

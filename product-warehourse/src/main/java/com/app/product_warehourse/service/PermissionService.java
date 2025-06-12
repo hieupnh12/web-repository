@@ -34,7 +34,7 @@ public class PermissionService {
             permission.setCanDelete(request.isCanDelete());
 
             var pms = permissionRepository.save(permission);
-        return permissionMapper.toPermissionResponse(pms,functions.getId());
+        return permissionMapper.toPermissionResponse(pms,functions.getFunctionId());
 
     }
 

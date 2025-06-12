@@ -15,7 +15,8 @@ import lombok.experimental.FieldDefaults;
 @Entity
 public class Functions {
     @Id
-    Long id;
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    Long functionId;
     String functionName;
 
 }
