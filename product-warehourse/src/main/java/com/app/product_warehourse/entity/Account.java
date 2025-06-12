@@ -15,13 +15,15 @@ import java.util.Set;
 @Entity
 public class Account {
     @Id
-    @GeneratedValue(strategy = GenerationType.UUID)
     String staffId;
     String userName;
     String password;
-
     Integer status;
+    @ManyToOne
+    Role role;
     String otp;
-
-
+    @OneToOne
+    @MapsId // Dùng chung khóa chính với Staff
+    @JoinColumn(name = "staff_id")
+    Staff staff;
 }

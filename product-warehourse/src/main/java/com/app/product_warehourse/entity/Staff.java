@@ -21,7 +21,7 @@ public class Staff {
     String email;
 
     Integer status;
-    @OneToOne
+    @OneToOne(mappedBy = "staff", cascade = CascadeType.ALL)
+    @PrimaryKeyJoinColumn
     Account account;
-
 }
