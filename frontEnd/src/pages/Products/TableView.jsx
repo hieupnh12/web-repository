@@ -1,0 +1,136 @@
+import React from 'react';
+import { Package } from 'lucide-react';
+
+const TableView = ({ products, currentPage, itemsPerPage, onSort, sortBy, sortOrder }) => {
+  const getStockStatus = (quantity) => {
+    if (quantity === 0) return { status: 'Hết hàng', color: 'bg-red-100 text-red-800' };
+    if (quantity < 10) return { status: 'Sắp hết', color: 'bg-yellow-100 text-yellow-800' };
+    if (quantity < 20) return { status: 'Còn ít', color: 'bg-orange-100 text-orange-800' };
+    return { status: 'Còn nhiều', color: 'bg-green-100 text-green-800' };
+  };
+
+  return (
+    <div className="bg-white rounded-2xl shadow-xl overflow-hidden">
+      <div className="overflow-x-auto">
+        <table className="min-w-full">
+          <thead className="bg-gradient-to-r from-blue-50 to-indigo-50">
+            <tr>
+              <th className="px-6 py-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">
+                STT
+              </th>
+              <th
+                className="px-6 py-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider cursor-pointer hover:bg-blue-100 transition-colors"
+                onClick={() => onSort('nameProduct')}
+              >
+                <div className="flex items-center space-x-1">
+                  <span>Tên sản phẩm</span>
+                  <div className="flex flex-col">
+                    <div
+                      className={`w-0 h-0 border-l-2 border-r-2 border-b-2 border-transparent ${
+                        sortBy === 'nameProduct' && sortOrder === 'asc' ? 'border-b-blue-500' : 'border-b-gray-300'
+                      }`}
+                      style={{ borderBottomWidth: '4px' }}
+                    ></div>
+                    <div
+                      className={`w-0 h-0 border-l-2 border-r-2 border-t-2 border-transparent ${
+                        sortBy === 'nameProduct' && sortOrder === 'desc' ? 'border-t-blue-500' : 'border-t-gray-300'
+                      }`}
+                      style={{ borderTopWidth: '4px' }}
+                    ></div>
+                  </div>
+                </div>
+              </th>
+              <th
+                className="px-6 py-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider cursor-pointer hover:bg-blue-100 transition-colors"
+                onClick={() => onSort('stockQuantity')}
+              >
+                <div className="flex items-center space-x-1">
+                  <span>Số lượng tồn</span>
+                  <div className="flex flex-col">
+                    <div
+                      className={`w-0 h-0 border-l-2 border-r-2 border-b-2 border-transparent ${
+                        sortBy === 'stockQuantity' && sortOrder === 'asc' ? 'border-b-blue-500' : 'border-b-gray-300'
+                      }`}
+                      style={{ borderBottomWidth: '4px' }}
+                    ></div>
+                    <div
+                      className={`w-0 h-0 border-l-2 border-r-2 border-t-2 border-transparent ${
+                        sortBy === 'stockQuantity' && sortOrder === 'desc' ? 'border-t-blue-500' : 'border-t-gray-300'
+                      }`}
+                      style={{ borderTopWidth: '4px' }}
+                    ></div>
+                  </div>
+                </div>
+              </th>
+              <th className="px-6 py-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">
+                Thương hiệu
+              </th>
+              <th className="px-6 py-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">
+                Hệ điều hành
+              </th>
+              <th className="px-6 py-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">
+                Xuất xứ
+              </th>
+              <th className="px-6 py-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">
+                Khu vực kho
+              </th>
+              <th className="px-6 py-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">
+                Trạng thái
+              </th>
+            </tr>
+          </thead>
+          <tbody className="bg-white divide-y divide-gray-100">
+            {products.map((product, index) => {
+              const stockInfo = getStockStatus(product.stockQuantity);
+              return (
+                <tr key={product.idProduct} className="hover:bg-gray-50 transition-colors duration-200">
+                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-600">
+                    {(currentPage - 1) * itemsPerPage + index + 1}
+                  </td>
+                  <td className="px-6 py-4 whitespace-nowrap">
+                    <div className="flex items-center">
+                      <div className="w-10 h-10 bg-gradient-to-br from-blue-400 to-indigo-500 rounded-lg flex items-center justify-center mr-3">
+                        <Package className="w-5 h-5 text-white" />
+                      </div>
+                      <div>
+                        <div className="text-sm font-medium text-gray-900">{product.nameProduct}</div>
+                        <div className="text-sm text-gray-500">ID: {product.idProduct}</div>
+                      </div>
+                    </div>
+                  </td>
+                  <td className="px-6 py-4 whitespace-nowrap">
+                    <div className="text-sm font-semibold text-gray-900">{product.stockQuantity}</div>
+                    <div className="text-xs text-gray-500">cái</div>
+                  </td>
+                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                    <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
+                      {product.brandName || product.brand || 'N/A'}
+                    </span>
+                  </td>
+                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-600">
+                    {product.os || 'N/A'}
+                  </td>
+                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-600">
+                    {product.origin || 'N/A'}
+                  </td>
+                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-600">
+                    <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-800">
+                      {product.warehouseArea || product.area || 'N/A'}
+                    </span>
+                  </td>
+                  <td className="px-6 py-4 whitespace-nowrap">
+                    <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${stockInfo.color}`}>
+                      {stockInfo.status}
+                    </span>
+                  </td>
+                </tr>
+              );
+            })}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  );
+};
+
+export default TableView;
