@@ -13,6 +13,7 @@ import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -26,6 +27,7 @@ public class StaffService {
     StaffMapper staffMapper;
     StaffRepository staffRepository;
 
+    @PreAuthorize("hasRole('ADMIN')")
     public StaffResponse createStaff(StaffCreateRequest request) {
         Staff staff = staffMapper.toStaff(request);
         var savedStaff = staffRepository.save(staff);

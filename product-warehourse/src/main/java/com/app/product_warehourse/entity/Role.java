@@ -15,11 +15,11 @@ import java.util.Set;
 public class Role {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    Long id;
-    String name;
+    Long roleId;
+    String roleName;
     String description;
-    @ManyToOne
-    Account account;
+    @OneToMany(mappedBy = "role")
+    Set<Account> account;
     @ManyToMany
     Set<Permission> permissions;
 

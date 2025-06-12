@@ -18,12 +18,13 @@ public class Account {
     String staffId;
     String userName;
     String password;
-    Integer status;
+    @Column(nullable = false)
+    Boolean status = true;
     @ManyToOne
+    @JoinColumn(name = "role_id")
     Role role;
-    String otp;
     @OneToOne
-    @MapsId // Dùng chung khóa chính với Staff
+    @MapsId
     @JoinColumn(name = "staff_id")
     Staff staff;
 }

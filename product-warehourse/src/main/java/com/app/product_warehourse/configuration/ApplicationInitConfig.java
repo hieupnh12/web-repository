@@ -2,8 +2,8 @@ package com.app.product_warehourse.configuration;
 
 import com.app.product_warehourse.entity.Account;
 import com.app.product_warehourse.entity.Staff;
-import com.app.product_warehourse.enums.Role;
-import com.app.product_warehourse.repository.AccountRepository;
+import com.app.product_warehourse.entity.Role;
+import com.app.product_warehourse.repository.RoleRepository;
 import com.app.product_warehourse.repository.StaffRepository;
 import jakarta.transaction.Transactional;
 import lombok.AccessLevel;
@@ -13,9 +13,9 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.ApplicationRunner;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.security.core.userdetails.User;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
+import java.time.LocalDate;
 import java.util.HashSet;
 
 @Configuration
@@ -24,6 +24,7 @@ import java.util.HashSet;
 @Slf4j
 public class ApplicationInitConfig {
     PasswordEncoder passwordEncoder;
+    RoleRepository roleRepository;
 
 
     @Transactional
@@ -33,16 +34,24 @@ public class ApplicationInitConfig {
             if (staffRepository.findByFullName("Admin").isEmpty()) {
                 Staff staff = Staff.builder()
                         .fullName("Admin")
+                        .gender(1)
+                        .birthDate(LocalDate.now())
+                        .email("warehouseadmin@gamil.com")
                         .build();
 
-                var roles = new HashSet<String>();
-                roles.add(Role.ADMIN.name());
+
+
+                Role adminRole = roleRepository.findByRoleName("ADMIN")
+                        .orElseGet(() -> roleRepository.save(Role.builder()
+                                        .roleName("ADMIN")
+                                        .build()));
+
 
                 Account account = new Account();
                 account.setStaff(staff);
                 account.setUserName("admin");
                 account.setPassword(passwordEncoder.encode("admin"));
-
+                account.setRole(adminRole);
                 staff.setAccount(account);
                 staffRepository.save(staff);
 

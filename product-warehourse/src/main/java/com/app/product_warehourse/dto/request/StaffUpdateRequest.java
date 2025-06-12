@@ -13,6 +13,6 @@ public class StaffUpdateRequest {
     Integer gender;
     String phoneNumber;
     String email;
-    Integer status;
+    boolean status;
 
 }

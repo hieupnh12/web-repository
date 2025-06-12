@@ -20,6 +20,9 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
+import java.util.stream.Collectors;
+
 @Service
 @RequiredArgsConstructor  // thay cho autowrid
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true) //bo private final
@@ -31,7 +34,11 @@ public class AccountService {
     RoleRepository roleRepository;
     PasswordEncoder passwordEncoder;
 
+<<<<<<< HEAD
     @PreAuthorize("hasAuthority('Account_CREATE')")
+=======
+    @PreAuthorize("hasRole('ADMIN')")
+>>>>>>> origin/main
     @Transactional
     public AccountResponse createAccount(AccountCreateRequest request, String staffId) {
         // Kiểm tra Staff tồn tại
@@ -55,17 +62,20 @@ public class AccountService {
             account.setUserName(request.getUserName());
             account.setPassword(passwordEncoder.encode(request.getPassword()));
             account.setRole(role);
-            account.setStatus(1);
-            account.setOtp(null);
-
 
             var ac = accountRepository.save(account);
-            return accountMapper.accountToAccountResponse(ac);
+            return accountMapper.accountToAccountResponse(ac,role.getRoleId());
 
         } catch (Exception e) {
             log.error("Error creating account", e);  // <- thêm dòng log này
             throw e;
         }
+    }
+    @PreAuthorize("hasRole('ADMIN')")
+    public List<AccountResponse> getAllAccounts() {
+        return accountRepository.findAll().stream()
+                .map(account -> accountMapper.accountToAccountResponse(account,account.getRole().getRoleId()))
+                .collect(Collectors.toList());
     }
 
 }

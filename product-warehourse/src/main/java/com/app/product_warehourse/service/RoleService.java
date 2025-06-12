@@ -57,7 +57,7 @@ public class RoleService {
 
         // 3. Tạo Role và gán danh sách Permission
         Role role = Role.builder()
-                .name(request.getName())
+                .roleName(request.getName())
                 .permissions(permissions)
                 .build();
 

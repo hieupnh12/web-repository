@@ -103,7 +103,7 @@ public class AuthenticationService {
         Role role = account.getRole();
 
         if (role != null) {
-            String roleName = role.getName().toUpperCase().replace(" ", "_");
+            String roleName = role.getRoleName().toUpperCase().replace(" ", "_");
             stringJoiner.add("ROLE_" + roleName);
 
             if (!CollectionUtils.isEmpty(role.getPermissions())) {
