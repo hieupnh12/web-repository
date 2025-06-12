@@ -1,4 +1,4 @@
-package com.app.product_warehourse.dto.request;
+package com.app.product_warehourse.dto.response;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import lombok.*;
@@ -10,7 +10,7 @@ import lombok.experimental.FieldDefaults;
 @AllArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE)
 @JsonInclude(JsonInclude.Include.NON_NULL) // cai nao trong json null thi khong hien
-public class ApiResponse<T>{
+public class ApiResponse <T>{
     @Builder.Default
     int code = 1000;   //có th set tùy ý cái code với ý nghĩa là thành công
     String message;

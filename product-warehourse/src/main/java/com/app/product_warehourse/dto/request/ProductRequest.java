@@ -1,0 +1,43 @@
+package com.app.product_warehourse.dto.request;
+
+import jakarta.persistence.Column;
+import lombok.*;
+import lombok.experimental.FieldDefaults;
+
+
+@Data
+@Builder
+@NoArgsConstructor
+@AllArgsConstructor
+@FieldDefaults(level = AccessLevel.PRIVATE)
+public class ProductRequest {
+    private String productName;
+
+    private String image;
+
+    private Long originId;
+
+    private String processor;
+
+    private Integer battery;
+
+    private Double screenSize;
+
+    private Long operatingSystemId;
+
+    private Integer chipset;
+
+    private String rearCamera;
+
+    private String frontCamera;
+
+    private Integer warrantyPeriod;
+
+    private Long  brandId;
+
+    private Long  warehouseAreaId;
+
+    private Integer stockQuantity;
+
+    private Boolean status;
+}

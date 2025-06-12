@@ -1,0 +1,33 @@
+{
+  "properties": [
+    {
+      "name": "springdoc.swagger-ui.path",
+      "type": "java.lang.String",
+      "description": "Description for springdoc.swagger-ui.path."
+    },
+    {
+      "name": "springdoc.swagger-ui.enabled",
+      "type": "java.lang.String",
+      "description": "Description for springdoc.swagger-ui.enabled."
+    },
+    {
+      "name": "springdoc.api-docs.path",
+      "type": "java.lang.String",
+      "description": "Description for springdoc.api-docs.path."
+    },
+    {
+      "name": "springdoc.api-docs.enabled",
+      "type": "java.lang.String",
+      "description": "Description for springdoc.api-docs.enabled."
+    },
+    {
+      "name": "springdoc.default-produces-media-type",
+      "type": "java.lang.String",
+      "description": "Description for springdoc.default-produces-media-type."
+    },
+    {
+      "name": "springdoc.default-consumes-media-type",
+      "type": "java.lang.String",
+      "description": "Description for springdoc.default-consumes-media-type."
+    }
+  ] }
