@@ -19,6 +19,8 @@ public enum ErrorCode {
     NOT_FOUND_EMAIL(1009, "Can not found email ", HttpStatus.NOT_FOUND),
     INVALID_TOKEN(1010, "Invalid token", HttpStatus.UNAUTHORIZED),
     EXPIRED_TOKEN(1011, "Time expired", HttpStatus.UNAUTHORIZED),
+    PASSWORD_NOT_MATCH(1012, "Password not match", HttpStatus.BAD_REQUEST),
+    ROLE_NOT_EXIT(1013, "Role not exit", HttpStatus.BAD_REQUEST),
     ;
 
     ;

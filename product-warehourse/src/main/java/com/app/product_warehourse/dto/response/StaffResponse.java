@@ -13,7 +13,7 @@ import java.time.LocalDate;
 public class StaffResponse {
     String staffId;
     String fullName;
-    Integer gender;
+    Boolean gender;
     LocalDate birthDate;
     String phoneNumber;
     String email;

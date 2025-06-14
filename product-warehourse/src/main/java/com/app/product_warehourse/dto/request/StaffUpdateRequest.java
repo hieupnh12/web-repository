@@ -1,7 +1,10 @@
 package com.app.product_warehourse.dto.request;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
+
+import java.time.LocalDate;
 
 @Data
 @Builder
@@ -10,8 +13,9 @@ import lombok.experimental.FieldDefaults;
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class StaffUpdateRequest {
     String fullName;
-    Integer gender;
+    Boolean gender;
     String phoneNumber;
+    LocalDate birthDate;
     String email;
     boolean status;
 

@@ -2,11 +2,14 @@ package com.app.product_warehourse.service;
 
 
 import com.app.product_warehourse.dto.request.AccountCreateRequest;
+import com.app.product_warehourse.dto.request.ChangePasswordRequest;
 import com.app.product_warehourse.dto.response.AccountResponse;
 import com.app.product_warehourse.dto.response.RoleResponse;
 import com.app.product_warehourse.entity.Account;
 import com.app.product_warehourse.entity.Role;
 import com.app.product_warehourse.entity.Staff;
+import com.app.product_warehourse.exception.AppException;
+import com.app.product_warehourse.exception.ErrorCode;
 import com.app.product_warehourse.mapper.AccountMapper;
 import com.app.product_warehourse.repository.AccountRepository;
 import com.app.product_warehourse.repository.RoleRepository;
@@ -73,5 +76,19 @@ public class AccountService {
                 .map(account -> accountMapper.accountToAccountResponse(account,account.getRole().getRoleId()))
                 .collect(Collectors.toList());
     }
+
+    public void changePassword(ChangePasswordRequest request,String staffId) {
+
+        var account = accountRepository.findById(staffId).orElseThrow(() -> new AppException(ErrorCode.ACCOUNT_NOT_EXIST));
+
+        boolean checkOldPassword = passwordEncoder.matches(request.getOldPassword(), account.getPassword());
+        if (checkOldPassword) {
+            account.setPassword(passwordEncoder.encode(request.getNewPassword()));
+            accountRepository.save(account);
+        } else {
+            throw new AppException(ErrorCode.PASSWORD_NOT_MATCH);
+        }
+    }
+
 
 }

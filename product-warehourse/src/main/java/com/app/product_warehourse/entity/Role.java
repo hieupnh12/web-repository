@@ -21,6 +21,10 @@ public class Role {
     @OneToMany(mappedBy = "role")
     Set<Account> account;
     @ManyToMany
+    @JoinTable(
+            name = "role_permissions",
+            joinColumns = @JoinColumn(name = "role_id"),
+            inverseJoinColumns = @JoinColumn(name = "permission_id"))
     Set<Permission> permissions;
 
 

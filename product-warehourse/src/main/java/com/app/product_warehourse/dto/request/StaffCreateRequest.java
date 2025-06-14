@@ -13,7 +13,7 @@ import java.time.LocalDate;
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class StaffCreateRequest {
     String fullName;
-    Integer gender;
+    Boolean gender;
     @JsonFormat(pattern = "dd-MM-yyyy")
     LocalDate birthDate;
     String phoneNumber;

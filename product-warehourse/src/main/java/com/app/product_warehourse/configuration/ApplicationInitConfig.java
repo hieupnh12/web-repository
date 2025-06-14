@@ -34,7 +34,7 @@ public class ApplicationInitConfig {
             if (staffRepository.findByFullName("Admin").isEmpty()) {
                 Staff staff = Staff.builder()
                         .fullName("Admin")
-                        .gender(1)
+                        .gender(true)
                         .birthDate(LocalDate.now())
                         .email("warehouseadmin@gamil.com")
                         .build();
