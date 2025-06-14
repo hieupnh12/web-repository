@@ -1,102 +1,143 @@
-import React, { useState, useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
+import Accdetails from './AccountDetails';
+import { createAccount, updateAccount } from '../../api/accountApi';
 
-export default function CreateAcc({ account, onClose, onSave }) {
+export default function CreateAcc({ onClose, onSave, account }) {
   const [form, setForm] = useState({
-    username: '',
+    staffId: '',
+    userName: '',
     password: '',
-    role: '',
-    status: ''
+    roleId: '',
+    staff: null,
   });
+  const [showAccDetails, setShowAccDetails] = useState(false);
 
   useEffect(() => {
     if (account) {
-      setForm(account);
+      setForm({
+        staffId: account.staffId,
+        userName: account.userName || '',
+        password: '',
+        roleId: account.role?.id || '',
+        staff: account.staff || null,
+      });
     }
   }, [account]);
 
   const handleChange = (e) => {
-    const { name, value } = e.target;
-    setForm(prev => ({ ...prev, [name]: value }));
+    setForm({ ...form, [e.target.name]: e.target.value });
   };
 
-  const handleSubmit = (e) => {
+  const handleSelectEmployee = (staff) => {
+    setForm({
+      ...form,
+      staffId: staff.id,
+      staff: staff,
+    });
+    setShowAccDetails(false);
+  };
+
+  const handleSubmit = async (e) => {
     e.preventDefault();
 
-    if (!form.username || !form.password || !form.role || !form.status) {
-      alert('Please fill in all fields!');
-      return;
-    }
+    const payload = {
+      staffId: form.staffId,
+      userName: form.userName,
+      password: form.password,
+      role: { id: parseInt(form.roleId) },
+      status: true,
+    };
 
-    if (onSave && typeof onSave === 'function') {
-      onSave(form);  // 👈 Gọi đúng hàm từ prop
-      onClose();
-    } else {
-      console.error('❌ onSave is not a function or missing');
+    try {
+      if (account) {
+        await updateAccount(form.staffId, payload);
+      } else {
+        await createAccount(form.staffId, payload);
+      }
+      onSave(payload);
+    } catch (err) {
+      console.error('❌ Failed to save account:', err);
     }
   };
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-40 flex justify-center items-center z-50">
-      <div className="bg-white p-6 rounded shadow-md w-full max-w-lg">
-        <div className="flex justify-between items-center mb-4">
-          <h2 className="text-xl font-bold">{account ? 'Edit Account' : 'Create New Account'}</h2>
-          <button onClick={onClose} className="text-xl text-gray-500 hover:text-black">×</button>
-        </div>
+    <div className="fixed inset-0 bg-black bg-opacity-40 flex items-center justify-center z-50">
+      <div className="bg-white p-6 rounded-lg shadow-md w-full max-w-lg">
+        <h2 className="text-xl font-bold mb-4">
+          {account ? 'Edit Account' : 'Create Account'}
+        </h2>
+        <form onSubmit={handleSubmit} className="space-y-3">
+          <input
+            type="text"
+            name="userName"
+            value={form.userName}
+            onChange={handleChange}
+            placeholder="Username"
+            required
+            className="w-full border px-3 py-2 rounded"
+          />
+          <input
+            type="password"
+            name="password"
+            value={form.password}
+            onChange={handleChange}
+            placeholder="Password"
+            className="w-full border px-3 py-2 rounded"
+            required={!account}
+          />
+          <select
+            name="roleId"
+            value={form.roleId}
+            onChange={handleChange}
+            required
+            className="w-full border px-3 py-2 rounded"
+          >
+            <option value="">Select Role</option>
+            <option value="1">Admin</option>
+            <option value="2">Staff</option>
+            <option value="3">Manager</option>
+          </select>
 
-        <form onSubmit={handleSubmit}>
-          <div className="mb-3">
-            <label className="block text-sm mb-1">Username</label>
+          <div className="flex gap-2">
             <input
-              name="username"
-              value={form.username}
-              onChange={handleChange}
-              className="w-full border px-3 py-2 rounded"
+              type="text"
+              value={form.staff?.fullName || ''}
+              readOnly
+              placeholder="Select employee..."
+              className="flex-1 border px-3 py-2 rounded bg-gray-100"
             />
-          </div>
-
-          <div className="mb-3">
-            <label className="block text-sm mb-1">Password</label>
-            <input
-              name="password"
-              type="password"
-              value={form.password || ''}
-              onChange={handleChange}
-              className="w-full border px-3 py-2 rounded"
-            />
-          </div>
-
-          <div className="mb-3">
-            <label className="block text-sm mb-1">Role</label>
-            <select
-              name="role"
-              value={form.role}
-              onChange={handleChange}
-              className="w-full border px-3 py-2 rounded"
+            <button
+              type="button"
+              onClick={() => setShowAccDetails(true)}
+              className="bg-blue-600 text-white px-4 rounded"
             >
-              <option value="">-- Select --</option>
-              <option value="Admin">Admin</option>
-              <option value="Staff">Staff</option>
-            </select>
+              Select
+            </button>
           </div>
 
-          <div className="mb-3">
-            <label className="block text-sm mb-1">Status</label>
-            <select
-              name="status"
-              value={form.status}
-              onChange={handleChange}
-              className="w-full border px-3 py-2 rounded"
+          <div className="flex justify-end gap-2 mt-4">
+            <button
+              type="submit"
+              className="bg-green-600 text-white px-4 py-2 rounded"
             >
-              <option value="">-- Select --</option>
-              <option value="Active">Active</option>
-              <option value="Inactive">Inactive</option>
-            </select>
+              {account ? 'Update' : 'Create'}
+            </button>
+            <button
+              type="button"
+              onClick={onClose}
+              className="bg-gray-400 text-white px-4 py-2 rounded"
+            >
+              Cancel
+            </button>
           </div>
-
-          <button type="submit" className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700">
-            {account ? 'Update' : 'Create'}
-          </button>
         </form>
+
+        {showAccDetails && (
+          <Accdetails
+            onSelect={handleSelectEmployee}
+            onClose={() => setShowAccDetails(false)}
+          />
+        )}
       </div>
     </div>
   );
