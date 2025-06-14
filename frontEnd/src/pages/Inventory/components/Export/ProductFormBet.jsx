@@ -1,30 +1,92 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
-const ProductForm = () => {
-  // TODO: state cho mã SP, giá, cấu hình, ...
+const ProductForm = ({ selected, onAdd }) => {
   const [formData, setFormData] = useState({
-    maSP: "11",
-    tenSanPham: "Realme 10",
-    cauHinh: "256GB - 8GB ...",
-    giaXuat: "640000",
-    soLuongTon: "0",
-    maImei: "",
+    idProduct: "",
+    nameProduct: "",
+    selectedOption: null,
+    exportPrice: "",
+    stockQuantity: "",
+    selectedImeis: [], // Lưu danh sách IMEI đã chọn
+    quantity: "",
   });
+  const [isModalOpen, setIsModalOpen] = useState(false); // Trạng thái modal
 
-  const handleChange = (e) => {
-    const { name, value } = e.target;
-    setFormData({ ...formData, [name]: value });
+  useEffect(() => {
+    if (selected) {
+      setFormData({
+        idProduct: selected.idProduct || "",
+        nameProduct: selected.nameProduct || "",
+        selectedOption: null,
+        exportPrice: "",
+        stockQuantity: selected.stockQuantity || 0,
+        selectedImeis: [],
+        quantity: "",
+      });
+    }
+  }, [selected]);
+
+  const handleOptionChange = (e) => {
+    const optionId = parseInt(e.target.value);
+    const option = selected.options.find((opt) => opt.idProductVersion === optionId);
+      console.log(option?.itemCount);
+    setFormData((prev) => ({
+      ...prev,
+      selectedOption: option,
+      exportPrice: option ? option.exportPrice : "",
+      selectedImeis: [],
+      quantity: option ? option?.itemCount : ""
+    }));
   };
 
-  const handleChooseImei = () => {
-    // Placeholder for choosing IMEI logic
-    alert("Chọn IMEI functionality to be implemented");
+  const handleImeiChange = (imei) => {
+    setFormData((prev) => {
+      const selectedImeis = prev.selectedImeis.includes(imei)
+        ? prev.selectedImeis.filter((i) => i !== imei)
+        : [...prev.selectedImeis, imei];
+      return { ...prev, selectedImeis };
+    });
   };
 
-  const handleUpdateImei = () => {
-    // Placeholder for updating IMEI logic
-    alert("Cập nhật IMEI functionality to be implemented");
+  const handleScanImei = () => {
+    const scannedImei = prompt("Nhập IMEI quét được:"); // Giả lập quét IMEI
+    if (scannedImei && formData.selectedOption?.imeiList.some((item) => item.imei === scannedImei && item.status === "in-stock")) {
+      setFormData((prev) => ({
+        ...prev,
+        selectedImeis: [...new Set([...prev.selectedImeis, scannedImei])],
+      }));
+    } else {
+      alert("IMEI không hợp lệ hoặc không có trong kho!");
+    }
   };
+
+  const handleAdd = () => {
+    if (formData.selectedOption && formData?.selectedImeis.length > 0 && formData.quantity === formData.selectedImeis.length) {
+      onAdd({
+        idProduct: formData?.idProduct,
+        nameProduct: formData?.nameProduct,
+        idProductVersion: formData?.selectedOption.idProductVersion,
+        configuration: `${formData?.selectedOption.color}, ${formData.selectedOption.ram}, ${formData.selectedOption.rom}`,
+        price: formData?.selectedOption.exportPrice,
+        imeis: formData?.selectedImeis, // Danh sách IMEI
+        quantity: formData?.quantity,
+      });
+      setFormData({
+        idProduct: selected?.idProduct || "",
+        nameProduct: selected?.nameProduct || "",
+        selectedOption: null,
+        exportPrice: "",
+        stockQuantity: selected?.stockQuantity || 0,
+        selectedImeis: [],
+        quantity: 1,
+      });
+    } else {
+      alert("Vui lòng chọn cấu hình, số lượng IMEI phù hợp với số lượng sản phẩm!");
+    }
+  };
+
+
+  
   return (
     <div className="md:w-1/2 space-y-4">
       <div className="bg-white rounded shadow h-[350px] p-2">
@@ -37,8 +99,7 @@ const ProductForm = () => {
               <input
                 type="text"
                 name="maSP"
-                value={formData.maSP}
-                onChange={handleChange}
+                value={formData?.idProduct}
                 className="mt-1 block w-full border-gray-700 rounded-md shadow-sm p-1 border"
                 readOnly
               />
@@ -50,8 +111,7 @@ const ProductForm = () => {
               <input
                 type="text"
                 name="tenSanPham"
-                value={formData.tenSanPham}
-                onChange={handleChange}
+                value={formData?.nameProduct}
                 className="mt-1 block w-full border-gray-700 rounded-md shadow-sm p-1 border"
                 readOnly
               />
@@ -64,8 +124,8 @@ const ProductForm = () => {
               <input
                 type="text"
                 name="giaXuat"
-                value={formData.giaXuat}
-                onChange={handleChange}
+                readOnly
+                value={formData?.exportPrice}
                 className="mt-1 block w-full border-gray-700 rounded-md shadow-sm p-1 border"
               />
             </div>
@@ -75,13 +135,16 @@ const ProductForm = () => {
                 Cấu hình
               </label>
               <select
-                name="cauHinh"
-                value={formData.cauHinh}
-                onChange={handleChange}
+                value={formData?.selectedOption?.idProductVersion || ""}
+                onChange={handleOptionChange}
                 className="mt-1 block w-full border-gray-700 rounded-md shadow-sm p-1 border"
               >
-                <option>256GB - 8GB ...</option>
-                {/* Add more options as needed */}
+                <option value="">Chọn cấu hình</option>
+                {selected?.options?.map((option) => (
+                  <option key={option.idProductVersion} value={option.idProductVersion}>
+                    {`${option.color} - ${option.ram} - ${option.rom}`}
+                  </option>
+                ))}
               </select>
             </div>
 
@@ -93,6 +156,8 @@ const ProductForm = () => {
                 <input
                   type="text"
                   name="soLuongTon"
+                  readOnly
+                  value={formData?.quantity}
                   className=" block border border-gray-700 rounded-md shadow-sm p-1 w-1/4"
                 />
               </div>
@@ -104,14 +169,16 @@ const ProductForm = () => {
                 </label>
                 <div className="flex space-x-2">
                   <button
-                    onClick={handleChooseImei}
+                    onClick={() => setIsModalOpen(true)}
                     className="bg-blue-500 text-white px-2 py-1 rounded-md hover:bg-blue-600 sm:w-auto"
+                    disabled={!formData.selectedOption}
                   >
                     Chọn IMEI
                   </button>
                   <button
-                    onClick={handleUpdateImei}
+                    onClick={handleScanImei}
                     className="bg-blue-500 text-white px-2 py-1 rounded-md hover:bg-blue-600 w-fit"
+                    disabled={!formData.selectedOption}
                   >
                     Quét IMEI
                   </button>
@@ -119,17 +186,54 @@ const ProductForm = () => {
               </div>
               <div className="mt-1">
                 <textarea
-                  name="maImei"
-                  value={formData.maImei}
-                  onChange={handleChange}
-                  className="w-full h-24 border border-gray-300 rounded-md shadow-sm resize-none p-3"
-                  placeholder="Nhập mã IMEI..."
-                />
+                value={(formData?.selectedImeis ?? []).join("\n")}
+                readOnly
+                className="mt-1 p-2 block w-full border-gray-700 rounded-md shadow-sm p-1 border h-24 resize-none"
+                placeholder="Danh sách IMEI đã chọn..."
+              />
               </div>
             </div>
           </div>
         </div>
       </div>
+      {/* Modal chọn IMEI */}
+      {isModalOpen && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center">
+          <div className="bg-white rounded-lg p-4 w-96 max-h-[80vh] overflow-y-auto">
+            <h2 className="text-lg font-medium mb-4">Chọn IMEI</h2>
+            <div className="space-y-2">
+              {formData.selectedOption?.imeiList
+                ?.filter((item) => item.status === "in-stock")
+                .map((item) => (
+                  <div key={item.imei} className="flex items-center">
+                    <input
+                      id={`imei-${item.imei}`} 
+                      type="checkbox"
+                      checked={formData?.selectedImeis.includes(item.imei)}
+                      onChange={() => handleImeiChange(item.imei)}
+                      className="mr-2"
+                    />
+                    <label htmlFor={`imei-${item.imei}`}>{item.imei} ({item.status})</label>
+                  </div>
+                ))}
+            </div>
+            <div className="flex justify-end mt-4 gap-2">
+              <button
+                onClick={() => setIsModalOpen(false)}
+                className="bg-gray-300 text-black px-4 py-2 rounded-md"
+              >
+                Hủy
+              </button>
+              <button
+                onClick={() => setIsModalOpen(false)}
+                className="bg-blue-500 text-white px-4 py-2 rounded-md"
+              >
+                Xác nhận
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

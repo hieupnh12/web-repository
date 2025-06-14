@@ -1,7 +1,7 @@
 const ExportTable = () => {
   // TODO: hiển thị sản phẩm đã nhập tạm thời
   return (
-    <div className="bg-white rounded-lg shadow p-4 overflow-visible max-h-[300px] h-[245px]">
+    <div className="bg-white overflow-x-auto rounded-lg shadow p-4 overflow-visible max-h-[300px] h-[245px]">
           <table className="w-full text-sm">
             <thead>
               <tr className="font-semibold border-b">
