@@ -23,6 +23,5 @@ public class Permission {
      boolean canCreate;
      boolean canUpdate;
      boolean canDelete;
-     @ManyToMany(mappedBy = "permissions")
-     Set<Role> roles;
+
 }

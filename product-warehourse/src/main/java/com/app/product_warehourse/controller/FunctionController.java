@@ -2,6 +2,7 @@ package com.app.product_warehourse.controller;
 
 import com.app.product_warehourse.dto.request.ApiResponse;
 import com.app.product_warehourse.dto.response.FunctionResponse;
+import com.app.product_warehourse.dto.response.RoleResponse;
 import com.app.product_warehourse.service.FunctionService;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
@@ -25,6 +26,13 @@ public class FunctionController {
     public ApiResponse<List<FunctionResponse>> getAllFunctions() {
         return ApiResponse.<List<FunctionResponse>>builder()
                 .result(functionService.getAllFunctions())
+                .build();
+    }
+
+    @GetMapping("/functionByRole")
+    public ApiResponse<List<FunctionResponse>> getFunctionByRole() {
+        return ApiResponse.<List<FunctionResponse>>builder()
+                .result(functionService.getFunctionByRole())
                 .build();
     }
 }
