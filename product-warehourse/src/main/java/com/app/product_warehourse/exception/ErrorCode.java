@@ -7,6 +7,15 @@ import org.springframework.http.HttpStatusCode;
 @Getter
 public enum ErrorCode {
 
+    WAREHOUSE_UNAVAILABLE(1016,"Warehouse area is currently unavailable, cannot add product.",HttpStatus.SERVICE_UNAVAILABLE),
+    WAREHOUSE_NOT_EXIST(1013, "Warehouse Not Exist", HttpStatus.NOT_FOUND),
+    WAREHOUSE_INVALID(1015,"Name must be at least 3 characters", HttpStatus.BAD_REQUEST),
+
+    PRODUCT_NOT_EXIST(1016,"Product Not Exist", HttpStatus.NOT_FOUND),
+
+
+
+
     UNCATEGORIZE_EXCEPTION(9999, "Uncategorized error", HttpStatus.INTERNAL_SERVER_ERROR),
     INVALID_KEY(1001, "Invalid message key", HttpStatus.BAD_REQUEST),
     ACCOUNT_NOT_EXIST(1002, "Wrong user name", HttpStatus.BAD_REQUEST),
