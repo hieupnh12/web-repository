@@ -33,12 +33,15 @@ public class StaffService {
 
     @PreAuthorize("hasRole('ADMIN')")
     public StaffResponse createStaff(StaffCreateRequest request) {
+        if (staffRepository.existsByEmail(request.getEmail())) {
+            throw new AppException(ErrorCode.EMAIL_EXITED);
+        }
         Staff staff = staffMapper.toStaff(request);
         var savedStaff = staffRepository.save(staff);
       return  staffMapper.toStaffResponse(savedStaff);
 
     }
-
+    @PreAuthorize("hasRole('ADMIN')")
     public void deleteStaff(String userId) {
         staffRepository.deleteById(userId);
     }
@@ -48,10 +51,13 @@ public class StaffService {
                 .map(staffMapper::toStaffResponse)
                 .collect(Collectors.toList());
     }
+    @PreAuthorize("hasRole('ADMIN')")
     public StaffResponse updateStaff(String staffId, StaffUpdateRequest request) {
         var staff = staffRepository.findById(staffId).orElseThrow(() ->
                 new AppException(ErrorCode.STAFF_NOT_EXIST));
-
+        if (staffRepository.existsByEmail(request.getEmail())) {
+            throw new AppException(ErrorCode.EMAIL_EXITED);
+        }
             staffMapper.updateStaff(staff, request);
             return staffMapper.toStaffResponse(staffRepository.save(staff));
     }

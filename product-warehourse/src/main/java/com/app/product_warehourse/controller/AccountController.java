@@ -7,6 +7,7 @@ import com.app.product_warehourse.dto.request.ChangePasswordRequest;
 import com.app.product_warehourse.dto.response.AccountResponse;
 import com.app.product_warehourse.dto.response.StaffResponse;
 import com.app.product_warehourse.service.AccountService;
+import jakarta.validation.Valid;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
@@ -24,7 +25,7 @@ public class AccountController {
     AccountService accountService;
 
     @PostMapping("/{staffId}")
-    public ApiResponse<AccountResponse> createAccount(@PathVariable String staffId,  @RequestBody AccountCreateRequest request) {
+    public ApiResponse<AccountResponse> createAccount(@Valid  @PathVariable String staffId, @RequestBody AccountCreateRequest request) {
         return ApiResponse.<AccountResponse>builder()
                 .result(accountService.createAccount(request,staffId))
                 .build();
@@ -37,7 +38,7 @@ public class AccountController {
                 .build();
     }
     @PostMapping("/change/{staffId}")
-    public ApiResponse<String> changePassword(@PathVariable String staffId, @RequestBody ChangePasswordRequest request) {
+    public ApiResponse<String> changePassword(@Valid @PathVariable String staffId, @RequestBody ChangePasswordRequest request) {
         accountService.changePassword(request,staffId);
         String message = "Password changed successfully";
         return ApiResponse.<String>builder()

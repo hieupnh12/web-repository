@@ -19,6 +19,7 @@ import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
@@ -38,8 +39,12 @@ public class RoleService {
     RoleMapper roleMapper;
     AccountRepository accountRepository;
 
+    @PreAuthorize("hasRole('ADMIN')")
     @Transactional
     public RoleResponse createRole(RoleCreateRequest request) {
+        if (roleRepository.existsByRoleName(request.getRoleName())) {
+            throw new AppException(ErrorCode.ROLE_EXITED);
+        }
         Set<Permission> permissions = new HashSet<>();
         Functions function = null;
         for (PermissionRequest permDTO : request.getPermissions()) {
@@ -72,7 +77,7 @@ public class RoleService {
         var s = roleRepository.save(role);
         return roleMapper.toRoleResponse(s);
     }
-
+    @PreAuthorize("hasRole('ADMIN')")
     public List<RoleResponse> getAllRoles() {
         return roleRepository.findAll().stream()
                 .map(roleMapper::toRoleResponseName)
@@ -90,7 +95,7 @@ public class RoleService {
         return roleMapper.toRoleResponseName(role);
 
     }
-
+    @PreAuthorize("hasRole('ADMIN')")
     public void deleteRoleById(Long roleId) {
         roleRepository.deleteById(roleId);
     }

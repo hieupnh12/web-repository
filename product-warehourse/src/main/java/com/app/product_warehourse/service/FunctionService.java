@@ -43,9 +43,13 @@ public class FunctionService {
     public List<FunctionResponse> getFunctionByRole() {
         var context =  SecurityContextHolder.getContext();
         String name = context.getAuthentication().getName();
+        if (name.equals("admin")) {
+            return getAllFunctions();
+        }
 
         Account account  =  accountRepository.findByUserName(name).orElseThrow(
                 () -> new AppException(ErrorCode.ACCOUNT_NOT_EXIST));
+
 
         var role = roleRepository.findById(account.getRole().getRoleId()).orElseThrow(() -> new AppException(ErrorCode.ACCOUNT_NOT_EXIST));
 
