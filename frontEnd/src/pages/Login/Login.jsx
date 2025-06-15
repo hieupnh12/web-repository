@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { Eye, EyeOff } from "lucide-react";
-import { login, takeRole } from "../../services/authService";
+import { login, loginV2, loginV3, takeRole } from "../../services/authService";
 import { Link, useNavigate } from "react-router-dom";
 import { useDispatch } from "react-redux";
 import { unwrapResult } from "@reduxjs/toolkit";
@@ -20,25 +20,25 @@ export default function Login() {
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
 
-  useEffect(() => {
-    const token = Cookie.get("token");
+  // useEffect(() => {
+  //   const token = Cookie.get("token");
 
-    if (token) {
-      // kiểm tra role và điều hướng
-      takeRole(token)
-        .then((res) => {
-          const role = res.data.result.roleName;
-          if (role === "ADMIN") navigate("/manager");
-          else navigate("/staff");
-        })
-        .catch(() => {
-          // token hết hạn hoặc lỗi
-          Cookie.remove("token");
-        });
-    } else {
-      navigate("/")
-    }
-  }, []);
+  //   if (token) {
+  //     // kiểm tra role và điều hướng
+  //     takeRole(token)
+  //       .then((res) => {
+  //         const role = res.data.result.roleName;
+  //         if (role === "ADMIN") navigate("/manager");
+  //         else navigate("/staff");
+  //       })
+  //       .catch(() => {
+  //         // token hết hạn hoặc lỗi
+  //         Cookie.remove("token");
+  //       });
+  //   } else {
+  //     navigate("/")
+  //   }
+  // }, []);
 
   const validateInputs = () => {
     const newErrors = {};
@@ -91,14 +91,19 @@ export default function Login() {
         password: credentials.password.trim(),
       };
 
-      const response = await dispatch(login(formattedData));
-      const data = unwrapResult(response);
-    
-      // Sử dụng luôn role trả về từ login nếu có
-      const role = await takeRole(data.result.token);
+      // const response = await dispatch(login(formattedData));
+
+      // const data = unwrapResult(response);
+      const response = await loginV2(formattedData);
       
-      if (role.data.result.roleName === "ADMIN") navigate("/manager/dashboard");
-      else navigate("/staff/dashboard");
+      if (response.status === 200) {
+        const role = await takeRole(response.data.result.token);
+        
+        if (role.data.result.roleName === "ADMIN")
+          navigate("/manager/dashboard");
+        else navigate("/staff/dashboard");
+      }
+      // Sử dụng luôn role trả về từ login nếu có
     } catch (error) {
       setServerError(error?.response?.data?.message);
     } finally {

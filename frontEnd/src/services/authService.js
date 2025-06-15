@@ -13,14 +13,18 @@ export const login = createAsyncThunk("auth/login", async (user) => {
     return (await responds).data;
 });
 
+export const loginV3 = async (user) => {
+    const responds = BASE_URL[POST]("auth/login", user);
+    return (await responds).data;
+};
 
 // Login để test trực tiếp k cần đổi api
-export const loginV2 = createAsyncThunk("auth/login", async (user) => {
+export const loginV2 = async (user) => {
     const responds = axios.post("http://localhost:8080/warehouse/auth/login", user)
+        Cookie.set("token", (await responds).data.result.token)
 
-
-    return (await responds).data;
-});
+    return responds;
+};
 
 /**
  * Giải mã token sau khi đăng nhập

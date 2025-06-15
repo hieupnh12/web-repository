@@ -1,5 +1,5 @@
 import { createSlice } from "@reduxjs/toolkit";
-import { loadUserFromCookie, loginV2 } from "../services/authService";
+import { loadUserFromCookie, login, loginV2 } from "../services/authService";
 import * as status from "../constants/status";
 import Cookie  from "js-cookie";
 
@@ -26,16 +26,16 @@ const authSlide = createSlice({
   }
     },
     extraReducers: (builder) => {
-        builder.addCase(loginV2.pending, (state, action) => {
+        builder.addCase(login.pending, (state, action) => {
             state.status = status.PENDING;
         })
 
-        .addCase(loginV2.fulfilled, (state, action) => {
+        .addCase(login.fulfilled, (state, action) => {
             state.status = status.SUCCESSFULLY;
             state.data = action.payload;
         }) 
 
-        .addCase(loginV2.rejected, (state, action) => {
+        .addCase(login.rejected, (state, action) => {
             state.status = status.FAILED;
             state.error = action.error.message;
         })
