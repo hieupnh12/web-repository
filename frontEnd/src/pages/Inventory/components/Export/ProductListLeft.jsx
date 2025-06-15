@@ -12,6 +12,8 @@ const ProductList = ({ products, onSelect, onSearch }) => {
     product.nameProduct.toLowerCase().includes(searchText.toLowerCase())
   );
 
+  console.log("check product", products);
+  
   return (
     <div className="md:w-1/2">
       <div className="bg-white rounded shadow p-2 h-[350px] overflow-y-auto">

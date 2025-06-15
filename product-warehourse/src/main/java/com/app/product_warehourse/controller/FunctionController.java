@@ -2,7 +2,6 @@ package com.app.product_warehourse.controller;
 
 import com.app.product_warehourse.dto.request.ApiResponse;
 import com.app.product_warehourse.dto.response.FunctionResponse;
-import com.app.product_warehourse.dto.response.RoleResponse;
 import com.app.product_warehourse.service.FunctionService;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;

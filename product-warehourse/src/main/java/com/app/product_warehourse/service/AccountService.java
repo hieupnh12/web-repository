@@ -37,11 +37,8 @@ public class AccountService {
     RoleRepository roleRepository;
     PasswordEncoder passwordEncoder;
 
-<<<<<<< HEAD
-    @PreAuthorize("hasAuthority('Account_CREATE')")
-=======
+
     @PreAuthorize("hasRole('ADMIN')")
->>>>>>> origin/main
     @Transactional
     public AccountResponse createAccount(AccountCreateRequest request, String staffId) {
         // Kiểm tra Staff tồn tại

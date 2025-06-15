@@ -27,7 +27,7 @@ const ExportPage = () => {
 // Tạo danh sách IMEI đã sử dụng
   const usedImeis = form.products.flatMap((product) => product.imeis);
 
-  const { data, isLoading, error } = useQuery({
+  const { data } = useQuery({
     queryKey: ["products", { page, limit: 20, search }],
     queryFn: getFullProductVersions,
     keepPreviousData: true,
@@ -38,7 +38,7 @@ const ExportPage = () => {
     queryFn: loadCustomers,
   });
 
-  console.log(data?.data);
+  // console.log(data?.data);
 
   // Set form
   const handleCustomerChange = (customer) => {
@@ -167,8 +167,6 @@ const ExportPage = () => {
     }
   };
 
-  if (isLoading && page === 1) return <div>Loading...</div>;
-  if (error) return <div>Error: {error.message}</div>;
 
   return (
     <div className="flex-1 bg-[#EFF6FF] rounded-2xl p-2 text-sm font-medium text-gray-700">
