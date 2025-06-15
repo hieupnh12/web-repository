@@ -15,167 +15,146 @@
       "idRoles": 2
     }
   ],
-  "exportReceipts": [
+  "roles": [
     {
-      "idExportReciept": 1,
-      "idStaff": 1,
-      "idCustomer": 1,
-      "time": "2025-06-01T10:30:00",
-      "status": "completed",
-      "totalCost": 5000000
+      "idRoles": 1,
+      "roleName": "Admin",
+      "permissions": ["read", "write", "delete", "manage"]
     },
     {
-      "idExportReciept": 2,
-      "idStaff": 2,
-      "idCustomer": 2,
-      "time": "2025-06-03T14:00:00",
-      "status": "pending",
-      "totalCost": 3000000
-    },
-    {
-      "idExportReciept": 3,
-      "idStaff": 2,
-      "idCustomer": 2,
-      "time": "2025-06-03T14:00:00",
-      "status": "pending",
-      "totalCost": 3000000
-    },
-    {
-      "idExportReciept": 4,
-      "idStaff": 2,
-      "idCustomer": 2,
-      "time": "2025-06-03T14:00:00",
-      "status": "pending",
-      "totalCost": 3000000
-    },
-    {
-      "idExportReciept": 5,
-      "idStaff": 2,
-      "idCustomer": 2,
-      "time": "2025-06-03T14:00:00",
-      "status": "pending",
-      "totalCost": 3000000
-    },
-    {
-      "idExportReciept": 6,
-      "idStaff": 2,
-      "idCustomer": 2,
-      "time": "2025-06-03T14:00:00",
-      "status": "pending",
-      "totalCost": 3000000
-    },
-    {
-      "idExportReciept": 7,
-      "idStaff": 2,
-      "idCustomer": 2,
-      "time": "2025-06-03T14:00:00",
-      "status": "pending",
-      "totalCost": 3000000
-    },
-    {
-      "idExportReciept": 8,
-      "idStaff": 2,
-      "idCustomer": 2,
-      "time": "2025-06-03T14:00:00",
-      "status": "pending",
-      "totalCost": 3000000
-    },
-    {
-      "idExportReciept": 9,
-      "idStaff": 2,
-      "idCustomer": 2,
-      "time": "2025-06-03T14:00:00",
-      "status": "pending",
-      "totalCost": 3000000
-    },
-    {
-      "idExportReciept": 10,
-      "idStaff": 2,
-      "idCustomer": 2,
-      "time": "2025-06-03T14:00:00",
-      "status": "pending",
-      "totalCost": 10000000
-    },
-    {
-      "idExportReciept": 11,
-      "idStaff": 2,
-      "idCustomer": 2,
-      "time": "2025-06-03T14:00:00",
-      "status": "pending",
-      "totalCost": 10000000
-    }
-    
-  ],
-  "customers": [
-    {
-      "idCustomer": 1,
-      "nameCustomer": "Nguyen Van A",
-      "address": "123 Le Loi, HCM",
-      "numberPhone": "0901234567"
-    },
-    {
-      "idCustomer": 2,
-      "nameCustomer": "Tran Thi B",
-      "address": "456 Tran Hung Dao, HN",
-      "numberPhone": "0912345678"
+      "idRoles": 2,
+      "roleName": "Staff",
+      "permissions": ["read", "write"]
     }
   ],
-  "exportReceiptDetails": [
+  "brands": [
     {
-      "idExportReciept": 1,
-      "idProductVersion": 101,
-      "quantity": 1,
-      "price": 5000000
+      "idBrand": 1,
+      "nameBrand": "Apple",
+      "country": "USA",
+      "status": "active"
     },
     {
-      "idExportReciept": 1,
-      "idProductVersion": 102,
-      "quantity": 1,
-      "price": 5000
+      "idBrand": 2,
+      "nameBrand": "Samsung",
+      "country": "Korea",
+      "status": "active"
     },
     {
-      "idExportReciept": 1,
-      "idProductVersion": 103,
-      "quantity": 100,
-      "price": 5000000
+      "idBrand": 3,
+      "nameBrand": "Xiaomi",
+      "country": "China",
+      "status": "active"
     },
     {
-      "idExportReciept": 1,
-      "idProductVersion": 104,
-      "quantity": 1,
-      "price": 500000
+      "idBrand": 4,
+      "nameBrand": "OPPO",
+      "country": "China",
+      "status": "active"
     },
     {
-      "idExportReciept": 2,
-      "idProductVersion": 102,
-      "quantity": 2,
-      "price": 1500000
+      "idBrand": 5,
+      "nameBrand": "Vivo",
+      "country": "China",
+      "status": "active"
+    },
+    {
+      "idBrand": 6,
+      "nameBrand": "Realme",
+      "country": "China",
+      "status": "active"
     }
   ],
-  "productItems": [
+  "warehouseAreas": [
     {
-      "imei": "123456789012345",
-      "idProductVersion": 101,
-      "idImportReciept": 10,
-      "idExportReciept": 1,
-      "status": "sold"
+      "idWarehouseArea": 1,
+      "nameArea": "Khu A",
+      "description": "Khu lưu trữ điện thoại cao cấp",
+      "capacity": 1000,
+      "currentStock": 45
     },
     {
-      "imei": "987654321098765",
-      "idProductVersion": 102,
-      "idImportReciept": 11,
-      "idExportReciept": 2,
-      "status": "reserved"
+      "idWarehouseArea": 2,
+      "nameArea": "Khu B",
+      "description": "Khu lưu trữ điện thoại tầm trung",
+      "capacity": 1500,
+      "currentStock": 34
     },
-     { "imei": "123456789012346", "idProductVersion": 102, "idImportReciept": 1, "idExportReciept": null, "status": "in-stock" },
-    { "imei": "123456789012347", "idProductVersion": 103, "idImportReciept": 2, "idExportReciept": null, "status": "in-stock" },
-    { "imei": "123456789012348", "idProductVersion": 104, "idImportReciept": 2, "idExportReciept": null, "status": "in-stock" },
-    { "imei": "123456789012349", "idProductVersion": 105, "idImportReciept": 3, "idExportReciept": null, "status": "in-stock" },
-    { "imei": "123456789012350", "idProductVersion": 106, "idImportReciept": 3, "idExportReciept": null, "status": "in-stock" },
-    { "imei": "123456789012351", "idProductVersion": 102, "idImportReciept": 3, "idExportReciept": null, "status": "in-stock" },
-    { "imei": "123456789012352", "idProductVersion": 102, "idImportReciept": 3, "idExportReciept": null, "status": "in-stock" },
-        { "imei": "123456789012353", "idProductVersion": 109, "idImportReciept": 3, "idExportReciept": null, "status": "in-stock" }
-
+    {
+      "idWarehouseArea": 3,
+      "nameArea": "Khu C",
+      "description": "Khu lưu trữ phụ kiện và điện thoại giá rẻ",
+      "capacity": 800,
+      "currentStock": 16
+    }
+  ],
+  "rams": [
+    {
+      "idRam": 1,
+      "ramSize": "6GB"
+    },
+    {
+      "idRam": 2,
+      "ramSize": "8GB"
+    },
+    {
+      "idRam": 3,
+      "ramSize": "12GB"
+    },
+    {
+      "idRam": 4,
+      "ramSize": "16GB"
+    }
+  ],
+  "roms": [
+    {
+      "idRom": 1,
+      "romSize": "128GB"
+    },
+    {
+      "idRom": 2,
+      "romSize": "256GB"
+    },
+    {
+      "idRom": 3,
+      "romSize": "512GB"
+    },
+    {
+      "idRom": 4,
+      "romSize": "1TB"
+    }
+  ],
+  "colors": [
+    {
+      "idColor": 1,
+      "nameColor": "Black",
+      "hexCode": "#000000"
+    },
+    {
+      "idColor": 2,
+      "nameColor": "White",
+      "hexCode": "#FFFFFF"
+    },
+    {
+      "idColor": 3,
+      "nameColor": "Blue",
+      "hexCode": "#0066CC"
+    },
+    {
+      "idColor": 4,
+      "nameColor": "Red",
+      "hexCode": "#FF0000"
+    },
+    {
+      "idColor": 5,
+      "nameColor": "Gold",
+      "hexCode": "#FFD700"
+    },
+    {
+      "idColor": 6,
+      "nameColor": "Silver",
+      "hexCode": "#C0C0C0"
+    }
   ],
   "products": [
     {
@@ -191,48 +170,519 @@
       "origin": "USA",
       "chipset": "A17",
       "idBrand": 1,
-      "idWarrehouseArea": 1,
-      "operatingSystem": "iOS"
-    },{ "idProduct": 2, "nameProduct": "Samsung S24", "picture": "s24.jpg", "status": "active", "stockQuantity": 8, "battery": "4500mAh", "rearCamera": "50MP", "frontCamera": "10MP", "screenSize": "6.5", "origin": "Korea", "chipset": "Exynos 2400", "idBrand": 2, "idWarrehouseArea": 1, "operatingSystem": "Android" },
-    { "idProduct": 3, "nameProduct": "Xiaomi 14", "picture": "xiaomi14.jpg", "status": "active", "stockQuantity": 15, "battery": "4600mAh", "rearCamera": "50MP", "frontCamera": "32MP", "screenSize": "6.4", "origin": "China", "chipset": "Snapdragon 8 Gen 3", "idBrand": 3, "idWarrehouseArea": 2, "operatingSystem": "Android" },
-    { "idProduct": 4, "nameProduct": "OPPO Reno11", "picture": "reno11.jpg", "status": "active", "stockQuantity": 12, "battery": "5000mAh", "rearCamera": "64MP", "frontCamera": "32MP", "screenSize": "6.7", "origin": "China", "chipset": "Dimensity 8200", "idBrand": 4, "idWarrehouseArea": 2, "operatingSystem": "Android" },
-    { "idProduct": 5, "nameProduct": "Vivo V30", "picture": "v30.jpg", "status": "active", "stockQuantity": 9, "battery": "4800mAh", "rearCamera": "50MP", "frontCamera": "50MP", "screenSize": "6.78", "origin": "China", "chipset": "Snapdragon 7 Gen 3", "idBrand": 5, "idWarrehouseArea": 3, "operatingSystem": "Android" },
-    { "idProduct": 6, "nameProduct": "Realme GT 6", "picture": "gt6.jpg", "status": "active", "stockQuantity": 7, "battery": "5500mAh", "rearCamera": "50MP", "frontCamera": "16MP", "screenSize": "6.74", "origin": "China", "chipset": "Snapdragon 8s Gen 3", "idBrand": 6, "idWarrehouseArea": 3, "operatingSystem": "Android" }
-  ],
-  "rams": [
-    { "idRam": 1, "ramSize": "6GB" },
-    { "idRam": 1, "ramSize": "8GB" },
-    { "idRam": 2, "ramSize": "12GB" }
-    
-  ],
-  "roms": [
-    { "idRom": 1, "romSize": "128GB" },
-    { "idRom": 2, "romSize": "256GB" }
-  ],
-  "colors": [
-    { "idColor": 1, "nameColor": "Black" },
-     { "idColor": 2, "nameColor": "White" },
-    { "idColor": 3, "nameColor": "Blue" }
+      "idWarehouseArea": 1,
+      "operatingSystem": "iOS",
+      "weight": "171g",
+      "dimensions": "147.6 x 71.6 x 7.8 mm",
+      "warranty": "12 months",
+      "createdAt": "2025-01-01T00:00:00Z",
+      "updatedAt": "2025-01-01T00:00:00Z"
+    },
+    {
+      "idProduct": 2,
+      "nameProduct": "Samsung Galaxy S24",
+      "picture": "s24.jpg",
+      "status": "active",
+      "stockQuantity": 8,
+      "battery": "4500mAh",
+      "rearCamera": "50MP",
+      "frontCamera": "10MP",
+      "screenSize": "6.5",
+      "origin": "Korea",
+      "chipset": "Exynos 2400",
+      "idBrand": 2,
+      "idWarehouseArea": 1,
+      "operatingSystem": "Android",
+      "weight": "195g",
+      "dimensions": "158.5 x 75.9 x 8.6 mm",
+      "warranty": "12 months",
+      "createdAt": "2025-01-02T00:00:00Z",
+      "updatedAt": "2025-01-02T00:00:00Z"
+    },
+    {
+      "idProduct": 3,
+      "nameProduct": "Xiaomi 14",
+      "picture": "xiaomi14.jpg",
+      "status": "active",
+      "stockQuantity": 15,
+      "battery": "4600mAh",
+      "rearCamera": "50MP",
+      "frontCamera": "32MP",
+      "screenSize": "6.4",
+      "origin": "China",
+      "chipset": "Snapdragon 8 Gen 3",
+      "idBrand": 3,
+      "idWarehouseArea": 2,
+      "operatingSystem": "Android",
+      "weight": "193g",
+      "dimensions": "152.8 x 71.5 x 8.2 mm",
+      "warranty": "18 months",
+      "createdAt": "2025-01-03T00:00:00Z",
+      "updatedAt": "2025-01-03T00:00:00Z"
+    },
+    {
+      "idProduct": 4,
+      "nameProduct": "OPPO Reno11",
+      "picture": "reno11.jpg",
+      "status": "active",
+      "stockQuantity": 12,
+      "battery": "5000mAh",
+      "rearCamera": "64MP",
+      "frontCamera": "32MP",
+      "screenSize": "6.7",
+      "origin": "China",
+      "chipset": "Dimensity 8200",
+      "idBrand": 4,
+      "idWarehouseArea": 2,
+      "operatingSystem": "Android",
+      "weight": "184g",
+      "dimensions": "162.4 x 74.2 x 7.9 mm",
+      "warranty": "12 months",
+      "createdAt": "2025-01-04T00:00:00Z",
+      "updatedAt": "2025-01-04T00:00:00Z"
+    },
+    {
+      "idProduct": 5,
+      "nameProduct": "Vivo V30",
+      "picture": "v30.jpg",
+      "status": "active",
+      "stockQuantity": 9,
+      "battery": "4800mAh",
+      "rearCamera": "50MP",
+      "frontCamera": "50MP",
+      "screenSize": "6.78",
+      "origin": "China",
+      "chipset": "Snapdragon 7 Gen 3",
+      "idBrand": 5,
+      "idWarehouseArea": 3,
+      "operatingSystem": "Android",
+      "weight": "186g",
+      "dimensions": "164.4 x 75.1 x 7.5 mm",
+      "warranty": "12 months",
+      "createdAt": "2025-01-05T00:00:00Z",
+      "updatedAt": "2025-01-05T00:00:00Z"
+    },
+    {
+      "idProduct": 6,
+      "nameProduct": "Realme GT 6",
+      "picture": "gt6.jpg",
+      "status": "active",
+      "stockQuantity": 7,
+      "battery": "5500mAh",
+      "rearCamera": "50MP",
+      "frontCamera": "16MP",
+      "screenSize": "6.74",
+      "origin": "China",
+      "chipset": "Snapdragon 8s Gen 3",
+      "idBrand": 6,
+      "idWarehouseArea": 3,
+      "operatingSystem": "Android",
+      "weight": "199g",
+      "dimensions": "162.0 x 75.1 x 8.6 mm",
+      "warranty": "12 months",
+      "createdAt": "2025-01-06T00:00:00Z",
+      "updatedAt": "2025-01-06T00:00:00Z"
+    }
   ],
   "productVersions": [
-  { "idProductVersion": 101, "idProduct": 1, "idColor": 1, "idRam": 1, "idRom": 1, "importPrice": 20000000, "exportPrice": 22000000 },
-  { "idProductVersion": 107, "idProduct": 1, "idColor": 2, "idRam": 2, "idRom": 2, "importPrice": 21500000, "exportPrice": 23500000 },
-  { "idProductVersion": 108, "idProduct": 1, "idColor": 3, "idRam": 1, "idRom": 2, "importPrice": 20500000, "exportPrice": 22500000 },
-
-  { "idProductVersion": 102, "idProduct": 2, "idColor": 2, "idRam": 1, "idRom": 2, "importPrice": 18000000, "exportPrice": 20000000 },
-  { "idProductVersion": 109, "idProduct": 2, "idColor": 1, "idRam": 2, "idRom": 2, "importPrice": 19000000, "exportPrice": 21000000 },
-
-  { "idProductVersion": 103, "idProduct": 3, "idColor": 3, "idRam": 2, "idRom": 2, "importPrice": 15000000, "exportPrice": 17000000 },
-  { "idProductVersion": 110, "idProduct": 3, "idColor": 1, "idRam": 1, "idRom": 1, "importPrice": 14500000, "exportPrice": 16500000 },
-
-  { "idProductVersion": 104, "idProduct": 4, "idColor": 1, "idRam": 2, "idRom": 1, "importPrice": 12000000, "exportPrice": 13500000 },
-  { "idProductVersion": 111, "idProduct": 4, "idColor": 2, "idRam": 1, "idRom": 2, "importPrice": 11800000, "exportPrice": 13200000 },
-
-  { "idProductVersion": 105, "idProduct": 5, "idColor": 2, "idRam": 1, "idRom": 1, "importPrice": 11000000, "exportPrice": 12500000 },
-  { "idProductVersion": 112, "idProduct": 5, "idColor": 3, "idRam": 2, "idRom": 2, "importPrice": 12500000, "exportPrice": 14000000 },
-
-  { "idProductVersion": 106, "idProduct": 6, "idColor": 3, "idRam": 2, "idRom": 2, "importPrice": 17000000, "exportPrice": 19000000 },
-  { "idProductVersion": 113, "idProduct": 6, "idColor": 1, "idRam": 1, "idRom": 1, "importPrice": 16000000, "exportPrice": 18000000 }
-]
-
+    {
+      "idProductVersion": 101,
+      "idProduct": 1,
+      "idColor": 1,
+      "idRam": 1,
+      "idRom": 1,
+      "importPrice": 20000000,
+      "exportPrice": 22000000,
+      "stockQuantity": 5,
+      "status": "active"
+    },
+    {
+      "idProductVersion": 107,
+      "idProduct": 1,
+      "idColor": 2,
+      "idRam": 2,
+      "idRom": 2,
+      "importPrice": 21500000,
+      "exportPrice": 23500000,
+      "stockQuantity": 8,
+      "status": "active"
+    },
+    {
+      "idProductVersion": 108,
+      "idProduct": 1,
+      "idColor": 3,
+      "idRam": 1,
+      "idRom": 2,
+      "importPrice": 20500000,
+      "exportPrice": 22500000,
+      "stockQuantity": 7,
+      "status": "active"
+    },
+    {
+      "idProductVersion": 102,
+      "idProduct": 2,
+      "idColor": 2,
+      "idRam": 1,
+      "idRom": 2,
+      "importPrice": 18000000,
+      "exportPrice": 20000000,
+      "stockQuantity": 3,
+      "status": "active"
+    },
+    {
+      "idProductVersion": 109,
+      "idProduct": 2,
+      "idColor": 1,
+      "idRam": 2,
+      "idRom": 2,
+      "importPrice": 19000000,
+      "exportPrice": 21000000,
+      "stockQuantity": 5,
+      "status": "active"
+    },
+    {
+      "idProductVersion": 103,
+      "idProduct": 3,
+      "idColor": 3,
+      "idRam": 2,
+      "idRom": 2,
+      "importPrice": 15000000,
+      "exportPrice": 17000000,
+      "stockQuantity": 10,
+      "status": "active"
+    },
+    {
+      "idProductVersion": 110,
+      "idProduct": 3,
+      "idColor": 1,
+      "idRam": 1,
+      "idRom": 1,
+      "importPrice": 14500000,
+      "exportPrice": 16500000,
+      "stockQuantity": 5,
+      "status": "active"
+    },
+    {
+      "idProductVersion": 104,
+      "idProduct": 4,
+      "idColor": 1,
+      "idRam": 2,
+      "idRom": 1,
+      "importPrice": 12000000,
+      "exportPrice": 13500000,
+      "stockQuantity": 7,
+      "status": "active"
+    },
+    {
+      "idProductVersion": 111,
+      "idProduct": 4,
+      "idColor": 2,
+      "idRam": 1,
+      "idRom": 2,
+      "importPrice": 11800000,
+      "exportPrice": 13200000,
+      "stockQuantity": 5,
+      "status": "active"
+    },
+    {
+      "idProductVersion": 105,
+      "idProduct": 5,
+      "idColor": 2,
+      "idRam": 1,
+      "idRom": 1,
+      "importPrice": 11000000,
+      "exportPrice": 12500000,
+      "stockQuantity": 4,
+      "status": "active"
+    },
+    {
+      "idProductVersion": 112,
+      "idProduct": 5,
+      "idColor": 3,
+      "idRam": 2,
+      "idRom": 2,
+      "importPrice": 12500000,
+      "exportPrice": 14000000,
+      "stockQuantity": 5,
+      "status": "active"
+    },
+    {
+      "idProductVersion": 106,
+      "idProduct": 6,
+      "idColor": 3,
+      "idRam": 2,
+      "idRom": 2,
+      "importPrice": 17000000,
+      "exportPrice": 19000000,
+      "stockQuantity": 3,
+      "status": "active"
+    },
+    {
+      "idProductVersion": 113,
+      "idProduct": 6,
+      "idColor": 1,
+      "idRam": 1,
+      "idRom": 1,
+      "importPrice": 16000000,
+      "exportPrice": 18000000,
+      "stockQuantity": 4,
+      "status": "active"
+    }
+  ],
+  "productItems": [
+    {
+      "imei": "123456789012345",
+      "idProductVersion": 101,
+      "idImportReciept": 10,
+      "idExportReciept": 1,
+      "status": "sold",
+      "condition": "new",
+      "purchaseDate": "2025-01-10T00:00:00Z",
+      "sellDate": "2025-06-01T10:30:00Z"
+    },
+    {
+      "imei": "987654321098765",
+      "idProductVersion": 102,
+      "idImportReciept": 11,
+      "idExportReciept": 2,
+      "status": "reserved",
+      "condition": "new",
+      "purchaseDate": "2025-01-11T00:00:00Z",
+      "sellDate": null
+    },
+    {
+      "imei": "123456789012346",
+      "idProductVersion": 102,
+      "idImportReciept": 1,
+      "idExportReciept": null,
+      "status": "in-stock",
+      "condition": "new",
+      "purchaseDate": "2025-01-01T00:00:00Z",
+      "sellDate": null
+    },
+    {
+      "imei": "123456789012347",
+      "idProductVersion": 103,
+      "idImportReciept": 2,
+      "idExportReciept": null,
+      "status": "in-stock",
+      "condition": "new",
+      "purchaseDate": "2025-01-02T00:00:00Z",
+      "sellDate": null
+    },
+    {
+      "imei": "123456789012348",
+      "idProductVersion": 104,
+      "idImportReciept": 2,
+      "idExportReciept": null,
+      "status": "in-stock",
+      "condition": "new",
+      "purchaseDate": "2025-01-02T00:00:00Z",
+      "sellDate": null
+    },
+    {
+      "imei": "123456789012349",
+      "idProductVersion": 105,
+      "idImportReciept": 3,
+      "idExportReciept": null,
+      "status": "in-stock",
+      "condition": "new",
+      "purchaseDate": "2025-01-03T00:00:00Z",
+      "sellDate": null
+    },
+    {
+      "imei": "123456789012350",
+      "idProductVersion": 106,
+      "idImportReciept": 3,
+      "idExportReciept": null,
+      "status": "in-stock",
+      "condition": "new",
+      "purchaseDate": "2025-01-03T00:00:00Z",
+      "sellDate": null
+    },
+    {
+      "imei": "123456789012351",
+      "idProductVersion": 102,
+      "idImportReciept": 3,
+      "idExportReciept": null,
+      "status": "in-stock",
+      "condition": "new",
+      "purchaseDate": "2025-01-03T00:00:00Z",
+      "sellDate": null
+    },
+    {
+      "imei": "123456789012352",
+      "idProductVersion": 102,
+      "idImportReciept": 3,
+      "idExportReciept": null,
+      "status": "in-stock",
+      "condition": "new",
+      "purchaseDate": "2025-01-03T00:00:00Z",
+      "sellDate": null
+    }
+  ],
+  "customers": [
+    {
+      "idCustomer": 1,
+      "nameCustomer": "Nguyen Van A",
+      "address": "123 Le Loi, HCM",
+      "numberPhone": "0901234567",
+      "email": "nguyenvana@email.com",
+      "dateOfBirth": "1990-01-15",
+      "gender": "male",
+      "customerType": "regular",
+      "totalPurchases": 5000000,
+      "createdAt": "2025-01-01T00:00:00Z",
+      "status": "active"
+    },
+    {
+      "idCustomer": 2,
+      "nameCustomer": "Tran Thi B",
+      "address": "456 Tran Hung Dao, HN",
+      "numberPhone": "0912345678",
+      "email": "tranthib@email.com",
+      "dateOfBirth": "1995-05-20",
+      "gender": "female",
+      "customerType": "vip",
+      "totalPurchases": 15000000,
+      "createdAt": "2025-01-02T00:00:00Z",
+      "status": "active"
+    }
+  ],
+  "suppliers": [
+    {
+      "idSupplier": 1,
+      "nameSupplier": "Apple Vietnam",
+      "address": "Keangnam Landmark, Ha Noi",
+      "numberPhone": "0243123456",
+      "email": "contact@apple.vn",
+      "contactPerson": "John Smith",
+      "taxCode": "0123456789",
+      "paymentTerms": "30 days",
+      "status": "active",
+      "createdAt": "2025-01-01T00:00:00Z"
+    },
+    {
+      "idSupplier": 2,
+      "nameSupplier": "Samsung Electronics Vietnam",
+      "address": "Samsung Plaza, HCM",
+      "numberPhone": "0283456789",
+      "email": "info@samsung.vn",
+      "contactPerson": "Kim Min Jun",
+      "taxCode": "0987654321",
+      "paymentTerms": "45 days",
+      "status": "active",
+      "createdAt": "2025-01-01T00:00:00Z"
+    }
+  ],
+  "importReceipts": [
+    {
+      "idImportReciept": 1,
+      "idSupplier": 1,
+      "idStaff": 1,
+      "importDate": "2025-01-01T00:00:00Z",
+      "totalCost": 50000000,
+      "status": "completed",
+      "notes": "Nhập hàng đầu năm"
+    },
+    {
+      "idImportReciept": 2,
+      "idSupplier": 2,
+      "idStaff": 2,
+      "importDate": "2025-01-02T00:00:00Z",
+      "totalCost": 30000000,
+      "status": "completed",
+      "notes": "Nhập Samsung S24"
+    },
+    {
+      "idImportReciept": 3,
+      "idSupplier": 1,
+      "idStaff": 1,
+      "importDate": "2025-01-03T00:00:00Z",
+      "totalCost": 25000000,
+      "status": "pending",
+      "notes": "Đang chờ xác nhận"
+    }
+  ],
+  "importReceiptDetails": [
+    {
+      "idImportReciept": 1,
+      "idProductVersion": 101,
+      "quantity": 10,
+      "unitPrice": 20000000,
+      "totalPrice": 200000000
+    },
+    {
+      "idImportReciept": 1,
+      "idProductVersion": 102,
+      "quantity": 5,
+      "unitPrice": 18000000,
+      "totalPrice": 90000000
+    },
+    {
+      "idImportReciept": 2,
+      "idProductVersion": 103,
+      "quantity": 8,
+      "unitPrice": 15000000,
+      "totalPrice": 120000000
+    }
+  ],
+  "exportReceipts": [
+    {
+      "idExportReciept": 1,
+      "idStaff": 1,
+      "idCustomer": 1,
+      "time": "2025-06-01T10:30:00",
+      "status": "completed",
+      "totalCost": 5000000,
+      "paymentMethod": "cash",
+      "discount": 0,
+      "notes": "Thanh toán tiền mặt"
+    },
+    {
+      "idExportReciept": 2,
+      "idStaff": 2,
+      "idCustomer": 2,
+      "time": "2025-06-03T14:00:00",
+      "status": "pending",
+      "totalCost": 3000000,
+      "paymentMethod": "transfer",
+      "discount": 100000,
+      "notes": "Chờ chuyển khoản"
+    },
+    {
+      "idExportReciept": 3,
+      "idStaff": 2,
+      "idCustomer": 2,
+      "time": "2025-06-03T14:00:00",
+      "status": "pending",
+      "totalCost": 3000000,
+      "paymentMethod": "credit",
+      "discount": 0,
+      "notes": "Thanh toán thẻ tín dụng"
+    }
+  ],
+  "exportReceiptDetails": [
+    {
+      "idExportReciept": 1,
+      "idProductVersion": 101,
+      "quantity": 1,
+      "price": 22000000,
+      "imei": "123456789012345"
+    },
+    {
+      "idExportReciept": 1,
+      "idProductVersion": 102,
+      "quantity": 1,
+      "price": 20000000,
+      "imei": "987654321098765"
+    },
+    {
+      "idExportReciept": 2,
+      "idProductVersion": 103,
+      "quantity": 1,
+      "price": 17000000,
+      "imei": "123456789012347"
+    }
+  ]
 }

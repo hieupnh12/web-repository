@@ -18,7 +18,7 @@ public class Staff {
     @GeneratedValue(strategy = GenerationType.UUID)
     String staffId;
     String fullName;
-    Integer gender;
+    Boolean gender;
     @Column(name = "birth_date", nullable = false)
     LocalDate birthDate;
     String phoneNumber;

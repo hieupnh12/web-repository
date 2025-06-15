@@ -3,7 +3,9 @@ package com.app.product_warehourse.controller;
 
 import com.app.product_warehourse.dto.request.AccountCreateRequest;
 import com.app.product_warehourse.dto.request.ApiResponse;
+import com.app.product_warehourse.dto.request.ChangePasswordRequest;
 import com.app.product_warehourse.dto.response.AccountResponse;
+import com.app.product_warehourse.dto.response.StaffResponse;
 import com.app.product_warehourse.service.AccountService;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
@@ -34,6 +36,15 @@ public class AccountController {
                 .result(accountService.getAllAccounts())
                 .build();
     }
+    @PostMapping("/change/{staffId}")
+    public ApiResponse<String> changePassword(@PathVariable String staffId, @RequestBody ChangePasswordRequest request) {
+        accountService.changePassword(request,staffId);
+        String message = "Password changed successfully";
+        return ApiResponse.<String>builder()
+                .result(message)
+                .build();
+    }
+
 
 
 }

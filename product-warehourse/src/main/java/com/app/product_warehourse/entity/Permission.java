@@ -4,6 +4,8 @@ import jakarta.persistence.*;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
 
+import java.util.Set;
+
 @Data
 @Builder
 @NoArgsConstructor
@@ -15,9 +17,11 @@ public class Permission {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     Long permissionId;
     @ManyToOne
+    @JoinColumn(name = "function_id")
     Functions functions;
      boolean canView;
      boolean canCreate;
      boolean canUpdate;
      boolean canDelete;
+
 }

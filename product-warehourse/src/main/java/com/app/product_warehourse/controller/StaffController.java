@@ -44,5 +44,10 @@ public class StaffController {
                 .result(staffService.updateStaff(staffId,request))
                 .build();
     }
-
+    @GetMapping("/myInfo")
+    public ApiResponse<StaffResponse> getAccount() {
+        return ApiResponse.<StaffResponse>builder()
+                .result(staffService.getMyInfo())
+                .build();
+    }
 }
