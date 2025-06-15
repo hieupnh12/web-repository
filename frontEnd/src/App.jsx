@@ -26,8 +26,8 @@ const ProductsPage = lazy(() => import("./pages/Products"));
 // const Storage = lazy(() => import('./pages/Inventory/Storage'));
 // const Customers = lazy(() => import('./pages/Customers/Customers'));
 // const Suppliers = lazy(() => import('./pages/Suppliers/Suppliers'));
-// const Staff = lazy(() => import('./pages/Staff/Staff'));
-// const Account = lazy(() => import('./pages/Account/Account'));
+ const Staff = lazy(() => import('./pages/Staff/Staff'));
+ const Account = lazy(() => import('./pages/Account/Account'));
 
 
 // Optional: 404 Not Found page
@@ -64,8 +64,8 @@ const router = createBrowserRouter(
         <Route path="export" element={<LazyLoader><ExportStock /></LazyLoader>} />
         {/* <Route path="customers" element={<Customers />} /> */}
         {/* <Route path="suppliers" element={<Suppliers />} /> */}
-        {/* <Route path="staff" element={<Staff />} /> */}
-        {/* <Route path="account" element={<Account />} /> */}
+        { <Route path="staff" element={<Staff />} /> }
+        { <Route path="account" element={<Account />} /> }
         {/* <Route path="permissions" element={<Permissions />} /> */}
         {/* <Route path="revenue" element={<Revenue />} /> */}
         <Route path="*" element={<NotFound />} />
