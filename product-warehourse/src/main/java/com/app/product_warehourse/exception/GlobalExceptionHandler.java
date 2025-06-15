@@ -28,6 +28,7 @@ public class GlobalExceptionHandler {
 //        return ResponseEntity.badRequest().body(apiResponse);
 //    }
 
+    // 1. Xử lý AppException (ngoại lệ tự định nghĩa)
     @ExceptionHandler(value = AppException.class)
     ResponseEntity<ApiResponse> handlingRuntimeException(AppException exception) {
         ErrorCode errorCode = exception.getErrorCode();
@@ -39,6 +40,23 @@ public class GlobalExceptionHandler {
                 .body(apiResponse);
     }
 
+
+//    // 4. Xử lý các RuntimeException chưa được phân loại
+//    @ExceptionHandler(RuntimeException.class)
+//    public ResponseEntity<com.app.product_warehourse.dto.response.ApiResponse> handleRuntimeException(RuntimeException e) {
+//        log.error("Lỗi không xác định: ", e);
+//        ErrorCode errorCode = ErrorCode.UNCATEGORIZE_EXCEPTION;
+//        ApiResponse apiResponse = new ApiResponse();
+//        apiResponse.setCode(errorCode.getCode());
+//        apiResponse.setMessage(errorCode.getMessage());
+//        return ResponseEntity
+//                .status(errorCode.getStatusCode())
+//                .body(apiResponse);
+//    }
+//
+
+
+    // 3. Xử lý quyền truy cập bị từ chối
     @ExceptionHandler(value = AccessDeniedException.class)
     ResponseEntity<ApiResponse> handlingAccessDenidedException(AccessDeniedException exception) {
         ErrorCode errorCode = ErrorCode.UNAUTHORIZED;
@@ -49,6 +67,11 @@ public class GlobalExceptionHandler {
                         .build()
         );
     }
+
+
+
+
+
     @ExceptionHandler(value = JsonMappingException.class)
     ResponseEntity<ApiResponse> handlingJsonMappingException(JsonMappingException ex) {
         ErrorCode errorCode = ErrorCode.INVALID_DATE_FORMAT;
@@ -61,6 +84,12 @@ public class GlobalExceptionHandler {
         return ResponseEntity.status(errorCode.getStatusCode()).body(response);
     }
 
+
+
+
+
+
+    // 2. Xử lý lỗi validation (Spring Validator)
     @ExceptionHandler(value = MethodArgumentNotValidException.class)
     ResponseEntity<ApiResponse> handlingRuntimeException(MethodArgumentNotValidException exception) {
 
@@ -91,6 +120,10 @@ public class GlobalExceptionHandler {
                 : errorCode.getMessage());
         return ResponseEntity.badRequest().body(apiResponse);
     }
+
+
+
+
 
     private String mapAttribute(String message, Map<String,Object> attributes) {
         String minvalue = String.valueOf(attributes.get(MIN_ATTRIBUTE));
