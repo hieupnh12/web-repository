@@ -65,7 +65,7 @@ export default function ExportStock() {
         totalPages={totalPages}
         onPageChange={setCurrentPage}
       />
-      <div id="modal-root"></div>
+      
     </>
   );
 }

@@ -46,7 +46,6 @@ public class FunctionService {
         if (name.equals("admin")) {
             return getAllFunctions();
         }
-
         Account account  =  accountRepository.findByUserName(name).orElseThrow(
                 () -> new AppException(ErrorCode.ACCOUNT_NOT_EXIST));
 

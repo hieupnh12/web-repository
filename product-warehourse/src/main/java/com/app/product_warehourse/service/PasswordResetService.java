@@ -26,7 +26,9 @@ import java.util.UUID;
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 @Slf4j
 public class PasswordResetService {
+
     private static final long TOKEN_EXPIRY_SECONDS = 300;
+
     AccountRepository accountRepository;
     StaffRepository staffRepository;
     PasswordResetTokenRepository tokenRepository;
@@ -49,12 +51,17 @@ public class PasswordResetService {
         PasswordResetToken resetToken = PasswordResetToken.builder()
                 .token(token)
                 .account(account)
+
+
                 .expiryTime(LocalDateTime.now().plusSeconds(TOKEN_EXPIRY_SECONDS))
+
                 .build();
         tokenRepository.save(resetToken);
 
         // Tạo liên kết khôi phục
+
         String resetLink = "http://localhost:8080/warehouse/index.html?token=" + token;
+
         emailService.sendPasswordResetEmail(request.getEmail(), resetLink);
     }
 
