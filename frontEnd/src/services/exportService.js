@@ -1,6 +1,6 @@
 import axios from 'axios';
 import BASE_URL from '../api';
-import { GET, POST } from "../constants/httpMethod"
+import { GET } from "../constants/httpMethod"
 
 export const fetchProducts = () => axios.get(`http://localhost:3004/products`);
 export const fetchSuppliers = () => axios.get(`http://localhost:3004/suppliers`);
@@ -51,11 +51,9 @@ export const fetchFullExportReceipts = async () => {
 
 
 // login function
-export const login = () => {
-  const response = BASE_URL[POST]("auth/login");
-
-  return response;
-}
+export const login = (data) => {
+  return axios.post(`http://localhost:8080/warehouse/auth/login`, data);
+};
 
 // api load product in create receipt export
 export const loadProductVerson = () => {
@@ -117,7 +115,9 @@ export const getFullProductVersions = async ({ page = 1, limit = 20, search = ''
         importPrice: pv.importPrice,
         exportPrice: pv.exportPrice,
         stockStatus: imeiList.length > 0 ? imeiList[0].status : 'out-of-stock',
-        itemCount: imeiList.length,
+        itemCount: imeiList.filter((imei) => {
+          return imei.status === "in-stock"
+        }).length,
         imeiList
       };
 
