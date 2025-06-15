@@ -1,6 +1,7 @@
 package com.app.product_warehourse.exception;
 
 import com.app.product_warehourse.dto.request.ApiResponse;
+import com.fasterxml.jackson.databind.JsonMappingException;
 import jakarta.validation.ConstraintViolation;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
@@ -9,6 +10,7 @@ import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 
+import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
 
@@ -18,13 +20,13 @@ import java.util.Objects;
 public class GlobalExceptionHandler {
     private static final String MIN_ATTRIBUTE = "min";
 
-    @ExceptionHandler(value = Exception.class)
-    ResponseEntity<ApiResponse> handlingRuntimeException(RuntimeException exception) {
-        ApiResponse apiResponse = new ApiResponse();
-        apiResponse.setCode(ErrorCode.UNCATEGORIZE_EXCEPTION.getCode());
-        apiResponse.setMessage(ErrorCode.UNCATEGORIZE_EXCEPTION.getMessage());
-        return ResponseEntity.badRequest().body(apiResponse);
-    }
+//    @ExceptionHandler(value = Exception.class)
+//    ResponseEntity<ApiResponse> handlingRuntimeException(RuntimeException exception) {
+//        ApiResponse apiResponse = new ApiResponse();
+//        apiResponse.setCode(ErrorCode.UNCATEGORIZE_EXCEPTION.getCode());
+//        apiResponse.setMessage(ErrorCode.UNCATEGORIZE_EXCEPTION.getMessage());
+//        return ResponseEntity.badRequest().body(apiResponse);
+//    }
 
     @ExceptionHandler(value = AppException.class)
     ResponseEntity<ApiResponse> handlingRuntimeException(AppException exception) {
@@ -47,6 +49,18 @@ public class GlobalExceptionHandler {
                         .build()
         );
     }
+    @ExceptionHandler(value = JsonMappingException.class)
+    ResponseEntity<ApiResponse> handlingJsonMappingException(JsonMappingException ex) {
+        ErrorCode errorCode = ErrorCode.INVALID_DATE_FORMAT;
+        ApiResponse response =  ApiResponse.builder()
+                .code(errorCode.getCode())
+                .message(errorCode.getMessage())
+                .build();
+
+
+        return ResponseEntity.status(errorCode.getStatusCode()).body(response);
+    }
+
     @ExceptionHandler(value = MethodArgumentNotValidException.class)
     ResponseEntity<ApiResponse> handlingRuntimeException(MethodArgumentNotValidException exception) {
 

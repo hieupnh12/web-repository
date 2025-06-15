@@ -44,7 +44,9 @@ public class AccountService {
         try {
             Staff staff = staffRepository.findById(staffId)
                     .orElseThrow(() -> new RuntimeException("Staff not found with id: " + staffId));
-
+            if (accountRepository.existsByUserName(request.getUserName())) {
+                throw new AppException(ErrorCode.ACCOUNT_EXITED);
+            }
             Role role = roleRepository.findById(request.getRoleId())
                     .orElseThrow(() -> new RuntimeException("Role not found with id: " + request.getRoleId()));
 

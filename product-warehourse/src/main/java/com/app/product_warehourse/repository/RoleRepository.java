@@ -11,7 +11,7 @@ import java.util.Optional;
 
 public interface RoleRepository extends JpaRepository<Role, Long> {
     Optional<Role> findByRoleName(String roleName);
-
+    Boolean existsByRoleName(String roleName);
 
     @Query("SELECT new com.app.product_warehourse.dto.response.FunctionResponse(f.functionId, f.functionName) " +
             "FROM Role r " +
