@@ -17,6 +17,9 @@ const Dashboard = lazy(() =>
 );const ExportStock = lazy(() => import("./pages/Inventory/ExportStock"));
 const Export = lazy(() => import("./pages/Inventory/components/Export"));
 const Login = lazy(() => import("./pages/Login/Login"));
+const ForgotPassword = lazy(() => import("./pages/Login/ForgotPassword"));
+const ProductsPage = lazy(() => import("./pages/Products"));
+
 // const ImportStock = lazy(() => import('./pages/Inventory/ImportStock'));
 // const Products = lazy(() => import('./pages/Products/Products'));
 // const Inventory = lazy(() => import('./pages/Inventory/Inventory'));
@@ -39,6 +42,7 @@ const router = createBrowserRouter(
     <>
       <Route path="/">
         <Route index element={<LazyLoader><Login /></LazyLoader>} />
+        <Route path="forgot-password" element={<LazyLoader><ForgotPassword /></LazyLoader>} />
       </Route>
 
       {/* Route cho Manager */}
@@ -53,7 +57,7 @@ const router = createBrowserRouter(
           <Route path="addexport" element={<LazyLoader><Export /></LazyLoader>} />
         </Route>
 
-        {/* <Route path="products" element={<Products />} /> */}
+        <Route path="products" element={<LazyLoader><ProductsPage /></LazyLoader>} />
         {/* <Route path="inventory" element={<Inventory />} /> */}
         {/* <Route path="storage" element={<Storage />} /> */}
         {/* <Route path="import" element={<ImportStock />} /> */}
