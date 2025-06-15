@@ -5,6 +5,7 @@ import com.app.product_warehourse.dto.request.StaffCreateRequest;
 import com.app.product_warehourse.dto.request.StaffUpdateRequest;
 import com.app.product_warehourse.dto.response.StaffResponse;
 import com.app.product_warehourse.service.StaffService;
+import jakarta.validation.Valid;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
@@ -21,7 +22,7 @@ import java.util.List;
 public class StaffController {
     StaffService staffService;
     @PostMapping
-    public ApiResponse<StaffResponse> addStaff(@RequestBody StaffCreateRequest request) {
+    public ApiResponse<StaffResponse> createStaff(@Valid @RequestBody StaffCreateRequest request) {
         return ApiResponse.<StaffResponse>builder()
                 .result(staffService.createStaff(request))
                 .build();
@@ -39,7 +40,7 @@ public class StaffController {
                 .build();
     }
     @PutMapping("/{staffId}")
-    public ApiResponse<StaffResponse> updateStaff(@PathVariable String staffId, @RequestBody StaffUpdateRequest request) {
+    public ApiResponse<StaffResponse> updateStaff(@Valid @PathVariable String staffId, @RequestBody StaffUpdateRequest request) {
         return ApiResponse.<StaffResponse>builder()
                 .result(staffService.updateStaff(staffId,request))
                 .build();

@@ -59,12 +59,12 @@ public class AuthenticationService {
 
     public AuthenticationResponse authenticate(AuthenticationRequest request) {
         Account account = (Account) accountRepository.findByUserName(request.getUsername())
-                .orElseThrow(() -> new AppException(ErrorCode.STAFF_NOT_EXIST));
+                .orElseThrow(() -> new AppException(ErrorCode.ACCOUNT_NOT_EXIST));
 
         boolean authenticated = passwordEncoder.matches(request.getPassword(), account.getPassword());
 
         if (!authenticated)
-            throw new AppException(ErrorCode.UNAUTHENTICATED);
+            throw new AppException(ErrorCode.AUTHENTICATED_PASSWORD);
 
         var token = generateToken(account);
         return   AuthenticationResponse.builder()

@@ -1,5 +1,6 @@
 package com.app.product_warehourse.dto.response;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
 
@@ -14,6 +15,7 @@ public class StaffResponse {
     String staffId;
     String fullName;
     Boolean gender;
+    @JsonFormat(pattern = "dd-MM-yyyy")
     LocalDate birthDate;
     String phoneNumber;
     String email;

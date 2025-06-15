@@ -49,6 +49,7 @@ public class FunctionService {
         Account account  =  accountRepository.findByUserName(name).orElseThrow(
                 () -> new AppException(ErrorCode.ACCOUNT_NOT_EXIST));
 
+
         var role = roleRepository.findById(account.getRole().getRoleId()).orElseThrow(() -> new AppException(ErrorCode.ACCOUNT_NOT_EXIST));
 
 
