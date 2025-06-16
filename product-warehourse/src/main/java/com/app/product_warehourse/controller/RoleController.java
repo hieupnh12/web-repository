@@ -40,7 +40,7 @@ public class RoleController {
                 .result(roleService.getAllRoles())
                 .build();
     }
-    @PostMapping("/{roleId}")
+    @DeleteMapping("/{roleId}")
     public ApiResponse<Void> deleteRole(@PathVariable long roleId) {
       roleService.deleteRoleById(roleId);
         return ApiResponse.<Void>builder().build();

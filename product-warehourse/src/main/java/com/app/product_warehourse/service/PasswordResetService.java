@@ -45,7 +45,11 @@ public class PasswordResetService {
         if (account == null) {
             throw new AppException(ErrorCode.ACCOUNT_NOT_EXIST);
         }
-
+        tokenRepository.findByAccount(account)
+                .filter(PasswordResetToken::isValid)
+                .ifPresent(token -> {
+                    throw new AppException(ErrorCode.TOKEN_STILL_VALID);
+                });
         // Tạo token
         String token = UUID.randomUUID().toString();
         PasswordResetToken resetToken = PasswordResetToken.builder()
@@ -60,7 +64,7 @@ public class PasswordResetService {
 
         // Tạo liên kết khôi phục
 
-        String resetLink = "http://localhost:8080/warehouse/index.html?token=" + token;
+        String resetLink = "http://localhost:3000/forgot-password?token=" + token;
 
         emailService.sendPasswordResetEmail(request.getEmail(), resetLink);
     }

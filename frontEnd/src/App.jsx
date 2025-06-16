@@ -8,6 +8,7 @@ import {
 import LayoutCommon from "./components/layout/Layout";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import LazyLoader from "./components/layout/LazyLoader";
+import Permissions from "./pages/Permission";
 
 // Các page (dùng lazy load)
 const Dashboard = lazy(() =>
@@ -66,7 +67,7 @@ const router = createBrowserRouter(
         {/* <Route path="suppliers" element={<Suppliers />} /> */}
         { <Route path="staff" element={<Staff />} /> }
         { <Route path="account" element={<Account />} /> }
-        {/* <Route path="permissions" element={<Permissions />} /> */}
+        <Route path="permissions" element={<LazyLoader><Permissions /></LazyLoader>} />
         {/* <Route path="revenue" element={<Revenue />} /> */}
         <Route path="*" element={<NotFound />} />
       </Route>
