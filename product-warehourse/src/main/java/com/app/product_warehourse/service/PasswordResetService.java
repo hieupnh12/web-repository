@@ -35,7 +35,7 @@ public class PasswordResetService {
     EmailService emailService;
     PasswordEncoder passwordEncoder;
 
-    public void initiatePasswordReset(ConfirmEmailRequest request) throws AppException {
+    public void initiatePasswordReset(ConfirmEmailRequest request) {
         // Tìm staff bằng email
         Staff staff = staffRepository.findByEmail(request.getEmail())
                 .orElseThrow(() -> new AppException(ErrorCode.NOT_FOUND_EMAIL));
@@ -46,24 +46,31 @@ public class PasswordResetService {
             throw new AppException(ErrorCode.ACCOUNT_NOT_EXIST);
         }
 
-        // Tạo token
+        // Kiểm tra token hiện tại (nếu có)
+        tokenRepository.findByAccount(account).ifPresent(existingToken -> {
+            if (existingToken.isValid()) {
+                // Nếu token còn sống, không cho tạo mới
+                throw new AppException(ErrorCode.TOKEN_STILL_VALID);
+            } else {
+                // Nếu token hết hạn thì xóa
+                tokenRepository.delete(existingToken);
+            }
+        });
+
+        // Tạo token mới
         String token = UUID.randomUUID().toString();
         PasswordResetToken resetToken = PasswordResetToken.builder()
                 .token(token)
                 .account(account)
-
-
                 .expiryTime(LocalDateTime.now().plusSeconds(TOKEN_EXPIRY_SECONDS))
-
                 .build();
         tokenRepository.save(resetToken);
 
-        // Tạo liên kết khôi phục
-
-        String resetLink = "http://localhost:8080/warehouse/index.html?token=" + token;
-
+        // Gửi email chứa liên kết
+        String resetLink = "http://localhost:3000/forgot-password?token=" + token;
         emailService.sendPasswordResetEmail(request.getEmail(), resetLink);
     }
+
 
     public void resetPassword(PasswordResetRequest request) throws AppException {
         // Tìm token
