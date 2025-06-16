@@ -1,15 +1,15 @@
 // src/components/ResetPasswordForm.jsx
-import React, { useState } from 'react';
-import { Mail, ArrowLeft, CheckCircle } from 'lucide-react';
-import { useNavigate } from 'react-router-dom';
-import { takeForgotPass } from '../../services/authService';
+import React, { useState } from "react";
+import { Mail, ArrowLeft, CheckCircle } from "lucide-react";
+import { useNavigate } from "react-router-dom";
+import { takeForgotPass } from "../../services/authService";
 
 export default function ResetPasswordForm() {
-  const [email, setEmail] = useState('');
+  const [email, setEmail] = useState("");
   const [errors, setErrors] = useState({});
   const [isLoading, setIsLoading] = useState(false);
   const [isEmailSent, setIsEmailSent] = useState(false);
-  const [serverError, setServerError] = useState('');
+  const [serverError, setServerError] = useState("");
 
   const validateEmail = (email) => {
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -22,39 +22,37 @@ export default function ResetPasswordForm() {
       setErrors({});
     }
     if (serverError) {
-      setServerError('');
+      setServerError("");
     }
   };
 
   const handleSubmit = async () => {
     setErrors({});
-    setServerError('');
+    setServerError("");
 
     // Validation
     if (!email.trim()) {
-      setErrors({ email: 'Email is required' });
+      setErrors({ email: "Email is required" });
       return;
     }
 
     if (!validateEmail(email)) {
-      setErrors({ email: 'Please enter a valid email address' });
+      setErrors({ email: "Please enter a valid email address" });
       return;
     }
 
     setIsLoading(true);
     try {
       const response = await takeForgotPass({ email: email.trim() });
-      
-      console.log(response);
-      
       if (response && response.status === 200) {
         setIsEmailSent(true);
       } else {
-        const errorMessage = response?.data?.message || response?.error || 'Email address not found in our system';
+        const errorMessage =
+          response?.data?.message || response?.error || "Check in your email";
         setServerError(errorMessage);
       }
     } catch (error) {
-      setServerError('Something went wrong. Please try again.');
+      setServerError(error.response.data.message);
     } finally {
       setIsLoading(false);
     }
@@ -62,11 +60,11 @@ export default function ResetPasswordForm() {
 
   const navigate = useNavigate();
   const handleBackToLogin = () => {
-    setEmail('');
+    setEmail("");
     setErrors({});
-    setServerError('');
+    setServerError("");
     setIsEmailSent(false);
-    navigate('/');
+    navigate("/");
   };
 
   const handleResendEmail = () => {
@@ -90,21 +88,28 @@ export default function ResetPasswordForm() {
                 <p className="text-gray-600">
                   We've sent a password reset link to
                 </p>
-                <p className="text-blue-600 font-medium mt-1">
-                  {email}
-                </p>
+                <p className="text-blue-600 font-medium mt-1">{email}</p>
               </div>
               <div className="mb-6 p-4 bg-blue-50 rounded-lg">
-                <p className="text-sm text-gray-700">
-                  Didn't receive the email? Check your spam folder or 
-                  <button 
-                    onClick={handleResendEmail}
-                    disabled={isLoading}
-                    className="text-blue-600 hover:underline ml-1 font-medium"
-                  >
-                    {isLoading ? 'Sending...' : 'resend email'}
-                  </button>
-                </p>
+                {serverError ? (
+                  <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-md mt-2">
+                    <p className="text-sm text-red-600 flex">
+                      <span className="mr-1">⚠</span>
+                      {serverError}
+                    </p>
+                  </div>
+                ) : (
+                  <p className="text-sm text-gray-700">
+                    Didn't receive the email? Check your spam folder or
+                    <button
+                      onClick={handleResendEmail}
+                      disabled={isLoading}
+                      className="text-blue-600 hover:underline ml-1 font-medium"
+                    >
+                      {isLoading ? "Sending..." : "resend email"}
+                    </button>
+                  </p>
+                )}
               </div>
               <button
                 onClick={handleBackToLogin}
@@ -137,7 +142,8 @@ export default function ResetPasswordForm() {
                 Reset your password
               </h2>
               <p className="text-gray-600 text-sm">
-                Enter your email address and we'll send you a link to reset your password.
+                Enter your email address and we'll send you a link to reset your
+                password.
               </p>
             </div>
             <div className="mb-6">
@@ -159,7 +165,7 @@ export default function ResetPasswordForm() {
                 value={email}
                 onChange={(e) => handleInputChange(e.target.value)}
                 onKeyPress={(e) => {
-                  if (e.key === 'Enter') {
+                  if (e.key === "Enter") {
                     handleSubmit();
                   }
                 }}
