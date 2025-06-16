@@ -3,6 +3,7 @@ import { getFullProducts } from "../../services/productService";
 import Button from "../../components/ui/Button";
 import ProductList from "./ProductList";
 import { Plus, Edit, Trash, Info, Scan, Download, Search } from "lucide-react";
+import AddProductModal from "./modals/AddProductModal"; // Thêm dòng này
 
 const ProductsPage = () => {
   const [products, setProducts] = useState([]);
@@ -12,6 +13,7 @@ const ProductsPage = () => {
     total: 0,
   });
   const [search, setSearch] = useState("");
+  const [showAddModal, setShowAddModal] = useState(false); // Quản lý trạng thái mở modal
 
   const loadData = async () => {
     const { data, pagination: pageInfo } = await getFullProducts({
@@ -36,7 +38,10 @@ const ProductsPage = () => {
           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
             {/* Buttons */}
             <div className="flex flex-wrap gap-2 sm:gap-3 items-center">
-              <Button className="group flex items-center gap-2 bg-blue-600 text-white hover:bg-blue-700 hover:scale-105 transform transition-all duration-300 shadow-lg hover:shadow-xl px-3 py-2 text-sm">
+              <Button
+                onClick={() => setShowAddModal(true)} // Mở modal khi nhấn
+                className="group flex items-center gap-2 bg-blue-600 text-white hover:bg-blue-700 hover:scale-105 transform transition-all duration-300 shadow-lg hover:shadow-xl px-3 py-2 text-sm"
+              >
                 <Plus className="w-4 h-4 group-hover:rotate-90 transition-transform duration-300" />
                 <span className="hidden sm:inline">Thêm mới</span>
               </Button>
@@ -90,6 +95,17 @@ const ProductsPage = () => {
           onPageChange={(p) => setPagination((prev) => ({ ...prev, page: p }))}
         />
       </div>
+
+      {/* Add Product Modal */}
+      {showAddModal && (
+        <AddProductModal
+          onClose={() => setShowAddModal(false)}
+          onSuccess={() => {
+            setShowAddModal(false);
+            loadData(); // Reload danh sách sau khi thêm
+          }}
+        />
+      )}
     </div>
   );
 };

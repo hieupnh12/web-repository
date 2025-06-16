@@ -1,3 +1,5 @@
+
+=======
 server:
   port: 8080
   servlet:
@@ -28,3 +30,4 @@ jwt:
   signerKey: "AHaGZCtFmdGkRWd2X0kdnE7GPkV9dFHP9i0qfSeOU+LkndFFegV9HR5Xdzoqq5T2"
   valid-duration: 36000
   refreshable-duration: 360000
+
