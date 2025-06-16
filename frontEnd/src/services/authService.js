@@ -60,6 +60,18 @@ export const takeFunction = () => {
     return responds;
 }
 
+export const takeForgotPass = (data) => {
+    const responds = BASE_URL[POST]("auth/forgot", data);
+    return responds;
+}
+
+export const takeResetPass = async (data) => {
+    const response = await BASE_URL[POST]('auth/reset', data);
+    
+    return response;
+};
+
+
 /**
  * Lấy data từ cookie và lưu vào redux
  */

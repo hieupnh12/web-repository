@@ -1,10 +1,12 @@
-import React from 'react';
-import { Package } from 'lucide-react';
+import React from "react";
+import { Package } from "lucide-react";
 
 const StatsSection = ({ products }) => {
   const totalProducts = products.length;
   const inStock = products.filter((p) => p.stockQuantity >= 20).length;
-  const lowStock = products.filter((p) => p.stockQuantity < 10 && p.stockQuantity > 0).length;
+  const lowStock = products.filter(
+    (p) => p.stockQuantity > 0 && p.stockQuantity < 10
+  ).length;
   const outOfStock = products.filter((p) => p.stockQuantity === 0).length;
 
   return (

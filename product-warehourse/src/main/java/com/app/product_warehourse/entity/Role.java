@@ -20,7 +20,7 @@ public class Role {
     String description;
     @OneToMany(mappedBy = "role")
     Set<Account> account;
-    @ManyToMany
+    @ManyToMany(cascade = CascadeType.REMOVE)
     @JoinTable(
             name = "role_permissions",
             joinColumns = @JoinColumn(name = "role_id"),

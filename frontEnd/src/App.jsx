@@ -8,6 +8,11 @@ import {
 import LayoutCommon from "./components/layout/Layout";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import LazyLoader from "./components/layout/LazyLoader";
+<<<<<<< HEAD
+// import Permissions from "./pages/Permission";
+=======
+import Permissions from "./pages/Permission";
+>>>>>>> 917924c18e28959f8054423ec609a3e586b2e91c
 
 // Các page (dùng lazy load)
 const Dashboard = lazy(() =>
@@ -17,14 +22,22 @@ const Dashboard = lazy(() =>
 );const ExportStock = lazy(() => import("./pages/Inventory/ExportStock"));
 const Export = lazy(() => import("./pages/Inventory/components/Export"));
 const Login = lazy(() => import("./pages/Login/Login"));
+const ForgotPassword = lazy(() => import("./pages/Login/ForgotPassword"));
+const ProductsPage = lazy(() => import("./pages/Products"));
+
 // const ImportStock = lazy(() => import('./pages/Inventory/ImportStock'));
 // const Products = lazy(() => import('./pages/Products/Products'));
 // const Inventory = lazy(() => import('./pages/Inventory/Inventory'));
 // const Storage = lazy(() => import('./pages/Inventory/Storage'));
 // const Customers = lazy(() => import('./pages/Customers/Customers'));
 // const Suppliers = lazy(() => import('./pages/Suppliers/Suppliers'));
-// const Staff = lazy(() => import('./pages/Staff/Staff'));
-// const Account = lazy(() => import('./pages/Account/Account'));
+<<<<<<< HEAD
+//  const Staff = lazy(() => import('./pages/Staff/Staff'));
+//  const Account = lazy(() => import('./pages/Account/Account'));
+=======
+ const Staff = lazy(() => import('./pages/Staff/Staff'));
+ const Account = lazy(() => import('./pages/Account/Account'));
+>>>>>>> 917924c18e28959f8054423ec609a3e586b2e91c
 
 
 // Optional: 404 Not Found page
@@ -39,6 +52,7 @@ const router = createBrowserRouter(
     <>
       <Route path="/">
         <Route index element={<LazyLoader><Login /></LazyLoader>} />
+        <Route path="forgot-password" element={<LazyLoader><ForgotPassword /></LazyLoader>} />
       </Route>
 
       {/* Route cho Manager */}
@@ -53,16 +67,22 @@ const router = createBrowserRouter(
           <Route path="addexport" element={<LazyLoader><Export /></LazyLoader>} />
         </Route>
 
-        {/* <Route path="products" element={<Products />} /> */}
+        <Route path="products" element={<LazyLoader><ProductsPage /></LazyLoader>} />
         {/* <Route path="inventory" element={<Inventory />} /> */}
         {/* <Route path="storage" element={<Storage />} /> */}
         {/* <Route path="import" element={<ImportStock />} /> */}
         <Route path="export" element={<LazyLoader><ExportStock /></LazyLoader>} />
         {/* <Route path="customers" element={<Customers />} /> */}
         {/* <Route path="suppliers" element={<Suppliers />} /> */}
-        {/* <Route path="staff" element={<Staff />} /> */}
-        {/* <Route path="account" element={<Account />} /> */}
-        {/* <Route path="permissions" element={<Permissions />} /> */}
+<<<<<<< HEAD
+        {/* { <Route path="staff" element={<Staff />} /> }
+        { <Route path="account" element={<Account />} /> }
+        <Route path="permissions" element={<LazyLoader><Permissions /></LazyLoader>} /> */}
+=======
+        { <Route path="staff" element={<Staff />} /> }
+        { <Route path="account" element={<Account />} /> }
+        <Route path="permissions" element={<LazyLoader><Permissions /></LazyLoader>} />
+>>>>>>> 917924c18e28959f8054423ec609a3e586b2e91c
         {/* <Route path="revenue" element={<Revenue />} /> */}
         <Route path="*" element={<NotFound />} />
       </Route>

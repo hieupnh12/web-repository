@@ -1,34 +1,60 @@
 import React, { useEffect, useState } from "react";
-import { getFullProducts } from "../../services/productService";
 import Button from "../../components/ui/Button";
-import ProductList from "./ProductList";
 import { Plus, Edit, Trash, Info, Scan, Download, Search } from "lucide-react";
-import AddProductModal from "./modals/AddProductModal"; // Thêm dòng này
+import TableViewPer from "./TableView";
+import {
+  takeCreateFunction,
+  takeCreateRole,
+  takePermission,
+} from "../../services/permissionService";
+import AddRoleModal from "./AddRoleModal";
 
-const ProductsPage = () => {
-  const [products, setProducts] = useState([]);
-  const [pagination, setPagination] = useState({
-    page: 1,
-    limit: 10,
-    total: 0,
-  });
+const Permissions = () => {
+  const [role, setRole] = useState([]);
   const [search, setSearch] = useState("");
-  const [showAddModal, setShowAddModal] = useState(false); // Quản lý trạng thái mở modal
+  const [loading, setLoading] = useState(true);
+  const [showModal, setShowModal] = useState(false);
 
-  const loadData = async () => {
-    const { data, pagination: pageInfo } = await getFullProducts({
-      page: pagination.page,
-      limit: pagination.limit,
-      search,
-    });
-
-    setProducts(data);
-    setPagination((prev) => ({ ...prev, total: pageInfo.total }));
+  const loadRole = async () => {
+    setLoading(true); // bắt đầu loading
+    try {
+      const info = await takePermission();
+      if (info.status === 200) {
+        setRole(info?.data?.result);
+      }
+    } catch (error) {
+      console.error("Lỗi khi tải quyền:", error);
+    } finally {
+      setLoading(false); // kết thúc loading
+    }
   };
 
   useEffect(() => {
-    loadData();
-  }, [pagination.page, search]);
+    loadRole(); // chạy khi mount
+  }, []);
+
+  const handleCreateRole = async (payload) => {
+    try {
+      console.log("Sending payload:", payload);
+      setShowModal(false);
+      const response = await takeCreateFunction(payload); // Gửi tới API
+
+      if (response?.status === 200 || response?.status === 201) {
+        const maxRoleId =
+          role.length > 0 ? Math.max(...role.map((r) => r.roleId)) : 0;
+        const newRole = {
+          roleId: maxRoleId + 1,
+          roleName: payload.roleName,
+          description: payload.description,
+          permissions: payload.permissions,
+        };
+
+        setRole((prev) => [...prev, newRole]); // thêm trực tiếp vào danh sách
+      }
+    } catch (err) {
+      console.error("Create role failed", err);
+    }
+  };
 
   return (
     <div className="min-h-screen w-full bg-gradient-to-br from-gray-50 to-blue-50 flex flex-col">
@@ -38,13 +64,23 @@ const ProductsPage = () => {
           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
             {/* Buttons */}
             <div className="flex flex-wrap gap-2 sm:gap-3 items-center">
-              <Button
-                onClick={() => setShowAddModal(true)} // Mở modal khi nhấn
-                className="group flex items-center gap-2 bg-blue-600 text-white hover:bg-blue-700 hover:scale-105 transform transition-all duration-300 shadow-lg hover:shadow-xl px-3 py-2 text-sm"
-              >
-                <Plus className="w-4 h-4 group-hover:rotate-90 transition-transform duration-300" />
-                <span className="hidden sm:inline">Thêm mới</span>
-              </Button>
+              <div>
+                <Button
+                  onClick={() => setShowModal(true)}
+                  className="group flex items-center gap-2 bg-blue-600 text-white hover:bg-blue-700 hover:scale-105 transform transition-all duration-300 shadow-lg hover:shadow-xl px-3 py-2 text-sm"
+                >
+                  <Plus className="w-4 h-4 group-hover:rotate-90 transition-transform duration-300" />
+                  <span className="hidden sm:inline">Thêm mới</span>
+                </Button>
+
+                {showModal && (
+                  <AddRoleModal
+                    role={role}
+                    onClose={() => setShowModal(false)}
+                    onSubmit={handleCreateRole}
+                  />
+                )}
+              </div>
 
               <Button className="group flex items-center gap-2 bg-yellow-500 text-white hover:bg-yellow-600 hover:scale-105 transform transition-all duration-300 shadow-lg hover:shadow-xl px-3 py-2 text-sm">
                 <Edit className="w-4 h-4 group-hover:scale-110 transition-transform duration-300" />
@@ -86,28 +122,11 @@ const ProductsPage = () => {
           </div>
         </div>
 
-        {/* Product List */}
-        <ProductList
-          products={products}
-          currentPage={pagination.page}
-          itemsPerPage={pagination.limit}
-          totalItems={pagination.total}
-          onPageChange={(p) => setPagination((prev) => ({ ...prev, page: p }))}
-        />
+        {/* Bảng quyền */}
+        <TableViewPer data={role} search={search} loading={loading} />
       </div>
-
-      {/* Add Product Modal */}
-      {showAddModal && (
-        <AddProductModal
-          onClose={() => setShowAddModal(false)}
-          onSuccess={() => {
-            setShowAddModal(false);
-            loadData(); // Reload danh sách sau khi thêm
-          }}
-        />
-      )}
     </div>
   );
 };
 
-export default ProductsPage;
+export default Permissions;
