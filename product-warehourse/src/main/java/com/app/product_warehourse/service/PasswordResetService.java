@@ -46,6 +46,7 @@ public class PasswordResetService {
             throw new AppException(ErrorCode.ACCOUNT_NOT_EXIST);
         }
 
+
         // Kiểm tra token hiện tại (nếu có)
         tokenRepository.findByAccount(account).ifPresent(existingToken -> {
             if (existingToken.isValid()) {
@@ -65,6 +66,7 @@ public class PasswordResetService {
                 .expiryTime(LocalDateTime.now().plusSeconds(TOKEN_EXPIRY_SECONDS))
                 .build();
         tokenRepository.save(resetToken);
+
 
         // Gửi email chứa liên kết
         String resetLink = "http://localhost:3000/forgot-password?token=" + token;
