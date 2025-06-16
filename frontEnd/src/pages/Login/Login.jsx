@@ -1,10 +1,10 @@
 import React, { useState, useEffect } from "react";
 import { Eye, EyeOff } from "lucide-react";
-import { login, loginV2, loginV3, takeRole } from "../../services/authService";
 import { Link, useNavigate } from "react-router-dom";
 import { useDispatch } from "react-redux";
 import { unwrapResult } from "@reduxjs/toolkit";
 import Cookie from "js-cookie";
+import { loginV2, takeRole } from "../../services/authService";
 
 export default function Login() {
   const [credentials, setCredentials] = useState({
@@ -202,9 +202,7 @@ export default function Login() {
             {/* Forgot Password */}
             <div className="text-right mb-4">
               <Link
-                onClick={(e) => {
-                  e.preventDefault();
-                }}
+              to={"forgot-password"}
                 className="text-sm text-blue-500 hover:underline"
               >
                 Forgot Password?
