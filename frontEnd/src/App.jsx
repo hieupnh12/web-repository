@@ -9,12 +9,17 @@ import LayoutCommon from "./components/layout/Layout";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import LazyLoader from "./components/layout/LazyLoader";
 
+
+
+
+
 // Các page (dùng lazy load)
 const Dashboard = lazy(() =>
   new Promise(resolve =>
     setTimeout(() => resolve(import("./pages/Dashboard/Dashboard")), 600)
   )
-);const ExportStock = lazy(() => import("./pages/Inventory/ExportStock"));
+);
+const ExportStock = lazy(() => import("./pages/Inventory/ExportStock"));
 const Export = lazy(() => import("./pages/Inventory/components/Export"));
 const Login = lazy(() => import("./pages/Login/Login"));
 // const ImportStock = lazy(() => import('./pages/Inventory/ImportStock'));
@@ -23,7 +28,9 @@ const Login = lazy(() => import("./pages/Login/Login"));
 // const Storage = lazy(() => import('./pages/Inventory/Storage'));
 // const Customers = lazy(() => import('./pages/Customers/Customers'));
 // const Suppliers = lazy(() => import('./pages/Suppliers/Suppliers'));
- const Staff = lazy(() => import('./pages/Staff/Staff'));
+ const CreateStaff = lazy(() => import('./pages/Staff/CreatStaff'));
+  const Staff = lazy(() => import('./pages/Staff/Staff'));
+const EditStaff = lazy(() => import('./pages/Staff/EditStaff'));
  const Account = lazy(() => import('./pages/Account/Account'));
 
 
@@ -61,6 +68,8 @@ const router = createBrowserRouter(
         {/* <Route path="customers" element={<Customers />} /> */}
         {/* <Route path="suppliers" element={<Suppliers />} /> */}
         { <Route path="staff" element={<Staff />} /> }
+        <Route path="staff/add" element={<CreateStaff />} />
+        <Route path="staff/edit" element={<EditStaff />} />
         { <Route path="account" element={<Account />} /> }
         {/* <Route path="permissions" element={<Permissions />} /> */}
         {/* <Route path="revenue" element={<Revenue />} /> */}

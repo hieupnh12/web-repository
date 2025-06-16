@@ -1,18 +1,20 @@
 import React, { useState, useEffect } from 'react';
-import { getAllEmployees } from '../../api/employeeApi';
+import { fetchStaffList } from '../../services/staffService';
 
 export default function Accdetails({ onSelect, onClose }) {
   const [search, setSearch] = useState('');
   const [staffList, setStaffList] = useState([]);
 
   useEffect(() => {
-    getAllEmployees()
-      .then((data) => setStaffList(data))
+    fetchStaffList()
+      .then((data) => setStaffList(data.data.result)
+      )
       .catch((error) => console.error('Error fetching staff:', error));
-  }, []);
+    }, []);
+    console.log(staffList);
 
   const filtered = staffList.filter((staff) =>
-    staff.full_name?.toLowerCase().includes(search.toLowerCase())
+    staff.fullName?.toLowerCase().includes(search.toLowerCase())
   );
 
   return (
@@ -46,18 +48,18 @@ export default function Accdetails({ onSelect, onClose }) {
           </thead>
           <tbody>
             {filtered.map((staff) => (
-              <tr
-                key={staff.staff_id}
+              <tr 
+                key={staff.staffId}
                 className="hover:bg-blue-50 cursor-pointer"
                 onClick={() => onSelect(staff)}
               >
-                <td>{staff.staff_id}</td>
-                <td>{staff.full_name}</td>
-                <td>{staff.gender === 1 ? 'Male' : 'Female'}</td>
-                <td>{staff.birth_date}</td>
-                <td>{staff.phone_number}</td>
+                <td>{staff.staffId}</td>
+                <td>{staff.fullName}</td>
+                <td>{staff.gender ? 'Nam' : 'Nữ'}</td>
+                <td>{staff.birthDate}</td>
+                <td>{staff.phoneNumber}</td>
                 <td>{staff.email}</td>
-                <td>{staff.status === 1 ? 'Active' : 'Inactive'}</td>
+                <td>{staff.status === 1 ? '0' : '1'}</td>
               </tr>
             ))}
           </tbody>

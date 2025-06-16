@@ -1,7 +1,8 @@
 import React, { useState, useEffect, startTransition } from 'react';
 import Accdetails from './AccountDetails';
 import CreateAcc from './CreateAcc';
-import { fetchAccounts, createAccount, updateAccount, deleteAccount } from '../../api/accountApi';
+import { createAccount, updateAccount, deleteAccount } from '../../api/accountApi';
+import { fetchAccounts } from '../../services/accountService';
 
 export default function Account() {
   const [accounts, setAccounts] = useState([]);
@@ -20,48 +21,51 @@ export default function Account() {
     try {
       setError(null);
       const response = await fetchAccounts();
-      startTransition(() => {
-        setAccounts(response);
-      });
+      console.log(response);
+      
+      setAccounts(response.data.result);
     } catch (error) {
       console.error('❌ Failed to fetch accounts:', error);
       setError(error.message || 'Failed to fetch accounts.');
-      if (error.message.includes('Unauthenticated')) {
-        window.location.href = '/login';
-      }
     }
   };
 
   useEffect(() => {
-    loadAccounts();
+     loadAccounts();
+    startTransition(() => {
+      loadAccounts();
+    });
   }, []);
 
   const handleSaveAccount = async (newData) => {
-    try {
-      setError(null);
-      const payload = {
-        staffId: newData.staffId,
-        userName: newData.userName,
-        password: newData.password || '',
-        role: { id: parseInt(newData.roleId) },
-        status: newData.status,
-      };
+    startTransition(async () => {
+      try {
+        setError(null);
+        const payload = {
+          userName: newData.userName,
+          roleId: parseInt(newData.roleId),
+        };
+        if (!editMode && newData.password) {
+          payload.password = newData.password;
+        }
 
-      if (editMode) {
-        await updateAccount(newData.staffId, payload);
-      } else {
-        await createAccount(newData.staffId, payload);
+        const staffId = newData.staffId || generateUUID();
+        if (editMode) {
+          await updateAccount(staffId, payload);
+        } else {
+          await createAccount(staffId, payload);
+        }
+        await loadAccounts();
+      } catch (err) {
+        console.error('❌ Failed to save account:', err);
+        setError(err.message || 'Failed to save account.');
       }
-      await loadAccounts();
-    } catch (err) {
-      console.error('❌ Failed to save account:', err);
-      setError(err.message || 'Failed to save account.');
-    }
 
-    setShowCreateAcc(false);
-    setEditMode(false);
-    setSelectedId(null);
-    setEmployeeToCreate(null);
+      setShowCreateAcc(false);
+      setEditMode(false);
+      setSelectedId(null);
+      setEmployeeToCreate(null);
+    });
   };
 
   const handleDelete = async () => {
@@ -70,15 +74,16 @@ export default function Account() {
       return;
     }
     if (window.confirm('Are you sure you want to delete this account?')) {
-      try {
-        setError(null);
-        await deleteAccount(selectedId);
-        await loadAccounts();
-        setSelectedId(null);
-      } catch (error) {
-        console.error('❌ Failed to delete:', error);
-        setError(error.message || 'Failed to delete account.');
-      }
+      startTransition(async () => {
+        try {
+          setError(null);
+          await deleteAccount(selectedId);
+          await loadAccounts();
+        } catch (error) {
+          console.error('❌ Failed to delete:', error);
+          setError(error.message || 'Failed to delete account.');
+        }
+      });
     }
   };
 
@@ -92,26 +97,25 @@ export default function Account() {
   };
 
   const filteredAccounts = accounts.filter((acc) => {
-    const matchRole = filterRole === 'All' || acc.role?.id === parseInt(filterRole);
+    const matchRole = filterRole === 'All' || acc.roleId === parseInt(filterRole);
     const matchSearch =
       acc.userName?.toLowerCase().includes(search.toLowerCase()) ||
       acc.staffId?.toString().toLowerCase().includes(search.toLowerCase());
     return matchRole && matchSearch;
   });
 
+  const generateUUID = () => {
+    return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
+      var r = Math.random() * 16 | 0, v = c === 'x' ? r : (r & 0x3 | 0x8);
+      return v.toString(16);
+    });
+  };
+
   return (
     <div className="p-4">
       {error && (
         <div className="mb-4 p-2 bg-red-100 text-red-700 border border-red-400 rounded">
           {error}
-          {error.includes('Unauthenticated') && (
-            <button
-              className="ml-2 bg-blue-500 hover:bg-blue-600 text-white px-2 py-1 rounded"
-              onClick={() => window.location.href = '/login'}
-            >
-              Go to Login
-            </button>
-          )}
         </div>
       )}
 
@@ -120,7 +124,7 @@ export default function Account() {
           <button
             onClick={() => {
               setEditMode(false);
-              setShowDetails(true);
+              setShowCreateAcc(true);
             }}
             className="bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded font-bold"
           >
@@ -130,7 +134,7 @@ export default function Account() {
             onClick={handleEdit}
             className="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded font-bold"
           >
-            Update
+            Edit
           </button>
           <button
             onClick={handleDelete}
@@ -174,7 +178,7 @@ export default function Account() {
 
           <button
             className="bg-teal-500 hover:bg-teal-600 text-white px-4 py-2 rounded font-bold"
-            onClick={loadAccounts}
+            onClick={() => startTransition(() => loadAccounts())}
           >
             Reload
           </button>
@@ -188,7 +192,6 @@ export default function Account() {
               <th className="px-4 py-2">ID</th>
               <th className="px-4 py-2">Username</th>
               <th className="px-4 py-2">Role</th>
-              <th className="px-4 py-2">Status</th>
             </tr>
           </thead>
           <tbody className="divide-y divide-gray-200">
@@ -202,8 +205,8 @@ export default function Account() {
               >
                 <td className="px-4 py-2">{acc.staffId}</td>
                 <td className="px-4 py-2">{acc.userName}</td>
-                <td className="px-4 py-2">{acc.role?.name || 'N/A'}</td>
-                <td className="px-4 py-2">{acc.status ? 'Active' : 'Inactive'}</td>
+                <td className="px-4 py-2">{acc.roleId}</td>
+               
               </tr>
             ))}
           </tbody>
@@ -226,12 +229,9 @@ export default function Account() {
         <Accdetails
           onSelect={(employee) => {
             setEmployeeToCreate({
-              staffId: employee.id,
+              staffId: employee.id || generateUUID(),
               userName: '',
               roleId: '2',
-              status: true,
-              password: '',
-              staff: employee,
             });
             setShowDetails(false);
             setShowCreateAcc(true);
