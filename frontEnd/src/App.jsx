@@ -8,11 +8,7 @@ import {
 import LayoutCommon from "./components/layout/Layout";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import LazyLoader from "./components/layout/LazyLoader";
-<<<<<<< HEAD
-// import Permissions from "./pages/Permission";
-=======
 import Permissions from "./pages/Permission";
->>>>>>> 917924c18e28959f8054423ec609a3e586b2e91c
 
 // Các page (dùng lazy load)
 const Dashboard = lazy(() =>
@@ -31,13 +27,8 @@ const ProductsPage = lazy(() => import("./pages/Products"));
 // const Storage = lazy(() => import('./pages/Inventory/Storage'));
 // const Customers = lazy(() => import('./pages/Customers/Customers'));
 // const Suppliers = lazy(() => import('./pages/Suppliers/Suppliers'));
-<<<<<<< HEAD
-//  const Staff = lazy(() => import('./pages/Staff/Staff'));
-//  const Account = lazy(() => import('./pages/Account/Account'));
-=======
  const Staff = lazy(() => import('./pages/Staff/Staff'));
  const Account = lazy(() => import('./pages/Account/Account'));
->>>>>>> 917924c18e28959f8054423ec609a3e586b2e91c
 
 
 // Optional: 404 Not Found page
@@ -74,15 +65,9 @@ const router = createBrowserRouter(
         <Route path="export" element={<LazyLoader><ExportStock /></LazyLoader>} />
         {/* <Route path="customers" element={<Customers />} /> */}
         {/* <Route path="suppliers" element={<Suppliers />} /> */}
-<<<<<<< HEAD
-        {/* { <Route path="staff" element={<Staff />} /> }
-        { <Route path="account" element={<Account />} /> }
-        <Route path="permissions" element={<LazyLoader><Permissions /></LazyLoader>} /> */}
-=======
         { <Route path="staff" element={<Staff />} /> }
         { <Route path="account" element={<Account />} /> }
         <Route path="permissions" element={<LazyLoader><Permissions /></LazyLoader>} />
->>>>>>> 917924c18e28959f8054423ec609a3e586b2e91c
         {/* <Route path="revenue" element={<Revenue />} /> */}
         <Route path="*" element={<NotFound />} />
       </Route>
