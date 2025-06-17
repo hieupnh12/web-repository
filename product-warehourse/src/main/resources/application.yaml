@@ -1,3 +1,5 @@
+
+=======
 server:
   port: 8080
   servlet:
@@ -7,7 +9,7 @@ spring:
   datasource:
     url: "jdbc:mysql://mysql-c9616c2-fpt-cfca.f.aivencloud.com:19031/warehouse_phone"
     username: avnadmin
-    
+
   mail:
     host: smtp.gmail.com
     port: 587
@@ -28,3 +30,4 @@ jwt:
   signerKey: "AHaGZCtFmdGkRWd2X0kdnE7GPkV9dFHP9i0qfSeOU+LkndFFegV9HR5Xdzoqq5T2"
   valid-duration: 36000
   refreshable-duration: 360000
+

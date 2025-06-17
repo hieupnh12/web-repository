@@ -1,8 +1,8 @@
 import React, { useState, useMemo } from "react";
 import { Grid, List } from "lucide-react";
 import TableView from "./TableView";
-import CardView from "./CardView";
 import StatsSection from "./StatsSection";
+import CardView from "./CardView";
 
 const ProductList = ({
   products,
@@ -11,17 +11,17 @@ const ProductList = ({
   totalItems,
   onPageChange,
 }) => {
-  const [sortBy, setSortBy] = useState("nameProduct");
+  const [sortBy, setSortBy] = useState("productName");
   const [sortOrder, setSortOrder] = useState("asc");
   const [viewMode, setViewMode] = useState("table");
 
   const filteredAndSortedProducts = useMemo(() => {
-    let filtered = [...products]; // không lọc gì vì đã lọc từ ProductsPage nếu cần
+    let filtered = [...products];
 
     filtered.sort((a, b) => {
       let aValue = a[sortBy] || "";
       let bValue = b[sortBy] || "";
-      if (typeof aValue === "string") {
+      if (typeof aValue === "string" && typeof bValue === "string") {
         aValue = aValue.toLowerCase();
         bValue = bValue.toLowerCase();
       }
@@ -58,11 +58,9 @@ const ProductList = ({
 
   return (
     <div>
-      {/* Stats */}
       <StatsSection products={filteredAndSortedProducts} />
 
-      {/* Product List */}
-      <div className="flex items-center gap-3">
+      <div className="flex items-center gap-3 mb-4">
         <button
           onClick={() => setViewMode(viewMode === "table" ? "card" : "table")}
           className="inline-flex items-center px-3 py-2 bg-blue-600 text-white rounded-xl hover:bg-blue-700 transition-colors duration-200 shadow-lg hover:shadow-xl"
@@ -86,14 +84,9 @@ const ProductList = ({
           sortOrder={sortOrder}
         />
       ) : (
-        <CardView
-          products={paginatedProducts}
-          currentPage={currentPage}
-          itemsPerPage={itemsPerPage}
-        />
+        <CardView products={paginatedProducts} />
       )}
 
-      {/* Pagination */}
       {totalPages > 1 && (
         <div className="flex items-center justify-center mt-8 space-x-2">
           <button
