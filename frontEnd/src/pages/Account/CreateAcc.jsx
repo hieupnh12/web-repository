@@ -58,7 +58,6 @@ export default function CreateAcc({ onClose, onSave, account }) {
     const payload = {
       staffId: form.staffId, // Thêm staffId vào payload
       userName: form.userName,
-      password: form.password,
       role: { id: parseInt(form.roleId) },
       status: form.status ? 1 : 0,
     };
@@ -68,7 +67,9 @@ export default function CreateAcc({ onClose, onSave, account }) {
       if (account) {
         await updateAccount(form.staffId, payload);
       } else {
-        await createAccount(form.staffId, payload);
+        const response = await createAccount(form.staffId, payload);
+        console.log(response);
+        
       }
       onSave(); // Làm mới danh sách
     } catch (err) {
@@ -140,7 +141,7 @@ export default function CreateAcc({ onClose, onSave, account }) {
           <div className="flex gap-2">
             <input
               type="text"
-              value={form.staff?.full_name || ''}
+              value={form.staff?.fullName || ''}
               readOnly
               placeholder="Select employee..."
               className="flex-1 border px-3 py-2 rounded bg-gray-100"

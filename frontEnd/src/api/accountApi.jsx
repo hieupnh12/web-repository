@@ -1,75 +1,91 @@
+import BASE_URL from '../api';
+import { GET, POST } from '../constants/httpMethod';
 import axios from 'axios';
 
-const API_BASE_URL = 'http://localhost:8080/api/account'; // Adjust if backend uses /warehouse/account
-
-// Lấy token từ localStorage
+// Hàm lấy token từ localStorage
 const getAuthToken = () => {
   const token = localStorage.getItem('authToken');
   if (!token) {
-    throw new Error('No authentication token found. Please log in.');
+    console.warn('⚠️ Không tìm thấy token trong localStorage.');
+    return null;
   }
   return token;
 };
 
-// Headers chuẩn
-const getHeaders = () => ({
-  'Content-Type': 'application/json',
-  'Authorization': `Bearer ${getAuthToken()}`,
-});
+// Hàm chuẩn hóa headers có hoặc không có token
+const getHeaders = () => {
+  const token = getAuthToken();
+  return {
+    'Content-Type': 'application/json',
+    ...(token && { 'Authorization': `Bearer ${token}` }),
+  };
+};
 
-// 📌 Lấy danh sách tài khoản
-export const fetchAccounts = async () => {
+// 🔄 Fetch danh sách accounts theo staffId (ID động)
+export const fetchAccounts = async (staffId) => {
+  const token = getAuthToken();
+  if (!token) return [];
+  
+
   try {
-    const response = await axios.get(`${API_BASE_URL}`, {
+    const response = await axios.get(`${BASE_URL}/account/${staffId}`, {
       headers: getHeaders(),
     });
-    console.log('API Response:', response.data); // Debug response structure
-    return response.data?.result || response.data?.data || [];
+    console.log('✅ response.data:', response.data);
+    return response.data.accounts || []; // đảm bảo luôn trả về mảng
   } catch (error) {
-    console.error('Error fetching accounts:', error);
-    const message = error.response?.data?.message || 'Failed to fetch accounts.';
-    if (error.response?.status === 401 || error.response?.status === 403) {
-      throw new Error('Unauthenticated. Please log in.');
-    }
-    throw new Error(message);
+    console.error("❌ Error fetching accounts:", error);
+    return [];
   }
 };
 
-// 📌 Tạo tài khoản mới theo staffId (MaNV)
+// Tạo account
 export const createAccount = async (staffId, payload) => {
   try {
-    const response = await axios.post(`${API_BASE_URL}/${staffId}`, payload, {
+    const token = getAuthToken();
+    if (!token) throw new Error('Authentication token is required to create an account.');
+
+    const response = await BASE_URL[POST](`/account/${staffId}`, payload, {
       headers: getHeaders(),
     });
-    return response.data?.result;
+
+    return response.data?.result || null;
   } catch (error) {
-    console.error('Error creating account:', error);
-    throw error.response?.data?.message || 'Failed to create account.';
+    console.error('❌ Error creating account:', error);
+    throw new Error(error.response?.data?.message || 'Failed to create account.');
   }
 };
 
-// 📌 Cập nhật tài khoản theo staffId
+// Cập nhật account
 export const updateAccount = async (staffId, payload) => {
   try {
-    const response = await axios.put(`${API_BASE_URL}/${staffId}`, payload, {
+    const token = getAuthToken();
+    if (!token) throw new Error('Authentication token is required to update an account.');
+
+    const response = await BASE_URL[POST](`/account/${staffId}`, payload, {
       headers: getHeaders(),
     });
-    return response.data?.result;
+
+    return response.data?.result || null;
   } catch (error) {
-    console.error('Error updating account:', error);
-    throw error.response?.data?.message || 'Failed to update account.';
+    console.error('❌ Error updating account:', error);
+    throw new Error(error.response?.data?.message || 'Failed to update account.');
   }
 };
 
-// 📌 Xoá tài khoản theo staffId
+// Xoá account
 export const deleteAccount = async (staffId) => {
   try {
-    const response = await axios.delete(`${API_BASE_URL}/${staffId}`, {
+    const token = getAuthToken();
+    if (!token) throw new Error('Authentication token is required to delete an account.');
+
+    const response = await axios.delete(`${BASE_URL}/account/${staffId}`, {
       headers: getHeaders(),
     });
+
     return response.data?.message || 'Deleted successfully';
   } catch (error) {
-    console.error('Error deleting account:', error);
-    throw error.response?.data?.message || 'Failed to delete account.';
+    console.error('❌ Error deleting account:', error);
+    throw new Error(error.response?.data?.message || 'Failed to delete account.');
   }
 };
