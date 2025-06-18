@@ -98,7 +98,7 @@ export default function Login() {
       
       if (response.status === 200) {
         const role = await takeRole(response.data.result.token);
-        
+         sessionStorage.setItem("roleName", role.data.result.roleName);
         if (role.data.result.roleName === "ADMIN")
           navigate("/manager/dashboard");
         else navigate("/staff/dashboard");

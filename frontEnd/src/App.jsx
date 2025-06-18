@@ -9,6 +9,7 @@ import LayoutCommon from "./components/layout/Layout";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import LazyLoader from "./components/layout/LazyLoader";
 import Permissions from "./pages/Permission";
+import AuthGuard from "./utils/AuthGuard";
 
 
 
@@ -52,7 +53,7 @@ const router = createBrowserRouter(
         <Route index element={<LazyLoader><Login /></LazyLoader>} />
         <Route path="forgot-password" element={<LazyLoader><ForgotPassword /></LazyLoader>} />
       </Route>
-
+    <Route element={<AuthGuard />}>
       {/* Route cho Manager */}
       <Route path="manager" element={<LayoutCommon />}>
 
@@ -91,6 +92,7 @@ const router = createBrowserRouter(
         {/* <Route path="inventory" element={<Inventory />} /> */}
         {/* <Route path="products" element={<Products />} /> */}
         <Route path="*" element={<NotFound />} />
+      </Route>
       </Route>
     </>
   ),

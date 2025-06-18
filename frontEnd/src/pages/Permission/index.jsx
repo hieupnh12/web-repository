@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import Button from "../../components/ui/Button";
-import { Plus, Edit, Trash, Info, Scan, Download, Search } from "lucide-react";
+import { Plus, Edit, Trash, Info, Search } from "lucide-react";
 import TableViewPer from "./TableView";
 import {
   takeCreateFunction,
@@ -8,12 +8,15 @@ import {
   takePermission,
 } from "../../services/permissionService";
 import AddRoleModal from "./AddRoleModal";
+import PerInfoDetail from "./PerInfoDetail";
 
 const Permissions = () => {
   const [role, setRole] = useState([]);
   const [search, setSearch] = useState("");
   const [loading, setLoading] = useState(true);
   const [showModal, setShowModal] = useState(false);
+  const [selectedRow, setSelectedRow] = useState(null);
+  const [showInfoDetail, setShowInfoDetail] = useState(false);
 
   const loadRole = async () => {
     setLoading(true); // bắt đầu loading
@@ -56,11 +59,23 @@ const Permissions = () => {
     }
   };
 
+  const handleSelectRow = (row) => {
+      try {
+        setSelectedRow(row)
+        setShowInfoDetail(true);
+        console.log(row);
+        
+      } catch (error) {
+        console.error("show info failed", error);
+      }
+      
+  }
+
   return (
     <div className="min-h-screen w-full bg-gradient-to-br from-gray-50 to-blue-50 flex flex-col">
-      <div className="flex-grow w-full px-4 py-6">
+      <div className="flex-grow w-full px-4 p-4">
         {/* Controls */}
-        <div className="bg-white rounded-2xl shadow-lg p-4 sm:p-6 mb-6">
+        <div className="bg-white rounded-2xl shadow-lg p-4 sm:p-6 mb-4">
           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
             {/* Buttons */}
             <div className="flex flex-wrap gap-2 sm:gap-3 items-center">
@@ -81,12 +96,19 @@ const Permissions = () => {
                   />
                 )}
               </div>
-
-              <Button className="group flex items-center gap-2 bg-yellow-500 text-white hover:bg-yellow-600 hover:scale-105 transform transition-all duration-300 shadow-lg hover:shadow-xl px-3 py-2 text-sm">
+                <div>
+              <Button 
+                className="group flex items-center gap-2 bg-yellow-500 text-white hover:bg-yellow-600 hover:scale-105 transform transition-all duration-300 shadow-lg hover:shadow-xl px-3 py-2 text-sm">
                 <Edit className="w-4 h-4 group-hover:scale-110 transition-transform duration-300" />
                 <span className="hidden sm:inline">Sửa</span>
               </Button>
-
+              {showInfoDetail && (
+                <PerInfoDetail 
+                  role={selectedRow}
+                  onClose={() => setShowInfoDetail(false)}
+                />
+              )}
+                </div>
               <Button className="group flex items-center gap-2 bg-red-600 text-white hover:bg-red-700 hover:scale-105 transform transition-all duration-300 shadow-lg hover:shadow-xl px-3 py-2 text-sm">
                 <Trash className="w-4 h-4 group-hover:scale-110 transition-transform duration-300" />
                 <span className="hidden sm:inline">Xoá</span>
@@ -95,16 +117,6 @@ const Permissions = () => {
               <Button className="group flex items-center gap-2 bg-purple-600 text-white hover:bg-purple-700 hover:scale-105 transform transition-all duration-300 shadow-lg hover:shadow-xl px-3 py-2 text-sm">
                 <Info className="w-4 h-4 group-hover:scale-110 transition-transform duration-300" />
                 <span className="hidden sm:inline">Chi tiết</span>
-              </Button>
-
-              <Button className="group flex items-center gap-2 bg-green-500 text-white hover:bg-green-600 hover:scale-105 transform transition-all duration-300 shadow-lg hover:shadow-xl px-3 py-2 text-sm">
-                <Scan className="w-4 h-4 group-hover:scale-110 transition-transform duration-300" />
-                <span className="hidden sm:inline">Quét IMEI</span>
-              </Button>
-
-              <Button className="group flex items-center gap-2 bg-gray-500 text-white hover:bg-gray-600 hover:scale-105 transform transition-all duration-300 shadow-lg hover:shadow-xl px-3 py-2 text-sm">
-                <Download className="w-4 h-4 group-hover:scale-110 transition-transform duration-300" />
-                <span className="hidden sm:inline">Xuất Excel</span>
               </Button>
             </div>
 
@@ -123,7 +135,7 @@ const Permissions = () => {
         </div>
 
         {/* Bảng quyền */}
-        <TableViewPer data={role} search={search} loading={loading} />
+        <TableViewPer data={role} search={search} loading={loading} onSelectRow={handleSelectRow}/>
       </div>
     </div>
   );
