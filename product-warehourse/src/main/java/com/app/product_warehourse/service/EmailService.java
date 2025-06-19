@@ -1,5 +1,7 @@
 package com.app.product_warehourse.service;
 
+import com.app.product_warehourse.exception.AppException;
+import com.app.product_warehourse.exception.ErrorCode;
 import jakarta.mail.MessagingException;
 import jakarta.mail.internet.MimeMessage;
 import lombok.AccessLevel;
@@ -30,7 +32,7 @@ public class EmailService   {
             mailSender.send(message);
         } catch (MessagingException e) {
             log.error("Lỗi khi gửi email đặt lại mật khẩu cho {}: {}", to, e.getMessage());
-            throw new RuntimeException("Không thể gửi email: " + e.getMessage());
+            throw new AppException(ErrorCode.TOKEN_STILL_VALID);
         }
     }
 }

@@ -4,7 +4,6 @@ import jakarta.persistence.*;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
 
-import java.util.Set;
 
 @Data
 @Builder
@@ -23,5 +22,4 @@ public class Permission {
      boolean canCreate;
      boolean canUpdate;
      boolean canDelete;
-
 }

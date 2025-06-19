@@ -39,7 +39,8 @@ public enum ErrorCode {
     ROLE_EXITED(1020, "Role already exited", HttpStatus.CONFLICT),
     AUTHENTICATED_PASSWORD(1021, "Wrong password please enter against", HttpStatus.BAD_REQUEST),
     AUTHENTICATED_PASSWORD_NOT_NULL(1022, "Please enter password", HttpStatus.BAD_REQUEST),
-    AUTHENTICATED_USERNAME_NOT_NULL(1022, "Please enter user name", HttpStatus.BAD_REQUEST),
+    AUTHENTICATED_USERNAME_NOT_NULL(1023, "Please enter user name", HttpStatus.BAD_REQUEST),
+    TOKEN_STILL_VALID(1024, "A valid password reset token already exists. Please check your email.",HttpStatus.BAD_REQUEST),
     ;
 
     ;

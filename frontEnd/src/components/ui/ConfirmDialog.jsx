@@ -23,7 +23,7 @@ export default function ConfirmDialog({ isOpen, title, message, onConfirm, onCan
             className="px-4 py-1 text-sm bg-red-500 text-white rounded hover:bg-red-600"
             disabled={loading}
           >
-            {loading ? 'Deleting...' : 'Yes, cancel'}
+            {loading ? 'Deleting...' : 'Yes'}
           </button>
         </div>
       </div>

@@ -1,6 +1,7 @@
+import { forwardRef, useImperativeHandle } from "react";
 import { useEffect, useState } from "react";
 
-const ProductForm = ({ selected, onAdd }) => {
+const ProductForm = forwardRef(({ selected, onAdd, editProduct, onEditImeis, usedImeis }, ref) => {
   const [formData, setFormData] = useState({
     idProduct: "",
     nameProduct: "",
@@ -11,25 +12,82 @@ const ProductForm = ({ selected, onAdd }) => {
     quantity: "",
   });
   const [isModalOpen, setIsModalOpen] = useState(false); // Trạng thái modal
+  const [products, setProducts] = useState([]); // Lưu danh sách sản phẩm đã chọn option và imei trước đó để cập nhật
+
 
   useEffect(() => {
-    if (selected) {
+    if (editProduct) {
+      // Chọn sản phẩm từ ExportTable (chế độ sửa)
+      const existingProduct = products.find(
+        (p) =>
+          p.idProduct === editProduct.idProduct &&
+          p.idProductVersion === editProduct.idProductVersion
+      );
+      const [color, ram, rom] = editProduct.configuration.split(", ");
       setFormData({
-        idProduct: selected.idProduct || "",
-        nameProduct: selected.nameProduct || "",
-        selectedOption: null,
-        exportPrice: "",
-        stockQuantity: selected.stockQuantity || 0,
-        selectedImeis: [],
-        quantity: "",
+        idProduct: editProduct.idProduct || "",
+        nameProduct: editProduct.nameProduct || "",
+        selectedOption: {
+          idProductVersion: editProduct.idProductVersion,
+          color,
+          ram,
+          rom,
+          exportPrice: editProduct.price,
+          imeiList: editProduct.imeis.map((imei) => ({ imei, status: "in-stock" })),
+        },
+        exportPrice: editProduct.price.toString(),
+        stockQuantity: editProduct.quantity.toString(),
+        selectedImeis: existingProduct ? existingProduct.imeis : editProduct.imeis,
+        quantity: editProduct.quantity.toString(),
       });
+    } else if (selected) {
+      // Chọn sản phẩm từ ProductList
+      const existingProduct = products.find(
+        (p) => p.idProduct === selected.idProduct && p.idProductVersion === selected.idProductVersion        
+      );
+      products.map((data) => console.log("data product", data)
+      )
+
+      console.log(selected);
+      
+      
+      if (existingProduct) {
+        // Nếu đã có cấu hình trước đó
+        const [color, ram, rom] = existingProduct.configuration.split(", ");
+        setFormData({
+          idProduct: existingProduct.idProduct || "",
+          nameProduct: existingProduct.nameProduct || "",
+          selectedOption: {
+            idProductVersion: existingProduct.idProductVersion,
+            color,
+            ram,
+            rom,
+            exportPrice: existingProduct.price,
+            imeiList: existingProduct.imeis.map((imei) => ({ imei, status: "in-stock" })),
+          },
+          exportPrice: existingProduct.price.toString(),
+          stockQuantity: existingProduct.quantity.toString(),
+          selectedImeis: existingProduct.imeis,
+          quantity: existingProduct.quantity.toString(),
+        });
+      } else {
+        // Làm mới form nếu chưa có cấu hình
+        setFormData({
+          idProduct: selected.idProduct || "",
+          nameProduct: selected.nameProduct || "",
+          selectedOption: null,
+          exportPrice: "",
+          stockQuantity: selected.stockQuantity || 0,
+          selectedImeis: [],
+          quantity: "",
+        });
+      }
     }
-  }, [selected]);
+  }, [selected?.idProduct, editProduct, products]);
 
   const handleOptionChange = (e) => {
     const optionId = parseInt(e.target.value);
     const option = selected.options.find((opt) => opt.idProductVersion === optionId);
-      console.log(option?.itemCount);
     setFormData((prev) => ({
       ...prev,
       selectedOption: option,
@@ -61,16 +119,41 @@ const ProductForm = ({ selected, onAdd }) => {
   };
 
   const handleAdd = () => {
-    if (formData.selectedOption && formData?.selectedImeis.length > 0 && formData.quantity === formData.selectedImeis.length) {
-      onAdd({
-        idProduct: formData?.idProduct,
-        nameProduct: formData?.nameProduct,
-        idProductVersion: formData?.selectedOption.idProductVersion,
-        configuration: `${formData?.selectedOption.color}, ${formData.selectedOption.ram}, ${formData.selectedOption.rom}`,
-        price: formData?.selectedOption.exportPrice,
-        imeis: formData?.selectedImeis, // Danh sách IMEI
-        quantity: formData?.quantity,
+
+    if (
+      formData.selectedOption &&
+      formData?.selectedImeis.length > 0 &&
+      parseInt(formData.quantity) >= formData.selectedImeis.length 
+    ) {
+      const newProduct = {
+        idProduct: formData.idProduct,
+        nameProduct: formData.nameProduct,
+        idProductVersion: formData.selectedOption.idProductVersion,
+        configuration: `${formData.selectedOption.color}, ${formData.selectedOption.ram}, ${formData.selectedOption.rom}`,
+        price: parseFloat(formData.selectedOption.exportPrice),
+        imeis: formData.selectedImeis,
+        quantity: parseInt(formData.selectedImeis.length),
+      };
+      // Cập nhật mảng products
+      setProducts((prev) => {
+        
+        const existingIndex = prev.findIndex(
+          (p) =>
+            p.idProduct === newProduct.idProduct &&
+            p.idProductVersion === newProduct.idProductVersion
+        );
+        if (existingIndex !== -1) {
+          const newProducts = [...prev];
+          newProducts[existingIndex] = newProduct;
+          return newProducts;
+        }
+        return [...prev, newProduct];
       });
+
+      console.log(newProduct);
+      
+      onAdd(newProduct);
+      // Làm mới formData
       setFormData({
         idProduct: selected?.idProduct || "",
         nameProduct: selected?.nameProduct || "",
@@ -78,13 +161,67 @@ const ProductForm = ({ selected, onAdd }) => {
         exportPrice: "",
         stockQuantity: selected?.stockQuantity || 0,
         selectedImeis: [],
-        quantity: 1,
+        quantity: "",
       });
     } else {
-      alert("Vui lòng chọn cấu hình, số lượng IMEI phù hợp với số lượng sản phẩm!");
+      alert(
+        `Vui lòng chọn cấu hình và số lượng IMEI phù hợp! ${formData.quantity}`
+      );
     }
   };
 
+  const handleEditImeis = () => {
+    const duplicateImeis = formData.selectedImeis.filter((imei) =>
+      usedImeis.includes(imei) &&
+      !editProduct?.imeis.includes(imei) // Cho phép giữ IMEI của sản phẩm đang sửa
+    );
+    if (
+      formData.selectedOption &&
+      formData.selectedImeis.length > 0 &&
+      duplicateImeis.length === 0
+    ) {
+      const updatedProduct = {
+        ...editProduct,
+        imeis: formData.selectedImeis,
+        quantity: parseInt(formData.quantity),
+      };
+      // Cập nhật mảng products
+      setProducts((prev) => {
+        const existingIndex = prev.findIndex(
+          (p) =>
+            p.idProduct === updatedProduct.idProduct &&
+            p.idProductVersion === updatedProduct.idProductVersion
+        );
+        if (existingIndex !== -1) {
+          const newProducts = [...prev];
+          newProducts[existingIndex] = updatedProduct;
+          return newProducts;
+        }
+        return [...prev, updatedProduct];
+      });
+      onEditImeis(updatedProduct);
+      // Làm mới formData
+      setFormData({
+        idProduct: selected?.idProduct || "",
+        nameProduct: selected?.nameProduct || "",
+        selectedOption: null,
+        exportPrice: "",
+        stockQuantity: selected?.stockQuantity || 0,
+        selectedImeis: [],
+        quantity: "",
+      });
+    } else {
+      alert(
+        duplicateImeis.length > 0
+          ? `IMEI trùng lặp: ${duplicateImeis.join(", ")}`
+          : "Vui lòng chọn số lượng IMEI phù hợp!"
+      );
+    }
+  };
+
+  useImperativeHandle(ref, () => ({
+    handleAdd,handleEditImeis,
+  }));
 
   
   return (
@@ -236,6 +373,6 @@ const ProductForm = ({ selected, onAdd }) => {
       )}
     </div>
   );
-};
+});
 
 export default ProductForm;
