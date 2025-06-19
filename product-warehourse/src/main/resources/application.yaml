@@ -23,8 +23,26 @@ spring:
     hibernate:
       ddl-auto: none
     show-sql: true
+  servlet:
+        multipart:
+          max-file-size: 10MB
+          max-request-size: 10MB
+
+
+
+cloudinary:
+  cloud:
+    name: ImageCloud
+  api:
+    key: 756234473817482
+    secret:  ${API_SECRET}
+#  T5qQXodnthydHuSyQYrF
+
 
 jwt:
   signerKey: "AHaGZCtFmdGkRWd2X0kdnE7GPkV9dFHP9i0qfSeOU+LkndFFegV9HR5Xdzoqq5T2"
   valid-duration: 36000
   refreshable-duration: 360000
+
+
+
