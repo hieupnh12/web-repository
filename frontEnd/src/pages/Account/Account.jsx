@@ -32,9 +32,9 @@ export default function Account() {
 
   useEffect(() => {
      loadAccounts();
-    startTransition(() => {
-      loadAccounts();
-    });
+    // startTransition(() => {
+    //   loadAccounts();
+    // });
   }, []);
 
   const handleSaveAccount = async (newData) => {

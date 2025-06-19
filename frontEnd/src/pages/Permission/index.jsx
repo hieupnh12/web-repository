@@ -60,22 +60,20 @@ const Permissions = () => {
   };
 
   const handleSelectRow = (row) => {
-      try {
-        setSelectedRow(row)
-        setShowInfoDetail(true);
-        console.log(row);
-        
-      } catch (error) {
-        console.error("show info failed", error);
-      }
-      
-  }
+    try {
+      setSelectedRow(row);
+      setShowInfoDetail(true);
+      console.log(row);
+    } catch (error) {
+      console.error("show info failed", error);
+    }
+  };
 
   return (
-    <div className="min-h-screen w-full bg-gradient-to-br from-gray-50 to-blue-50 flex flex-col">
+    <div className="w-full bg-gradient-to-br from-gray-50 to-blue-50 flex flex-col">
       <div className="flex-grow w-full px-4 p-4">
         {/* Controls */}
-        <div className="bg-white rounded-2xl shadow-lg p-4 sm:p-6 mb-4">
+        <div className="bg-white rounded-2xl shadow-lg p-4 sm:p-4 mb-4">
           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
             {/* Buttons */}
             <div className="flex flex-wrap gap-2 sm:gap-3 items-center">
@@ -85,7 +83,7 @@ const Permissions = () => {
                   className="group flex items-center gap-2 bg-blue-600 text-white hover:bg-blue-700 hover:scale-105 transform transition-all duration-300 shadow-lg hover:shadow-xl px-3 py-2 text-sm"
                 >
                   <Plus className="w-4 h-4 group-hover:rotate-90 transition-transform duration-300" />
-                  <span className="hidden sm:inline">Thêm mới</span>
+                  <span className="hidden sm:inline">New Permission</span>
                 </Button>
 
                 {showModal && (
@@ -96,28 +94,15 @@ const Permissions = () => {
                   />
                 )}
               </div>
-                <div>
-              <Button 
-                className="group flex items-center gap-2 bg-yellow-500 text-white hover:bg-yellow-600 hover:scale-105 transform transition-all duration-300 shadow-lg hover:shadow-xl px-3 py-2 text-sm">
-                <Edit className="w-4 h-4 group-hover:scale-110 transition-transform duration-300" />
-                <span className="hidden sm:inline">Sửa</span>
-              </Button>
-              {showInfoDetail && (
-                <PerInfoDetail 
-                  role={selectedRow}
-                  onClose={() => setShowInfoDetail(false)}
-                />
-              )}
-                </div>
-              <Button className="group flex items-center gap-2 bg-red-600 text-white hover:bg-red-700 hover:scale-105 transform transition-all duration-300 shadow-lg hover:shadow-xl px-3 py-2 text-sm">
-                <Trash className="w-4 h-4 group-hover:scale-110 transition-transform duration-300" />
-                <span className="hidden sm:inline">Xoá</span>
-              </Button>
-
-              <Button className="group flex items-center gap-2 bg-purple-600 text-white hover:bg-purple-700 hover:scale-105 transform transition-all duration-300 shadow-lg hover:shadow-xl px-3 py-2 text-sm">
-                <Info className="w-4 h-4 group-hover:scale-110 transition-transform duration-300" />
-                <span className="hidden sm:inline">Chi tiết</span>
-              </Button>
+              <div>
+                {showInfoDetail && (
+                  <PerInfoDetail
+                    role={selectedRow}
+                    data={setRole}
+                    onClose={() => setShowInfoDetail(false)}
+                  />
+                )}
+              </div>
             </div>
 
             {/* Search bar */}
@@ -125,8 +110,8 @@ const Permissions = () => {
               <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
               <input
                 type="text"
-                placeholder="Tìm kiếm sản phẩm..."
-                className="w-full pl-10 pr-4 py-2 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
+                placeholder="Search name permission..."
+                className="text-sm w-full pl-10 pr-4 py-2 border border-blue-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200"
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
               />
@@ -135,7 +120,12 @@ const Permissions = () => {
         </div>
 
         {/* Bảng quyền */}
-        <TableViewPer data={role} search={search} loading={loading} onSelectRow={handleSelectRow}/>
+        <TableViewPer
+          data={role}
+          search={search}
+          loading={loading}
+          onSelectRow={handleSelectRow}
+        />
       </div>
     </div>
   );

@@ -18,6 +18,6 @@ export const takeFunctions = async () => {
 };
 
 export const takeDeleteRole = async (data) => {
-  const response = await BASE_URL[DELETE]("role"); // URL thay theo API của bạn
-  return response.data;
+  const response = await BASE_URL[DELETE](`role/${data}`); // URL thay theo API của bạn
+  return response;
 };

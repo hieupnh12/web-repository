@@ -1,5 +1,6 @@
 import React from "react";
-import { Loader2 } from "lucide-react"; // Icon quay vòng
+import { Loader2, Trash } from "lucide-react"; // Icon quay vòng
+import Button from "../../components/ui/Button";
 
 const TableViewPer = ({ data = [], search = "", loading = false , onSelectRow}) => {
   const filteredData = data.filter((role) =>
@@ -12,7 +13,7 @@ const TableViewPer = ({ data = [], search = "", loading = false , onSelectRow}) 
         <table className="min-w-full text-center">
           <thead className="bg-gradient-to-r from-blue-50 to-indigo-50 sticky top-0 z-10">
             <tr className="w-full">
-              <th className="px-6 py-3 text-xs font-semibold text-gray-700 uppercase">ID</th>
+              <th className="px-6 py-3 text-xs font-semibold text-gray-700 uppercase border-r border-gray-300">ID</th>
               <th className="px-6 py-3 text-xs font-semibold text-gray-700 uppercase">Permission</th>
             </tr>
           </thead>
@@ -25,10 +26,10 @@ const TableViewPer = ({ data = [], search = "", loading = false , onSelectRow}) 
                 </td>
               </tr>
             ) : filteredData.length > 0 ? (
-              filteredData.map((item) => (
-                <tr key={item.roleId} onClick={() => onSelectRow(item)} className="hover:bg-gray-100 transition-colors duration-200">
-                  <td className="px-6 py-3 whitespace-nowrap text-sm text-gray-700">{item.roleId}</td>
-                  <td className="px-6 py-3 whitespace-nowrap text-sm text-gray-800 font-medium">
+              filteredData.map((item, index) => (
+                <tr key={item.roleId} onClick={() => onSelectRow(item)} className="hover:bg-gray-200 transition-colors duration-200 text-center ">
+                  <td className="px-6 py-3 whitespace-nowrap text-sm text-gray-700 w-[30%] border-r border-gray-100">{index + 1}</td>
+                  <td className="px-6 py-3 whitespace-nowrap text-sm text-gray-800 font-medium w-[70%]">
                     {item.roleName}
                   </td>
                 </tr>
