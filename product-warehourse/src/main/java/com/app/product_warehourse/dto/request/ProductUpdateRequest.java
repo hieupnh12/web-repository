@@ -3,6 +3,7 @@ package com.app.product_warehourse.dto.request;
 
 import lombok.*;
 import lombok.experimental.FieldDefaults;
+import org.springframework.web.multipart.MultipartFile;
 
 
 @Data
@@ -12,7 +13,7 @@ import lombok.experimental.FieldDefaults;
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class ProductUpdateRequest {
 
-    private String image;
+    private MultipartFile image;
 
     private Integer origin;
 
