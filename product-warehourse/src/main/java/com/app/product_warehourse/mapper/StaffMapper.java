@@ -11,7 +11,8 @@ import org.mapstruct.MappingTarget;
 @Mapper(componentModel = "spring")
 public interface StaffMapper {
     Staff toStaff (StaffCreateRequest request);
-    StaffResponse toStaffResponse (Staff staff);
+   StaffResponse toStaffResponse (Staff staff);
+
 
     void updateStaff(@MappingTarget Staff staff, StaffUpdateRequest request);
 }

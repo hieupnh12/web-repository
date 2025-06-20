@@ -2,6 +2,7 @@ package com.app.product_warehourse.controller;
 
 import com.app.product_warehourse.dto.request.ApiResponse;
 import com.app.product_warehourse.dto.request.RoleCreateRequest;
+import com.app.product_warehourse.dto.request.RoleUpdateRequest;
 import com.app.product_warehourse.dto.response.RoleResponse;
 import com.app.product_warehourse.entity.Role;
 import com.app.product_warehourse.service.RoleService;
@@ -9,6 +10,7 @@ import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -47,4 +49,18 @@ public class RoleController {
     }
 
 
+    @GetMapping("/details/{roleId}")
+    public ApiResponse<RoleResponse> getRoleById(@PathVariable Long roleId) {
+      return ApiResponse.<RoleResponse>builder()
+              .result(roleService.getRoleById(roleId))
+              .build();
+    }
+
+    @PutMapping("/update/{roleId}")
+    public ApiResponse<RoleResponse> getRoleById(@PathVariable Long roleId, @RequestBody RoleUpdateRequest request) {
+        return ApiResponse.<RoleResponse>builder()
+                .result(roleService.updateRole(roleId,request))
+                .build();
+
+    }
 }

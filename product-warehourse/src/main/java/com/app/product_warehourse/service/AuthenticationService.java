@@ -55,12 +55,14 @@ public class AuthenticationService {
 
     @NonFinal
     @Value("${jwt.refreshable-duration}")
-    protected   Long REFRESHABLE_DURATION;
+    protected  Long REFRESHABLE_DURATION;
 
     public AuthenticationResponse authenticate(AuthenticationRequest request) {
         Account account = (Account) accountRepository.findByUserName(request.getUsername())
                 .orElseThrow(() -> new AppException(ErrorCode.ACCOUNT_NOT_EXIST));
-
+        if (!account.getStatus()) {
+            throw new AppException(ErrorCode.ACCOUNT_INACTIVE);
+        }
         boolean authenticated = passwordEncoder.matches(request.getPassword(), account.getPassword());
 
         if (!authenticated)
@@ -197,7 +199,9 @@ public class AuthenticationService {
         var username = signedJWT.getJWTClaimsSet().getSubject();
         var account = accountRepository.findByUserName(username).orElseThrow(
                 () -> new AppException(ErrorCode.ACCOUNT_NOT_EXIST));
-
+        if (!account.getStatus()) {
+            throw new AppException(ErrorCode.ACCOUNT_INACTIVE);
+        }
         var token = generateToken(account);
         return   AuthenticationResponse.builder()
                 .token(token)

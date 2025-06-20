@@ -14,6 +14,9 @@ import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
+import java.util.stream.Collectors;
+
 @Service
 @RequiredArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
@@ -34,8 +37,14 @@ public class PermissionService {
             permission.setCanDelete(request.isCanDelete());
 
             var pms = permissionRepository.save(permission);
-        return permissionMapper.toPermissionResponse(pms,functions.getFunctionId());
+        //return permissionMapper.toPermissionResponse(pms,functions.getFunctionId());
+        return permissionMapper.toPermissionResponse(pms);
+    }
 
+    public List<PermissionResponse> getAllPermissions() {
+        return permissionRepository.findAll().stream()
+                .map(permissionMapper::toPermissionResponse)
+                .collect(Collectors.toList());
     }
 
 
