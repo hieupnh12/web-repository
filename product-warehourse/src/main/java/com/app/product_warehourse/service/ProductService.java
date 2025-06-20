@@ -9,14 +9,21 @@ import com.app.product_warehourse.mapper.ProductMapper;
 import com.app.product_warehourse.mapper.ProductVersionMapper;
 import com.app.product_warehourse.repository.ProductRepository;
 import com.app.product_warehourse.repository.ProductVersionRepository;
+import com.cloudinary.Cloudinary;
+import com.cloudinary.utils.ObjectUtils;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
 
+
+import java.io.IOException;
 import java.util.List;
+import java.util.Map;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 
@@ -33,37 +40,36 @@ public class ProductService {
     final BrandService brandService;
      final OperatingSystemService operatingSystemService;
      final ProductVersionRepository productVersionRepository;
-    final RamService ramService;
-    final RomService romService;
-     final ProductVersionMapper productVersionMapper;
-    final ColorService colorService;
+    Cloudinary cloudinary;
 
 
-    //sử dụng cách viết thủ công
-    public ProductResponse createProduct(ProductRequest request ) {
 
-        //lấy các id từ bảng
+
+    public ProductResponse createProduct(ProductRequest request) throws IOException {
+        String imageUrl = null;
+        if (request.getImage() != null && !request.getImage().isEmpty()) {
+            imageUrl = uploadImage(null, request.getImage()); // Upload file và lấy URL
+        }
+
         Origin origin = originService.getOriginById(request.getOriginId());
         WarehouseArea wa = warehouseAreaService.getWarehouseAreaById(request.getWarehouseAreaId());
 
-
-        // xu li trang thai hoat dong cua cac
-        if(!wa.isStatus()){
+        if (!wa.isStatus()) {
             throw new AppException(ErrorCode.WAREHOUSE_UNAVAILABLE);
         }
-
 
         Brand br = brandService.GetBrandById(request.getBrandId());
         OperatingSystem os = operatingSystemService.getOSById(request.getOperatingSystemId());
 
-        //xử lí mapper đối với các id  đó với product response
-        Product product = productMapper.toProductWithOrigin(request,origin,os,br,wa);
+        // Tạo Product và gán imageUrl thủ công
+        Product product = productMapper.toProductWithOrigin(request, origin, os, br, wa);
+        if (imageUrl != null) {
+            product.setImage(imageUrl); // Gán URL sau khi upload
+        }
 
-        //lưu dữ liệu vào data
-        productRepository.save(product);
-        return productMapper.toProductResponse(product);
+        Product savedProduct = productRepository.save(product);
+        return productMapper.toProductResponse(savedProduct);
     }
-
 
 
 
@@ -86,12 +92,19 @@ public class ProductService {
 
 
 
-    public ProductResponse updateProduct(Long id, ProductRequest request) {
+    public ProductResponse updateProduct(Long id, ProductRequest request) throws IOException {
         Product product = getProductById(id);
-        product = productMapper.toProduct(request);
-       var savedProduct = productRepository.save(product);
-       return productMapper.toProductResponse(savedProduct);
-     }
+
+        if (request.getImage() != null && !request.getImage().isEmpty()) {
+            String imageUrl = uploadImage(id, request.getImage()); // Upload file mới
+            product.setImage(imageUrl); // Cập nhật URL
+        }
+
+        // Mapper các trường khác, image đã được gán thủ công
+        product = productMapper.toProduct(request); // Giả sử mapper bỏ qua image
+        Product savedProduct = productRepository.save(product);
+        return productMapper.toProductResponse(savedProduct);
+    }
 
 
 
@@ -149,5 +162,52 @@ public class ProductService {
 
 
 
+
+
+
+
+
+    public String uploadImage(Long id ,MultipartFile file) throws IOException {
+
+        //Kiểm tra file
+        if(file.isEmpty() || !isImageFile(file)) {
+            throw new IllegalArgumentException(" Invalid image file");
+        }
+
+        //Upload len Cloudinary
+
+//        Map uploadResult = cloudinary.uploader().upload(file.getBytes(), ObjectUtils.emptyMap());
+
+        // Tạo một Map chứa các tùy chọn để upload ảnh lên Cloudinary
+        Map options = ObjectUtils.asMap(
+                "quality", "auto",              // Tự động tối ưu chất lượng ảnh (giảm dung lượng mà vẫn đẹp)
+                "fetch_format", "auto"                  // Tự động chọn định dạng file phù hợp nhất (WebP, JPEG, PNG, v.v.)
+        );
+
+// Gọi hàm upload ảnh từ Cloudinary, truyền vào:
+// - file.getBytes(): nội dung file ảnh dưới dạng byte[]
+// - options: các tùy chọn upload đã tạo ở trên
+        Map uploadResult = cloudinary.uploader().upload(file.getBytes(), options);
+
+// Lấy URL an toàn (https) của ảnh vừa upload từ kết quả trả về
+        String imageUrl = (String) uploadResult.get("secure_url");
+
+
+
+        //cap nhat san pham
+        Product product = productRepository.findById(id).orElseThrow(()-> new RuntimeException("Product not found"));
+        product.setImage(imageUrl);
+        productRepository.save(product);
+
+        return imageUrl;
+
+    }
+
+
+
+    private boolean isImageFile(MultipartFile file) {
+        String contentType = file.getContentType();
+        return contentType != null && (contentType.equals("image/jpeg") || contentType.equals("image/png"));
+    }
 
 }

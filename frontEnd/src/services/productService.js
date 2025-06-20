@@ -1,52 +1,101 @@
-import axios from "axios";
+import BASE_URL from "../api";
+import { GET, POST, PUT } from "../constants/httpMethod";
 
-const BASE_URL = "http://localhost:3004";
+/**
+ * Chuyển danh sách [{ id, name }] thành map { id: name }
+ */
+const toMap = (arr = []) => {
+  const map = {};
+  arr.forEach((item) => {
+    if (item?.id != null) {
+      map[item.id] = item.name || item.value || "N/A";
+    }
+  });
+  return map;
+};
 
-export const getFullProducts = async ({ page = 1, limit = 10, search = '' } = {}) => {
-  const params = new URLSearchParams({ _page: page, _limit: limit });
-  if (search) params.append('q', search);
+/**
+ * Lấy danh sách sản phẩm đầy đủ (bao gồm các thuộc tính phụ trợ nếu cần)
+ */
+export const getFullProducts = async ({ page = 1, limit = 5, search = '' } = {}) => {
+  const params = new URLSearchParams({ page, limit });
+  if (search) params.append("search", search);
 
-  const [productsRes, versionsRes, itemsRes, colorsRes, ramsRes, romsRes] = await Promise.all([
-    axios.get(`${BASE_URL}/products?${params.toString()}`),
-    axios.get(`${BASE_URL}/productVersions`),
-    axios.get(`${BASE_URL}/productItems`),
-    axios.get(`${BASE_URL}/colors`),
-    axios.get(`${BASE_URL}/rams`),
-    axios.get(`${BASE_URL}/roms`)
+  const [
+    productsRes,
+    colorsRes,
+    ramsRes,
+    romsRes,
+    brandsRes,
+    osRes,
+    originsRes,
+    areaRes,
+    chipsetsRes
+  ] = await Promise.all([
+    BASE_URL[GET](`product?${params.toString()}`),
+    BASE_URL[GET]("color"),
+    BASE_URL[GET]("ram"),
+    BASE_URL[GET]("rom"),
+    BASE_URL[GET]("brand"),
+    BASE_URL[GET]("operatingSystem"),
+    BASE_URL[GET]("origin"),
+    BASE_URL[GET]("warehouseArea"),
+    BASE_URL[GET]("chipset"),
   ]);
 
-  const total = parseInt(productsRes.headers['x-total-count'] || productsRes.data.length);
+  const total = productsRes.data?.totalElements || productsRes.data?.length || 0;
+  const productList = productsRes.data || [];
 
-  const products = productsRes.data.map(product => {
-    const versions = versionsRes.data.filter(v => v.idProduct === product.idProduct).map(v => {
-      const color = colorsRes.data.find(c => c.idColor === v.idColor);
-      const ram = ramsRes.data.find(r => r.idRam === v.idRam);
-      const rom = romsRes.data.find(r => r.idRom === v.idRom);
-      const items = itemsRes.data.filter(i => i.idProductVersion === v.idProductVersion);
-
-      return {
-        ...v,
-        color: color?.nameColor || 'N/A',
-        ram: ram?.ramSize || 'N/A',
-        rom: rom?.romSize || 'N/A',
-        imeiCount: items.length,
-        imeiList: items
-      };
-    });
-
+  const products = productList.map((product) => {
     return {
       ...product,
-      versions
+      image: product.image || null,
+      versions: [], // Nếu cần version sau này có thể xử lý thêm
     };
   });
 
   return {
     data: products,
+    maps: {
+      brandMap: toMap(brandsRes.data),
+      osMap: toMap(osRes.data),
+      originMap: toMap(originsRes.data),
+      areaMap: toMap(areaRes.data),
+      ramMap: toMap(ramsRes.data),
+      romMap: toMap(romsRes.data),
+      colorMap: toMap(colorsRes.data),
+      chipsetMap: toMap(chipsetsRes.data),
+    },
     pagination: {
       total,
       page,
       limit,
-      totalPages: Math.ceil(total / limit)
-    }
+      totalPages: Math.ceil(total / limit),
+    },
   };
+};
+
+/**
+ * Cập nhật thông tin sản phẩm (KHÔNG gửi ảnh, chỉ gửi JSON thuần)
+ */
+export const updateProduct = async (productId, productData) => {
+  return BASE_URL[PUT](`/product/${productId}`, productData, {
+    headers: {
+      "Content-Type": "application/json",
+    },
+  });
+};
+
+/**
+ * Gửi ảnh riêng biệt cho sản phẩm
+ */
+export const uploadProductImage = (productId, imageFile) => {
+  const formData = new FormData();
+  formData.append("image", imageFile);
+
+  return BASE_URL[POST](`/upload_image/${productId}`, formData, {
+    headers: {
+      "Content-Type": "multipart/form-data",
+    },
+  });
 };

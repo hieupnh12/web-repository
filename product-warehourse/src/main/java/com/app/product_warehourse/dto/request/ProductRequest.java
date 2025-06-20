@@ -1,7 +1,10 @@
 package com.app.product_warehourse.dto.request;
 
+import com.app.product_warehourse.entity.Product;
+import com.app.product_warehourse.validation.UniqueName;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 
@@ -11,33 +14,35 @@ import java.util.List;
 @AllArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class ProductRequest {
-    private String productName;
 
-    private String image;
+    @UniqueName(entity = Product.class, fieldName = "productName")
+    String productName;
 
-    private Long originId;
+    MultipartFile image;
 
-    private String processor;
+    Long originId;
 
-    private Integer battery;
+    String processor;
 
-    private Double screenSize;
+     Integer battery;
 
-    private Long operatingSystemId;
+    Double screenSize;
 
-    private Integer chipset;
+    Long operatingSystemId;
 
-    private String rearCamera;
+     Integer chipset;
 
-    private String frontCamera;
+    String rearCamera;
 
-    private Integer warrantyPeriod;
+    String frontCamera;
 
-    private Long  brandId;
+    Integer warrantyPeriod;
 
-    private Long  warehouseAreaId;
+    Long  brandId;
 
-    private Boolean status;
+    Long  warehouseAreaId;
+
+    Boolean status;
 
 
 

@@ -22,7 +22,7 @@ import { takeFunction, takeInfo, takeRole } from "../../services/authService";
 // Static menu list
 const MENU_ITEMS = [
   { id: 4, label: "Sản phẩm", icon: Package, path: "products", color: "text-blue-500" },
-  { id: 1, label: "Thuốc tính", icon: BarChart3, path: "inventory", color: "text-blue-500" },
+  { id: 1, label: "Thuộc tính", icon: BarChart3, path: "inventory", color: "text-blue-500" },
   { id: 2, label: "Khu vực kho", icon: MapPin, path: "storage", color: "text-blue-500" },
   { id: 6, label: "Phiếu nhập", icon: FileText, path: "import", color: "text-blue-500" },
   { id: 7, label: "Phiếu xuất", icon: Send, path: "export", color: "text-blue-500" },

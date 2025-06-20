@@ -11,7 +11,8 @@ public interface ProductMapper {
 
 //    @Mapping(source = "firstname", target = "lastname")     cái này tức là cho dữ liệu của firstname giống với lastname
 //    @Mapping(target = "lastname", ignore = true)       không mapping đối với lastname (tức là không đụng tới nó luôn --> null)
-      Product toProduct (ProductRequest request);
+    @Mapping(target = "image", ignore = true) // Bỏ qua ánh xạ image, xử lý thủ công
+    Product toProduct (ProductRequest request);
 
     @Mapping(source = "origin.name", target = "originName")
     @Mapping(source = "operatingSystem.name", target = "operatingSystemName")
@@ -21,6 +22,7 @@ public interface ProductMapper {
 
 
     // Gọi riêng để xử lý entity
+    @Mapping(target = "image", ignore = true) // Bỏ qua ánh xạ image
     default Product toProductWithOrigin(ProductRequest request, Origin origin , OperatingSystem os , Brand br, WarehouseArea wa ) {
         Product product = toProduct(request);
         product.setOrigin(origin);
