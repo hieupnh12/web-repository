@@ -7,12 +7,11 @@ import org.springframework.http.HttpStatusCode;
 @Getter
 public enum ErrorCode {
 
-    WAREHOUSE_UNAVAILABLE(1016,"Warehouse area is currently unavailable, cannot add product.",HttpStatus.SERVICE_UNAVAILABLE),
-    WAREHOUSE_NOT_EXIST(1013, "Warehouse Not Exist", HttpStatus.NOT_FOUND),
-    WAREHOUSE_INVALID(1015,"Name must be at least 3 characters", HttpStatus.BAD_REQUEST),
-
-    PRODUCT_NOT_EXIST(1016,"Product Not Exist", HttpStatus.NOT_FOUND),
-
+    WAREHOUSE_UNAVAILABLE(2001,"Warehouse area is currently unavailable, cannot add product.",HttpStatus.SERVICE_UNAVAILABLE),
+    WAREHOUSE_NOT_EXIST(2002, "Warehouse Not Exist", HttpStatus.NOT_FOUND),
+    WAREHOUSE_INVALID(2003,"Name must be at least 3 characters", HttpStatus.BAD_REQUEST),
+    PRODUCT_NOT_EXIST(2004,"Product Not Exist", HttpStatus.NOT_FOUND),
+    NAME_ALREADY_EXIST(2005,"Name Exist! ", HttpStatus.CONFLICT),
 
 
 
@@ -41,9 +40,9 @@ public enum ErrorCode {
     AUTHENTICATED_PASSWORD(1021, "Wrong password please enter against", HttpStatus.BAD_REQUEST),
     AUTHENTICATED_PASSWORD_NOT_NULL(1022, "Please enter password", HttpStatus.BAD_REQUEST),
     AUTHENTICATED_USERNAME_NOT_NULL(1023, "Please enter user name", HttpStatus.BAD_REQUEST),
-    TOKEN_STILL_VALID(1024, "A link already send. Please check your email.",HttpStatus.BAD_REQUEST),
-    ;
-
+    TOKEN_STILL_VALID(1024, "A link reset password already send. Please check your email.",HttpStatus.BAD_REQUEST),
+    ACCOUNT_INACTIVE(1025, "Account is inactive.",HttpStatus.BAD_REQUEST),
+    FUNCTION_NOT_EXIST(1026, "Function not exist.",HttpStatus.BAD_REQUEST),
     ;
 
     ErrorCode(int code, String message, HttpStatusCode statusCode) {
