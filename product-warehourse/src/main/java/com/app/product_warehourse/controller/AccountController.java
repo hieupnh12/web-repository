@@ -2,6 +2,7 @@ package com.app.product_warehourse.controller;
 
 
 import com.app.product_warehourse.dto.request.AccountCreateRequest;
+import com.app.product_warehourse.dto.request.AccountUpdateRequest;
 import com.app.product_warehourse.dto.request.ApiResponse;
 import com.app.product_warehourse.dto.request.ChangePasswordRequest;
 import com.app.product_warehourse.dto.response.AccountResponse;
@@ -45,6 +46,12 @@ public class AccountController {
                 .build();
     }
 
+    @PutMapping("/update/{staffId}")
+    public ApiResponse<AccountResponse> updateAccount(@Valid @PathVariable String staffId, @RequestBody AccountUpdateRequest request) {
+        return ApiResponse.<AccountResponse>builder()
+                .result(accountService.updateAccount(staffId,request))
+                .build();
+    }
 
 
 }

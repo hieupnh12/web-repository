@@ -2,6 +2,7 @@ package com.app.product_warehourse.service;
 
 
 import com.app.product_warehourse.dto.request.AccountCreateRequest;
+import com.app.product_warehourse.dto.request.AccountUpdateRequest;
 import com.app.product_warehourse.dto.request.ChangePasswordRequest;
 import com.app.product_warehourse.dto.response.AccountResponse;
 import com.app.product_warehourse.dto.response.RoleResponse;
@@ -19,6 +20,7 @@ import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -73,7 +75,8 @@ public class AccountService {
             throw e;
         }
     }
-    @PreAuthorize("hasRole('ADMIN')")
+     @PreAuthorize("hasRole('ADMIN')")
+    @Cacheable("account")
     public List<AccountResponse> getAllAccounts() {
         return accountRepository.findAll().stream()
                 .map(account -> accountMapper.accountToAccountResponse(account,account.getRole().getRoleId()))
@@ -92,6 +95,15 @@ public class AccountService {
             throw new AppException(ErrorCode.PASSWORD_NOT_MATCH);
         }
     }
+        @PreAuthorize("hasRole('ADMIN')")
+        public AccountResponse updateAccount(String staffId, AccountUpdateRequest request) {
+        var account = accountRepository.findById(staffId)
+                .orElseThrow(() -> new AppException(ErrorCode.ACCOUNT_NOT_EXIST));
+                account.setStatus(request.getStatus());
+                account.setRole(roleRepository.findById(request.getRoleId()).orElseThrow(()-> new AppException(ErrorCode.ROLE_NOT_EXIT)));
+                accountRepository.save(account);
+                return accountMapper.accountToAccountResponse(account,account.getRole().getRoleId());
+        }
 
 
 }

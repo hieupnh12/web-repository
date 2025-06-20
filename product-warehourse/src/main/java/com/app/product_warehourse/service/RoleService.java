@@ -2,6 +2,7 @@ package com.app.product_warehourse.service;
 
 import com.app.product_warehourse.dto.request.PermissionRequest;
 import com.app.product_warehourse.dto.request.RoleCreateRequest;
+import com.app.product_warehourse.dto.request.RoleUpdateRequest;
 import com.app.product_warehourse.dto.response.RoleResponse;
 import com.app.product_warehourse.entity.Account;
 import com.app.product_warehourse.entity.Functions;
@@ -10,6 +11,7 @@ import com.app.product_warehourse.entity.Role;
 import com.app.product_warehourse.exception.AppException;
 import com.app.product_warehourse.exception.ErrorCode;
 import com.app.product_warehourse.mapper.RoleMapper;
+import com.app.product_warehourse.mapper.StaffMapper;
 import com.app.product_warehourse.repository.AccountRepository;
 import com.app.product_warehourse.repository.FunctionRepository;
 import com.app.product_warehourse.repository.PermissionRepository;
@@ -38,6 +40,7 @@ public class RoleService {
     FunctionRepository functionRepository;
     RoleMapper roleMapper;
     AccountRepository accountRepository;
+    private final StaffMapper staffMapper;
 
     @PreAuthorize("hasRole('ADMIN')")
     @Transactional
@@ -77,6 +80,43 @@ public class RoleService {
         var s = roleRepository.save(role);
         return roleMapper.toRoleResponse(s);
     }
+    @Transactional
+    public RoleResponse updateRole(Long roleId, RoleUpdateRequest request) {
+        Role role = roleRepository.findById(roleId)
+                .orElseThrow(() -> new AppException(ErrorCode.ROLE_NOT_EXIT));
+
+        // 1. Cập nhật tên và mô tả
+        role.setRoleName(request.getRoleName());
+        role.setDescription(request.getDescription());
+
+        // 2. Xử lý Permission mới
+        Set<Permission> newPermissions = request.getPermissions().stream()
+                .map(p -> {
+                    Functions function = functionRepository.findById(p.getFunctionId())
+                            .orElseThrow(() -> new AppException(ErrorCode.FUNCTION_NOT_EXIST));
+
+                    return Permission.builder()
+                            .functions(function)
+                            .canView(p.isCanView())
+                            .canCreate(p.isCanCreate())
+                            .canUpdate(p.isCanUpdate())
+                            .canDelete(p.isCanDelete())
+                            .build();
+                })
+                .collect(Collectors.toSet());
+
+        // 3. Save Permission trước
+        newPermissions = new HashSet<>(permissionRepository.saveAll(newPermissions));
+
+        // 4. Gán vào Role
+        role.setPermissions(newPermissions);
+
+        // 5. Lưu lại Role và trả response
+        Role saved = roleRepository.save(role);
+        return roleMapper.toRoleResponse(saved);
+    }
+
+
     @PreAuthorize("hasRole('ADMIN')")
     public List<RoleResponse> getAllRoles() {
         return roleRepository.findAll().stream()
@@ -99,5 +139,11 @@ public class RoleService {
     public void deleteRoleById(Long roleId) {
         roleRepository.deleteById(roleId);
     }
+
+    public RoleResponse getRoleById(Long roleId) {
+        var role = roleRepository.findById(roleId).orElseThrow(() -> new AppException(ErrorCode.ROLE_NOT_EXIT));
+        return roleMapper.toRoleResponse(role);
+    }
+
 
 }
