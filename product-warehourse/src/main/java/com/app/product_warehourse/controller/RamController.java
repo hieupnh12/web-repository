@@ -23,7 +23,7 @@ public class RamController {
     RamService ramService;
 
     @PostMapping
-    public ApiResponse<Ram> createRam(@RequestBody RamRequest request) {
+    public ApiResponse<Ram> createRam(@RequestBody @Valid RamRequest request) {
         ApiResponse<Ram> response = new ApiResponse<>();
         response.setResult(ramService.createRam(request));
         return response;

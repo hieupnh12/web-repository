@@ -1,5 +1,7 @@
 package com.app.product_warehourse.validation;
 
+import com.app.product_warehourse.exception.AppException;
+import com.app.product_warehourse.exception.ErrorCode;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
 import jakarta.validation.ConstraintValidator;
@@ -37,8 +39,12 @@ public class UniqueValidator implements ConstraintValidator<UniqueName, Object> 
         Long count = entityManager.createQuery(jpql, Long.class)
                 .setParameter("value", fieldValue)
                 .getSingleResult();
+        if(count > 0){
+            throw new AppException(ErrorCode.NAME_ALREADY_EXIST);
+        }
 
-        return count == 0;
+
+        return true;
     }
 
 }

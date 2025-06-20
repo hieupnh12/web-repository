@@ -1,6 +1,8 @@
 package com.app.product_warehourse.dto.request;
 
 
+import com.app.product_warehourse.entity.Color;
+import com.app.product_warehourse.validation.UniqueName;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
 
@@ -10,6 +12,8 @@ import lombok.experimental.FieldDefaults;
 @AllArgsConstructor      // Tạo constructor với tất cả các tham số
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class ColorRequest {
+
+    @UniqueName(entity = Color.class, fieldName = "name")
     String name ;
     Boolean status;
 

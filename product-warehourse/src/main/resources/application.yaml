@@ -35,6 +35,7 @@ cloudinary:
     name: ImageCloud
   api:
     key: 756234473817482
+    secret:
     secret: 
 #  T5qQXodnthydHuSyQYrF
 

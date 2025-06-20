@@ -37,7 +37,6 @@ public class ProductUpdateRequest {
 
     private Integer warehouseArea;
 
-    private Integer stockQuantity;
 
     private Boolean status;
 }

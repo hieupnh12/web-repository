@@ -18,7 +18,6 @@ public class ProductRequest {
     @UniqueName(entity = Product.class, fieldName = "productName")
     String productName;
 
-    MultipartFile image;
 
     Long originId;
 

@@ -1,10 +1,13 @@
 package com.app.product_warehourse.mapper;
 
+import com.app.product_warehourse.dto.request.ImageRequest;
 import com.app.product_warehourse.dto.request.ProductRequest;
 import com.app.product_warehourse.dto.response.ProductResponse;
 import com.app.product_warehourse.entity.*;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
+import org.mapstruct.Named;
+import org.springframework.web.multipart.MultipartFile;
 
 @Mapper(componentModel = "spring")
 public interface ProductMapper {
@@ -19,6 +22,25 @@ public interface ProductMapper {
     @Mapping(source = "brand.brandName", target = "brandName")
     @Mapping(source = "warehouseArea.name", target = "warehouseAreaName")
     ProductResponse toProductResponse (Product product);
+
+
+    @Mapping(target = "image", source = "image", qualifiedByName = "multipartFileToString")
+    Product toImageProduct(ImageRequest request);
+
+    @Named("multipartFileToString")
+    default String multipartFileToString(MultipartFile file) {
+        // Bạn xử lý upload file lên Cloudinary hoặc nơi lưu trữ rồi trả về URL
+        // Giả sử bạn upload thành công và lấy được URL:
+        return uploadToCloudinary(file);
+    }
+
+    private static String uploadToCloudinary(MultipartFile file) {
+        // Upload file và trả về URL (chỉ là ví dụ đơn giản)
+        return "https://your-cloud.com/" + file.getOriginalFilename();
+    }
+
+
+
 
 
     // Gọi riêng để xử lý entity
