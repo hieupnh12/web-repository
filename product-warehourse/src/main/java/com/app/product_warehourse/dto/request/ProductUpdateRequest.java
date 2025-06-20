@@ -12,8 +12,6 @@ import lombok.experimental.FieldDefaults;
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class ProductUpdateRequest {
 
-    private String image;
-
     private Integer origin;
 
     private String processor;
@@ -36,7 +34,6 @@ public class ProductUpdateRequest {
 
     private Integer warehouseArea;
 
-    private Integer stockQuantity;
 
     private Boolean status;
 }

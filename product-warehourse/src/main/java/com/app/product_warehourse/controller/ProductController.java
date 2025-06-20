@@ -1,6 +1,7 @@
 package com.app.product_warehourse.controller;
 
 
+import com.app.product_warehourse.dto.request.ImageRequest;
 import com.app.product_warehourse.dto.request.ProductRequest;
 import com.app.product_warehourse.dto.response.ApiResponse;
 import com.app.product_warehourse.dto.response.ImageResponse;
@@ -23,16 +24,23 @@ public class ProductController {
 
          //tao new Product su dung Post
          @PostMapping
-         public ApiResponse<ProductResponse>  addProduct(@RequestBody @Valid ProductRequest request,
-                                           @RequestParam(value = "image", required = false) MultipartFile image) throws IOException {
-            ApiResponse api = new ApiResponse();
-             if (image != null) {
-                 request.setImage(image); // Gán file vào request nếu có
-             }
+         public ApiResponse<ProductResponse>  addProduct(@RequestBody @Valid ProductRequest request) {
+            ApiResponse<ProductResponse> api = new ApiResponse<>();
              ProductResponse response = productService.createProduct(request);
              api.setResult(response);
              return api;
          }
+
+
+         @PostMapping("/{id}")
+         public ApiResponse<ProductResponse> updateImageProduct(@PathVariable("id") Long  id,@RequestParam  ImageRequest request) throws IOException {
+             ApiResponse<ProductResponse> api = new ApiResponse<>();
+             ProductResponse response = productService.createImageProduct(request,id);
+             api.setResult(response);
+             return api;
+         }
+
+
 
 //    @PostMapping
 //    public ApiResponse<ProductResponse> createProductWithVersions(@RequestBody CreateProductWithVersionsRequest request) {
@@ -58,13 +66,8 @@ public class ProductController {
 
 
           @PutMapping("/{idproduct}")
-           ApiResponse<ProductResponse> updateProduct(@PathVariable("idproduct") Long  idproduct, @RequestBody ProductRequest request,
-
-                                                      @RequestParam(value = "image", required = false) MultipartFile image) throws IOException {
-              if (image != null) {
-                  request.setImage(image); // Gán file vào request nếu có
-              }
-             ApiResponse api = new ApiResponse();
+           ApiResponse<ProductResponse> updateProduct(@PathVariable("idproduct") Long  idproduct, @RequestBody ProductRequest request) throws IOException {
+             ApiResponse<ProductResponse> api = new ApiResponse<>();
              api.setResult(productService.updateProduct(idproduct, request));
              return api;
           }

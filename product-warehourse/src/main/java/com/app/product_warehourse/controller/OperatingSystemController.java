@@ -4,6 +4,7 @@ import com.app.product_warehourse.dto.request.OperatingSystemRequest;
 import com.app.product_warehourse.dto.response.OperatingSystemResponse;
 import com.app.product_warehourse.entity.OperatingSystem;
 import com.app.product_warehourse.service.OperatingSystemService;
+import jakarta.validation.Valid;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
@@ -22,7 +23,7 @@ public class OperatingSystemController {
     OperatingSystemService osService;
 
     @PostMapping
-    public OperatingSystem createOS(@RequestBody OperatingSystemRequest request) {
+    public OperatingSystem createOS(@RequestBody @Valid OperatingSystemRequest request) {
         return osService.createOS(request);
     }
 

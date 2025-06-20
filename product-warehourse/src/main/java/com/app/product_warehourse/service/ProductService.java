@@ -1,5 +1,6 @@
 package com.app.product_warehourse.service;
 
+import com.app.product_warehourse.dto.request.ImageRequest;
 import com.app.product_warehourse.dto.request.ProductRequest;
 import com.app.product_warehourse.dto.response.ProductResponse;
 import com.app.product_warehourse.entity.*;
@@ -45,11 +46,7 @@ public class ProductService {
 
 
 
-    public ProductResponse createProduct(ProductRequest request) throws IOException {
-        String imageUrl = null;
-        if (request.getImage() != null && !request.getImage().isEmpty()) {
-            imageUrl = uploadImage(null, request.getImage()); // Upload file và lấy URL
-        }
+    public ProductResponse createProduct(ProductRequest request)  {
 
         Origin origin = originService.getOriginById(request.getOriginId());
         WarehouseArea wa = warehouseAreaService.getWarehouseAreaById(request.getWarehouseAreaId());
@@ -63,14 +60,27 @@ public class ProductService {
 
         // Tạo Product và gán imageUrl thủ công
         Product product = productMapper.toProductWithOrigin(request, origin, os, br, wa);
-        if (imageUrl != null) {
-            product.setImage(imageUrl); // Gán URL sau khi upload
-        }
+
 
         Product savedProduct = productRepository.save(product);
         return productMapper.toProductResponse(savedProduct);
     }
 
+
+
+    public ProductResponse createImageProduct(ImageRequest request, Long id) throws IOException {
+        Product product = getProductById(id);
+        String imageUrl = null;
+        if (request.getImage() != null && !request.getImage().isEmpty()) {
+            imageUrl = uploadImage(null, request.getImage()); // Upload file và lấy URL
+        }
+        if (imageUrl != null) {
+            product.setImage(imageUrl); // Gán URL sau khi upload
+        }
+        product = productMapper.toImageProduct(request);
+        Product savedProduct = productRepository.save(product);
+        return productMapper.toProductResponse(savedProduct);
+    }
 
 
 
@@ -94,12 +104,6 @@ public class ProductService {
 
     public ProductResponse updateProduct(Long id, ProductRequest request) throws IOException {
         Product product = getProductById(id);
-
-        if (request.getImage() != null && !request.getImage().isEmpty()) {
-            String imageUrl = uploadImage(id, request.getImage()); // Upload file mới
-            product.setImage(imageUrl); // Cập nhật URL
-        }
-
         // Mapper các trường khác, image đã được gán thủ công
         product = productMapper.toProduct(request); // Giả sử mapper bỏ qua image
         Product savedProduct = productRepository.save(product);
