@@ -1,7 +1,10 @@
 package com.app.product_warehourse.entity;
 
 
-import jakarta.persistence.*;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.Id;
+import jakarta.persistence.Table;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
 
@@ -10,35 +13,25 @@ import lombok.experimental.FieldDefaults;
 @Data                    // Tự sinh getter, setter, toString, equals, hashCode
 @NoArgsConstructor       // Tạo constructor không tham số (mặc định)
 @AllArgsConstructor      // Tạo constructor với tất cả các tham số
-@Table(name = "product_item") // Đặt tên bảng trong DB là "product"
+@Table(name = "import_details") // Đặt tên bảng trong DB là "product"
 @FieldDefaults(level = AccessLevel.PRIVATE) // Mặc định các biến thành private, không cần khai báo riêng
-public class ProductItem {
+public class ImportReceiptDetail {
+
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name ="item_id")
-    Long item_id;
+    @Column(name ="import_id")
+    String id;
 
-    @Column(name ="imei")
-    String imei;
+    @Column(name ="product_version_id")
+    String productVersionId;
 
-
-    @ManyToOne
-    @JoinColumn(name ="product_version_id")
-    ProductVersion versionId;
-
-    @ManyToOne
-    @JoinColumn(name ="import_id")
-    ImportReceipt import_id;
+    @Column(name ="quantity")
+    Integer quantity;
 
 
-    @ManyToOne
-    @JoinColumn(name ="export_id")
-    ExportReceipt export_id;
+    @Column(name ="unit_price")
+    Integer unitPrice;
 
-    @Column(name ="status")
-    boolean status;
-
-
-
+    @Column(name ="import_type")
+    Boolean type;
 }

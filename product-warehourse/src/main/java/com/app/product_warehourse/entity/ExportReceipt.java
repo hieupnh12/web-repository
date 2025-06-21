@@ -5,40 +5,34 @@ import jakarta.persistence.*;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
 
+import java.time.LocalDateTime;
+
 @Builder                 // Tạo builder pattern giúp tạo đối tượng dễ dàng, linh hoạt
 @Entity                  // Đánh dấu class này là entity, ánh xạ tới bảng trong DB
 @Data                    // Tự sinh getter, setter, toString, equals, hashCode
 @NoArgsConstructor       // Tạo constructor không tham số (mặc định)
 @AllArgsConstructor      // Tạo constructor với tất cả các tham số
-@Table(name = "product_item") // Đặt tên bảng trong DB là "product"
+@Table(name = "export") // Đặt tên bảng trong DB là "product"
 @FieldDefaults(level = AccessLevel.PRIVATE) // Mặc định các biến thành private, không cần khai báo riêng
-public class ProductItem {
-
+public class ExportReceipt {
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name ="item_id")
-    Long item_id;
+    @GeneratedValue(strategy = GenerationType.UUID)
+    @Column(name ="export_id")
+    String export_id;
 
-    @Column(name ="imei")
-    String imei;
+    @Column(name ="export_time")
+    LocalDateTime exportTime;
 
+    @Column(name ="total_amount")
+    Long totalAmount;
 
-    @ManyToOne
-    @JoinColumn(name ="product_version_id")
-    ProductVersion versionId;
+    @Column(name ="creater_id")
+    String staffId;
 
-    @ManyToOne
-    @JoinColumn(name ="import_id")
-    ImportReceipt import_id;
-
-
-    @ManyToOne
-    @JoinColumn(name ="export_id")
-    ExportReceipt export_id;
+    @Column(name ="customer_id")
+    String customerId;
 
     @Column(name ="status")
-    boolean status;
-
-
+    Integer status;
 
 }
