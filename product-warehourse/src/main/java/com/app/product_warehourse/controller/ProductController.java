@@ -3,6 +3,7 @@ package com.app.product_warehourse.controller;
 
 import com.app.product_warehourse.dto.request.ImageRequest;
 import com.app.product_warehourse.dto.request.ProductRequest;
+import com.app.product_warehourse.dto.request.ProductUpdateRequest;
 import com.app.product_warehourse.dto.response.ApiResponse;
 import com.app.product_warehourse.dto.response.ImageResponse;
 import com.app.product_warehourse.dto.response.ProductResponse;
@@ -66,7 +67,8 @@ public class ProductController {
 
 
           @PutMapping("/{idproduct}")
-           ApiResponse<ProductResponse> updateProduct(@PathVariable("idproduct") Long  idproduct, @RequestBody ProductRequest request) throws IOException {
+           ApiResponse<ProductResponse> updateProduct(@PathVariable("idproduct") Long  idproduct, @RequestBody ProductUpdateRequest request)  {
+
              ApiResponse<ProductResponse> api = new ApiResponse<>();
              api.setResult(productService.updateProduct(idproduct, request));
              return api;

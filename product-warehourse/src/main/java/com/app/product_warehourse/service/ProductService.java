@@ -2,6 +2,7 @@ package com.app.product_warehourse.service;
 
 import com.app.product_warehourse.dto.request.ImageRequest;
 import com.app.product_warehourse.dto.request.ProductRequest;
+import com.app.product_warehourse.dto.request.ProductUpdateRequest;
 import com.app.product_warehourse.dto.response.ProductResponse;
 import com.app.product_warehourse.entity.*;
 import com.app.product_warehourse.exception.AppException;
@@ -102,10 +103,24 @@ public class ProductService {
 
 
 
-    public ProductResponse updateProduct(Long id, ProductRequest request) throws IOException {
-        Product product = getProductById(id);
-        // Mapper các trường khác, image đã được gán thủ công
-        product = productMapper.toProduct(request); // Giả sử mapper bỏ qua image
+    public ProductResponse updateProduct(Long id, ProductUpdateRequest request)   {
+        log.info("Nhận được ProductUpdateRequest với originId: {}", request.getOriginId());
+        // Lấy sản phẩm hiện có
+        Product product = getProductById(id); // Đảm bảo lấy sản phẩm với productId = 18
+
+        // Lấy các thực thể liên quan
+        Origin origin = originService.getOriginById(request.getOriginId());
+        WarehouseArea wa = warehouseAreaService.getWarehouseAreaById(request.getWarehouseAreaId());
+        if (!wa.isStatus()) {
+            throw new AppException(ErrorCode.WAREHOUSE_UNAVAILABLE);
+        }
+        Brand br = brandService.GetBrandById(request.getBrandId());
+        OperatingSystem os = operatingSystemService.getOSById(request.getOperatingSystemId());
+
+        // Cập nhật các trường của sản phẩm hiện có
+        productMapper.toProductUpdate(request, product, origin, os, br, wa);
+
+        // Lưu sản phẩm đã cập nhật
         Product savedProduct = productRepository.save(product);
         return productMapper.toProductResponse(savedProduct);
     }
