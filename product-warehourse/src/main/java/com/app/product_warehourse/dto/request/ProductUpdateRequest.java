@@ -12,28 +12,27 @@ import lombok.experimental.FieldDefaults;
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class ProductUpdateRequest {
 
-    private Integer origin;
+    Long originId;
 
-    private String processor;
+    String processor;
 
-    private Integer battery;
+    Integer battery;
 
-    private Double screenSize;
+    Double screenSize;
 
-    private Integer operatingSystem;
+    Long operatingSystemId;
 
-    private Integer chipset;
+    Integer chipset;
 
-    private String rearCamera;
+    String rearCamera;
 
-    private String frontCamera;
+    String frontCamera;
 
-    private Integer warrantyPeriod;
+    Integer warrantyPeriod;
 
-    private Integer brand;
+    Long  brandId;
 
-    private Integer warehouseArea;
+    Long  warehouseAreaId;
 
-
-    private Boolean status;
+    Boolean status;
 }
