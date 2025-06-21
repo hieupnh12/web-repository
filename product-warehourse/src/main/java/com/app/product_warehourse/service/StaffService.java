@@ -15,6 +15,7 @@ import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
@@ -45,11 +46,11 @@ public class StaffService {
     public void deleteStaff(String userId) {
         staffRepository.deleteById(userId);
     }
+    @PreAuthorize("hasRole('ADMIN')")
+   @Cacheable("staffs")
     public List<StaffResponse> getAllStaff() {
-        return staffRepository.findAll()
-                .stream()
-                .map(staffMapper::toStaffResponse)
-                .collect(Collectors.toList());
+        List<StaffResponse> result = staffRepository.findAllStaffResponse();
+        return result;
     }
     @PreAuthorize("hasRole('ADMIN')")
     public StaffResponse updateStaff(String staffId, StaffUpdateRequest request) {

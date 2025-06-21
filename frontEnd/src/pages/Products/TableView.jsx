@@ -1,5 +1,5 @@
 import React from "react";
-import { Package } from "lucide-react";
+import { Package, Edit, Info } from "lucide-react";
 
 const TableView = ({
   products,
@@ -8,6 +8,8 @@ const TableView = ({
   onSort,
   sortBy,
   sortOrder,
+  onEdit,    // callback mở modal sửa
+  onDetail,  // callback mở modal chi tiết
 }) => {
   const getStockStatus = (quantity) => {
     if (quantity === 0)
@@ -95,6 +97,9 @@ const TableView = ({
               <th className="px-6 py-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">
                 Trạng thái
               </th>
+              <th className="px-6 py-4 text-center text-xs font-semibold text-gray-700 uppercase tracking-wider">
+                Hành động
+              </th>
             </tr>
           </thead>
           <tbody className="bg-white divide-y divide-gray-100">
@@ -117,7 +122,6 @@ const TableView = ({
                         <div className="text-sm font-medium text-gray-900">
                           {product.productName}
                         </div>
-                        {/* <div className="text-sm text-gray-500">ID: {product.id}</div> */}
                       </div>
                     </div>
                   </td>
@@ -128,30 +132,39 @@ const TableView = ({
                     <div className="text-xs text-gray-500">cái</div>
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                    {/* Nếu bạn có map từ brandId sang brandName thì dùng brandName */}
                     {product.brandName || product.brandId || "N/A"}
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-600">
-                    {product.operatingSystemName ||
-                      product.operatingSystemId ||
-                      "N/A"}
+                    {product.operatingSystemName || product.operatingSystemId || "N/A"}
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-600">
                     {product.originName || product.originId || "N/A"}
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-600">
-                    {product.warehouseAreaName ||
-                      product.warehouseAreaId ||
-                      "N/A"}
+                    {product.warehouseAreaName || product.warehouseAreaId || "N/A"}
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap">
                     <span
-                      className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
-                        stockInfo.color
-                      }`}
+                      className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${stockInfo.color}`}
                     >
                       {stockInfo.status}
                     </span>
+                  </td>
+                  <td className="px-6 py-4 whitespace-nowrap text-center space-x-2">
+                    <button
+                      onClick={() => onEdit && onEdit(product)}
+                      className="inline-flex items-center px-2 py-1 text-yellow-600 hover:text-yellow-800 rounded-md transition"
+                      title="Sửa"
+                    >
+                      <Edit className="w-4 h-4" />
+                    </button>
+                    <button
+                      onClick={() => onDetail && onDetail(product)}
+                      className="inline-flex items-center px-2 py-1 text-blue-600 hover:text-blue-800 rounded-md transition"
+                      title="Chi tiết"
+                    >
+                      <Info className="w-4 h-4" />
+                    </button>
                   </td>
                 </tr>
               );

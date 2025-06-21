@@ -40,9 +40,10 @@ public enum ErrorCode {
     AUTHENTICATED_PASSWORD(1021, "Wrong password please enter against", HttpStatus.BAD_REQUEST),
     AUTHENTICATED_PASSWORD_NOT_NULL(1022, "Please enter password", HttpStatus.BAD_REQUEST),
     AUTHENTICATED_USERNAME_NOT_NULL(1023, "Please enter user name", HttpStatus.BAD_REQUEST),
-    TOKEN_STILL_VALID(1024, "A valid password reset token already exists. Please check your email.",HttpStatus.BAD_REQUEST),
-    ;
 
+    TOKEN_STILL_VALID(1024, "A link reset password already send. Please check your email.",HttpStatus.BAD_REQUEST),
+    ACCOUNT_INACTIVE(1025, "Account is inactive.",HttpStatus.BAD_REQUEST),
+    FUNCTION_NOT_EXIST(1026, "Function not exist.",HttpStatus.BAD_REQUEST),
     ;
 
     ErrorCode(int code, String message, HttpStatusCode statusCode) {

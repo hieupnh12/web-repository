@@ -16,6 +16,7 @@ public interface PermissionMapper {
     @Mapping(target = "permissionId", ignore = true)
     Permission toPermission(PermissionRequest request, Functions functions);
 
-    PermissionResponse toPermissionResponse(Permission request, Long functionId);
-
+   // PermissionResponse toPermissionResponse(Permission request, Long functionId);
+   @Mapping(source = "functions.functionId", target = "functionId")
+   PermissionResponse toPermissionResponse(Permission request);
 }

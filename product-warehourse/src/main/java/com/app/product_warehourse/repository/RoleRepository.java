@@ -1,7 +1,10 @@
 package com.app.product_warehourse.repository;
 
+import com.app.product_warehourse.dto.request.StaffUpdateRequest;
 import com.app.product_warehourse.dto.response.FunctionResponse;
 import com.app.product_warehourse.entity.Role;
+import com.app.product_warehourse.entity.Staff;
+import org.mapstruct.MappingTarget;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -19,4 +22,5 @@ public interface RoleRepository extends JpaRepository<Role, Long> {
             "JOIN p.functions f " +
             "WHERE r.roleId = :roleId")
     List<FunctionResponse> findFunctionResponsesByRoleId(@Param("roleId") Long roleId);
+
 }
