@@ -38,7 +38,6 @@ export default function Account() {
   }, []);
 
   const handleSaveAccount = async (newData) => {
-    startTransition(async () => {
       try {
         setError(null);
         const payload = {
@@ -65,7 +64,6 @@ export default function Account() {
       setEditMode(false);
       setSelectedId(null);
       setEmployeeToCreate(null);
-    });
   };
 
   const handleDelete = async () => {
@@ -74,7 +72,6 @@ export default function Account() {
       return;
     }
     if (window.confirm('Are you sure you want to delete this account?')) {
-      startTransition(async () => {
         try {
           setError(null);
           await deleteAccount(selectedId);
@@ -83,7 +80,6 @@ export default function Account() {
           console.error('❌ Failed to delete:', error);
           setError(error.message || 'Failed to delete account.');
         }
-      });
     }
   };
 

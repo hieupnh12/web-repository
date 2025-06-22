@@ -71,6 +71,7 @@ const AddRoleModal = ({ onClose, onSubmit }) => {
             <label className="block font-medium mb-1">Tên nhóm quyền</label>
             <input
               value={roleName}
+              required={true}
               onChange={(e) => setRoleName(e.target.value)}
               className="w-full border rounded-md p-2"
               placeholder="Nhập tên nhóm quyền"

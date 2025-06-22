@@ -1,5 +1,5 @@
 import BASE_URL from "../api";
-import { DELETE, GET, POST } from "../constants/httpMethod";
+import { DELETE, GET, POST, PUT } from "../constants/httpMethod";
 
 
 export const takePermission = () => {
@@ -19,5 +19,63 @@ export const takeFunctions = async () => {
 
 export const takeDeleteRole = async (data) => {
   const response = await BASE_URL[DELETE](`role/${data}`); // URL thay theo API của bạn
+  return response;
+};
+
+// hiển thị thông tin function (crud) với mỗi role Id
+export const takeInfoEachRole = async (roleId) => {  
+  try {
+    const [functionInfoRes, roleInfoRes] = await Promise.all([
+      BASE_URL[GET]("function"),
+      BASE_URL[GET](`role/details/${roleId}`)
+    ]);
+
+    const functionInfo = functionInfoRes.data.result;
+    const permissions = roleInfoRes.data.result.permissions;
+    console.log(roleInfoRes);
+    
+    // Tạo map từ permissions
+    const permissionsMap = new Map();
+    permissions.forEach((perm) => {
+      permissionsMap.set(perm.functionId, perm);
+    });
+
+    // Duyệt tất cả functionInfo (luôn đủ 12 cái nếu API đúng)
+    const mergedData = functionInfo.map((func) => {
+      const perm = permissionsMap.get(func.functionId) || {
+        functionId: func.functionId,
+        canView: false,
+        canCreate: false,
+        canUpdate: false,
+        canDelete: false,
+      };
+
+      return {
+        functionId: func.functionId,
+        functionName: func.functionName,
+        canView: perm.canView,
+        canCreate: perm.canCreate,
+        canUpdate: perm.canUpdate,
+        canDelete: perm.canDelete,
+      };
+    });
+
+    return {
+      code: 1000,
+      result: mergedData,
+    };
+  } catch (error) {
+    console.error("❌ Failed to fetch role or function info:", error);
+    return {
+      code: 500,
+      result: [],
+      message: "Lỗi hệ thống",
+    };
+  }
+};
+
+// Chọn quyền truy cập các chức năng rồi update
+export const takeUpdateRole = async (roleId ,data) => {
+  const response = await BASE_URL[PUT](`role/update/${roleId}`, data); // URL thay theo API của bạn
   return response;
 };

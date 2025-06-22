@@ -38,15 +38,14 @@ const Permissions = () => {
 
   const handleCreateRole = async (payload) => {
     try {
-      console.log("Sending payload:", payload);
+      // console.log("Sending payload:", payload);
       setShowModal(false);
       const response = await takeCreateFunction(payload); // Gửi tới API
-
+      
       if (response?.status === 200 || response?.status === 201) {
-        const maxRoleId =
-          role.length > 0 ? Math.max(...role.map((r) => r.roleId)) : 0;
+      
         const newRole = {
-          roleId: maxRoleId + 1,
+          roleId: response.data.result.roleId,
           roleName: payload.roleName,
           description: payload.description,
           permissions: payload.permissions,

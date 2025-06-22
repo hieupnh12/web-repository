@@ -12,7 +12,7 @@ const ProductList = ({ products, onSelect, onSearch }) => {
     product.nameProduct.toLowerCase().includes(searchText.toLowerCase())
   );
 
-  console.log("check product", products);
+  // console.log("check product", onSelect);
   
   return (
     <div className="md:w-1/2">

@@ -3,11 +3,13 @@ import { X, Loader2, Trash, Edit } from "lucide-react";
 import Button from "../../components/ui/Button";
 import {
   takeDeleteRole,
-  takeFunctions,
+  takeInfoEachRole,
+  takeUpdateRole,
 } from "../../services/permissionService";
 import ConfirmDialog from "../../components/ui/ConfirmDialog";
 
 const PerInfoDetail = ({ onClose, role, data }) => {
+
   // Lưu các chức năng per(crud)
   const [functions, setFunctions] = useState([]);
   // load khi mới đầu vô
@@ -21,34 +23,38 @@ const PerInfoDetail = ({ onClose, role, data }) => {
   const [isEditing, setIsEditing] = useState(false);
   const [showConfirmUpdate, setShowConfirmUpdate] = useState(false);
 
+  console.log(role);
+  
   useEffect(() => {
-    const loadRole = async () => {
+    const loadFunctionEachRole = async () => {
       setLoading(true);
-      try {
-        const info = await takeFunctions();
+      console.log(role.roleId);
 
+      try {
+        const info = await takeInfoEachRole(role.roleId);
         if (info.code === 1000 && info?.result) {
           const result = info.result;
+          console.log(result);
 
           setFunctions(result);
           // Cập nhật permissions tương ứng
           const initialPermissions = result.map((fn) => ({
             functionId: fn.functionId,
-            canView: false,
-            canCreate: false,
-            canUpdate: false,
-            canDelete: false,
+            canView: fn.canView,
+            canCreate: fn.canCreate,
+            canUpdate: fn.canUpdate,
+            canDelete: fn.canDelete,
           }));
           setPermissions(initialPermissions);
         }
       } catch (error) {
-        console.error("Lỗi khi tải chức năng:", error);
+        console.error("Lỗi khi lấy quyền từng chức năng:", error);
       } finally {
         setLoading(false);
       }
     };
 
-    loadRole();
+    loadFunctionEachRole();
   }, []);
 
   const handleCheckboxChange = (funcId, field) => {
@@ -80,32 +86,48 @@ const PerInfoDetail = ({ onClose, role, data }) => {
 
   // api Update
   const handleUpdate = async () => {
-    const payload = {
-      roleName: role.roleName,
-      description,
-      permissions,
-    };
-    // đóng thông báo confirm
-    setShowConfirm(false);
-    setLoadingV2(true);
-    try {
-      // api
-      const response = ""; // = await takeUpdateRole(role.roleId, payload);
-
-      if (response.status === 200) {
-        setLoadingV2(false);
-        // đóng nguyên cái bảng quyền
-
-        setIsEditing(false);
-        onClose();
-      }
-    } catch (error) {
-      console.error("Lỗi khi cập nhật quyền:", error);
-    }
+  const payload = {
+    roleName: role.roleName,
+    description,
+    permissions,
   };
+  setShowConfirmUpdate(false);
+  setLoadingV2(true);
+  try {
+    const response = await takeUpdateRole(role.roleId, payload);
+
+    if (response.status === 200) {
+      setLoadingV2(false);
+      setIsEditing(false);
+
+      // Cập nhật danh sách nếu cần
+      data((prev) =>
+        prev.map((item) =>
+          item.roleId === role.roleId
+            ? { ...item, description, permissions }
+            : item
+        )
+      );
+
+      onClose(); // Đóng modal
+    }
+  } catch (error) {
+    console.error("Lỗi khi cập nhật quyền:", error);
+    setLoadingV2(false);
+  }
+};
+
   return (
     <div className="fixed inset-0 bg-black bg-opacity-30 flex justify-center items-center z-50">
       <div className="bg-white rounded-xl w-[90%] max-w-4xl p-6 shadow-2xl relative">
+         {loadingV2 && (
+          <div className="absolute inset-0 z-10 flex items-center justify-center bg-white/60 backdrop-blur-sm">
+            <div className="text-center">
+              <Loader2 className="mx-auto h-8 w-8 animate-spin text-blue-500" />
+              <div className="mt-2 text-sm text-gray-600">Loading...</div>
+            </div>
+          </div>
+        )}
         <button
           onClick={onClose}
           className="absolute top-3 right-3 text-gray-500 hover:text-red-500"
@@ -133,14 +155,7 @@ const PerInfoDetail = ({ onClose, role, data }) => {
             />
           </div>
         </div>
-        {loadingV2 && (
-          <div className="fixed inset-0 z-500 flex items-center justify-center bg-white/60 backdrop-blur-sm">
-            <div className="text-center">
-              <Loader2 className="mx-auto h-8 w-8 animate-spin text-blue-500" />
-              <div className="mt-2 text-sm text-gray-600">Loading...</div>
-            </div>
-          </div>
-        )}
+        
         {loading ? (
           <div className="py-8 text-center">
             <Loader2 className="mx-auto h-6 w-6 animate-spin text-blue-500" />
@@ -150,6 +165,7 @@ const PerInfoDetail = ({ onClose, role, data }) => {
           </div>
         ) : (
           <div className="overflow-x-auto">
+           
             <table className="w-full border">
               <thead className="bg-gray-100 text-sm">
                 <tr>
@@ -173,8 +189,13 @@ const PerInfoDetail = ({ onClose, role, data }) => {
                           <td key={field} className="p-2 text-center">
                             <input
                               type="checkbox"
+                              className={`accent-blue-500 ${
+                                !isEditing
+                                  ? "pointer-events-none opacity-70"
+                                  : ""
+                              }`}
                               checked={perm?.[field] || false}
-                              disabled={!isEditing} // <-- chỉ enable nếu isEditing = true
+                              // disabled={!isEditing} // <-- chỉ enable nếu isEditing = true
                               onChange={() =>
                                 handleCheckboxChange(fn.functionId, field)
                               }
@@ -214,7 +235,7 @@ const PerInfoDetail = ({ onClose, role, data }) => {
             <ConfirmDialog
               isOpen={showConfirmUpdate}
               title="Update"
-                message="Are you sure you want to update permissions?"
+              message="Are you sure you want to update permissions?"
               onConfirm={() => {
                 handleUpdate();
                 setShowConfirmUpdate(false);

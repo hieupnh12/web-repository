@@ -8,8 +8,8 @@ const TableViewPer = ({ data = [], search = "", loading = false , onSelectRow}) 
   );
 
   return (
-    <div className="bg-white rounded-2xl shadow-xl p-4">
-      <div className="overflow-y-auto max-h-[540px]">
+    <div className="bg-white rounded-2xl shadow-xl h-[530px]">
+      <div className="overflow-y-auto max-h-[520px]">
         <table className="min-w-full text-center">
           <thead className="bg-gradient-to-r from-blue-50 to-indigo-50 sticky top-0 z-10">
             <tr className="w-full">
