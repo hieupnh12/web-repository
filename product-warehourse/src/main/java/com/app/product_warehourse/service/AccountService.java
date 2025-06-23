@@ -106,4 +106,10 @@ public class AccountService {
         }
 
 
+    @PreAuthorize("hasRole('ADMIN') or hasRole('STAFF')")
+    public Account getAccountEntity(String staffId) {
+        return accountRepository.findById(staffId)
+                .orElseThrow(() -> new AppException(ErrorCode.ACCOUNT_NOT_EXIST));
+    }
+
 }

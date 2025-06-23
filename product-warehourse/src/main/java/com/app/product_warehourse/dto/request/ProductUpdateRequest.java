@@ -3,7 +3,6 @@ package com.app.product_warehourse.dto.request;
 
 import lombok.*;
 import lombok.experimental.FieldDefaults;
-import org.springframework.web.multipart.MultipartFile;
 
 
 @Data
@@ -13,30 +12,27 @@ import org.springframework.web.multipart.MultipartFile;
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class ProductUpdateRequest {
 
-    // private MultipartFile image;
+    Long originId;
 
-    private Integer origin;
+    String processor;
 
-    private String processor;
+    Integer battery;
 
-    private Integer battery;
+    Double screenSize;
 
-    private Double screenSize;
+    Long operatingSystemId;
 
-    private Integer operatingSystem;
+    Integer chipset;
 
-    private Integer chipset;
+    String rearCamera;
 
-    private String rearCamera;
+    String frontCamera;
 
-    private String frontCamera;
+    Integer warrantyPeriod;
 
-    private Integer warrantyPeriod;
+    Long  brandId;
 
-    private Integer brand;
+    Long  warehouseAreaId;
 
-    private Integer warehouseArea;
-
-
-    private Boolean status;
+    Boolean status;
 }
