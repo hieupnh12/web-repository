@@ -41,6 +41,7 @@ cloudinary:
 #  T5qQXodnthydHuSyQYrF
 
 
+
 jwt:
   signerKey: "AHaGZCtFmdGkRWd2X0kdnE7GPkV9dFHP9i0qfSeOU+LkndFFegV9HR5Xdzoqq5T2"
   valid-duration: 36000
