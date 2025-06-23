@@ -1,9 +1,11 @@
 package com.app.product_warehourse.entity;
 
 
+import com.app.product_warehourse.dto.response.AccountResponse;
 import jakarta.persistence.*;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
+import org.hibernate.annotations.CreationTimestamp;
 
 import java.time.LocalDateTime;
 
@@ -20,14 +22,18 @@ public class ImportReceipt {
     @Column(name ="import_id")
     String import_id;
 
+    @CreationTimestamp
     @Column(name ="import_time")
     LocalDateTime time;
 
-    @Column(name ="supplier_id")
-    String supplierId;
 
-    @Column(name ="created_id")
-    String staffId;
+    @ManyToOne
+    @JoinColumn(name ="supplier_id")
+    Suppliers suppliers;
+
+    @ManyToOne
+    @JoinColumn(name ="created_id")
+    Account staff;
 
     @Column(name ="total_amount")
     Long totalAmount;

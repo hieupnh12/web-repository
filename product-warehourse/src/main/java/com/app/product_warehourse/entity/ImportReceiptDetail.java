@@ -1,10 +1,8 @@
 package com.app.product_warehourse.entity;
 
 
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.Id;
-import jakarta.persistence.Table;
+import jakarta.persistence.*;
+import jakarta.validation.constraints.Min;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
 
@@ -17,15 +15,18 @@ import lombok.experimental.FieldDefaults;
 @FieldDefaults(level = AccessLevel.PRIVATE) // Mặc định các biến thành private, không cần khai báo riêng
 public class ImportReceiptDetail {
 
+    @Id
+    @ManyToOne
+    @JoinColumn(name ="import_id")
+    ImportReceipt id;
 
     @Id
-    @Column(name ="import_id")
-    String id;
-
-    @Column(name ="product_version_id")
-    String productVersionId;
+    @ManyToOne
+    @JoinColumn(name ="product_version_id")
+    ProductVersion productVersionId;
 
     @Column(name ="quantity")
+    @Min(value = 0, message = "Quantity must be non-negative")
     Integer quantity;
 
 

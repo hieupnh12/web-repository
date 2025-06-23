@@ -12,7 +12,7 @@ public enum ErrorCode {
     WAREHOUSE_INVALID(2003,"Name must be at least 3 characters", HttpStatus.BAD_REQUEST),
     PRODUCT_NOT_EXIST(2004,"Product Not Exist", HttpStatus.NOT_FOUND),
     NAME_ALREADY_EXIST(2005,"Name Exist! ", HttpStatus.CONFLICT),
-
+    SUPPLIER_NOT_EXIST(2006,"Supplier Not Exist", HttpStatus.NOT_FOUND),
 
 
     UNCATEGORIZE_EXCEPTION(9999, "Uncategorized error", HttpStatus.INTERNAL_SERVER_ERROR),
