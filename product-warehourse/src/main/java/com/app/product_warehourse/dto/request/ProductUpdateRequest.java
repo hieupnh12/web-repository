@@ -13,7 +13,7 @@ import org.springframework.web.multipart.MultipartFile;
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class ProductUpdateRequest {
 
-    private MultipartFile image;
+    // private MultipartFile image;
 
     private Integer origin;
 
