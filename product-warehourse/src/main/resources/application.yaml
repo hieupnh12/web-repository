@@ -7,6 +7,7 @@ spring:
   datasource:
     url: "jdbc:mysql://mysql-c9616c2-fpt-cfca.f.aivencloud.com:19031/warehouse_phone"
     username: avnadmin
+    password: ${DB_PASSWORD}
 
   mail:
     host: smtp.gmail.com
@@ -35,7 +36,8 @@ cloudinary:
     name: ImageCloud
   api:
     key: 756234473817482
-    secret: 
+    secret: T5qQXodnthydHuSyQYrF
+
 #  T5qQXodnthydHuSyQYrF
 
 

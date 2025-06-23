@@ -5,6 +5,7 @@ import com.app.product_warehourse.dto.request.BrandRequest;
 import com.app.product_warehourse.dto.response.BrandResponse;
 import com.app.product_warehourse.entity.Brand;
 import com.app.product_warehourse.service.BrandService;
+import jakarta.validation.Valid;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
@@ -22,7 +23,7 @@ public class BrandController {
         BrandService brandService;
 
         @PostMapping
-        public Brand createBrand(@RequestBody BrandRequest request) {
+        public Brand createBrand(@RequestBody @Valid BrandRequest request) {
             return brandService.CreateBrand(request);
         }
 

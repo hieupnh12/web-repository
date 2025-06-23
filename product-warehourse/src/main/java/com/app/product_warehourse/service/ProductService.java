@@ -1,6 +1,8 @@
 package com.app.product_warehourse.service;
 
+import com.app.product_warehourse.dto.request.ImageRequest;
 import com.app.product_warehourse.dto.request.ProductRequest;
+import com.app.product_warehourse.dto.request.ProductUpdateRequest;
 import com.app.product_warehourse.dto.response.ProductResponse;
 import com.app.product_warehourse.entity.*;
 import com.app.product_warehourse.exception.AppException;
@@ -45,11 +47,7 @@ public class ProductService {
 
 
 
-    public ProductResponse createProduct(ProductRequest request) throws IOException {
-        String imageUrl = null;
-        if (request.getImage() != null && !request.getImage().isEmpty()) {
-            imageUrl = uploadImage(null, request.getImage()); // Upload file và lấy URL
-        }
+    public ProductResponse createProduct(ProductRequest request)  {
 
         Origin origin = originService.getOriginById(request.getOriginId());
         WarehouseArea wa = warehouseAreaService.getWarehouseAreaById(request.getWarehouseAreaId());
@@ -63,14 +61,27 @@ public class ProductService {
 
         // Tạo Product và gán imageUrl thủ công
         Product product = productMapper.toProductWithOrigin(request, origin, os, br, wa);
-        if (imageUrl != null) {
-            product.setImage(imageUrl); // Gán URL sau khi upload
-        }
+
 
         Product savedProduct = productRepository.save(product);
         return productMapper.toProductResponse(savedProduct);
     }
 
+
+
+    public ProductResponse createImageProduct(ImageRequest request, Long id) throws IOException {
+        Product product = getProductById(id);
+        String imageUrl = null;
+        if (request.getImage() != null && !request.getImage().isEmpty()) {
+            imageUrl = uploadImage(null, request.getImage()); // Upload file và lấy URL
+        }
+        if (imageUrl != null) {
+            product.setImage(imageUrl); // Gán URL sau khi upload
+        }
+        product = productMapper.toImageProduct(request);
+        Product savedProduct = productRepository.save(product);
+        return productMapper.toProductResponse(savedProduct);
+    }
 
 
 
@@ -92,16 +103,24 @@ public class ProductService {
 
 
 
-    public ProductResponse updateProduct(Long id, ProductRequest request) throws IOException {
-        Product product = getProductById(id);
+    public ProductResponse updateProduct(Long id, ProductUpdateRequest request)   {
+        log.info("Nhận được ProductUpdateRequest với originId: {}", request.getOriginId());
+        // Lấy sản phẩm hiện có
+        Product product = getProductById(id); // Đảm bảo lấy sản phẩm với productId = 18
 
-        if (request.getImage() != null && !request.getImage().isEmpty()) {
-            String imageUrl = uploadImage(id, request.getImage()); // Upload file mới
-            product.setImage(imageUrl); // Cập nhật URL
+        // Lấy các thực thể liên quan
+        Origin origin = originService.getOriginById(request.getOriginId());
+        WarehouseArea wa = warehouseAreaService.getWarehouseAreaById(request.getWarehouseAreaId());
+        if (!wa.isStatus()) {
+            throw new AppException(ErrorCode.WAREHOUSE_UNAVAILABLE);
         }
+        Brand br = brandService.GetBrandById(request.getBrandId());
+        OperatingSystem os = operatingSystemService.getOSById(request.getOperatingSystemId());
 
-        // Mapper các trường khác, image đã được gán thủ công
-        product = productMapper.toProduct(request); // Giả sử mapper bỏ qua image
+        // Cập nhật các trường của sản phẩm hiện có
+        productMapper.toProductUpdate(request, product, origin, os, br, wa);
+
+        // Lưu sản phẩm đã cập nhật
         Product savedProduct = productRepository.save(product);
         return productMapper.toProductResponse(savedProduct);
     }

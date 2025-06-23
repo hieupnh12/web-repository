@@ -1,6 +1,8 @@
 package com.app.product_warehourse.dto.request;
 
 
+import com.app.product_warehourse.entity.Ram;
+import com.app.product_warehourse.validation.UniqueName;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
 
@@ -11,6 +13,7 @@ import lombok.experimental.FieldDefaults;
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class RamRequest {
 
+    @UniqueName(entity = Ram.class, fieldName = "name")
     String name;
 
     Boolean status;

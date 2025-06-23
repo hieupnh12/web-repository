@@ -4,6 +4,7 @@ import com.app.product_warehourse.dto.request.OriginRequest;
 import com.app.product_warehourse.dto.response.OriginResponse;
 import com.app.product_warehourse.entity.Origin;
 import com.app.product_warehourse.service.OriginService;
+import jakarta.validation.Valid;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
@@ -22,7 +23,7 @@ public class OriginController {
     OriginService originService;
 
     @PostMapping
-    public Origin createOrigin(@RequestBody OriginRequest request) {
+    public Origin createOrigin(@RequestBody @Valid OriginRequest request) {
         return originService.createOrigin(request);
     }
 
