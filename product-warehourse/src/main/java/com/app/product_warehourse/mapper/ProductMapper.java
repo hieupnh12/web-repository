@@ -2,6 +2,7 @@ package com.app.product_warehourse.mapper;
 
 import com.app.product_warehourse.dto.request.ImageRequest;
 import com.app.product_warehourse.dto.request.ProductRequest;
+import com.app.product_warehourse.dto.request.ProductUpdateRequest;
 import com.app.product_warehourse.dto.response.ProductResponse;
 import com.app.product_warehourse.entity.*;
 import org.mapstruct.Mapper;
@@ -40,6 +41,7 @@ public interface ProductMapper {
     }
 
 
+     Product toUpdateProduct(ProductUpdateRequest request);
 
 
 
@@ -54,7 +56,49 @@ public interface ProductMapper {
         return product;
     }
 
+//    // Gọi riêng để xử lý entity để update
+//    @Mapping(target = "image", ignore = true) // Bỏ qua ánh xạ image
+//    default Product toProductUpdate(ProductUpdateRequest request, Origin origin , OperatingSystem os , Brand br, WarehouseArea wa ) {
+//        Product product = toUpdateProduct(request);
+//        product.setOrigin(origin);
+//        product.setOperatingSystem(os);
+//        product.setBrand(br);
+//        product.setWarehouseArea(wa);
+//        return product;
+//    }
 
+
+    // Phương thức mới để cập nhật đối tượng Product hiện có
+    default void toProductUpdate(ProductUpdateRequest request, Product product, Origin origin, OperatingSystem os, Brand br, WarehouseArea wa) {
+        if (request.getProcessor() != null) {
+            product.setProcessor(request.getProcessor());
+        }
+        if (request.getBattery() != null) {
+            product.setBattery(request.getBattery());
+        }
+        if (request.getScreenSize() != null) {
+            product.setScreenSize(request.getScreenSize());
+        }
+        if (request.getChipset() != null) {
+            product.setChipset(request.getChipset());
+        }
+        if (request.getRearCamera() != null) {
+            product.setRearCamera(request.getRearCamera());
+        }
+        if (request.getFrontCamera() != null) {
+            product.setFrontCamera(request.getFrontCamera());
+        }
+        if (request.getWarrantyPeriod() != null) {
+            product.setWarrantyPeriod(request.getWarrantyPeriod());
+        }
+        if (request.getStatus() != null) {
+            product.setStatus(request.getStatus());
+        }
+        product.setOrigin(origin);
+        product.setOperatingSystem(os);
+        product.setBrand(br);
+        product.setWarehouseArea(wa);
+    }
 
 }
 
