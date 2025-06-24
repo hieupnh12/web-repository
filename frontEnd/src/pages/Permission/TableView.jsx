@@ -1,6 +1,5 @@
 import React from "react";
-import { Loader2, Trash } from "lucide-react"; // Icon quay vòng
-import Button from "../../components/ui/Button";
+import { Loader2 } from "lucide-react"; // Icon quay vòng
 
 const TableViewPer = ({ data = [], search = "", loading = false , onSelectRow}) => {
   const filteredData = data.filter((role) =>
@@ -9,7 +8,7 @@ const TableViewPer = ({ data = [], search = "", loading = false , onSelectRow}) 
 
   return (
     <div className="bg-white rounded-2xl shadow-xl h-[530px]">
-      <div className="overflow-y-auto max-h-[520px]">
+      <div className="overflow-y-auto max-h-[520px] custom-scroll">
         <table className="min-w-full text-center">
           <thead className="bg-gradient-to-r from-blue-50 to-indigo-50 sticky top-0 z-10">
             <tr className="w-full">

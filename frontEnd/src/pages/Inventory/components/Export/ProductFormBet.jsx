@@ -1,5 +1,6 @@
 import { forwardRef, useImperativeHandle } from "react";
 import { useEffect, useState } from "react";
+import BarcodeScanner from "../../../../utils/useImeiCam";
 
 const ProductForm = forwardRef(
   ({ selected, onAdd, editProduct, usedImeis, setEditProduct }, ref) => {
@@ -14,7 +15,7 @@ const ProductForm = forwardRef(
     });
     const [isModalOpen, setIsModalOpen] = useState(false); // Trạng thái modal
     const [products, setProducts] = useState([]); // Lưu danh sách sản phẩm đã chọn option và imei trước đó để cập nhật
-
+     const [showScanner, setShowScanner] = useState(false);
     console.log("edit", editProduct);
 
     useEffect(() => {
@@ -92,21 +93,42 @@ const ProductForm = forwardRef(
     };
 
     const handleScanImei = () => {
-      const scannedImei = prompt("Nhập IMEI quét được:"); // Giả lập quét IMEI
-      if (
-        scannedImei &&
-        formData.selectedOption?.imeiList.some(
-          (item) => item.imei === scannedImei && item.status === "in-stock"
-        )
-      ) {
-        setFormData((prev) => ({
-          ...prev,
-          selectedImeis: [...new Set([...prev.selectedImeis, scannedImei])],
-        }));
-      } else {
-        alert("IMEI không hợp lệ hoặc không có trong kho!");
-      }
+      setShowScanner(true);
+      // const scannedImei = prompt("Nhập IMEI quét được:"); // Giả lập quét IMEI
+      // if (
+      //   scannedImei &&
+      //   formData.selectedOption?.imeiList.some(
+      //     (item) => item.imei === scannedImei && item.status === "in-stock"
+      //   )
+      // ) {
+      //   setFormData((prev) => ({
+      //     ...prev,
+      //     selectedImeis: [...new Set([...prev.selectedImeis, scannedImei])],
+      //   }));
+      // } else {
+      //   alert("IMEI không hợp lệ hoặc không có trong kho!");
+      // }
     };
+
+
+    const handleScanSuccess = (scannedImei) => {
+    setShowScanner(false);
+
+    // Kiểm tra IMEI có hợp lệ và thêm vào form
+    if (
+      formData.selectedOption?.imeiList.some(
+        (item) => item.imei === scannedImei && item.status === "in-stock"
+      )
+    ) {
+      setFormData((prev) => ({
+        ...prev,
+        selectedImeis: [...new Set([...prev.selectedImeis, scannedImei])],
+      }));
+    } else {
+      alert("IMEI không hợp lệ hoặc không có trong kho!");
+    }
+  };
+
 
     const handleAdd = () => {
       if (
@@ -258,6 +280,12 @@ const ProductForm = forwardRef(
                     >
                       Quét IMEI
                     </button>
+                    {showScanner && (
+        <BarcodeScanner
+          onScanSuccess={handleScanSuccess}
+          onClose={() => setShowScanner(false)}
+        />
+      )}
                   </div>
                 </div>
                 <div className="mt-1">

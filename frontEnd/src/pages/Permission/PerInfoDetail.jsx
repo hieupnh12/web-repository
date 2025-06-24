@@ -9,7 +9,6 @@ import {
 import ConfirmDialog from "../../components/ui/ConfirmDialog";
 
 const PerInfoDetail = ({ onClose, role, data }) => {
-
   // Lưu các chức năng per(crud)
   const [functions, setFunctions] = useState([]);
   // load khi mới đầu vô
@@ -24,7 +23,7 @@ const PerInfoDetail = ({ onClose, role, data }) => {
   const [showConfirmUpdate, setShowConfirmUpdate] = useState(false);
 
   console.log(role);
-  
+
   useEffect(() => {
     const loadFunctionEachRole = async () => {
       setLoading(true);
@@ -86,41 +85,41 @@ const PerInfoDetail = ({ onClose, role, data }) => {
 
   // api Update
   const handleUpdate = async () => {
-  const payload = {
-    roleName: role.roleName,
-    description,
-    permissions,
-  };
-  setShowConfirmUpdate(false);
-  setLoadingV2(true);
-  try {
-    const response = await takeUpdateRole(role.roleId, payload);
+    const payload = {
+      roleName: role.roleName,
+      description,
+      permissions,
+    };
+    setShowConfirmUpdate(false);
+    setLoadingV2(true);
+    try {
+      const response = await takeUpdateRole(role.roleId, payload);
 
-    if (response.status === 200) {
+      if (response.status === 200) {
+        setLoadingV2(false);
+        setIsEditing(false);
+
+        // Cập nhật danh sách nếu cần
+        data((prev) =>
+          prev.map((item) =>
+            item.roleId === role.roleId
+              ? { ...item, description, permissions }
+              : item
+          )
+        );
+
+        onClose(); // Đóng modal
+      }
+    } catch (error) {
+      console.error("Lỗi khi cập nhật quyền:", error);
       setLoadingV2(false);
-      setIsEditing(false);
-
-      // Cập nhật danh sách nếu cần
-      data((prev) =>
-        prev.map((item) =>
-          item.roleId === role.roleId
-            ? { ...item, description, permissions }
-            : item
-        )
-      );
-
-      onClose(); // Đóng modal
     }
-  } catch (error) {
-    console.error("Lỗi khi cập nhật quyền:", error);
-    setLoadingV2(false);
-  }
-};
+  };
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-30 flex justify-center items-center z-50">
       <div className="bg-white rounded-xl w-[90%] max-w-4xl p-6 shadow-2xl relative">
-         {loadingV2 && (
+        {loadingV2 && (
           <div className="absolute inset-0 z-10 flex items-center justify-center bg-white/60 backdrop-blur-sm">
             <div className="text-center">
               <Loader2 className="mx-auto h-8 w-8 animate-spin text-blue-500" />
@@ -155,7 +154,7 @@ const PerInfoDetail = ({ onClose, role, data }) => {
             />
           </div>
         </div>
-        
+
         {loading ? (
           <div className="py-8 text-center">
             <Loader2 className="mx-auto h-6 w-6 animate-spin text-blue-500" />
@@ -165,7 +164,6 @@ const PerInfoDetail = ({ onClose, role, data }) => {
           </div>
         ) : (
           <div className="overflow-x-auto">
-           
             <table className="w-full border">
               <thead className="bg-gray-100 text-sm">
                 <tr>
@@ -234,6 +232,18 @@ const PerInfoDetail = ({ onClose, role, data }) => {
             </Button>
             <ConfirmDialog
               isOpen={showConfirmUpdate}
+              title="Are you sure?"
+              message="Do you want to update this permission?"
+              action="update" // hoặc "delete", "create"
+              onConfirm={() => {
+                handleUpdate();
+                setShowConfirmUpdate(false);
+              }}
+              onCancel={() => setShowConfirmUpdate(false)}
+              // loading={loadingV2}
+            />
+            {/* <ConfirmDialog
+              isOpen={showConfirmUpdate}
               title="Update"
               message="Are you sure you want to update permissions?"
               onConfirm={() => {
@@ -241,7 +251,7 @@ const PerInfoDetail = ({ onClose, role, data }) => {
                 setShowConfirmUpdate(false);
               }}
               onCancel={() => setShowConfirmUpdate(false)}
-            />
+            /> */}
           </div>
           <div>
             <Button
@@ -254,7 +264,7 @@ const PerInfoDetail = ({ onClose, role, data }) => {
             <ConfirmDialog
               isOpen={showConfirm}
               title="Delete"
-              message="Bạn có chắc chắn muốn xóa?"
+              message="Do you want to delete this permission??"
               onConfirm={handleDeleteRole}
               onCancel={() => setShowConfirm(false)}
             />

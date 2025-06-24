@@ -26,7 +26,6 @@ const Export = lazy(() => import("./pages/Inventory/components/Export"));
 const Login = lazy(() => import("./pages/Login/Login"));
 const ForgotPassword = lazy(() => import("./pages/Login/ForgotPassword"));
 const ProductsPage = lazy(() => import("./pages/Products"));
-const SupplierManagement = lazy(() => import("./pages/Suppliers"));
 
 // const ImportStock = lazy(() => import('./pages/Inventory/ImportStock'));
 // const Products = lazy(() => import('./pages/Products/Products'));
@@ -73,10 +72,7 @@ const router = createBrowserRouter(
         {/* <Route path="import" element={<ImportStock />} /> */}
         <Route path="export" element={<LazyLoader><ExportStock /></LazyLoader>} />
         {/* <Route path="customers" element={<Customers />} /> */}
-        {/* <Route path="suppliers" element={<Suppliers />} /> */}
-         <Route path="suppliers">
-          <Route element={<LazyLoader><SupplierManagement /></LazyLoader>} />
-        </Route>
+         <Route path="suppliers" element={<LazyLoader><Suppliers /></LazyLoader>} />
         { <Route path="staff" element={<Staff />} /> }
         <Route path="staff/add" element={<CreateStaff />} />
         <Route path="staff/edit" element={<EditStaff />} />
