@@ -23,6 +23,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 
 import java.io.IOException;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -33,7 +34,7 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor  // thay cho autowrid
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true) //bo private final
 @Slf4j
-public class ProductService {
+public class ProductService  {
 
      ProductRepository productRepository;
      ProductMapper productMapper;
@@ -68,20 +69,24 @@ public class ProductService {
     }
 
 
-
+    @Transactional
     public ProductResponse createImageProduct(ImageRequest request, Long id) throws IOException {
-        Product product = getProductById(id);
-        String imageUrl = null;
+        Product product = productRepository.findById(id)
+                .orElseThrow(() -> new IllegalArgumentException("Sản phẩm không tồn tại với ID: " + id));
+
+        System.out.println("Processing request with image: " + (request.getImage() != null ? request.getImage().getOriginalFilename() : "null"));
         if (request.getImage() != null && !request.getImage().isEmpty()) {
-            imageUrl = uploadImage(null, request.getImage()); // Upload file và lấy URL
+            Product updatedProduct = productMapper.toImageProduct(request, cloudinary);
+            product.setImage(updatedProduct.getImage()); // Cập nhật image
+            System.out.println("Updated product image: " + updatedProduct.getImage());
+        } else {
+            System.out.println("No image provided in request");
         }
-        if (imageUrl != null) {
-            product.setImage(imageUrl); // Gán URL sau khi upload
-        }
-        product = productMapper.toImageProduct(request);
+
         Product savedProduct = productRepository.save(product);
         return productMapper.toProductResponse(savedProduct);
     }
+
 
 
 

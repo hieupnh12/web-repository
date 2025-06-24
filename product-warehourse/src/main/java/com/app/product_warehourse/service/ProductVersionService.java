@@ -92,9 +92,21 @@ public class ProductVersionService {
        public ProductVersionResponse UpdateProductVersion(ProductVersionRequest request, String id) {
            ProductVersion pr = GetProductVersionById(id);
 
-           pr = pvm.ToProductVersion(request);
-           pvr.save(pr);
-           return pvm.ToProductVersionResponse(pr);
+           Product product = productservice.getProductById(request.getProductId());
+           if(product == null) {
+               throw new AppException(ErrorCode.PRODUCT_NOT_EXIST);
+           }
+           Ram ram = ramservice.getRamById(request.getRamId());
+           Rom rom = romservice.getRomById(request.getRomId());
+           Color color = colorservice.getColorById(request.getColorId());
+
+           ProductVersion productVersion = pvm.ToUpdateProductVersion(request,pr,ram,rom,color,product);
+
+           // Cập nhật stock_quantity của Product
+           productService.updateProductStockQuantity(request.getProductId());
+
+           pvr.save(productVersion);
+           return pvm.ToProductVersionResponse(productVersion);
        }
 
 

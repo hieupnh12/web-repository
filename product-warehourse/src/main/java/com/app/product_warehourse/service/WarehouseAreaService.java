@@ -65,8 +65,8 @@ public class WarehouseAreaService {
 
     public WarehouseAreaResponse UpdateWarehouseAreaAttribute (Long id, WarehouseUpdateRequest request) {
         WarehouseArea area = warehouseAreaRepo.findById(id).orElse(null);
-        area = warehouseAreaMapper.toWarehouseAreaUpdate(request);
-        area.setId(id); // giữ lại id cũ
+        area.setNote(request.getNote());
+        area.setStatus(request.isStatus());
 
         return warehouseAreaMapper.toWarehouseAreaResponse(warehouseAreaRepo.save(area));
     }
