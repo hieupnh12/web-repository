@@ -1,101 +1,144 @@
 import BASE_URL from "../api";
 import { GET, POST, PUT } from "../constants/httpMethod";
 
-/**
- * Chuyển danh sách [{ id, name }] thành map { id: name }
- */
-const toMap = (arr = []) => {
-  const map = {};
-  arr.forEach((item) => {
-    if (item?.id != null) {
-      map[item.id] = item.name || item.value || "N/A";
-    }
-  });
-  return map;
+const handleApiError = (error, defaultMessage) => {
+  const errorDetails = {
+    message: error.message,
+    response: error.response?.data,
+    status: error.response?.status,
+  };
+  console.error(defaultMessage, errorDetails);
+  const errorMessage =
+    error.response?.data?.message ||
+    (typeof error.response?.data === "object" ? JSON.stringify(error.response?.data) : error.message) ||
+    defaultMessage;
+  throw new Error(errorMessage);
 };
 
-/**
- * Lấy danh sách sản phẩm đầy đủ (bao gồm các thuộc tính phụ trợ nếu cần)
- */
-export const getFullProducts = async ({ page = 1, limit = 5, search = '' } = {}) => {
-  const params = new URLSearchParams({ page, limit });
-  if (search) params.append("search", search);
+export const getFullProducts = async ({
+  page = 1,
+  limit = 10,
+  search = "",
+  brandId = null,
+  originId = null,
+  operatingSystemId = null,
+  warehouseAreaId = null,
+} = {}) => {
+  try {
+    const params = new URLSearchParams({ page, limit });
+    if (search) params.append("search", search);
+    if (brandId) params.append("brandId", brandId);
+    if (originId) params.append("originId", originId);
+    if (operatingSystemId) params.append("operatingSystemId", operatingSystemId);
+    if (warehouseAreaId) params.append("warehouseAreaId", warehouseAreaId);
 
-  const [
-    productsRes,
-    colorsRes,
-    ramsRes,
-    romsRes,
-    brandsRes,
-    osRes,
-    originsRes,
-    areaRes,
-    chipsetsRes
-  ] = await Promise.all([
-    BASE_URL[GET](`product?${params.toString()}`),
-    BASE_URL[GET]("color"),
-    BASE_URL[GET]("ram"),
-    BASE_URL[GET]("rom"),
-    BASE_URL[GET]("brand"),
-    BASE_URL[GET]("operatingSystem"),
-    BASE_URL[GET]("origin"),
-    BASE_URL[GET]("warehouseArea"),
-    BASE_URL[GET]("chipset"),
-  ]);
+    const productsRes = await BASE_URL[GET](`product?${params.toString()}`);
+    const data = productsRes.data || {};
+    const total = data.totalElements || data.length || 0;
+    const productList = Array.isArray(data) ? data : data.content || [];
 
-  const total = productsRes.data?.totalElements || productsRes.data?.length || 0;
-  const productList = productsRes.data || [];
-
-  const products = productList.map((product) => {
-    return {
+    const products = productList.map((product) => ({
       ...product,
       image: product.image || null,
-      versions: [], // Nếu cần version sau này có thể xử lý thêm
+      versions: [],
+    }));
+
+    return {
+      data: products,
+      pagination: {
+        total,
+        page,
+        limit,
+        totalPages: Math.ceil(total / limit),
+      },
     };
-  });
-
-  return {
-    data: products,
-    maps: {
-      brandMap: toMap(brandsRes.data),
-      osMap: toMap(osRes.data),
-      originMap: toMap(originsRes.data),
-      areaMap: toMap(areaRes.data),
-      ramMap: toMap(ramsRes.data),
-      romMap: toMap(romsRes.data),
-      colorMap: toMap(colorsRes.data),
-      chipsetMap: toMap(chipsetsRes.data),
-    },
-    pagination: {
-      total,
-      page,
-      limit,
-      totalPages: Math.ceil(total / limit),
-    },
-  };
+  } catch (error) {
+    handleApiError(error, "Không thể lấy danh sách sản phẩm");
+  }
 };
 
-/**
- * Cập nhật thông tin sản phẩm (KHÔNG gửi ảnh, chỉ gửi JSON thuần)
- */
 export const updateProduct = async (productId, productData) => {
-  return BASE_URL[PUT](`/product/${productId}`, productData, {
-    headers: {
-      "Content-Type": "application/json",
-    },
-  });
+  try {
+    if (process.env.NODE_ENV === "development") {
+      console.log("Calling updateProduct with:", { productId, productData });
+    }
+    return await BASE_URL[PUT](`/product/${productId}`, productData, {
+      headers: {
+        "Content-Type": "application/json",
+      },
+    });
+  } catch (error) {
+    handleApiError(error, "Không thể cập nhật sản phẩm");
+  }
 };
 
-/**
- * Gửi ảnh riêng biệt cho sản phẩm
- */
-export const uploadProductImage = (productId, imageFile) => {
-  const formData = new FormData();
-  formData.append("image", imageFile);
+export const uploadProductImage = async (productId, imageFile) => {
+  try {
+    const formData = new FormData();
+    formData.append("image", imageFile);
 
-  return BASE_URL[POST](`/upload_image/${productId}`, formData, {
-    headers: {
-      "Content-Type": "multipart/form-data",
-    },
-  });
+    return await BASE_URL[POST](`/product/upload_image/${productId}`, formData, {
+      headers: {
+        "Content-Type": "multipart/form-data",
+      },
+    });
+  } catch (error) {
+    handleApiError(error, "Không thể tải ảnh sản phẩm");
+  }
+};
+
+export const getAllBrands = async () => {
+  try {
+    const res = await BASE_URL[GET]("brand");
+    if (process.env.NODE_ENV === "development") {
+      console.log("Brand API response:", res.data);
+    }
+    return {
+      data: Array.isArray(res.data) ? res.data : res.data?.content || res.data?.data || [],
+    };
+  } catch (error) {
+    handleApiError(error, "Không thể tải danh sách thương hiệu");
+  }
+};
+
+export const getAllOrigins = async () => {
+  try {
+    const res = await BASE_URL[GET]("origin");
+    if (process.env.NODE_ENV === "development") {
+      console.log("Origin API response:", res.data);
+    }
+    return {
+      data: Array.isArray(res.data) ? res.data : res.data?.content || res.data?.data || [],
+    };
+  } catch (error) {
+    handleApiError(error, "Không thể tải danh sách xuất xứ");
+  }
+};
+
+export const getAllOperatingSystems = async () => {
+  try {
+    const res = await BASE_URL[GET]("operating_system");
+    if (process.env.NODE_ENV === "development") {
+      console.log("Operating System API response:", res.data);
+    }
+    return {
+      data: Array.isArray(res.data) ? res.data : res.data?.content || res.data?.data || [],
+    };
+  } catch (error) {
+    handleApiError(error, "Không thể tải danh sách hệ điều hành");
+  }
+};
+
+export const getAllWarehouseAreas = async () => {
+  try {
+    const res = await BASE_URL[GET]("warehouse_area");
+    if (process.env.NODE_ENV === "development") {
+      console.log("Warehouse Area API response:", res.data);
+    }
+    return {
+      data: Array.isArray(res.data) ? res.data : res.data?.content || res.data?.data || [],
+    };
+  } catch (error) {
+    handleApiError(error, "Không thể tải danh sách khu vực kho");
+  }
 };

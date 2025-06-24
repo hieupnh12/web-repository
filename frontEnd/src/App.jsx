@@ -31,9 +31,9 @@ const SupplierManagement = lazy(() => import("./pages/Suppliers"));
 // const ImportStock = lazy(() => import('./pages/Inventory/ImportStock'));
 // const Products = lazy(() => import('./pages/Products/Products'));
 // const Inventory = lazy(() => import('./pages/Inventory/Inventory'));
-// const Storage = lazy(() => import('./pages/Inventory/Storage'));
+const WarehouseAreas = lazy(() => import('./pages/Storage'));
 // const Customers = lazy(() => import('./pages/Customers/Customers'));
-// const Suppliers = lazy(() => import('./pages/Suppliers/Suppliers'));
+const Suppliers = lazy(() => import('./pages/Suppliers'));
  const CreateStaff = lazy(() => import('./pages/Staff/CreatStaff'));
   const Staff = lazy(() => import('./pages/Staff/Staff'));
 const EditStaff = lazy(() => import('./pages/Staff/EditStaff'));
@@ -69,7 +69,7 @@ const router = createBrowserRouter(
 
         <Route path="products" element={<LazyLoader><ProductsPage /></LazyLoader>} />
         {/* <Route path="inventory" element={<Inventory />} /> */}
-        {/* <Route path="storage" element={<Storage />} /> */}
+        <Route path="storage" element={<LazyLoader><WarehouseAreas /></LazyLoader>} />
         {/* <Route path="import" element={<ImportStock />} /> */}
         <Route path="export" element={<LazyLoader><ExportStock /></LazyLoader>} />
         {/* <Route path="customers" element={<Customers />} /> */}

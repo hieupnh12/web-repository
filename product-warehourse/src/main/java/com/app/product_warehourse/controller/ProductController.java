@@ -34,7 +34,7 @@ public class ProductController {
 
 
          @PostMapping("/{id}")
-         public ApiResponse<ProductResponse> updateImageProduct(@PathVariable("id") Long  id,@RequestParam  ImageRequest request) throws IOException {
+         public ApiResponse<ProductResponse> updateImageProduct(@PathVariable("id") Long  id,@ModelAttribute  ImageRequest request) throws IOException {
              ApiResponse<ProductResponse> api = new ApiResponse<>();
              ProductResponse response = productService.createImageProduct(request,id);
              api.setResult(response);
