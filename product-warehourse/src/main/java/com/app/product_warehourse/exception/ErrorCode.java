@@ -13,7 +13,7 @@ public enum ErrorCode {
     PRODUCT_NOT_EXIST(2004,"Product Not Exist", HttpStatus.NOT_FOUND),
     NAME_ALREADY_EXIST(2005,"Name Exist! ", HttpStatus.CONFLICT),
     SUPPLIER_NOT_EXIST(2006,"Supplier Not Exist", HttpStatus.NOT_FOUND),
-
+    IMPORTDETAIL_NOT_EXIST(2007,"ImportDetail Not Exist", HttpStatus.NOT_FOUND),
 
     UNCATEGORIZE_EXCEPTION(9999, "Uncategorized error", HttpStatus.INTERNAL_SERVER_ERROR),
     INVALID_KEY(1001, "Invalid message key", HttpStatus.BAD_REQUEST),

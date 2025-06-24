@@ -69,9 +69,11 @@ public class BrandService {
 
        public BrandResponse UpdateBrand(Long id ,BrandRequest request) {
              Brand brand = brandRepo.findById(id).orElse(null);
-             brand = brandMapper.toBrand(request);
+           // Update the existing brand using the mapper
+           brandMapper.updateBrandFromRequest(request, brand);
 
-             return brandMapper.toBrandResponse(brandRepo.save(brand));
+
+           return brandMapper.toBrandResponse(brandRepo.save(brand));
        }
 
 

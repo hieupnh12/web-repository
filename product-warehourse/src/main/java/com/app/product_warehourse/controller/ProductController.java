@@ -11,6 +11,7 @@ import com.app.product_warehourse.entity.Product;
 import com.app.product_warehourse.service.ProductService;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -33,16 +34,21 @@ public class ProductController {
          }
 
 
-         @PostMapping("/{id}")
-         public ApiResponse<ProductResponse> updateImageProduct(@PathVariable("id") Long  id,@RequestParam  ImageRequest request) throws IOException {
-             ApiResponse<ProductResponse> api = new ApiResponse<>();
-             ProductResponse response = productService.createImageProduct(request,id);
-             api.setResult(response);
-             return api;
-         }
-
-
-
+    @PutMapping(value = "/upload_image/{id}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public ApiResponse<ProductResponse> updateImageProduct(@PathVariable("id") Long id,
+                                                           @RequestPart("image") MultipartFile image) {
+        ApiResponse<ProductResponse> api = new ApiResponse<>();
+        try {
+            ImageRequest request = ImageRequest.builder().image(image).build();
+            ProductResponse response = productService.createImageProduct(request, id);
+            api.setResult(response);
+            return api;
+        } catch (IOException e) {
+            api.setCode(500);
+            api.setMessage("Lỗi khi tải hình ảnh: " + e.getMessage());
+            return api;
+        }
+    }
 //    @PostMapping
 //    public ApiResponse<ProductResponse> createProductWithVersions(@RequestBody CreateProductWithVersionsRequest request) {
 //        ApiResponse<ProductResponse> resp = new ApiResponse<>();
