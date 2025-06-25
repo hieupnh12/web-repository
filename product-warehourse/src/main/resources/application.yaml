@@ -30,15 +30,10 @@ spring:
 
 cloudinary:
   cloud:
-    name: ImageCloud
+    name: dpf4ph1qu
   api:
     key: 756234473817482
     secret: T5qQXodnthydHuSyQYrF
-<<<<<<< Updated upstream
-=======
-#  T5qQXodnthydHuSyQYrF
-
->>>>>>> Stashed changes
 jwt:
   signerKey: "AHaGZCtFmdGkRWd2X0kdnE7GPkV9dFHP9i0qfSeOU+LkndFFegV9HR5Xdzoqq5T2"
   valid-duration: 36000

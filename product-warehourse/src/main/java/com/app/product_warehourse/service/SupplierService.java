@@ -57,8 +57,8 @@ public class SupplierService {
 
 
     public SupplierResponse updateSupplier(String id, SupplierRequest request){
-         Suppliers supplier = getSupplier(id);
-         supplier = supplierMap.toSuppliers(request);
+         Suppliers supplier = supplierRepo.findById(id).orElseThrow(() ->  new RuntimeException("Not Found Supplier by Id") );
+         supplierMap.updateSupplierFromRequest(request, supplier);
 
       return   supplierMap.toSupplierResponse(supplierRepo.save(supplier));
     }

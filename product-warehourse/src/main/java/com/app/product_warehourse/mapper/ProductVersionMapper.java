@@ -26,4 +26,28 @@ public interface ProductVersionMapper {
          productVersion.setProduct(product);
          return productVersion;
     }
+
+
+    default ProductVersion ToUpdateProductVersion (ProductVersionRequest request, ProductVersion version ,Ram ram , Rom rom , Color color, Product product) {
+        // Cập nhật các trường từ request nếu có giá trị
+        if (request.getExportPrice() != null) {
+            version.setExportPrice(request.getExportPrice());
+        }
+        if (request.getImportPrice() != null) {
+            version.setImportPrice(request.getImportPrice());
+        }
+        if (request.getStockQuantity() != null) {
+            version.setStockQuantity(request.getStockQuantity());
+        }
+        if (request.getStatus() != null) {
+            version.setStatus(request.getStatus());
+        }
+        // Cập nhật các trường liên quan
+        version.setRam(ram);
+        version.setRom(rom);
+        version.setColor(color);
+        version.setProduct(product);
+        return version;
+    }
+
 }

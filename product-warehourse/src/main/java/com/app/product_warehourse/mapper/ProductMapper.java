@@ -5,10 +5,12 @@ import com.app.product_warehourse.dto.request.ProductRequest;
 import com.app.product_warehourse.dto.request.ProductUpdateRequest;
 import com.app.product_warehourse.dto.response.ProductResponse;
 import com.app.product_warehourse.entity.*;
-import org.mapstruct.Mapper;
-import org.mapstruct.Mapping;
-import org.mapstruct.Named;
+import com.cloudinary.Cloudinary;
+import org.mapstruct.*;
 import org.springframework.web.multipart.MultipartFile;
+
+import java.io.IOException;
+import java.util.Map;
 
 @Mapper(componentModel = "spring")
 public interface ProductMapper {
@@ -25,20 +27,46 @@ public interface ProductMapper {
     ProductResponse toProductResponse (Product product);
 
 
-    @Mapping(target = "image", source = "image", qualifiedByName = "multipartFileToString")
-    Product toImageProduct(ImageRequest request);
+    @Mapping(target = "image", ignore = true)
+    Product toImageProduct(ImageRequest request,@Context Cloudinary cloudinary) throws IOException;
 
-    @Named("multipartFileToString")
-    default String multipartFileToString(MultipartFile file) {
-        // Bạn xử lý upload file lên Cloudinary hoặc nơi lưu trữ rồi trả về URL
-        // Giả sử bạn upload thành công và lấy được URL:
-        return uploadToCloudinary(file);
+
+
+
+    @AfterMapping
+    default void afterMapping(ImageRequest request, @MappingTarget Product product, @Context Cloudinary cloudinary) throws IOException {
+        System.out.println("Processing image upload for request: " + (request != null ? request.getImage() : "null"));
+        if (request != null && request.getImage() != null && !request.getImage().isEmpty()) {
+            String imageUrl = uploadToCloudinary(request.getImage(), cloudinary);
+            System.out.println("Uploaded image URL: " + imageUrl);
+            product.setImage(imageUrl);
+        } else {
+            System.out.println("Image is null or empty, skipping upload");
+        }
     }
 
-    private static String uploadToCloudinary(MultipartFile file) {
-        // Upload file và trả về URL (chỉ là ví dụ đơn giản)
-        return "https://your-cloud.com/" + file.getOriginalFilename();
+
+
+    default String uploadToCloudinary(MultipartFile file, @Context Cloudinary cloudinary) throws IOException {
+        if (file == null || file.isEmpty()) {
+            System.out.println("File is null or empty");
+            return null;
+        }
+        try {
+            System.out.println("Uploading file: " + file.getOriginalFilename() + " with Cloudinary: " + cloudinary);
+            Map uploadResult = cloudinary.uploader().upload(file.getBytes(), Map.of());
+            String url = uploadResult.get("url").toString();
+            System.out.println("Upload successful, URL: " + url);
+            return url;
+        } catch (Exception e) {
+            System.err.println("Error during upload: " + e.getMessage());
+            throw new IOException("Lỗi khi tải tệp lên Cloudinary: " + e.getMessage(), e);
+        }
     }
+
+
+
+
 
 
      Product toUpdateProduct(ProductUpdateRequest request);
