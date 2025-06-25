@@ -21,4 +21,6 @@ public interface StaffRepository extends JpaRepository<Staff, String> {
     @Query("SELECT new com.app.product_warehourse.dto.response.StaffResponse(s.staffId, s.fullName, s.gender, s.birthDate, s.phoneNumber, s.email) " +
             "FROM Staff s")
     List<StaffResponse> findAllStaffResponse();
+
+    long countByStatus(Boolean status);
 }

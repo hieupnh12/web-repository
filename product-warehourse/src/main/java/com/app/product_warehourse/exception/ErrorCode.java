@@ -43,6 +43,8 @@ public enum ErrorCode {
     TOKEN_STILL_VALID(1024, "A link reset password already send. Please check your email.",HttpStatus.BAD_REQUEST),
     ACCOUNT_INACTIVE(1025, "Account is inactive.",HttpStatus.BAD_REQUEST),
     FUNCTION_NOT_EXIST(1026, "Function not exist.",HttpStatus.BAD_REQUEST),
+    CUSTOMER_NOT_EXIST(1027, "Customer not exist.",HttpStatus.BAD_REQUEST),
+
     ;
 
     ErrorCode(int code, String message, HttpStatusCode statusCode) {
