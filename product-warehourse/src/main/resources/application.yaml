@@ -33,13 +33,12 @@ spring:
 
 cloudinary:
   cloud:
-    name: dpf4ph1qu
+    name: ImageCloud
   api:
     key: 756234473817482
     secret:
-
-#  T5qQXodnthydHuSyQYrF-xk98Eo
-
+    secret: 
+#  T5qQXodnthydHuSyQYrF
 
 
 jwt:
