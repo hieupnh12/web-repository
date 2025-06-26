@@ -67,3 +67,5 @@ export const CustomerStatistic = () => {
     </div>
   );
 };
+
+export default CustomerStatistic;
