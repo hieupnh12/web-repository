@@ -52,7 +52,7 @@ const EditStaff = () => {
       };
       console.log('Payload sent to API:', payload); // Debug payload
       await updateEmployee(form.staffId, payload);
-      navigate('/staff');
+      // navigate('/staff');
     } catch (err) {
       console.error('Update error:', err);
       const errorMessage = err.response?.data?.message || err.message || 'Lỗi không xác định';

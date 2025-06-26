@@ -51,6 +51,10 @@ const pageConfig = {
       { label: "Thêm phiếu" },
     ],
   },
+  "/permissions": {
+    title: "Permissions",
+    breadcrumb: [{ label: "Permissions" }],
+  },
 };
 
 const LayoutCommon = () => {

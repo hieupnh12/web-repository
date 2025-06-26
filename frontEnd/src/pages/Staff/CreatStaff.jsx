@@ -31,7 +31,7 @@ const CreateStaff = () => {
       };
       await addEmployee(formattedForm);
       alert('Thêm nhân viên thành công!');
-      navigate('/manager/staff');
+      // navigate('/manager/staff');
     } catch (err) {
       console.error('Lỗi khi thêm nhân viên:', err);
       alert('Đã xảy ra lỗi khi thêm nhân viên.');

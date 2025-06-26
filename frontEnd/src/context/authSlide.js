@@ -17,6 +17,8 @@ const authSlide = createSlice({
             Cookie.remove("token");
 
             state.data = null;
+            state.userInfo = null;
+      state.functionIds = [];
         },
         setUserInfo: (state, action) => {
     state.userInfo = action.payload; // { fullName, roleName }
