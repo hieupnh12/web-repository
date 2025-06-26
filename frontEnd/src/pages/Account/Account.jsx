@@ -1,8 +1,14 @@
-import React, { useState, useEffect, startTransition } from 'react';
-import Accdetails from './AccountDetails';
+import React, { useEffect, useState } from 'react';
+import { Plus, Edit, Trash, Info, Search, RefreshCw } from 'lucide-react';
 import CreateAcc from './CreateAcc';
-import { createAccount, updateAccount, deleteAccount } from '../../api/accountApi';
-import { fetchAccounts } from '../../services/accountService';
+import Accdetails from './AccountDetails';
+import {
+  createAccount,
+  updateAccount,
+  deleteAccount,
+  fetchAccounts
+} from '../../services/accountService';
+import Button from '../../components/ui/Button';
 
 export default function Account() {
   const [accounts, setAccounts] = useState([]);
@@ -12,58 +18,54 @@ export default function Account() {
   const [editMode, setEditMode] = useState(false);
   const [employeeToCreate, setEmployeeToCreate] = useState(null);
   const [search, setSearch] = useState('');
-  const [filterRole, setFilterRole] = useState('All');
   const [error, setError] = useState(null);
+  const [loading, setLoading] = useState(true);
 
   const selectedAccount = accounts.find((acc) => acc.staffId === selectedId);
 
   const loadAccounts = async () => {
+    setLoading(true);
     try {
       setError(null);
       const response = await fetchAccounts();
-      console.log(response);
-      
-      setAccounts(response.data.result);
-    } catch (error) {
-      console.error('❌ Failed to fetch accounts:', error);
-      setError(error.message || 'Failed to fetch accounts.');
+      setAccounts(response.data.result || []);
+    } catch (err) {
+      console.error('❌ Error fetching accounts:', err);
+      setError(err.message || 'Failed to load accounts.');
+    } finally {
+      setLoading(false);
     }
   };
 
   useEffect(() => {
-     loadAccounts();
-    // startTransition(() => {
-    //   loadAccounts();
-    // });
+    loadAccounts();
   }, []);
 
-  const handleSaveAccount = async (newData) => {
-      try {
-        setError(null);
-        const payload = {
-          userName: newData.userName,
-          roleId: parseInt(newData.roleId),
-        };
-        if (!editMode && newData.password) {
-          payload.password = newData.password;
-        }
+  const handleSaveAccount = async (formData) => {
+    try {
+      const payload = {
+        userName: formData.userName,
+        roleId: parseInt(formData.roleId),
+      };
 
-        const staffId = newData.staffId || generateUUID();
-        if (editMode) {
-          await updateAccount(staffId, payload);
-        } else {
-          await createAccount(staffId, payload);
-        }
-        await loadAccounts();
-      } catch (err) {
-        console.error('❌ Failed to save account:', err);
-        setError(err.message || 'Failed to save account.');
+      if (!editMode && formData.password) {
+        payload.password = formData.password;
       }
 
+      if (editMode) {
+        await updateAccount(formData.staffId, payload);
+      } else {
+        await createAccount(formData.staffId, payload);
+      }
+
+      await loadAccounts();
       setShowCreateAcc(false);
       setEditMode(false);
       setSelectedId(null);
-      setEmployeeToCreate(null);
+    } catch (err) {
+      console.error('❌ Save failed:', err);
+      setError(err.message || 'Failed to save account.');
+    }
   };
 
   const handleDelete = async () => {
@@ -72,14 +74,15 @@ export default function Account() {
       return;
     }
     if (window.confirm('Are you sure you want to delete this account?')) {
-        try {
-          setError(null);
-          await deleteAccount(selectedId);
-          await loadAccounts();
-        } catch (error) {
-          console.error('❌ Failed to delete:', error);
-          setError(error.message || 'Failed to delete account.');
-        }
+
+      try {
+        await deleteAccount(selectedId);
+        await loadAccounts();
+        setSelectedId(null);
+      } catch (err) {
+        console.error('❌ Delete failed:', err);
+        setError(err.message || 'Failed to delete.');
+      }
     }
   };
 
@@ -92,149 +95,142 @@ export default function Account() {
     setShowCreateAcc(true);
   };
 
-  const filteredAccounts = accounts.filter((acc) => {
-    const matchRole = filterRole === 'All' || acc.roleId === parseInt(filterRole);
-    const matchSearch =
-      acc.userName?.toLowerCase().includes(search.toLowerCase()) ||
-      acc.staffId?.toString().toLowerCase().includes(search.toLowerCase());
-    return matchRole && matchSearch;
-  });
-
-  const generateUUID = () => {
-    return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
-      var r = Math.random() * 16 | 0, v = c === 'x' ? r : (r & 0x3 | 0x8);
-      return v.toString(16);
-    });
-  };
+  const filtered = accounts.filter((acc) =>
+    acc.userName?.toLowerCase().includes(search.toLowerCase())
+  );
 
   return (
-    <div className="p-4">
-      {error && (
-        <div className="mb-4 p-2 bg-red-100 text-red-700 border border-red-400 rounded">
-          {error}
-        </div>
-      )}
+    <div className="min-h-screen w-full bg-gradient-to-br from-gray-50 to-blue-50 flex flex-col">
+      <div className="flex-grow w-full px-4 py-6">
+        <div className="bg-white rounded-2xl shadow-lg p-4 sm:p-6 mb-6">
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+            <div className="flex flex-wrap gap-2 sm:gap-3 items-center">
+              <Button
+                onClick={() => {
+                  setEditMode(false);
+                  setShowCreateAcc(true);
+                }}
+                className="group flex items-center gap-2 bg-blue-600 text-white hover:bg-blue-700 hover:scale-105 transition-all duration-300 shadow-lg px-3 py-2 text-sm"
+              >
+                <Plus className="w-4 h-4 group-hover:rotate-90 transition-transform" />
+                <span className="hidden sm:inline">Add</span>
+              </Button>
 
-      <div className="flex flex-wrap items-center justify-between mb-4">
-        <div className="flex items-center gap-2 mb-2 sm:mb-0">
-          <button
-            onClick={() => {
+              <Button
+                onClick={handleEdit}
+                className="group flex items-center gap-2 bg-yellow-500 text-white hover:bg-yellow-600 hover:scale-105 transition-all duration-300 shadow-lg px-3 py-2 text-sm"
+              >
+                <Edit className="w-4 h-4" />
+                <span className="hidden sm:inline">Edit</span>
+              </Button>
+
+              <Button
+                onClick={handleDelete}
+                className="group flex items-center gap-2 bg-red-600 text-white hover:bg-red-700 hover:scale-105 transition-all duration-300 shadow-lg px-3 py-2 text-sm"
+              >
+                <Trash className="w-4 h-4" />
+                <span className="hidden sm:inline">Delete</span>
+              </Button>
+
+              <Button
+                onClick={() => {
+                  if (!selectedId) {
+                    setError('Please select an account!');
+                    return;
+                  }
+                  setShowDetails(true);
+                }}
+                className="group flex items-center gap-2 bg-purple-600 text-white hover:bg-purple-700 hover:scale-105 transition-all duration-300 shadow-lg px-3 py-2 text-sm"
+              >
+                <Info className="w-4 h-4" />
+                <span className="hidden sm:inline">Details</span>
+              </Button>
+
+              <Button
+                onClick={loadAccounts}
+                className="group flex items-center gap-2 bg-gray-500 text-white hover:bg-gray-600 hover:scale-105 transition-all duration-300 shadow-lg px-3 py-2 text-sm"
+              >
+                <RefreshCw className="w-4 h-4" />
+                <span className="hidden sm:inline">Reload</span>
+              </Button>
+            </div>
+
+            {/* Search bar */}
+            <div className="relative w-full sm:w-72">
+              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
+              <input
+                type="text"
+                placeholder="Search account..."
+                className="w-full pl-10 pr-4 py-2 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
+                value={search}
+                onChange={(e) => setSearch(e.target.value)}
+              />
+            </div>
+          </div>
+        </div>
+
+        {/* Error Message */}
+        {error && (
+          <div className="mb-4 p-2 bg-red-100 text-red-700 border border-red-400 rounded">
+            {error}
+          </div>
+        )}
+
+        {/* Table */}
+        <div className="bg-white rounded-xl shadow overflow-auto">
+          <table className="min-w-full text-sm text-center">
+            <thead className="bg-gray-100">
+              <tr>
+                <th className="px-4 py-2">#</th>
+                <th className="px-4 py-2">Username</th>
+                <th className="px-4 py-2">Role</th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-gray-200">
+              {filtered.map((acc, index) => (
+                <tr
+                  key={acc.staffId}
+                  onClick={() => setSelectedId(acc.staffId)}
+                  className={`cursor-pointer hover:bg-blue-50 ${
+                    selectedId === acc.staffId ? 'bg-blue-100 font-semibold' : ''
+                  }`}
+                >
+                  <td className="px-4 py-2">{index + 1}</td>
+                  <td className="px-4 py-2">{acc.userName}</td>
+                  <td className="px-4 py-2">{acc.roleId}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+
+        {/* Modals */}
+        {showCreateAcc && (
+          <CreateAcc
+            account={editMode ? selectedAccount : employeeToCreate}
+            onClose={() => {
+              setShowCreateAcc(false);
               setEditMode(false);
+              setEmployeeToCreate(null);
+            }}
+            onSave={handleSaveAccount}
+          />
+        )}
+        {showDetails && (
+          <Accdetails
+            onSelect={(employee) => {
+              setEmployeeToCreate({
+                staffId: employee.id,
+                userName: '',
+                roleId: '2',
+              });
+              setShowDetails(false);
               setShowCreateAcc(true);
             }}
-            className="bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded font-bold"
-          >
-            Add
-          </button>
-          <button
-            onClick={handleEdit}
-            className="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded font-bold"
-          >
-            Edit
-          </button>
-          <button
-            onClick={handleDelete}
-            className="bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded font-bold"
-          >
-            Delete
-          </button>
-          <button
-            onClick={() => {
-              if (!selectedId) {
-                setError('Please select an account!');
-                return;
-              }
-              setShowDetails(true);
-            }}
-            className="bg-yellow-500 hover:bg-yellow-600 text-white px-4 py-2 rounded font-bold"
-          >
-            Details
-          </button>
-        </div>
-
-        <div className="flex items-center gap-2">
-          <select
-            className="border rounded px-3 py-2"
-            value={filterRole}
-            onChange={(e) => setFilterRole(e.target.value)}
-          >
-            <option value="All">All</option>
-            <option value="1">Admin</option>
-            <option value="2">Staff</option>
-            <option value="3">Manager</option>
-          </select>
-
-          <input
-            type="text"
-            placeholder="Search..."
-            className="border rounded px-3 py-2"
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
+            onClose={() => setShowDetails(false)}
           />
-
-          <button
-            className="bg-teal-500 hover:bg-teal-600 text-white px-4 py-2 rounded font-bold"
-            onClick={() => startTransition(() => loadAccounts())}
-          >
-            Reload
-          </button>
-        </div>
+        )}
       </div>
-
-      <div className="overflow-x-auto">
-        <table className="w-full text-sm border rounded-md overflow-hidden text-center">
-          <thead className="bg-gray-100 text-black font-semibold">
-            <tr>
-              <th className="px-4 py-2">ID</th>
-              <th className="px-4 py-2">Username</th>
-              <th className="px-4 py-2">Role</th>
-            </tr>
-          </thead>
-          <tbody className="divide-y divide-gray-200">
-            {filteredAccounts.map((acc) => (
-              <tr
-                key={acc.staffId}
-                className={`hover:bg-blue-50 cursor-pointer ${
-                  selectedId === acc.staffId ? 'bg-blue-100 font-bold' : ''
-                }`}
-                onClick={() => setSelectedId(acc.staffId)}
-              >
-                <td className="px-4 py-2">{acc.staffId}</td>
-                <td className="px-4 py-2">{acc.userName}</td>
-                <td className="px-4 py-2">{acc.roleId}</td>
-               
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
-
-      {showCreateAcc && (
-        <CreateAcc
-          account={editMode ? selectedAccount : employeeToCreate}
-          onClose={() => {
-            setShowCreateAcc(false);
-            setEditMode(false);
-            setEmployeeToCreate(null);
-          }}
-          onSave={handleSaveAccount}
-        />
-      )}
-
-      {showDetails && (
-        <Accdetails
-          onSelect={(employee) => {
-            setEmployeeToCreate({
-              staffId: employee.id || generateUUID(),
-              userName: '',
-              roleId: '2',
-            });
-            setShowDetails(false);
-            setShowCreateAcc(true);
-          }}
-          onClose={() => setShowDetails(false)}
-        />
-      )}
     </div>
   );
 }

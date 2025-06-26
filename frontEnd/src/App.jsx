@@ -9,7 +9,6 @@ import LayoutCommon from "./components/layout/Layout";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import LazyLoader from "./components/layout/LazyLoader";
 import Permissions from "./pages/Permission";
-import AuthGuard from "./utils/AuthGuard";
 
 
 
@@ -32,7 +31,7 @@ const ProductsPage = lazy(() => import("./pages/Products"));
 // const Inventory = lazy(() => import('./pages/Inventory/Inventory'));
 const WarehouseAreas = lazy(() => import('./pages/Storage'));
 // const Customers = lazy(() => import('./pages/Customers/Customers'));
-const Suppliers = lazy(() => import('./pages/Suppliers'));
+// const Suppliers = lazy(() => import('./pages/Suppliers/Suppliers'));
  const CreateStaff = lazy(() => import('./pages/Staff/CreatStaff'));
   const Staff = lazy(() => import('./pages/Staff/Staff'));
 const EditStaff = lazy(() => import('./pages/Staff/EditStaff'));
@@ -72,13 +71,22 @@ const router = createBrowserRouter(
         {/* <Route path="import" element={<ImportStock />} /> */}
         <Route path="export" element={<LazyLoader><ExportStock /></LazyLoader>} />
         {/* <Route path="customers" element={<Customers />} /> */}
-         <Route path="suppliers" element={<LazyLoader><Suppliers /></LazyLoader>} />
+        {/* <Route path="suppliers" element={<Suppliers />} /> */}
         { <Route path="staff" element={<Staff />} /> }
         <Route path="staff/add" element={<CreateStaff />} />
         <Route path="staff/edit" element={<EditStaff />} />
         { <Route path="account" element={<Account />} /> }
         <Route path="permissions" element={<LazyLoader><Permissions /></LazyLoader>} />
-        {/* <Route path="revenue" element={<Revenue />} /> */}
+        <Route path="statistics" element={<StatisticsLayout />}>
+          <Route index element={<Overview />} />
+            <Route path="overview" element={<Overview />} />
+            <Route path="inventory" element={<StatisticsInventory />} />
+            <Route path="revenue" element={<StatisticsRevenue />} />
+            <Route path="suppliers" element={<StatisticsSuppliers />} />
+            <Route path="customers" element={<StatisticsCustomers />} />
+        </Route>
+
+        
         <Route path="*" element={<NotFound />} />
       </Route>
 
@@ -88,6 +96,15 @@ const router = createBrowserRouter(
         <Route index element={<LazyLoader><Dashboard /></LazyLoader>} />
         <Route path="dashboard" element={<LazyLoader><Dashboard /></LazyLoader>} />
         <Route path="export" element={<LazyLoader><ExportStock /></LazyLoader>} />
+        <Route path="statistics" element={<StatisticsLayout />}>
+          <Route index element={<Overview />} />
+            <Route path="overview" element={<Overview />} />
+            <Route path="inventory" element={<StatisticsInventory />} />
+            <Route path="revenue" element={<StatisticsRevenue />} />
+            <Route path="suppliers" element={<StatisticsSuppliers />} />
+            <Route path="customers" element={<StatisticsCustomers />} />
+        </Route>
+        
         {/* <Route path="import" element={<ImportStock />} /> */}
         {/* <Route path="inventory" element={<Inventory />} /> */}
         {/* <Route path="products" element={<Products />} /> */}
