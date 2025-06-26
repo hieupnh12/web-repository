@@ -15,11 +15,13 @@ import {
 
 const BarcodeScanner = ({ open, onClose, onResult }) => {
   const videoRef = useRef(null);
+  const codeReaderRef = useRef(null);
+  const scannedRef = useRef(new Set()); // ✅ lưu các mã đã quét
+
   const [result, setResult] = useState("No barcode scanned yet");
-  const [isScanning, setIsScanning] = useState(false);
   const [status, setStatus] = useState("waiting"); // waiting, success, error, scanning
   const [isLoading, setIsLoading] = useState(true);
-  const codeReaderRef = useRef(null);
+  const [isScanning, setIsScanning] = useState(false);
 
   const stopScanner = () => {
     if (codeReaderRef.current) {
@@ -29,13 +31,12 @@ const BarcodeScanner = ({ open, onClose, onResult }) => {
         codeReaderRef.current.reset();
       }
     }
-     // Tắt camera thật sự
-  if (videoRef.current && videoRef.current.srcObject) {
-    const stream = videoRef.current.srcObject;
-    const tracks = stream.getTracks();
-    tracks.forEach(track => track.stop());
-    videoRef.current.srcObject = null;
-  }
+
+    if (videoRef.current && videoRef.current.srcObject) {
+      const stream = videoRef.current.srcObject;
+      stream.getTracks().forEach((track) => track.stop());
+      videoRef.current.srcObject = null;
+    }
   };
 
   const startScanner = async () => {
@@ -44,6 +45,7 @@ const BarcodeScanner = ({ open, onClose, onResult }) => {
     setIsLoading(true);
     setStatus("scanning");
     setIsScanning(true);
+    scannedRef.current.clear(); // ✅ clear danh sách mã cũ khi khởi động mới
 
     codeReaderRef.current = new BrowserMultiFormatReader();
 
@@ -54,25 +56,28 @@ const BarcodeScanner = ({ open, onClose, onResult }) => {
         (result, err) => {
           if (result) {
             const scannedText = result.getText();
-            setIsScanning(false);
+
+            if (scannedRef.current.has(scannedText)) return; // ✅ bỏ qua mã trùng
+            scannedRef.current.add(scannedText); // ✅ lưu mã đã quét (dù đúng/sai)
+
+            setResult(scannedText);
 
             if (/^\d{15}$/.test(scannedText)) {
-              setResult(`${scannedText}`);
-              setStatus("success");
-              onResult && onResult(scannedText, true);
-              stopScanner();
-            } else {
-              setResult(`${scannedText}`);
-              setStatus("error");
-              onResult && onResult(scannedText, false);
-            }
+  setStatus("success");
+  setIsScanning(false);
+  onResult && onResult(scannedText, true);
+  stopScanner(); 
+  setResult("");
+} else {
+  setStatus("error");
+
+  // ✅ chỉ gọi onResult với mã sai nếu đây là lần đầu gặp
+  onResult && onResult(scannedText, false);
+  setResult("");
+}
           }
 
-          if (err) {
-            // Bỏ qua lỗi not found bình thường
-            if (err.name === "NotFoundException") {
-              return;
-            }
+          if (err && err.name !== "NotFoundException") {
             console.error("Scanning error:", err);
           }
         }
@@ -82,8 +87,8 @@ const BarcodeScanner = ({ open, onClose, onResult }) => {
       console.error("Cannot access camera:", err);
       setResult("Cannot access camera");
       setStatus("error");
-      setIsLoading(false);
       setIsScanning(false);
+      setIsLoading(false);
     }
   };
 
@@ -93,7 +98,8 @@ const BarcodeScanner = ({ open, onClose, onResult }) => {
     setStatus("waiting");
     setIsScanning(false);
     setIsLoading(true);
-    setTimeout(() => startScanner(), 100);
+    scannedRef.current.clear(); // ✅ reset danh sách quét khi reset
+    setTimeout(() => startScanner(), 1000);
   };
 
   const handleClose = () => {
@@ -102,6 +108,7 @@ const BarcodeScanner = ({ open, onClose, onResult }) => {
     setStatus("waiting");
     setIsScanning(false);
     setIsLoading(true);
+    scannedRef.current.clear();
     onClose && onClose();
   };
 
@@ -119,9 +126,7 @@ const BarcodeScanner = ({ open, onClose, onResult }) => {
       case "success":
         return <CheckCircleIconSolid className="w-6 h-6 text-green-500" />;
       case "error":
-        return (
-          <ExclamationTriangleIconSolid className="w-6 h-6 text-red-500" />
-        );
+        return <ExclamationTriangleIconSolid className="w-6 h-6 text-red-500" />;
       case "scanning":
         return <QrCodeIcon className="w-6 h-6 text-blue-500" />;
       default:
@@ -130,24 +135,16 @@ const BarcodeScanner = ({ open, onClose, onResult }) => {
   };
 
   const getStatusText = () => {
-    if (/^\d{15}$/.test(result) && status === "success") {
-      return "Valid IMEI";
-    } else if (status === "error" && result !== "Cannot access camera") {
-      return "Not a 15-digit IMEI";
-    } else if (status === "scanning") {
-      return "Scanning...";
-    }
+    if (/^\d{15}$/.test(result) && status === "success") return "Valid IMEI";
+    if (status === "error" && result !== "Cannot access camera") return "Not a 15-digit IMEI";
+    if (status === "scanning") return "Scanning...";
     return "Ready to scan";
   };
 
   const getStatusBadgeClasses = () => {
-    if (/^\d{15}$/.test(result) && status === "success") {
-      return "bg-green-100 text-green-800 border-green-300";
-    } else if (status === "error") {
-      return "bg-red-100 text-red-800 border-red-300";
-    } else if (status === "scanning") {
-      return "bg-blue-100 text-blue-800 border-blue-300";
-    }
+    if (status === "success") return "bg-green-100 text-green-800 border-green-300";
+    if (status === "error") return "bg-red-100 text-red-800 border-red-300";
+    if (status === "scanning") return "bg-blue-100 text-blue-800 border-blue-300";
     return "bg-gray-100 text-gray-800 border-gray-300";
   };
 
@@ -155,7 +152,7 @@ const BarcodeScanner = ({ open, onClose, onResult }) => {
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
-      <div className="bg-white rounded-2xl shadow-2xl w-full max-w-md transform transition-all duration-300 scale-100 opacity-100">
+      <div className="bg-white rounded-2xl shadow-2xl w-full max-w-md">
         {/* Header */}
         <div className="bg-gradient-to-r from-indigo-500 to-purple-600 text-white p-4 rounded-t-2xl">
           <div className="flex items-center justify-between">
@@ -163,14 +160,12 @@ const BarcodeScanner = ({ open, onClose, onResult }) => {
               <DevicePhoneMobileIcon className="w-8 h-8" />
               <div>
                 <h2 className="text-xl font-bold">IMEI Scanner</h2>
-                <p className="text-sm opacity-90">
-                  Scan barcode to verify IMEI
-                </p>
+                <p className="text-sm">Scan barcode to verify IMEI</p>
               </div>
             </div>
             <button
               onClick={handleClose}
-              className="p-2 hover:bg-white hover:bg-opacity-20 rounded-full transition-colors"
+              className="p-2 hover:bg-white hover:bg-opacity-20 rounded-full"
             >
               <XMarkIcon className="w-6 h-6" />
             </button>
@@ -179,10 +174,9 @@ const BarcodeScanner = ({ open, onClose, onResult }) => {
 
         {/* Content */}
         <div className="p-6 space-y-6">
-          {/* Camera Section */}
+          {/* Camera Preview */}
           <div className="relative flex justify-center">
             <div className="relative w-full max-w-sm border-2 border-blue-500 rounded-2xl overflow-hidden bg-gradient-to-br from-gray-50 to-white shadow-lg">
-              {/* Loading Overlay */}
               {isLoading && (
                 <div className="absolute inset-0 bg-black bg-opacity-70 flex items-center justify-center z-10">
                   <div className="text-center text-white">
@@ -192,7 +186,6 @@ const BarcodeScanner = ({ open, onClose, onResult }) => {
                 </div>
               )}
 
-              {/* Video Element */}
               <video
                 ref={videoRef}
                 className="w-full h-64 object-cover bg-black"
@@ -201,7 +194,7 @@ const BarcodeScanner = ({ open, onClose, onResult }) => {
                 playsInline
               />
 
-              {/* Scanning Line */}
+              {/* Scan line */}
               {isScanning && (
                 <div
                   className="absolute left-4 right-4 h-0.5 bg-gradient-to-r from-transparent via-red-500 to-transparent shadow-lg"
@@ -211,64 +204,51 @@ const BarcodeScanner = ({ open, onClose, onResult }) => {
                 />
               )}
 
-              {/* Corner Markers */}
+              {/* Corner markers */}
               <div className="absolute top-5 left-5 w-5 h-5 border-l-4 border-t-4 border-blue-500 rounded-tl-lg"></div>
               <div className="absolute top-5 right-5 w-5 h-5 border-r-4 border-t-4 border-blue-500 rounded-tr-lg"></div>
               <div className="absolute bottom-5 left-5 w-5 h-5 border-l-4 border-b-4 border-blue-500 rounded-bl-lg"></div>
               <div className="absolute bottom-5 right-5 w-5 h-5 border-r-4 border-b-4 border-blue-500 rounded-br-lg"></div>
 
-              {/* Refresh Button */}
               <button
                 onClick={resetScanner}
-                className="absolute top-3 right-3 p-2 bg-white bg-opacity-90 hover:bg-opacity-100 rounded-full shadow-md transition-all duration-200 hover:scale-110"
+                className="absolute top-3 right-3 p-2 bg-white bg-opacity-90 hover:bg-opacity-100 rounded-full shadow-md"
               >
                 <ArrowPathIcon className="w-4 h-4 text-gray-700" />
               </button>
             </div>
           </div>
 
-          {/* Status Badge */}
+          {/* Status */}
           <div className="flex justify-center">
-            <div
-              className={`inline-flex items-center space-x-2 px-4 py-2 rounded-full border-2 font-medium transition-all duration-300 ${getStatusBadgeClasses()}`}
-            >
+            <div className={`inline-flex items-center space-x-2 px-4 py-2 rounded-full border-2 font-medium ${getStatusBadgeClasses()}`}>
               {getStatusIcon()}
               <span>{getStatusText()}</span>
             </div>
           </div>
 
-          {/* Divider */}
-          <div className="border-t border-gray-200"></div>
-
-          {/* Result Section */}
+          {/* Result */}
           {result !== "No barcode scanned yet" && (
             <div className="space-y-4 animate-fade-in">
-              <div
-                className={`p-4 rounded-xl border-2 transition-all duration-300 ${
-                  status === "success"
-                    ? "bg-green-50 border-green-200"
-                    : status === "error"
-                    ? "bg-red-50 border-red-200"
-                    : "bg-blue-50 border-blue-200"
-                }`}
-              >
+              <div className={`p-4 rounded-xl border-2 ${
+                status === "success"
+                  ? "bg-green-50 border-green-200"
+                  : status === "error"
+                  ? "bg-red-50 border-red-200"
+                  : "bg-blue-50 border-blue-200"
+              }`}>
                 <div className="flex items-center space-x-3 mb-3">
                   {getStatusIcon()}
-                  <h3 className="text-lg font-semibold text-gray-800">
-                    Scan Result
-                  </h3>
+                  <h3 className="text-lg font-semibold">Scan Result</h3>
                 </div>
-
                 <div className="bg-white bg-opacity-80 p-3 rounded-lg border border-dashed border-gray-400">
-                  <p
-                    className={`text-lg font-mono tracking-widest text-center ${
-                      status === "success"
-                        ? "text-green-600"
-                        : status === "error"
-                        ? "text-red-600"
-                        : "text-blue-600"
-                    }`}
-                  >
+                  <p className={`text-lg font-mono text-center ${
+                    status === "success"
+                      ? "text-green-600"
+                      : status === "error"
+                      ? "text-red-600"
+                      : "text-blue-600"
+                  }`}>
                     {result}
                   </p>
                 </div>

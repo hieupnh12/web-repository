@@ -8,7 +8,7 @@ const AddRoleModal = ({ onClose, onSubmit }) => {
   const [loading, setLoading] = useState(false);
   const [roleName, setRoleName] = useState("");
   const [description, setDescription] = useState("");
-  const [permissions, setPermissions] = useState([]);
+  const [permission, setPermissions] = useState([]);
 
   useEffect(() => {
     const loadRole = async () => {
@@ -48,7 +48,16 @@ const AddRoleModal = ({ onClose, onSubmit }) => {
     );
   };
 
+  
+function getObjectsWithPermissions(data) {  
+  return data.filter(item =>
+    item.canView || item.canCreate || item.canUpdate || item.canDelete
+  );
+}
+
   const handleSubmit = () => {
+
+    const permissions = getObjectsWithPermissions(permission);
     const payload = {
       roleName,
       description,
@@ -109,7 +118,7 @@ const AddRoleModal = ({ onClose, onSubmit }) => {
               </thead>
               <tbody>
                 {functions?.map((fn) => {
-                  const perm = permissions.find(
+                  const perm = permission.find(
                     (p) => p.functionId === fn.functionId
                   );
                   return (

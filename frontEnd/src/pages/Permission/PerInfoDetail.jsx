@@ -14,7 +14,7 @@ const PerInfoDetail = ({ onClose, role, data }) => {
   // load khi mới đầu vô
   const [loading, setLoading] = useState(false);
   const [description, setDescription] = useState("");
-  const [permissions, setPermissions] = useState([]);
+  const [permission, setPermissions] = useState([]);
   const [showConfirm, setShowConfirm] = useState(false);
   // load khi thực hiện crud
   const [loadingV2, setLoadingV2] = useState(false);
@@ -22,7 +22,7 @@ const PerInfoDetail = ({ onClose, role, data }) => {
   const [isEditing, setIsEditing] = useState(false);
   const [showConfirmUpdate, setShowConfirmUpdate] = useState(false);
 
-  console.log(role);
+  // console.log(role);
 
   useEffect(() => {
     const loadFunctionEachRole = async () => {
@@ -83,8 +83,17 @@ const PerInfoDetail = ({ onClose, role, data }) => {
     }
   };
 
+function getObjectsWithPermissions(data) {  
+  return data.filter(item =>
+    item.canView || item.canCreate || item.canUpdate || item.canDelete
+  );
+}
+  
   // api Update
   const handleUpdate = async () => {
+    // lọc quyền
+      const permissions =  getObjectsWithPermissions(permission);
+
     const payload = {
       roleName: role.roleName,
       description,
@@ -92,7 +101,9 @@ const PerInfoDetail = ({ onClose, role, data }) => {
     };
     setShowConfirmUpdate(false);
     setLoadingV2(true);
-    try {
+    try {      
+      console.log("sôsdidiid", payload);
+      
       const response = await takeUpdateRole(role.roleId, payload);
 
       if (response.status === 200) {
@@ -176,7 +187,7 @@ const PerInfoDetail = ({ onClose, role, data }) => {
               </thead>
               <tbody>
                 {functions?.map((fn) => {
-                  const perm = permissions.find(
+                  const perm = permission.find(
                     (p) => p.functionId === fn.functionId
                   );
                   return (
