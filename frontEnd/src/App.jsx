@@ -36,13 +36,9 @@ const ProductsPage = lazy(() => import("./pages/Products"));
 // const Inventory = lazy(() => import('./pages/Inventory/Inventory'));
 const WarehouseAreas = lazy(() => import("./pages/Storage"));
 // const Customers = lazy(() => import('./pages/Customers/Customers'));
-// const Suppliers = lazy(() => import('./pages/Suppliers/Suppliers'));
-
- const CreateStaff = lazy(() => import('./pages/Staff/CreateStaff'));
-  const Staff = lazy(() => import('./pages/Staff/Staff'));
-const EditStaff = lazy(() => import('./pages/Staff/EditStaff'));
- const Account = lazy(() => import('./pages/Account/Account'));
-  const Account = lazy(() => import('./pages/Account/Account'));
+const Suppliers = lazy(() => import('./pages/Suppliers'));
+const Staff = lazy(() => import("./pages/Staff/Staff"));
+const Account = lazy(() => import("./pages/Account/Account"));
 
 
 // Optional: 404 Not Found page
@@ -137,12 +133,31 @@ const router = createBrowserRouter(
               </LazyLoader>
             }
           />
+          <Route
+            path="suppliers"
+            element={
+              <LazyLoader>
+                <Suppliers />
+              </LazyLoader>
+            }
+          />
           {/* <Route path="customers" element={<Customers />} /> */}
-          {/* <Route path="suppliers" element={<Suppliers />} /> */}
-          {<Route path="staff" element={<Staff />} />}
-          <Route path="staff/add" element={<CreateStaff />} />
-          <Route path="staff/edit" element={<EditStaff />} />
-          {<Route path="account" element={<Account />} />}
+          <Route
+            path="staff"
+            element={
+              <LazyLoader>
+                <Staff />
+              </LazyLoader>
+            }
+            />
+           <Route
+            path="account"
+            element={
+              <LazyLoader>
+                <Account />
+              </LazyLoader>
+            }
+            />
           <Route
             path="permissions"
             element={
@@ -150,7 +165,7 @@ const router = createBrowserRouter(
                 <Permissions />
               </LazyLoader>
             }
-          cd      />
+            />
           <Route path="statistics" element={<StatisticsLayout />}>
             <Route index element={<Overview />} />
             <Route path="overview" element={<Overview />} />
