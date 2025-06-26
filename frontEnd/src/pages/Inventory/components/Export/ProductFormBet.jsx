@@ -15,7 +15,7 @@ const ProductForm = forwardRef(
     });
     const [isModalOpen, setIsModalOpen] = useState(false); // Trạng thái modal
     const [products, setProducts] = useState([]); // Lưu danh sách sản phẩm đã chọn option và imei trước đó để cập nhật
-     const [showScanner, setShowScanner] = useState(false);
+    const [showScanner, setShowScanner] = useState(false);
     console.log("edit", editProduct);
 
     useEffect(() => {
@@ -94,46 +94,32 @@ const ProductForm = forwardRef(
 
     const handleScanImei = () => {
       setShowScanner(true);
-      // const scannedImei = prompt("Nhập IMEI quét được:"); // Giả lập quét IMEI
-      // if (
-      //   scannedImei &&
-      //   formData.selectedOption?.imeiList.some(
-      //     (item) => item.imei === scannedImei && item.status === "in-stock"
-      //   )
-      // ) {
-      //   setFormData((prev) => ({
-      //     ...prev,
-      //     selectedImeis: [...new Set([...prev.selectedImeis, scannedImei])],
-      //   }));
-      // } else {
-      //   alert("IMEI không hợp lệ hoặc không có trong kho!");
-      // }
+     
     };
 
-
     const handleScanSuccess = (scannedImei) => {
-    setShowScanner(false);
+      setShowScanner(false);
+      console.log(scannedImei);
 
-    // Kiểm tra IMEI có hợp lệ và thêm vào form
-    if (
-      formData.selectedOption?.imeiList.some(
-        (item) => item.imei === scannedImei && item.status === "in-stock"
-      )
-    ) {
-      setFormData((prev) => ({
-        ...prev,
-        selectedImeis: [...new Set([...prev.selectedImeis, scannedImei])],
-      }));
-    } else {
-      alert("IMEI không hợp lệ hoặc không có trong kho!");
-    }
-  };
-
+      // Kiểm tra IMEI có hợp lệ và thêm vào form
+      if (
+        formData.selectedOption?.imeiList.some(
+          (item) => item.imei === scannedImei && item.status === "in-stock"
+        )
+      ) {
+        setFormData((prev) => ({
+          ...prev,
+          selectedImeis: [...new Set([...prev.selectedImeis, scannedImei])],
+        }));
+      } else {
+        console.log("IMEI không hợp lệ hoặc không có trong kho!");
+      }
+    };
 
     const handleAdd = () => {
       if (
         formData.selectedOption &&
-        formData?.selectedImeis.length > 0 
+        formData?.selectedImeis.length > 0
         //&& parseInt(formData.quantity) >= formData.selectedImeis.length
       ) {
         const newProduct = {
@@ -184,6 +170,11 @@ const ProductForm = forwardRef(
 
     return (
       <div className="md:w-1/2 space-y-4">
+        <BarcodeScanner
+          open={showScanner}
+          onResult={handleScanSuccess}
+          onClose={() => setShowScanner(false)}
+        />
         <div className="bg-white rounded shadow h-[350px] p-2">
           <div className="container mx-auto p-4">
             <div className="grid grid-cols-3 gap-4">
@@ -280,12 +271,6 @@ const ProductForm = forwardRef(
                     >
                       Quét IMEI
                     </button>
-                    {showScanner && (
-        <BarcodeScanner
-          onScanSuccess={handleScanSuccess}
-          onClose={() => setShowScanner(false)}
-        />
-      )}
                   </div>
                 </div>
                 <div className="mt-1">
