@@ -9,6 +9,8 @@ import LayoutCommon from "./components/layout/Layout";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import LazyLoader from "./components/layout/LazyLoader";
 import Permissions from "./pages/Permission";
+import AuthGuard from "./utils/AuthGuard";
+import CustomerStatistic from "./pages/Statistics/CustomerStatistic";
 
 
 
@@ -26,16 +28,18 @@ const Login = lazy(() => import("./pages/Login/Login"));
 const ForgotPassword = lazy(() => import("./pages/Login/ForgotPassword"));
 const ProductsPage = lazy(() => import("./pages/Products"));
 
-// const ImportStock = lazy(() => import('./pages/Inventory/ImportStock'));
+// const ImportStock = lazy(() => import('./pages/Inventory/ImportStock')); 
 // const Products = lazy(() => import('./pages/Products/Products'));
 // const Inventory = lazy(() => import('./pages/Inventory/Inventory'));
 const WarehouseAreas = lazy(() => import('./pages/Storage'));
 // const Customers = lazy(() => import('./pages/Customers/Customers'));
 // const Suppliers = lazy(() => import('./pages/Suppliers/Suppliers'));
- const CreateStaff = lazy(() => import('./pages/Staff/CreatStaff'));
+ const CreateStaff = lazy(() => import('./pages/Staff/CreateStaff'));
   const Staff = lazy(() => import('./pages/Staff/Staff'));
 const EditStaff = lazy(() => import('./pages/Staff/EditStaff'));
  const Account = lazy(() => import('./pages/Account/Account'));
+  const Account = lazy(() => import('./pages/Account/Account'));
+
 
 
 // Optional: 404 Not Found page
@@ -77,13 +81,13 @@ const router = createBrowserRouter(
         <Route path="staff/edit" element={<EditStaff />} />
         { <Route path="account" element={<Account />} /> }
         <Route path="permissions" element={<LazyLoader><Permissions /></LazyLoader>} />
-        <Route path="statistics" element={<StatisticsLayout />}>
+        {/* <Route path="statistics" element={<StatisticsLayout />}>
           <Route index element={<Overview />} />
             <Route path="overview" element={<Overview />} />
             <Route path="inventory" element={<StatisticsInventory />} />
             <Route path="revenue" element={<StatisticsRevenue />} />
             <Route path="suppliers" element={<StatisticsSuppliers />} />
-            <Route path="customers" element={<StatisticsCustomers />} />
+            <Route path="customers" element={<CustomerStatistic/>} /> */}
         </Route>
 
         
