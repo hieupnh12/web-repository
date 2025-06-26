@@ -31,7 +31,7 @@ const MENU_ITEMS = [
   { id: 9, label: "Nhân viên", icon: UserCircle, path: "staff", color: "text-blue-500" },
   { id: 10, label: "Tài khoản", icon: Settings, path: "account", color: "text-blue-500" },
   { id: 11, label: "Phân quyền", icon: UserCircle, path: "permissions", color: "text-blue-500" },
-  { id: 12, label: "Doanh thu", icon: Settings, path: "revenue", color: "text-blue-500" },
+  { id: 12, label: "Thống Kê", icon: Settings, path: "statistics", color: "text-blue-500" },
 ];
 
 const Sidebar = () => {

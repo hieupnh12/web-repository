@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import Accdetails from './AccountDetails';
-import { createAccount, updateAccount } from '../../api/accountApi';
+import { createAccount, updateAccount } from '../../services/accountService';
 
 export default function CreateAcc({ onClose, onSave, account }) {
   const [form, setForm] = useState({
@@ -13,9 +13,8 @@ export default function CreateAcc({ onClose, onSave, account }) {
   });
 
   const [showAccDetails, setShowAccDetails] = useState(false);
-  const [error, setError] = useState(null); // Thêm state để hiển thị lỗi
+  const [error, setError] = useState(null);
 
-  // Nếu đang chỉnh sửa account, nạp dữ liệu vào form
   useEffect(() => {
     if (account) {
       setForm({
@@ -37,11 +36,10 @@ export default function CreateAcc({ onClose, onSave, account }) {
     }));
   };
 
-  // Khi chọn nhân viên từ Accdetails
   const handleSelectEmployee = (staff) => {
     setForm((prev) => ({
       ...prev,
-      staffId: staff.staff_id, // Lưu UUID
+      staffId: staff.staffId,
       staff: staff,
     }));
     setShowAccDetails(false);
@@ -56,29 +54,23 @@ export default function CreateAcc({ onClose, onSave, account }) {
     }
 
     const payload = {
-      staffId: form.staffId, // Thêm staffId vào payload
+      staffId: form.staffId,
       userName: form.userName,
-      role: { id: parseInt(form.roleId) },
-      status: form.status ? 1 : 0,
+      password: form.password,
+      roleId: parseInt(form.roleId),
     };
 
     try {
-      setError(null); // Reset lỗi
+      setError(null);
       if (account) {
         await updateAccount(form.staffId, payload);
       } else {
-        const response = await createAccount(form.staffId, payload);
-        console.log(response);
-        
+        await createAccount(form.staffId, payload);
       }
-      onSave(); // Làm mới danh sách
+      onSave(payload); // Pass the form data back to handleSaveAccount
     } catch (err) {
       console.error('❌ Failed to save account:', err);
-      setError(
-        err.includes('Please log in')
-          ? 'Unauthenticated. Please log in to save the account.'
-          : 'Failed to save account. Check your input or try again.'
-      );
+      setError(err.message || 'Failed to save account. Check your input or try again.');
     }
   };
 
@@ -91,14 +83,6 @@ export default function CreateAcc({ onClose, onSave, account }) {
         {error && (
           <div className="mb-2 p-2 bg-red-100 text-red-700 border border-red-400 rounded">
             {error}
-            {error.includes('Please log in') && (
-              <button
-                className="ml-2 bg-blue-500 hover:bg-blue-600 text-white px-2 py-1 rounded"
-                onClick={() => window.location.href = '/login'} // Thay '/login' bằng đường dẫn thực tế
-              >
-                Go to Login
-              </button>
-            )}
           </div>
         )}
         <form onSubmit={handleSubmit} className="space-y-3">
@@ -118,9 +102,8 @@ export default function CreateAcc({ onClose, onSave, account }) {
             onChange={handleChange}
             placeholder="Password"
             className="w-full border px-3 py-2 rounded"
-            required={!account} // Chỉ bắt buộc khi tạo mới
+            required={!account}
           />
-
           <select
             name="roleId"
             value={form.roleId}
@@ -136,8 +119,6 @@ export default function CreateAcc({ onClose, onSave, account }) {
             <option value="17">kddd</option>
             <option value="18">FFFF</option>
           </select>
-
-          {/* Chọn nhân viên */}
           <div className="flex gap-2">
             <input
               type="text"
@@ -154,8 +135,6 @@ export default function CreateAcc({ onClose, onSave, account }) {
               Select
             </button>
           </div>
-
-          {/* Trạng thái */}
           <label className="flex items-center gap-2">
             <input
               type="checkbox"
@@ -165,7 +144,6 @@ export default function CreateAcc({ onClose, onSave, account }) {
             />
             Active
           </label>
-
           <div className="flex justify-end gap-2 mt-4">
             <button
               type="submit"
@@ -182,8 +160,6 @@ export default function CreateAcc({ onClose, onSave, account }) {
             </button>
           </div>
         </form>
-
-        {/* Hiển thị bảng chọn nhân viên */}
         {showAccDetails && (
           <Accdetails
             onSelect={handleSelectEmployee}
