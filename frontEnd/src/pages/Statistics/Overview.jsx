@@ -10,6 +10,7 @@ import {
   Tooltip,
   ResponsiveContainer,
 } from "recharts";
+import StatisticTabs from "./StatisticTabs";
 
 const Overview = () => {
   const [overviewData, setOverviewData] = useState({});
