@@ -1,6 +1,5 @@
 import React, { useEffect, useState } from "react";
 import { getInventoryStatistic } from "../../services/statisticService";
-import { Warehouse } from "lucide-react";
 import { Search } from "lucide-react";
 
 const InventoryStatistic = () => {
