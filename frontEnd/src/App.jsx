@@ -9,6 +9,7 @@ import LayoutCommon from "./components/layout/Layout";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import LazyLoader from "./components/layout/LazyLoader";
 import Permissions from "./pages/Permission";
+
 import CustomerStatistic from "./pages/Statistics/CustomerStatistic";
 import InventoryStatistic from "./pages/Statistics/InventoryStatistic";
 import AuthGuard from "./utils/AuthGuard";
@@ -30,7 +31,7 @@ const Login = lazy(() => import("./pages/Login/Login"));
 const ForgotPassword = lazy(() => import("./pages/Login/ForgotPassword"));
 const ProductsPage = lazy(() => import("./pages/Products"));
 
-const ImportStock = lazy(() => import('./pages/Inventory/ImportStock'));
+// const ImportStock = lazy(() => import('./pages/Inventory/ImportStock'));
 // const Products = lazy(() => import('./pages/Products/Products'));
 // const Inventory = lazy(() => import('./pages/Inventory/Inventory'));
 const WarehouseAreas = lazy(() => import("./pages/Storage"));
@@ -38,6 +39,7 @@ const Customers = lazy(() => import('./pages/Customers'));
 const Suppliers = lazy(() => import('./pages/Suppliers'));
 const Staff = lazy(() => import("./pages/Staff/Staff"));
 const Account = lazy(() => import("./pages/Account/Account"));
+
 
 // Optional: 404 Not Found page
 const NotFound = () => (

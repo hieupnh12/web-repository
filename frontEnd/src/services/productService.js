@@ -1,5 +1,5 @@
 import BASE_URL from "../api";
-import { GET, POST, PUT } from "../constants/httpMethod";
+import { GET, POST, PUT, DELETE } from "../constants/httpMethod";
 
 const handleApiError = (error, defaultMessage) => {
   const errorDetails = {
@@ -57,6 +57,22 @@ export const getFullProducts = async ({
   }
 };
 
+export const createProduct = async (productData) => {
+  try {
+    if (process.env.NODE_ENV === "development") {
+      console.log("Calling createProduct with:", productData);
+    }
+    const response = await BASE_URL[POST]("/product", productData, {
+      headers: {
+        "Content-Type": "application/json",
+      },
+    });
+    return response;
+  } catch (error) {
+    handleApiError(error, "Không thể tạo sản phẩm");
+  }
+};
+
 export const updateProduct = async (productId, productData) => {
   try {
     if (process.env.NODE_ENV === "development") {
@@ -84,6 +100,18 @@ export const uploadProductImage = async (productId, imageFile) => {
     });
   } catch (error) {
     handleApiError(error, "Không thể tải ảnh sản phẩm");
+  }
+};
+
+export const deleteProduct = async (productId) => {
+  try {
+    if (process.env.NODE_ENV === "development") {
+      console.log("Calling deleteProduct with:", { productId });
+    }
+    const response = await BASE_URL[DELETE](`/product/${productId}`);
+    return response;
+  } catch (error) {
+    handleApiError(error, "Không thể xóa sản phẩm");
   }
 };
 

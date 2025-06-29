@@ -221,9 +221,6 @@ const Dashboard = () => {
               </button>
               <div className="absolute -top-1 -right-1 w-3 h-3 bg-red-500 rounded-full animate-bounce"></div>
             </div>
-            <div className="w-10 h-10 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-full flex items-center justify-center font-bold text-white shadow-lg hover:scale-110 transition-transform cursor-pointer">
-              A
-            </div>
           </div>
         </div>
       </div>
@@ -432,9 +429,6 @@ const Dashboard = () => {
           <div className="bg-white/60 backdrop-blur-sm rounded-2xl p-6 border border-gray-200">
             <p className="text-gray-600 text-lg">
               © 2025 IMEI Management System - 
-              <span className="bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent font-bold">
-                {' '}Powered by AnBaCùSi Technology
-              </span>
             </p>
           </div>
         </div>

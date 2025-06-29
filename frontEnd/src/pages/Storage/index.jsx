@@ -1,374 +1,579 @@
-import React, { useState, useEffect } from "react";
-import {
+import React, { useState, useEffect } from 'react';
+import { 
+  takeWarehouseArea, 
+  takeWarehouseAreaById
+} from '../../services/storage';
+import { 
+  Box, 
+  Button, 
+  Card, 
+  CardContent, 
+  Typography, 
+  Grid,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  Snackbar,
+  Alert,
+  IconButton,
+  Chip,
+  Skeleton,
+  Badge,
+  Fade,
+  Zoom,
+  Avatar,
+  Divider,
+  Paper,
+  Container,
+  CardActionArea
+} from '@mui/material';
+import { 
+  Info, 
+  Close, 
   Warehouse,
-  Package,
+  Inventory,
+  CheckCircle,
+  Cancel,
+  ViewModule,
   TrendingUp,
-  Users,
-  MapPin,
-  Clock,
-} from "lucide-react";
+  Category
+} from '@mui/icons-material';
 
-function WarehouseAreas() {
+const WarehouseAreaPage = () => {
+  const [warehouseAreas, setWarehouseAreas] = useState([]);
   const [selectedArea, setSelectedArea] = useState(null);
-  const [isLoading, setIsLoading] = useState(true);
+  const [openDetailDialog, setOpenDetailDialog] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [snackbar, setSnackbar] = useState({
+    open: false,
+    message: '',
+    severity: 'success'
+  });
 
-  // Simulated warehouse data with realistic metrics
-  const areas = [
-    {
-      id: "area-a",
-      name: "Kho A",
-      capacity: 85,
-      occupancy: 72,
-      items: 1247,
-      staff: 12,
-      lastUpdate: "2 phút trước",
-      status: "active",
-      color: "from-blue-500 to-cyan-500",
-      icon: Warehouse,
-      bgPattern:
-        'data:image/svg+xml,%3Csvg width="40" height="40" viewBox="0 0 40 40" xmlns="http://www.w3.org/2000/svg"%3E%3Cg fill="%23ffffff" fill-opacity="0.05"%3E%3Cpath d="m0 40l40-40h-40z"/%3E%3C/g%3E%3C/svg%3E',
-    },
-    {
-      id: "area-b",
-      name: "Kho B",
-      capacity: 92,
-      occupancy: 67,
-      items: 2156,
-      staff: 8,
-      lastUpdate: "5 phút trước",
-      status: "active",
-      color: "from-sky-500 to-blue-500",
-      icon: Warehouse,
-      bgPattern:
-        'data:image/svg+xml,%3Csvg width="40" height="40" viewBox="0 0 40 40" xmlns="http://www.w3.org/2000/svg"%3E%3Cg fill="%23ffffff" fill-opacity="0.05"%3E%3Ccircle cx="20" cy="20" r="3"/%3E%3C/g%3E%3C/svg%3E',
-    },
-    {
-      id: "area-c",
-      name: "Kho C",
-      capacity: 78,
-      occupancy: 89,
-      items: 856,
-      staff: 15,
-      lastUpdate: "1 phút trước",
-      status: "warning",
-      color: "from-orange-500 to-red-500",
-      icon: Warehouse,
-      bgPattern:
-        'data:image/svg+xml,%3Csvg width="40" height="40" viewBox="0 0 40 40" xmlns="http://www.w3.org/2000/svg"%3E%3Cg fill="%23ffffff" fill-opacity="0.05"%3E%3Cpath d="M20 0v40M0 20h40"/%3E%3C/g%3E%3C/svg%3E',
-    },
-    {
-      id: "area-d",
-      name: "Kho D",
-      capacity: 95,
-      occupancy: 45,
-      items: 687,
-      staff: 6,
-      lastUpdate: "8 phút trước",
-      status: "low",
-      color: "from-emerald-500 to-teal-500",
-      icon: Warehouse,
-      bgPattern:
-        'data:image/svg+xml,%3Csvg width="40" height="40" viewBox="0 0 40 40" xmlns="http://www.w3.org/2000/svg"%3E%3Cg fill="%23ffffff" fill-opacity="0.05"%3E%3Cpath d="M0 0h20v20H0zM20 20h20v20H20z"/%3E%3C/g%3E%3C/svg%3E',
-    },
-  ];
-
+  // Fetch all warehouse areas on component mount
   useEffect(() => {
-    // Simulate loading
-    setTimeout(() => setIsLoading(false), 1500);
+    fetchWarehouseAreas();
   }, []);
 
-  const getStatusColor = (status) => {
-    switch (status) {
-      case "active":
-        return "text-green-500";
-      case "warning":
-        return "text-yellow-500";
-      case "low":
-        return "text-blue-500";
-      default:
-        return "text-gray-500";
+  const fetchWarehouseAreas = async () => {
+    try {
+      setLoading(true);
+      const response = await takeWarehouseArea();
+      setWarehouseAreas(response.data || []);
+    } catch (error) {
+      console.error('Error:', error);
+      showSnackbar('Không thể tải danh sách khu vực kho', 'error');
+    } finally {
+      setLoading(false);
     }
   };
 
-  const getOccupancyColor = (occupancy) => {
-    if (occupancy >= 80) return "text-red-500 bg-red-100";
-    if (occupancy >= 60) return "text-yellow-600 bg-yellow-100";
-    return "text-green-600 bg-green-100";
+  const fetchWarehouseAreaDetails = async (id) => {
+    try {
+      setLoading(true);
+      const response = await takeWarehouseAreaById(id);
+      setSelectedArea(response.data);
+      setOpenDetailDialog(true);
+    } catch (error) {
+      console.error('Error:', error);
+      showSnackbar('Không thể tải chi tiết khu vực kho', 'error');
+    } finally {
+      setLoading(false);
+    }
   };
 
-  if (isLoading) {
-    return (
-      <div className="min-h-screen bg-gradient-to-br from-blue-500 via-blue-600 to-blue-700 flex items-center justify-center">
-        <div className="text-center">
-          <div className="relative">
-            <div className="w-20 h-20 border-4 border-white border-t-blue-600 rounded-full animate-spin mx-auto mb-4"></div>
-            <Warehouse className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-8 h-8 text-blue-600" />
-          </div>
-          <p className="text-white text-lg font-medium drop-shadow-md">
-            Đang tải dữ liệu kho...
-          </p>
-        </div>
-      </div>
-    );
-  }
+  const handleCloseDetailDialog = () => {
+    setOpenDetailDialog(false);
+    setSelectedArea(null);
+  };
+
+  const showSnackbar = (message, severity) => {
+    setSnackbar({
+      open: true,
+      message,
+      severity
+    });
+  };
+
+  const handleCloseSnackbar = () => {
+    setSnackbar(prev => ({ ...prev, open: false }));
+  };
+
+  // Helper function to get total products count
+  const getTotalProducts = () => {
+    return warehouseAreas.reduce((total, area) => {
+      return total + (area.products?.length || 0);
+    }, 0);
+  };
+
+  // Helper function to get active areas count
+  const getActiveAreas = () => {
+    return warehouseAreas.filter(area => area.status).length;
+  };
+
+  // Loading skeleton
+  const renderSkeleton = () => (
+    <Grid container spacing={3}>
+      {[1, 2, 3, 4, 5, 6].map((item) => (
+        <Grid item xs={12} sm={6} md={4} key={item}>
+          <Card sx={{ height: '280px' }}>
+            <CardContent>
+              <Skeleton variant="text" width="60%" height={32} />
+              <Skeleton variant="text" width="40%" height={24} sx={{ mt: 1 }} />
+              <Skeleton variant="rectangular" height={80} sx={{ mt: 2, mb: 2 }} />
+              <Skeleton variant="rectangular" height={36} width="50%" sx={{ mx: 'auto' }} />
+            </CardContent>
+          </Card>
+        </Grid>
+      ))}
+    </Grid>
+  );
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-white-200 via-white-300 to-blue-700 p-4">
-      {/* Animated Background Elements */}
-      <div className="fixed inset-0 overflow-hidden pointer-events-none">
-        <div className="absolute -top-40 -right-40 w-80 h-80 bg-white rounded-full mix-blend-multiply filter blur-xl opacity-20 animate-pulse"></div>
-        {/* <div className="absolute -bottom-40 -left-40 w-80 h-80 bg-sky-400 rounded-full mix-blend-multiply filter blur-xl opacity-30 animate-pulse animation-delay-2000"></div> */}
-        <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-60 h-60 bg-blue-400 rounded-full mix-blend-multiply filter blur-xl opacity-20 animate-pulse animation-delay-4000"></div>
-      </div>
-
-      <div className="relative z-10 container mx-auto max-w-7xl">
-        {/* Header Section */}
+    <Container maxWidth="xl" sx={{ py: 4 }}>
+      {/* Header Section */}
+      <Paper 
+        elevation={0} 
+        sx={{ 
+          p: 4, 
+          mb: 4, 
+          background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+          color: 'white',
+          borderRadius: 3
+        }}
+      >
+        <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
+          <Avatar sx={{ mr: 2, bgcolor: 'rgba(255,255,255,0.2)', width: 56, height: 56 }}>
+            <Warehouse fontSize="large" />
+          </Avatar>
+          <Box>
+            <Typography variant="h3" component="h1" fontWeight="bold">
+              Quản lý khu vực kho
+            </Typography>
+            <Typography variant="h6" sx={{ opacity: 0.9, mt: 1 }}>
+              Theo dõi và quản lý tất cả khu vực lưu trữ
+            </Typography>
+          </Box>
+        </Box>
         
-        <div className="text-center mb-12 bg-white">
-          <div className="flex items-center justify-center mt-4 text-gray">
-            <Clock className="w-4 h-4 mr-2" />
-            <span className="drop-shadow-md">
-              Cập nhật lần cuối: {new Date().toLocaleTimeString("vi-VN")}
-            </span>
-          </div>
-        </div>
+        {/* Statistics Cards */}
+        <Grid container spacing={3} sx={{ mt: 2 }}>
+          <Grid item xs={12} sm={4}>
+            <Paper sx={{ p: 2, bgcolor: 'rgba(255,255,255,0.1)', backdropFilter: 'blur(10px)' }}>
+              <Box sx={{ display: 'flex', alignItems: 'center' }}>
+                <ViewModule sx={{ mr: 2, fontSize: 40, color: '#fff' }} />
+                <Box>
+                  <Typography variant="h4" fontWeight="bold" color="white">
+                    {warehouseAreas.length}
+                  </Typography>
+                  <Typography variant="body2" color="rgba(255,255,255,0.8)">
+                    Tổng khu vực
+                  </Typography>
+                </Box>
+              </Box>
+            </Paper>
+          </Grid>
+          <Grid item xs={12} sm={4}>
+            <Paper sx={{ p: 2, bgcolor: 'rgba(255,255,255,0.1)', backdropFilter: 'blur(10px)' }}>
+              <Box sx={{ display: 'flex', alignItems: 'center' }}>
+                <CheckCircle sx={{ mr: 2, fontSize: 40, color: '#4caf50' }} />
+                <Box>
+                  <Typography variant="h4" fontWeight="bold" color="white">
+                    {getActiveAreas()}
+                  </Typography>
+                  <Typography variant="body2" color="rgba(255,255,255,0.8)">
+                    Đang hoạt động
+                  </Typography>
+                </Box>
+              </Box>
+            </Paper>
+          </Grid>
+          <Grid item xs={12} sm={4}>
+            <Paper sx={{ p: 2, bgcolor: 'rgba(255,255,255,0.1)', backdropFilter: 'blur(10px)' }}>
+              <Box sx={{ display: 'flex', alignItems: 'center' }}>
+                <Inventory sx={{ mr: 2, fontSize: 40, color: '#ff9800' }} />
+                <Box>
+                  <Typography variant="h4" fontWeight="bold" color="white">
+                    {getTotalProducts()}
+                  </Typography>
+                  <Typography variant="body2" color="rgba(255,255,255,0.8)">
+                    Tổng sản phẩm
+                  </Typography>
+                </Box>
+              </Box>
+            </Paper>
+          </Grid>
+        </Grid>
+      </Paper>
 
-        {/* Stats Overview */}
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8">
-          <div className="bg-blue/20 backdrop-blur-md rounded-xl p-4 border border-red/30 shadow-lg">
-            <div className="flex items-center justify-between">
-              <div >
-                <p className="text-black/90 text-sm font-medium">
-                  Tổng khu vực
-                </p>
-                <p className="text-2xl font-bold text-black drop-shadow-md">
-                  4
-                </p>
-              </div>
-              <MapPin className="w-8 h-8 text-black/80" />
-            </div>
-          </div>
-          <div className="bg-red/20 backdrop-blur-md rounded-xl p-4 border border-red/30 shadow-lg">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-white/90 text-sm font-medium">
-                  Tổng sản phẩm
-                </p>
-                <p className="text-2xl font-bold text-white drop-shadow-md">
-                  {areas
-                    .reduce((sum, area) => sum + area.items, 0)
-                    .toLocaleString()}
-                </p>
-              </div>
-              <Package className="w-8 h-8 text-white/80" />
-            </div>
-          </div>
-          <div className="bg-white/20 backdrop-blur-md rounded-xl p-4 border border-white/30 shadow-lg">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-white/90 text-sm font-medium">Nhân viên</p>
-                <p className="text-2xl font-bold text-white drop-shadow-md">
-                  {areas.reduce((sum, area) => sum + area.staff, 0)}
-                </p>
-              </div>
-              <Users className="w-8 h-8 text-white/80" />
-            </div>
-          </div>
-          <div className="bg-white/20 backdrop-blur-md rounded-xl p-4 border border-white/30 shadow-lg">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-white/90 text-sm font-medium">
-                  Công suất TB
-                </p>
-                <p className="text-2xl font-bold text-white drop-shadow-md">
-                  {Math.round(
-                    areas.reduce((sum, area) => sum + area.occupancy, 0) /
-                      areas.length
-                  )}
-                  %
-                </p>
-              </div>
-              <TrendingUp className="w-8 h-8 text-white/80" />
-            </div>
-          </div>
-        </div>
+      {/* Loading State */}
+      {loading && renderSkeleton()}
 
-        {/* Main Grid - 4 Corners Layout */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 max-w-6xl mx-auto">
-          {areas.map((area, index) => {
-            const IconComponent = area.icon;
-            return (
-              <div
-                key={area.id}
-                className={`group relative overflow-hidden rounded-3xl bg-gradient-to-br ${
-                  area.color
-                } p-1 hover:scale-105 transition-all duration-500 cursor-pointer shadow-2xl ${
-                  selectedArea === area.id
-                    ? "ring-4 ring-white/70 scale-105"
-                    : ""
-                }`}
-                onClick={() =>
-                  setSelectedArea(selectedArea === area.id ? null : area.id)
-                }
-                style={{
-                  backgroundImage: `url("${area.bgPattern}")`,
-                  backgroundSize: "40px 40px",
-                }}
-              >
-                {/* Glass morphism effect */}
-                <div className="absolute inset-0 bg-white/10 backdrop-blur-sm"></div>
-
-                {/* Animated border */}
-                <div className="absolute inset-0 rounded-3xl opacity-0 group-hover:opacity-100 transition-opacity duration-500">
-                  <div className="absolute inset-0 rounded-3xl border-2 border-white/40 animate-pulse"></div>
-                </div>
-
-                {/* Content */}
-                <div className="relative bg-white/95 backdrop-blur-sm rounded-3xl p-8 h-full min-h-[320px] flex flex-col shadow-xl">
-                  {/* Header */}
-                  <div className="flex items-start justify-between mb-6">
-                    <div>
-                      <h3 className="text-2xl font-bold text-gray-800 mb-1">
-                        {area.name}
-                      </h3>
-                    </div>
-                    <div
-                      className={`p-3 rounded-2xl bg-gradient-to-br ${area.color} shadow-lg transform group-hover:rotate-12 transition-transform duration-300`}
-                    >
-                      <IconComponent className="w-8 h-8 text-white" />
-                    </div>
-                  </div>
-
-                  {/* Metrics */}
-                  <div className="flex-1 space-y-4">
-                    {/* Occupancy Bar */}
-                    <div>
-                      <div className="flex justify-between items-center mb-2">
-                        <span className="text-sm font-medium text-gray-700">
-                          Công suất sử dụng
-                        </span>
-                        <span
-                          className={`text-sm font-bold px-2 py-1 rounded-full ${getOccupancyColor(
-                            area.occupancy
-                          )}`}
+      {/* Warehouse Areas Grid */}
+      {!loading && (
+        <Fade in={true} timeout={800}>
+          <Grid container spacing={3}>
+            {warehouseAreas.map((area, index) => (
+              <Grid item xs={12} sm={6} md={4} key={area.id}>
+                <Zoom in={true} timeout={600} style={{ transitionDelay: `${index * 100}ms` }}>
+                  <Card 
+                    sx={{ 
+                      height: '100%', 
+                      display: 'flex', 
+                      flexDirection: 'column',
+                      transition: 'all 0.3s ease-in-out',
+                      '&:hover': {
+                        transform: 'translateY(-8px)',
+                        boxShadow: '0 12px 40px rgba(0,0,0,0.15)',
+                      },
+                      borderRadius: 3,
+                      overflow: 'hidden',
+                      position: 'relative'
+                    }}
+                  >
+                    {/* Status overlay */}
+                    <Box
+                      sx={{
+                        position: 'absolute',
+                        top: 0,
+                        left: 0,
+                        right: 0,
+                        height: 4,
+                        background: area.status 
+                          ? 'linear-gradient(90deg, #4caf50, #8bc34a)' 
+                          : 'linear-gradient(90deg, #f44336, #ff5722)'
+                      }}
+                    />
+                    
+                    <CardActionArea onClick={() => fetchWarehouseAreaDetails(area.id)}>
+                      <CardContent sx={{ flexGrow: 1, p: 3 }}>
+                        {/* Header */}
+                        <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', mb: 2 }}>
+                          <Box sx={{ display: 'flex', alignItems: 'center' }}>
+                            <Avatar 
+                              sx={{ 
+                                mr: 2, 
+                                bgcolor: area.status ? 'success.main' : 'error.main',
+                                width: 48,
+                                height: 48
+                              }}
+                            >
+                              {area.status ? <CheckCircle /> : <Cancel />}
+                            </Avatar>
+                            <Box>
+                              <Typography 
+                                variant="h6" 
+                                component="div" 
+                                fontWeight="bold"
+                                sx={{ 
+                                  fontSize: '1.1rem',
+                                  lineHeight: 1.2,
+                                  mb: 0.5
+                                }}
+                              >
+                                {area.name}
+                              </Typography>
+                              <Chip
+                                size="small"
+                                label={area.status ? 'Hoạt động' : 'Không hoạt động'}
+                                color={area.status ? 'success' : 'error'}
+                                variant="outlined"
+                                sx={{ fontSize: '0.7rem' }}
+                              />
+                            </Box>
+                          </Box>
+                        </Box>
+                        
+                        {/* Description */}
+                        <Box 
+                          sx={{ 
+                            bgcolor: 'grey.50', 
+                            p: 2, 
+                            borderRadius: 2, 
+                            mb: 3,
+                            minHeight: '60px',
+                            display: 'flex',
+                            alignItems: 'center'
+                          }}
                         >
-                          {area.occupancy}%
-                        </span>
-                      </div>
-                      <div className="w-full bg-gray-200 rounded-full h-3 overflow-hidden">
-                        <div
-                          className={`h-full bg-gradient-to-r ${area.color} transition-all duration-1000 ease-out rounded-full`}
-                          style={{ width: `${area.occupancy}%` }}
-                        ></div>
-                      </div>
-                    </div>
-
-                    {/* Stats Grid */}
-                    <div className="grid grid-cols-2 gap-4">
-                      <div className="bg-gray-50 rounded-xl p-3">
-                        <p className="text-xs text-gray-500 mb-1">Sản phẩm</p>
-                        <p className="text-lg font-bold text-gray-800">
-                          {area.items.toLocaleString()}
-                        </p>
-                      </div>
-                      <div className="bg-gray-50 rounded-xl p-3">
-                        <p className="text-xs text-gray-500 mb-1">Nhân viên</p>
-                        <p className="text-lg font-bold text-gray-800">
-                          {area.staff}
-                        </p>
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* Footer */}
-                  <div className="flex items-center justify-between mt-6 pt-4 border-t border-gray-200">
-                    <div className="flex items-center text-sm text-gray-500">
-                      <div
-                        className={`w-2 h-2 rounded-full ${getStatusColor(
-                          area.status
-                        )} mr-2 animate-pulse`}
-                      ></div>
-                      {area.lastUpdate}
-                    </div>
-                    <button
-                      className={`px-4 py-2 bg-gradient-to-r ${area.color} text-white text-sm font-medium rounded-lg hover:shadow-lg transition-all duration-300 transform hover:scale-105`}
-                    >
-                      Chi tiết
-                    </button>
-                  </div>
-
-                  {/* Expanded Details */}
-                  {selectedArea === area.id && (
-                    <div className="mt-4 p-4 bg-gray-50 rounded-xl border-t border-gray-200 animate-fadeIn">
-                      <h4 className="font-semibold text-gray-800 mb-2">
-                        Thông tin chi tiết
-                      </h4>
-                      <div className="grid grid-cols-2 gap-3 text-sm">
-                        <div>
-                          <span className="text-gray-500">
-                            Dung lượng tối đa:
-                          </span>
-                          <span className="ml-2 font-medium">
-                            {area.capacity}%
-                          </span>
-                        </div>
-                        <div>
-                          <span className="text-gray-500">Trạng thái:</span>
-                          <span
-                            className={`ml-2 font-medium ${getStatusColor(
-                              area.status
-                            )}`}
+                          <Typography 
+                            variant="body2" 
+                            color="text.secondary"
+                            sx={{ 
+                              fontStyle: area.note ? 'normal' : 'italic',
+                              lineHeight: 1.4
+                            }}
                           >
-                            {area.status === "active"
-                              ? "Hoạt động"
-                              : area.status === "warning"
-                              ? "Cảnh báo"
-                              : "Thấp"}
-                          </span>
-                        </div>
-                      </div>
-                    </div>
-                  )}
-                </div>
+                            {area.note || 'Không có mô tả'}
+                          </Typography>
+                        </Box>
+                        
+                        {/* Products Info */}
+                        <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
+                          <Box sx={{ display: 'flex', alignItems: 'center' }}>
+                            <Category sx={{ mr: 1, color: 'text.secondary', fontSize: 20 }} />
+                            <Typography variant="body2" color="text.secondary">
+                              Sản phẩm
+                            </Typography>
+                          </Box>
+                          <Badge 
+                            badgeContent={area.products?.length || 0} 
+                            color="primary"
+                            sx={{
+                              '& .MuiBadge-badge': {
+                                fontSize: '0.75rem',
+                                height: '20px',
+                                minWidth: '20px'
+                              }
+                            }}
+                          >
+                            <Inventory color="action" />
+                          </Badge>
+                        </Box>
 
-                {/* Hover effect overlay */}
-                <div className="absolute inset-0 bg-gradient-to-br from-white/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 rounded-3xl"></div>
-              </div>
-            );
-          })}
-        </div>
+                        <Divider sx={{ my: 2 }} />
+                        
+                        {/* Action Button */}
+                        <Box sx={{ display: 'flex', justifyContent: 'center' }}>
+                          <Button 
+                            variant="contained"
+                            startIcon={<Info />}
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              fetchWarehouseAreaDetails(area.id);
+                            }}
+                            sx={{ 
+                              minWidth: '140px',
+                              borderRadius: 2,
+                              textTransform: 'none',
+                              fontWeight: 'bold',
+                              py: 1,
+                              background: 'linear-gradient(45deg, #2196F3 30%, #21CBF3 90%)',
+                              '&:hover': {
+                                background: 'linear-gradient(45deg, #1976D2 30%, #1CB5E0 90%)',
+                                transform: 'scale(1.05)'
+                              }
+                            }}
+                          >
+                            Xem chi tiết
+                          </Button>
+                        </Box>
+                      </CardContent>
+                    </CardActionArea>
+                  </Card>
+                </Zoom>
+              </Grid>
+            ))}
+          </Grid>
+        </Fade>
+      )}
 
-        {/* Footer */}
-        <div className="text-center mt-12">
-          <p className="text-white drop-shadow-md">
-            © 2025 Warehouse Management System - Powered by Advanced Analytics
-          </p>
-        </div>
-      </div>
+      {/* Empty State */}
+      {!loading && warehouseAreas.length === 0 && (
+        <Paper 
+          sx={{ 
+            textAlign: 'center', 
+            py: 8, 
+            mt: 4,
+            borderRadius: 3,
+            bgcolor: 'grey.50'
+          }}
+        >
+          <Warehouse sx={{ fontSize: 80, color: 'grey.300', mb: 2 }} />
+          <Typography variant="h5" color="text.secondary" gutterBottom>
+            Chưa có khu vực kho nào
+          </Typography>
+          <Typography variant="body1" color="text.secondary">
+            Hệ thống chưa có dữ liệu khu vực kho để hiển thị
+          </Typography>
+        </Paper>
+      )}
 
-      <style jsx>{`
-        .animation-delay-2000 {
-          animation-delay: 2s;
-        }
-        .animation-delay-4000 {
-          animation-delay: 4s;
-        }
-        @keyframes fadeIn {
-          from {
-            opacity: 0;
-            transform: translateY(10px);
-          }
-          to {
-            opacity: 1;
-            transform: translateY(0);
-          }
-        }
-        .animate-fadeIn {
-          animation: fadeIn 0.3s ease-out;
-        }
-      `}</style>
-    </div>
+      {/* Enhanced Details Dialog */}
+      <Dialog 
+        open={openDetailDialog} 
+        onClose={handleCloseDetailDialog} 
+        maxWidth="lg" 
+        fullWidth
+        PaperProps={{
+          sx: { borderRadius: 3 }
+        }}
+      >
+        <DialogTitle 
+          sx={{ 
+            background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+            color: 'white',
+            p: 3
+          }}
+        >
+          <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+            <Box sx={{ display: 'flex', alignItems: 'center' }}>
+              <Avatar sx={{ mr: 2, bgcolor: 'rgba(255,255,255,0.2)' }}>
+                <Inventory />
+              </Avatar>
+              <Box>
+                <Typography variant="h5" fontWeight="bold">
+                  {selectedArea?.name}
+                </Typography>
+                <Typography variant="body2" sx={{ opacity: 0.9 }}>
+                  Danh sách sản phẩm trong kho
+                </Typography>
+              </Box>
+            </Box>
+            <IconButton 
+              onClick={handleCloseDetailDialog}
+              sx={{ color: 'white' }}
+            >
+              <Close />
+            </IconButton>
+          </Box>
+        </DialogTitle>
+        
+        <DialogContent sx={{ p: 3 }}>
+          {selectedArea?.products?.length > 0 ? (
+            <Grid container spacing={3} sx={{ mt: 1 }}>
+              {selectedArea.products.map((product, index) => (
+                <Grid item xs={12} sm={6} md={4} key={product.id}>
+                  <Zoom in={true} timeout={400} style={{ transitionDelay: `${index * 100}ms` }}>
+                    <Card 
+                      sx={{ 
+                        height: '100%',
+                        borderRadius: 3,
+                        transition: 'all 0.3s ease',
+                        '&:hover': {
+                          transform: 'translateY(-4px)',
+                          boxShadow: '0 8px 25px rgba(0,0,0,0.15)'
+                        }
+                      }}
+                    >
+                      <CardContent sx={{ p: 0 }}>
+                        {/* Product Image */}
+                        <Box sx={{ 
+                          width: '100%', 
+                          height: '180px', 
+                          display: 'flex', 
+                          justifyContent: 'center', 
+                          alignItems: 'center',
+                          background: 'linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%)',
+                          position: 'relative',
+                          overflow: 'hidden'
+                        }}>
+                          {product.image ? (
+                            <img 
+                              src={product.image} 
+                              alt={product.name} 
+                              style={{ 
+                                maxWidth: '90%', 
+                                maxHeight: '90%', 
+                                objectFit: 'contain',
+                                borderRadius: '8px'
+                              }} 
+                            />
+                          ) : (
+                            <Box sx={{ textAlign: 'center' }}>
+                              <Inventory sx={{ fontSize: 60, color: 'grey.400', mb: 1 }} />
+                              <Typography variant="body2" color="grey.500">
+                                Không có hình ảnh
+                              </Typography>
+                            </Box>
+                          )}
+                          
+                          {/* Quantity Badge */}
+                          <Chip
+                            label={`SL: ${product.quantity}`}
+                            size="small"
+                            sx={{
+                              position: 'absolute',
+                              top: 12,
+                              right: 12,
+                              bgcolor: 'primary.main',
+                              color: 'white',
+                              fontWeight: 'bold'
+                            }}
+                          />
+                        </Box>
+                        
+                        {/* Product Info */}
+                        <Box sx={{ p: 2 }}>
+                          <Typography 
+                            variant="h6" 
+                            align="center" 
+                            sx={{ 
+                              mb: 1, 
+                              fontWeight: 'bold',
+                              fontSize: '1rem',
+                              lineHeight: 1.3
+                            }}
+                          >
+                            {product.name}
+                          </Typography>
+                          
+                          <Divider sx={{ my: 1 }} />
+                          
+                          <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
+                            <TrendingUp sx={{ mr: 1, color: 'success.main', fontSize: 20 }} />
+                            <Typography 
+                              variant="body1" 
+                              sx={{ 
+                                fontWeight: 'bold',
+                                color: 'primary.main'
+                              }}
+                            >
+                              Số lượng: {product.quantity}
+                            </Typography>
+                          </Box>
+                        </Box>
+                      </CardContent>
+                    </Card>
+                  </Zoom>
+                </Grid>
+              ))}
+            </Grid>
+          ) : (
+            <Paper 
+              sx={{ 
+                textAlign: 'center', 
+                py: 6,
+                bgcolor: 'grey.50',
+                borderRadius: 2
+              }}
+            >
+              <Inventory sx={{ fontSize: 60, color: 'grey.300', mb: 2 }} />
+              <Typography variant="h6" color="text.secondary" gutterBottom>
+                Khu vực này chưa có sản phẩm
+              </Typography>
+              <Typography variant="body2" color="text.secondary">
+                Chưa có sản phẩm nào được lưu trữ trong khu vực này
+              </Typography>
+            </Paper>
+          )}
+        </DialogContent>
+      </Dialog>
+
+      {/* Enhanced Snackbar */}
+      <Snackbar
+        open={snackbar.open}
+        autoHideDuration={6000}
+        onClose={handleCloseSnackbar}
+        anchorOrigin={{ vertical: 'top', horizontal: 'right' }}
+      >
+        <Alert 
+          onClose={handleCloseSnackbar} 
+          severity={snackbar.severity}
+          sx={{ 
+            width: '100%',
+            borderRadius: 2,
+            '& .MuiAlert-icon': {
+              fontSize: 24
+            }
+          }}
+          variant="filled"
+        >
+          {snackbar.message}
+        </Alert>
+      </Snackbar>
+    </Container>
   );
-}
+};
 
-export default WarehouseAreas;
+export default WarehouseAreaPage;

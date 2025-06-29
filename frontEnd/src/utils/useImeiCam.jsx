@@ -1,4 +1,4 @@
-// src/components/BarcodeScanner.jsx
+
 import React, { useEffect, useRef, useState } from "react";
 import { BrowserMultiFormatReader } from "@zxing/browser";
 import {
