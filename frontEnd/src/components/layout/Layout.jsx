@@ -9,46 +9,46 @@ const pageConfig = {
   "/": { title: "Dashboard", breadcrumb: [] },
   "/dashboard": { title: "Dashboard", breadcrumb: [] },
   "/products": {
-    title: "Quản lý sản phẩm",
-    breadcrumb: [{ label: "Sản phẩm" }],
+    title: "Product Management",
+    breadcrumb: [{ label: "Products" }],
   },
   "/inventory": {
-    title: "Quản lý kho",
-    breadcrumb: [{ label: "Thuốc tính" }],
+    title: "Inventory Management",
+    breadcrumb: [{ label: "Attributes" }],
   },
   "/storage": {
-    title: "Khu vực kho",
-    breadcrumb: [{ label: "Khu vực kho" }],
+    title: "Warehouse Areas",
+    breadcrumb: [{ label: "Warehouse Areas" }],
   },
   "/import": {
-    title: "Phiếu nhập",
-    breadcrumb: [{ label: "Phiếu nhập" }],
+    title: "Import Notes",
+    breadcrumb: [{ label: "Import Notes" }],
   },
   "/export": {
-    title: "Phiếu xuất",
-    breadcrumb: [{ label: "Phiếu xuất" }],
+    title: "Export Notes",
+    breadcrumb: [{ label: "Export Notes" }],
   },
   "/customers": {
-    title: "Quản lý khách hàng",
-    breadcrumb: [{ label: "Khách hàng" }],
+    title: "Customer Management",
+    breadcrumb: [{ label: "Customers" }],
   },
   "/suppliers": {
-    title: "Quản lý nhà cung cấp",
-    breadcrumb: [{ label: "Nhà cung cấp" }],
+    title: "Supplier Management",
+    breadcrumb: [{ label: "Suppliers" }],
   },
   "/staff": {
-    title: "Quản lý nhân viên",
-    breadcrumb: [{ label: "Nhân viên" }],
+    title: "Staff Management",
+    breadcrumb: [{ label: "Staff" }],
   },
   "/account": {
-    title: "Tài khoản",
-    breadcrumb: [{ label: "Tài khoản" }],
+    title: "Account",
+    breadcrumb: [{ label: "Account" }],
   },
   "/export/addexport": {
-    title: "Thêm phiếu xuất",
+    title: "Add Export Note",
     breadcrumb: [
-      { label: "Phiếu xuất", href: "export" },
-      { label: "Thêm phiếu" },
+      { label: "Export Notes", href: "export" },
+      { label: "Add Note" },
     ],
   },
   "/permissions": {
@@ -84,10 +84,10 @@ const LayoutCommon = () => {
           <div className="p-2">
             {/* Page content */}
             <div className="bg-white rounded-lg shadow-sm min-h-full">
-               {/* Breadcrumb */}
-            {config.breadcrumb.length > 0 && (
-              <Breadcrumb items={config.breadcrumb} />
-            )}
+              {/* Breadcrumb */}
+              {config.breadcrumb.length > 0 && (
+                <Breadcrumb items={config.breadcrumb} />
+              )}
               <Outlet />
             </div>
           </div>

@@ -1,5 +1,5 @@
 import BASE_URL from "../api";
-import { GET, POST } from "../constants/httpMethod";
+import { GET, POST, PUT, DELETE } from "../constants/httpMethod"; // Add PUT and DELETE here
 
 /**
  * lấy danh sách khu vực kho (trả về tất cả)
@@ -15,7 +15,7 @@ export const takeWarehouseArea = () => {
  * @returns khu vực kho
  */
 export const takeWarehouseAreaById = (idWare) => {
-    const responds = BASE_URL[PUT](`warehouse_area/${idWare}`);
+    const responds = BASE_URL[GET](`warehouse_area/${idWare}`); // Changed from PUT to GET since this seems to be a retrieval
     return responds;
 }
 
@@ -23,7 +23,6 @@ export const takeWarehouseAreaById = (idWare) => {
  * Thêm danh sách sản phẩm đang có ở khu vực nữa
  * @returns (ảnh / tên / số lượng)
  */
-
 
 /**
  * Tạo 1 khu vực kho code 1000/result
@@ -45,4 +44,3 @@ export const takeDeleteWarehouseArea = (idWare) => {
     const responds = BASE_URL[DELETE](`warehouse_area/${idWare}`);
     return responds;
 }
-

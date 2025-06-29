@@ -10,8 +10,9 @@ const ProductList = ({
   itemsPerPage,
   totalItems,
   onPageChange,
-  onEdit,    // Thêm prop onEdit
-  onDetail,  // Thêm prop onDetail
+  onEdit,    
+  onDetail, 
+  onDelete,
 }) => {
   const [sortBy, setSortBy] = useState("productName");
   const [sortOrder, setSortOrder] = useState("asc");
@@ -85,15 +86,17 @@ const ProductList = ({
           sortBy={sortBy}
           sortOrder={sortOrder}
 
-          onEdit={onEdit}       // Truyền onEdit xuống TableView
-          onDetail={onDetail}   // Truyền onDetail xuống TableView
+          onEdit={onEdit}       
+          onDetail={onDetail}  
+          onDelete={onDelete}
         />
       ) : (
         <CardView
           products={paginatedProducts}
 
-          onEdit={onEdit}       // Truyền onEdit xuống CardView
-          onDetail={onDetail}   // Truyền onDetail xuống CardView
+          onEdit={onEdit}       
+          onDetail={onDetail}
+          onDelete={onDelete}
         />
       )}
 

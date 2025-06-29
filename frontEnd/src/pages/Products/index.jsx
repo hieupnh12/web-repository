@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useMemo } from "react";
+import React, { useEffect, useState, useCallback } from "react";
 import { getFullProducts, updateProduct, uploadProductImage } from "../../services/productService";
 import Button from "../../components/ui/Button";
 import ProductList from "./ProductList";
@@ -7,6 +7,7 @@ import AddProductModal from "./modals/AddProductModal";
 import EditProductModal from "./modals/EditProductModal";
 import ProductDetailModal from "./modals/ProductDetailModal";
 import SearchFilter from "./components/SearchFilter";
+import DeleteProductModal from "./modals/DeleteProductModal";
 
 const ProductsPage = () => {
   const [products, setProducts] = useState([]);
@@ -24,40 +25,35 @@ const ProductsPage = () => {
   });
   const [isLoading, setIsLoading] = useState(false);
   const [selectedProduct, setSelectedProduct] = useState(null);
+  const [showAddModal, setShowAddModal] = useState(false);
+  const [showEditModal, setShowEditModal] = useState(false);
+  const [showDetailModal, setShowDetailModal] = useState(false);
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
 
-  // Memoize filters to prevent unnecessary re-renders
-  const memoizedFilters = useMemo(() => filters, [
-    filters.search,
-    filters.brandId,
-    filters.originId,
-    filters.operatingSystemId,
-    filters.warehouseAreaId,
-  ]);
-
-  const loadData = async () => {
+  const loadData = useCallback(async () => {
     try {
       setIsLoading(true);
-      if (process.env.NODE_ENV === "development") {
-        console.log("loadData called with:", { page: pagination.page, filters });
-      }
+      console.log("Loading data with filters:", { page: pagination.page, ...filters });
+      
       const { data, pagination: pageInfo } = await getFullProducts({
         page: pagination.page,
         limit: pagination.limit,
         ...filters,
       });
+      
       setProducts(data);
-      setPagination((prev) => ({ ...prev, total: pageInfo.total }));
+      setPagination(prev => ({ ...prev, total: pageInfo.total }));
     } catch (error) {
-      console.error("Lỗi khi tải dữ liệu:", error);
-      alert("Không thể tải dữ liệu.");
+      console.error("Error loading products:", error);
+      alert("Could not load product data.");
     } finally {
       setIsLoading(false);
     }
-  };
+  }, [pagination.page, pagination.limit, filters]);
 
   useEffect(() => {
     loadData();
-  }, [pagination.page, memoizedFilters]);
+  }, [loadData]);
 
   const handleEdit = (product) => {
     setSelectedProduct(product);
@@ -70,15 +66,16 @@ const ProductsPage = () => {
   };
 
   const handleDelete = (product) => {
-    alert(`Bạn muốn xóa sản phẩm: ${product.productName} ?`);
+      setSelectedProduct(product);
+      setShowDeleteModal(true);
   };
 
   const handleScanIMEI = () => {
-    alert("Chức năng quét chưa được triển khai.");
+    alert("IMEI scanning feature not implemented yet.");
   };
 
   const handleExportExcel = () => {
-    alert("Chức năng xuất Excel chưa được triển khai.");
+    alert("Excel export feature not implemented yet.");
   };
 
   const onSelectProduct = (product) => {
@@ -87,19 +84,18 @@ const ProductsPage = () => {
 
   const handleSaveEdit = async (editedData) => {
     try {
-      if (process.env.NODE_ENV === "development") {
-        console.log("Edited data:", editedData);
-      }
+      console.log("Saving edited product:", editedData);
 
       if (!editedData.productId && !editedData.id) {
-        throw new Error("Product ID is missing");
+        throw new Error("Product ID is required");
       }
 
+      // Validation
       const errors = [];
-      if (!editedData.origin?.id) errors.push("Xuất xứ sản phẩm là bắt buộc");
-      if (!editedData.operatingSystem?.id) errors.push("Hệ điều hành là bắt buộc");
-      if (!editedData.warehouseArea?.id) errors.push("Khu vực kho là bắt buộc");
-      if (!editedData.brand?.idBrand) errors.push("Thương hiệu sản phẩm là bắt buộc");
+      if (!editedData.origin?.id) errors.push("Product origin is required");
+      if (!editedData.operatingSystem?.id) errors.push("Operating system is required");
+      if (!editedData.warehouseArea?.id) errors.push("Warehouse area is required");
+      if (!editedData.brand?.idBrand) errors.push("Product brand is required");
 
       if (errors.length > 0) {
         throw new Error(errors.join("; "));
@@ -121,41 +117,27 @@ const ProductsPage = () => {
         status: editedData.status ?? true,
       };
 
-      if (process.env.NODE_ENV === "development") {
-        console.log("Update data to send:", updateData);
-      }
-
       await updateProduct(editedData.productId || editedData.id, updateData);
 
       if (editedData.image) {
         await uploadProductImage(editedData.productId || editedData.id, editedData.image);
       }
 
-      alert("Cập nhật sản phẩm thành công.");
+      alert("Product updated successfully!");
       setShowEditModal(false);
       setSelectedProduct(null);
       await loadData();
     } catch (error) {
-      console.error("Lỗi khi lưu chỉnh sửa sản phẩm:", {
-        message: error.message,
-        response: error.response?.data,
-        status: error.response?.status,
-      });
-      alert(`Cập nhật sản phẩm thất bại: ${error.message || "Lỗi không xác định"}`);
+      console.error("Error saving product:", error);
+      alert(`Failed to update product: ${error.message || "Unknown error"}`);
     }
   };
 
-  const handleFilterChange = (newFilters) => {
-    if (process.env.NODE_ENV === "development") {
-      console.log("handleFilterChange called with:", newFilters);
-    }
+  const handleFilterChange = useCallback((newFilters) => {
+    console.log("Filters changed:", newFilters);
     setFilters(newFilters);
-    setPagination((prev) => ({ ...prev, page: 1 }));
-  };
-
-  const [showAddModal, setShowAddModal] = useState(false);
-  const [showEditModal, setShowEditModal] = useState(false);
-  const [showDetailModal, setShowDetailModal] = useState(false);
+    setPagination(prev => ({ ...prev, page: 1 }));
+  }, []);
 
   return (
     <div className="min-h-screen w-full bg-gradient-to-br from-gray-50 to-blue-100 flex flex-col">
@@ -169,42 +151,33 @@ const ProductsPage = () => {
                   className="group flex items-center gap-2 bg-blue-600 text-white hover:bg-blue-700 hover:scale-105 transform transition-all duration-300 shadow-lg hover:shadow-xl px-4 py-2 text-sm"
                 >
                   <Plus className="w-4 h-4 group-hover:rotate-90 transition-transform duration-300" />
-                  <span className="hidden sm:inline">Thêm mới</span>
-                </Button>
-                <Button
-                  onClick={() => {
-                    if (selectedProduct) handleDelete(selectedProduct);
-                    else alert("Vui lòng chọn sản phẩm để xoá");
-                  }}
-                  className="group flex items-center gap-2 bg-red-500 text-white hover:bg-red-600 hover:scale-105 transform transition-all duration-300 shadow-lg hover:shadow-xl px-4 py-2 text-sm"
-                >
-                  <Trash className="w-4 h-4 group-hover:scale-110 transition-all duration-200" />
-                  <span className="hidden sm:inline">Xoá sản phẩm</span>
+                  <span className="hidden sm:inline">Add New</span>
                 </Button>
                 <Button
                   onClick={handleScanIMEI}
                   className="group flex items-center gap-2 bg-green-500 text-white hover:bg-green-600 hover:scale-105 transform transition-all duration-200 shadow-lg hover:shadow-xl px-4 py-2 text-sm"
                 >
                   <Scan className="w-4 h-4 group-hover:scale-110 transition-all duration-200" />
-                  <span className="hidden sm:inline">Quét IMEI</span>
+                  <span className="hidden sm:inline">Scan IMEI</span>
                 </Button>
                 <Button
                   onClick={handleExportExcel}
                   className="group flex items-center gap-2 bg-gray-500 text-white hover:bg-gray-600 hover:scale-105 transform transition-all duration-200 shadow-lg hover:shadow-xl px-4 py-2 text-sm"
                 >
                   <Download className="w-4 h-4 group-hover:scale-110 transition-all duration-200" />
-                  <span className="hidden sm:inline">Xuất Excel</span>
+                  <span className="hidden sm:inline">Export Excel</span>
                 </Button>
               </div>
             </div>
-            {isLoading ? (
+            
+            <SearchFilter onFilterChange={handleFilterChange} />
+            
+            {/* {isLoading && (
               <div className="flex justify-center items-center py-4">
                 <Loader2 className="w-6 h-6 text-blue-500 animate-spin" />
-                <span className="ml-2">Đang tải sản phẩm...</span>
+                <span className="ml-2">Loading products...</span>
               </div>
-            ) : (
-              <SearchFilter onFilterChange={handleFilterChange} />
-            )}
+            )} */}
           </div>
         </div>
 
@@ -213,9 +186,10 @@ const ProductsPage = () => {
           currentPage={pagination.page}
           itemsPerPage={pagination.limit}
           totalItems={pagination.total}
-          onPageChange={(p) => setPagination((prev) => ({ ...prev, page: p }))}
+          onPageChange={(p) => setPagination(prev => ({ ...prev, page: p }))}
           onEdit={handleEdit}
           onDetail={handleDetail}
+          onDelete={handleDelete}
           onSelect={onSelectProduct}
         />
       </div>
@@ -247,6 +221,20 @@ const ProductsPage = () => {
           onClose={() => {
             setShowDetailModal(false);
             setSelectedProduct(null);
+          }}
+        />
+      )}
+      {showDeleteModal && selectedProduct && (
+        <DeleteProductModal
+          product={selectedProduct}
+          onClose={() => {
+            setShowDeleteModal(false);
+            setSelectedProduct(null);
+          }}
+          onSuccess={() => {
+            setShowDeleteModal(false);
+            setSelectedProduct(null);
+            loadData();
           }}
         />
       )}
