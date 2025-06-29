@@ -1,5 +1,5 @@
 import React from "react";
-import { Package, Edit, Info } from "lucide-react";
+import { Package, Edit, Info, Trash } from "lucide-react";
 
 const CardView = ({
   products,
@@ -13,8 +13,9 @@ const CardView = ({
   romMap,
   colorMap,
   chipsetMap,
-  onEdit,    // callback mở modal sửa
-  onDetail,  // callback mở modal chi tiết
+  onEdit,
+  onDetail,
+  onDelete,
 }) => {
   const getStockStatus = (quantity) => {
     if (quantity === 0) return { status: "Hết hàng", color: "bg-red-100 text-red-800" };
@@ -23,7 +24,6 @@ const CardView = ({
     return { status: "Còn nhiều", color: "bg-green-100 text-green-800" };
   };
 
-  // Hàm format tiền VND
   const formatPrice = (price) => {
     if (price == null) return "N/A";
     return price.toLocaleString("vi-VN", { style: "currency", currency: "VND" });
@@ -58,85 +58,63 @@ const CardView = ({
                   <span className="text-sm text-gray-500">Số lượng tồn kho:</span>
                   <span className="text-sm font-semibold text-gray-900">{product.stockQuantity}</span>
                 </div>
-
                 <div className="flex items-center justify-between">
                   <span className="text-sm text-gray-500">Thương hiệu:</span>
                   <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
                     {brandMap?.[product.brandId] || "N/A"}
                   </span>
                 </div>
-
                 <div className="flex items-center justify-between">
                   <span className="text-sm text-gray-500">Hệ điều hành:</span>
                   <span className="text-sm text-gray-900">{osMap?.[product.operatingSystemId] || "N/A"}</span>
                 </div>
-
                 <div className="flex items-center justify-between">
                   <span className="text-sm text-gray-500">Xuất xứ:</span>
                   <span className="text-sm text-gray-900">{originMap?.[product.originId] || "N/A"}</span>
                 </div>
-
                 <div className="flex items-center justify-between">
                   <span className="text-sm text-gray-500">Khu vực kho:</span>
                   <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-800">
                     {areaMap?.[product.warehouseAreaId] || "N/A"}
                   </span>
                 </div>
-
-                {/* RAM */}
                 <div className="flex items-center justify-between">
                   <span className="text-sm text-gray-500">RAM:</span>
                   <span className="text-sm text-gray-900">{ramMap?.[product.ramId] || "N/A"}</span>
                 </div>
-
-                {/* ROM */}
                 <div className="flex items-center justify-between">
                   <span className="text-sm text-gray-500">ROM:</span>
                   <span className="text-sm text-gray-900">{romMap?.[product.romId] || "N/A"}</span>
                 </div>
-
-                {/* Màu sắc */}
                 <div className="flex items-center justify-between">
                   <span className="text-sm text-gray-500">Màu sắc:</span>
                   <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-pink-100 text-pink-800">
                     {colorMap?.[product.colorId] || "N/A"}
                   </span>
                 </div>
-
-                {/* Chipset (nếu có) */}
                 {product.chipsetId && (
                   <div className="flex items-center justify-between">
                     <span className="text-sm text-gray-500">Chipset:</span>
                     <span className="text-sm text-gray-900">{chipsetMap?.[product.chipsetId] || "N/A"}</span>
                   </div>
                 )}
-
-                {/* Thời gian bảo hành */}
                 <div className="flex items-center justify-between">
                   <span className="text-sm text-gray-500">Bảo hành:</span>
                   <span className="text-sm text-gray-900">{product.warrantyPeriod || "N/A"}</span>
                 </div>
-
-                {/* Giá nhập */}
                 <div className="flex items-center justify-between">
                   <span className="text-sm text-gray-500">Giá nhập:</span>
                   <span className="text-sm font-semibold text-gray-900">{formatPrice(product.importPrice)}</span>
                 </div>
-
-                {/* Giá xuất */}
                 <div className="flex items-center justify-between">
                   <span className="text-sm text-gray-500">Giá bán:</span>
                   <span className="text-sm font-semibold text-gray-900">{formatPrice(product.exportPrice)}</span>
                 </div>
               </div>
-
-              {/* Trạng thái tồn kho */}
               <div className="mt-4 pt-4 border-t border-gray-100 flex items-center justify-between">
                 <span className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-medium ${stockInfo.color}`}>
                   {stockInfo.status}
                 </span>
-
-                {/* Nút hành động */}
                 <div className="space-x-2">
                   <button
                     onClick={() => onEdit && onEdit(product)}
@@ -153,6 +131,14 @@ const CardView = ({
                   >
                     <Info className="w-4 h-4 mr-1" />
                     <span className="hidden sm:inline">Chi tiết</span>
+                  </button>
+                  <button
+                    onClick={() => onDelete && onDelete(product)}
+                    className="inline-flex items-center px-3 py-1 bg-red-600 text-white rounded-md hover:bg-red-700 transition"
+                    title="Xóa"
+                  >
+                    <Trash className="w-4 h-4 mr-1" />
+                    <span className="hidden sm:inline">Xóa</span>
                   </button>
                 </div>
               </div>
