@@ -20,7 +20,6 @@ const AddRoleModal = ({ onClose, onSubmit }) => {
           const result = info.result;
 
           setFunctions(result);
-          // Cập nhật permissions tương ứng
           const initialPermissions = result.map((fn) => ({
             functionId: fn.functionId,
             canView: false,
@@ -31,7 +30,7 @@ const AddRoleModal = ({ onClose, onSubmit }) => {
           setPermissions(initialPermissions);
         }
       } catch (error) {
-        console.error("Lỗi khi tải chức năng:", error);
+        console.error("Error loading functions:", error);
       } finally {
         setLoading(false);
       }
@@ -48,15 +47,14 @@ const AddRoleModal = ({ onClose, onSubmit }) => {
     );
   };
 
-  
-function getObjectsWithPermissions(data) {  
-  return data.filter(item =>
-    item.canView || item.canCreate || item.canUpdate || item.canDelete
-  );
-}
+  function getObjectsWithPermissions(data) {
+    return data.filter(
+      (item) =>
+        item.canView || item.canCreate || item.canUpdate || item.canDelete
+    );
+  }
 
   const handleSubmit = () => {
-
     const permissions = getObjectsWithPermissions(permission);
     const payload = {
       roleName,
@@ -77,23 +75,23 @@ function getObjectsWithPermissions(data) {
         </button>
         <div className="flex justify-between gap-4">
           <div className="mb-4 w-2/4">
-            <label className="block font-medium mb-1">Tên nhóm quyền</label>
+            <label className="block font-medium mb-1">Role Name</label>
             <input
               value={roleName}
               required={true}
               onChange={(e) => setRoleName(e.target.value)}
               className="w-full border rounded-md p-2"
-              placeholder="Nhập tên nhóm quyền"
+              placeholder="Enter role name"
             />
           </div>
 
           <div className="mb-4 w-2/4">
-            <label className="block font-medium mb-1">Mô tả</label>
+            <label className="block font-medium mb-1">Description</label>
             <input
               value={description}
               onChange={(e) => setDescription(e.target.value)}
               className="w-full border rounded-md p-2"
-              placeholder="Nhập mô tả"
+              placeholder="Enter description"
             />
           </div>
         </div>
@@ -101,7 +99,7 @@ function getObjectsWithPermissions(data) {
           <div className="py-8 text-center">
             <Loader2 className="mx-auto h-6 w-6 animate-spin text-blue-500" />
             <div className="mt-2 text-sm text-gray-500">
-              Đang tải dữ liệu...
+              Loading data...
             </div>
           </div>
         ) : (
@@ -109,11 +107,11 @@ function getObjectsWithPermissions(data) {
             <table className="w-full border">
               <thead className="bg-gray-100 text-sm">
                 <tr>
-                  <th className="p-2 text-left">Danh mục chức năng</th>
-                  <th className="p-2 text-center">Xem</th>
-                  <th className="p-2 text-center">Tạo mới</th>
-                  <th className="p-2 text-center">Cập nhật</th>
-                  <th className="p-2 text-center">Xoá</th>
+                  <th className="p-2 text-left">Function Group</th>
+                  <th className="p-2 text-center">View</th>
+                  <th className="p-2 text-center">Create</th>
+                  <th className="p-2 text-center">Update</th>
+                  <th className="p-2 text-center">Delete</th>
                 </tr>
               </thead>
               <tbody>
@@ -150,13 +148,13 @@ function getObjectsWithPermissions(data) {
             onClick={handleSubmit}
             className="bg-blue-600 hover:bg-blue-700 text-white"
           >
-            Thêm nhóm quyền
+            Add Role
           </Button>
           <Button
             onClick={onClose}
             className="bg-red-500 hover:bg-red-600 text-white"
           >
-            Huỷ bỏ
+            Cancel
           </Button>
         </div>
       </div>

@@ -9,34 +9,23 @@ import {
 import ConfirmDialog from "../../components/ui/ConfirmDialog";
 
 const PerInfoDetail = ({ onClose, role, data }) => {
-  // Lưu các chức năng per(crud)
   const [functions, setFunctions] = useState([]);
-  // load khi mới đầu vô
   const [loading, setLoading] = useState(false);
   const [description, setDescription] = useState("");
   const [permission, setPermissions] = useState([]);
   const [showConfirm, setShowConfirm] = useState(false);
-  // load khi thực hiện crud
   const [loadingV2, setLoadingV2] = useState(false);
-  // Điều khiển edit
   const [isEditing, setIsEditing] = useState(false);
   const [showConfirmUpdate, setShowConfirmUpdate] = useState(false);
-
-  // console.log(role);
 
   useEffect(() => {
     const loadFunctionEachRole = async () => {
       setLoading(true);
-      console.log(role.roleId);
-
       try {
         const info = await takeInfoEachRole(role.roleId);
         if (info.code === 1000 && info?.result) {
           const result = info.result;
-          console.log(result);
-
           setFunctions(result);
-          // Cập nhật permissions tương ứng
           const initialPermissions = result.map((fn) => ({
             functionId: fn.functionId,
             canView: fn.canView,
@@ -47,7 +36,7 @@ const PerInfoDetail = ({ onClose, role, data }) => {
           setPermissions(initialPermissions);
         }
       } catch (error) {
-        console.error("Lỗi khi lấy quyền từng chức năng:", error);
+        console.error("Error loading role permissions:", error);
       } finally {
         setLoading(false);
       }
@@ -65,35 +54,29 @@ const PerInfoDetail = ({ onClose, role, data }) => {
   };
 
   const handleDeleteRole = async () => {
-    // đóng thông báo confirm
     setShowConfirm(false);
     setLoadingV2(true);
     try {
       const response = await takeDeleteRole(role.roleId);
-
-      console.log(response);
       if (response.status === 200) {
         setLoadingV2(false);
-        // đóng nguyên cái bảng quyền
         onClose();
         data((prev) => prev.filter((item) => item.roleId !== role.roleId));
       }
     } catch (error) {
-      console.log("Error from delete row", error);
+      console.error("Error deleting role:", error);
     }
   };
 
-function getObjectsWithPermissions(data) {  
-  return data.filter(item =>
-    item.canView || item.canCreate || item.canUpdate || item.canDelete
-  );
-}
-  
-  // api Update
-  const handleUpdate = async () => {
-    // lọc quyền
-      const permissions =  getObjectsWithPermissions(permission);
+  function getObjectsWithPermissions(data) {
+    return data.filter(
+      (item) =>
+        item.canView || item.canCreate || item.canUpdate || item.canDelete
+    );
+  }
 
+  const handleUpdate = async () => {
+    const permissions = getObjectsWithPermissions(permission);
     const payload = {
       roleName: role.roleName,
       description,
@@ -101,16 +84,11 @@ function getObjectsWithPermissions(data) {
     };
     setShowConfirmUpdate(false);
     setLoadingV2(true);
-    try {      
-      console.log("sôsdidiid", payload);
-      
+    try {
       const response = await takeUpdateRole(role.roleId, payload);
-
       if (response.status === 200) {
         setLoadingV2(false);
         setIsEditing(false);
-
-        // Cập nhật danh sách nếu cần
         data((prev) =>
           prev.map((item) =>
             item.roleId === role.roleId
@@ -118,11 +96,10 @@ function getObjectsWithPermissions(data) {
               : item
           )
         );
-
-        onClose(); // Đóng modal
+        onClose();
       }
     } catch (error) {
-      console.error("Lỗi khi cập nhật quyền:", error);
+      console.error("Error updating role:", error);
       setLoadingV2(false);
     }
   };
@@ -134,7 +111,7 @@ function getObjectsWithPermissions(data) {
           <div className="absolute inset-0 z-10 flex items-center justify-center bg-white/60 backdrop-blur-sm">
             <div className="text-center">
               <Loader2 className="mx-auto h-8 w-8 animate-spin text-blue-500" />
-              <div className="mt-2 text-sm text-gray-600">Loading...</div>
+              <div className="mt-2 text-sm text-gray-600">Processing...</div>
             </div>
           </div>
         )}
@@ -146,22 +123,22 @@ function getObjectsWithPermissions(data) {
         </button>
         <div className="flex justify-between gap-4">
           <div className="mb-4 w-2/4">
-            <label className="block font-medium mb-1">Tên nhóm quyền</label>
+            <label className="block font-medium mb-1">Role Name</label>
             <input
               value={role.roleName}
               disabled
               className="w-full border rounded-md p-2"
-              placeholder="Nhập tên nhóm quyền"
+              placeholder="Enter role name"
             />
           </div>
 
           <div className="mb-4 w-2/4">
-            <label className="block font-medium mb-1">Mô tả</label>
+            <label className="block font-medium mb-1">Description</label>
             <input
               value={description}
               onChange={(e) => setDescription(e.target.value)}
               className="w-full border rounded-md p-2"
-              placeholder="Nhập mô tả"
+              placeholder="Enter description"
             />
           </div>
         </div>
@@ -170,7 +147,7 @@ function getObjectsWithPermissions(data) {
           <div className="py-8 text-center">
             <Loader2 className="mx-auto h-6 w-6 animate-spin text-blue-500" />
             <div className="mt-2 text-sm text-gray-500">
-              Đang tải dữ liệu...
+              Loading data...
             </div>
           </div>
         ) : (
@@ -178,11 +155,11 @@ function getObjectsWithPermissions(data) {
             <table className="w-full border">
               <thead className="bg-gray-100 text-sm">
                 <tr>
-                  <th className="p-2 text-left">Danh mục chức năng</th>
-                  <th className="p-2 text-center">Xem</th>
-                  <th className="p-2 text-center">Tạo mới</th>
-                  <th className="p-2 text-center">Cập nhật</th>
-                  <th className="p-2 text-center">Xoá</th>
+                  <th className="p-2 text-left">Function</th>
+                  <th className="p-2 text-center">View</th>
+                  <th className="p-2 text-center">Create</th>
+                  <th className="p-2 text-center">Update</th>
+                  <th className="p-2 text-center">Delete</th>
                 </tr>
               </thead>
               <tbody>
@@ -204,7 +181,6 @@ function getObjectsWithPermissions(data) {
                                   : ""
                               }`}
                               checked={perm?.[field] || false}
-                              // disabled={!isEditing} // <-- chỉ enable nếu isEditing = true
                               onChange={() =>
                                 handleCheckboxChange(fn.functionId, field)
                               }
@@ -227,7 +203,7 @@ function getObjectsWithPermissions(data) {
                 if (isEditing) {
                   setShowConfirmUpdate(true);
                 }
-                setIsEditing(!isEditing); //Chuyển chế độ
+                setIsEditing(!isEditing);
               }}
               className={`group flex items-center gap-2 ${
                 isEditing
@@ -235,7 +211,6 @@ function getObjectsWithPermissions(data) {
                   : "bg-yellow-500 hover:bg-yellow-600"
               } text-white hover:scale-105 transform transition-all duration-300 shadow-lg hover:shadow-xl px-3 py-2 text-sm`}
             >
-              {" "}
               <Edit className="w-4 h-4 group-hover:scale-110 transition-transform duration-300" />
               <span className="hidden sm:inline">
                 {isEditing ? "Update" : "Edit"}
@@ -243,26 +218,15 @@ function getObjectsWithPermissions(data) {
             </Button>
             <ConfirmDialog
               isOpen={showConfirmUpdate}
-              title="Are you sure?"
+              title="Confirm Update"
               message="Do you want to update this permission?"
-              action="update" // hoặc "delete", "create"
+              action="update"
               onConfirm={() => {
                 handleUpdate();
                 setShowConfirmUpdate(false);
               }}
               onCancel={() => setShowConfirmUpdate(false)}
-              // loading={loadingV2}
             />
-            {/* <ConfirmDialog
-              isOpen={showConfirmUpdate}
-              title="Update"
-              message="Are you sure you want to update permissions?"
-              onConfirm={() => {
-                handleUpdate();
-                setShowConfirmUpdate(false);
-              }}
-              onCancel={() => setShowConfirmUpdate(false)}
-            /> */}
           </div>
           <div>
             <Button
@@ -275,7 +239,7 @@ function getObjectsWithPermissions(data) {
             <ConfirmDialog
               isOpen={showConfirm}
               title="Delete"
-              message="Do you want to delete this permission??"
+              message="Do you want to delete this permission?"
               onConfirm={handleDeleteRole}
               onCancel={() => setShowConfirm(false)}
             />
