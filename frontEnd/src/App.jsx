@@ -31,11 +31,11 @@ const Login = lazy(() => import("./pages/Login/Login"));
 const ForgotPassword = lazy(() => import("./pages/Login/ForgotPassword"));
 const ProductsPage = lazy(() => import("./pages/Products"));
 
-// const ImportStock = lazy(() => import('./pages/Inventory/ImportStock')); 
+// const ImportStock = lazy(() => import('./pages/Inventory/ImportStock'));
 // const Products = lazy(() => import('./pages/Products/Products'));
 // const Inventory = lazy(() => import('./pages/Inventory/Inventory'));
 const WarehouseAreas = lazy(() => import("./pages/Storage"));
-// const Customers = lazy(() => import('./pages/Customers/Customers'));
+const Customers = lazy(() => import('./pages/Customers'));
 const Suppliers = lazy(() => import('./pages/Suppliers'));
 const Staff = lazy(() => import("./pages/Staff/Staff"));
 const Account = lazy(() => import("./pages/Account/Account"));
@@ -163,6 +163,22 @@ const router = createBrowserRouter(
             element={
               <LazyLoader>
                 <Permissions />
+              </LazyLoader>
+            }
+            />
+            <Route
+            path="Customers"
+            element={
+              <LazyLoader>
+                <Customers />
+              </LazyLoader>
+            }
+            />
+            <Route
+            path="import"
+            element={
+              <LazyLoader>
+                <ImportStock />
               </LazyLoader>
             }
             />

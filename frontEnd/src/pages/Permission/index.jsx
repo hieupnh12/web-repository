@@ -36,10 +36,12 @@ const Permissions = () => {
     loadRole(); // chạy khi mount
   }, []);
 
+
   const handleCreateRole = async (payload) => {
     try {
-      // console.log("Sending payload:", payload);
       setShowModal(false);
+      console.log("create ", payload);
+      
       const response = await takeCreateFunction(payload); // Gửi tới API
       
       if (response?.status === 200 || response?.status === 201) {

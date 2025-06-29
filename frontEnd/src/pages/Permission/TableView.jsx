@@ -1,19 +1,31 @@
-import React from "react";
-import { Loader2 } from "lucide-react"; // Icon quay vòng
+import React, { useMemo } from "react";
+import { Loader2 } from "lucide-react";
 
-const TableViewPer = ({ data = [], search = "", loading = false , onSelectRow}) => {
-  const filteredData = data.filter((role) =>
-    role.roleName.toLowerCase().includes(search.toLowerCase())
-  );
+const TableViewPer = ({
+  data = [],
+  search = "",
+  loading = false,
+  onSelectRow,
+  selectedRoleId = null, // optional prop để làm nổi bật dòng đang chọn
+}) => {
+  const filteredData = useMemo(() => {
+    return data.filter((role) =>
+      role.roleName.toLowerCase().includes(search.toLowerCase())
+    );
+  }, [data, search]);
 
   return (
     <div className="bg-white rounded-2xl shadow-xl h-[530px]">
       <div className="overflow-y-auto max-h-[520px] custom-scroll">
         <table className="min-w-full text-center">
           <thead className="bg-gradient-to-r from-blue-50 to-indigo-50 sticky top-0 z-10">
-            <tr className="w-full">
-              <th className="px-6 py-3 text-xs font-semibold text-gray-700 uppercase border-r border-gray-300">ID</th>
-              <th className="px-6 py-3 text-xs font-semibold text-gray-700 uppercase">Permission</th>
+            <tr>
+              <th className="px-6 py-3 text-xs font-semibold text-gray-700 uppercase border-r border-gray-300">
+                ID
+              </th>
+              <th className="px-6 py-3 text-xs font-semibold text-gray-700 uppercase">
+                Permission
+              </th>
             </tr>
           </thead>
           <tbody className="bg-white divide-y divide-gray-100 cursor-pointer">
@@ -26,8 +38,16 @@ const TableViewPer = ({ data = [], search = "", loading = false , onSelectRow}) 
               </tr>
             ) : filteredData.length > 0 ? (
               filteredData.map((item, index) => (
-                <tr key={item.roleId} onClick={() => onSelectRow(item)} className="hover:bg-gray-200 transition-colors duration-200 text-center ">
-                  <td className="px-6 py-3 whitespace-nowrap text-sm text-gray-700 w-[30%] border-r border-gray-100">{index + 1}</td>
+                <tr
+                  key={item.roleId}
+                  onClick={() => onSelectRow(item)}
+                  className={`hover:bg-gray-200 transition-colors duration-200 ${
+                    selectedRoleId === item.roleId ? "bg-blue-100 font-semibold" : ""
+                  }`}
+                >
+                  <td className="px-6 py-3 whitespace-nowrap text-sm text-gray-700 w-[30%] border-r border-gray-100">
+                    {index + 1}
+                  </td>
                   <td className="px-6 py-3 whitespace-nowrap text-sm text-gray-800 font-medium w-[70%]">
                     {item.roleName}
                   </td>
@@ -35,8 +55,11 @@ const TableViewPer = ({ data = [], search = "", loading = false , onSelectRow}) 
               ))
             ) : (
               <tr>
-                <td colSpan={2} className="px-6 py-4 text-center text-sm text-gray-500">
-                  Don't found permissions.
+                <td
+                  colSpan={2}
+                  className="px-6 py-4 text-center text-sm text-gray-500"
+                >
+                  No permissions found.
                 </td>
               </tr>
             )}

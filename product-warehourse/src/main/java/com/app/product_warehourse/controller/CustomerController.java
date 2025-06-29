@@ -14,6 +14,8 @@ import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+
 @RestController
 @RequestMapping("/customer")
 @RequiredArgsConstructor
@@ -21,6 +23,13 @@ import org.springframework.web.bind.annotation.*;
 @Slf4j
 public class CustomerController {
     CustomerService customerService;
+
+    @GetMapping
+    public ApiResponse<List<CustomerResponse>> getAllCustomers() {
+        return ApiResponse.<List<CustomerResponse>>builder()
+                .result(customerService.getAllCustomer())
+                .build();
+    }
 
     @PostMapping
     public ApiResponse<CustomerResponse> addCustomer(@Valid  @RequestBody CustomerCreateRequest request) {

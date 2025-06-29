@@ -86,12 +86,14 @@ const Sidebar = () => {
       color: "text-blue-500",
     };
 
-    const filtered = MENU_ITEMS.filter((item) => allowedFunctionIds.includes(item.id));
+    const filtered = MENU_ITEMS.filter((item) =>
+      allowedFunctionIds.includes(item.id)
+    );
     return [defaultDashboard, ...filtered];
   }, [allowedFunctionIds]);
 
   return (
-    <div className="w-64 bg-white shadow-lg h-screen flex flex-col overflow-auto">
+    <div className="w-64 bg-white shadow-lg h-screen flex flex-col overflow-auto custom-scroll">
       {/* User Info */}
       <div className="p-4 border-b border-gray-200">
         <div className="flex items-center space-x-3">
@@ -99,7 +101,9 @@ const Sidebar = () => {
             <UserCircle className="w-8 h-8 text-white" />
           </div>
           <div>
-            <h3 className="font-semibold text-gray-800">{infoAccount.fullName}</h3>
+            <h3 className="font-semibold text-gray-800">
+              {infoAccount.fullName}
+            </h3>
             <p className="text-sm text-gray-500">{infoAccount.roleName}</p>
           </div>
         </div>

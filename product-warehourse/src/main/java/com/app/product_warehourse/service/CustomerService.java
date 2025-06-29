@@ -14,6 +14,10 @@ import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
+import java.util.List;
+import java.util.stream.Collectors;
+
 @Service
 @RequiredArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
@@ -34,4 +38,8 @@ public class CustomerService {
         return customerMapper.toCustomerResponse(customerRepository.save(customer));
     }
 
+    public List<CustomerResponse>  getAllCustomer() {
+        List<CustomerResponse> customerResponseList = customerRepository.findAll().stream().map(customerMapper::toCustomerResponse).collect(Collectors.toList());
+        return customerResponseList;
+    }
 }
