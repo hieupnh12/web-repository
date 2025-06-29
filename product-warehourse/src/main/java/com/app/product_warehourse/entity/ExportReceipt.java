@@ -4,6 +4,7 @@ package com.app.product_warehourse.entity;
 import jakarta.persistence.*;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
+import org.hibernate.annotations.CreationTimestamp;
 
 import java.time.LocalDateTime;
 
@@ -20,17 +21,23 @@ public class ExportReceipt {
     @Column(name ="export_id")
     String export_id;
 
+
+    @CreationTimestamp
     @Column(name ="export_time")
     LocalDateTime exportTime;
 
     @Column(name ="total_amount")
     Long totalAmount;
 
-    @Column(name ="creater_id")
-    String staffId;
 
-    @Column(name ="customer_id")
-    String customerId;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name ="creater_id")
+    Account staff;
+
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name ="customer_id")
+    Customer customer;
 
     @Column(name ="status")
     Integer status;

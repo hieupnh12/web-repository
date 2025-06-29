@@ -25,7 +25,7 @@ public class ImportReceiptDetail  {
     public static class ImportReceiptDetailId implements Serializable {
         @ManyToOne
         @JoinColumn(name = "import_id")
-        ImportReceipt id;
+        ImportReceipt import_id;
 
         @ManyToOne
         @JoinColumn(name = "product_version_id")

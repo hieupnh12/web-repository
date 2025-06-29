@@ -17,12 +17,12 @@ import org.mapstruct.MappingTarget;
 @Mapper(componentModel = "spring")
 public interface ImportReceiptDetailsMapper {
 
-    @Mapping(target = "id", ignore = true) // Bỏ qua ánh xạ id
+    @Mapping(target = "import_id", ignore = true) // Bỏ qua ánh xạ id
     @Mapping(target = "productVersionId", ignore = true) // Bỏ qua ánh xạ productVersionId
     ImportReceiptDetail.ImportReceiptDetailId toImportIDDetails(ImportReceiptDetailsRequest request);
 
 
-    @Mapping(target = "id", source = "newid.id.import_id") // Ánh xạ import_id của ImportReceipt
+    @Mapping(target = "import_id", source = "newid.import_id.import_id") // Ánh xạ import_id của ImportReceipt
     @Mapping(target = "productVersionId", source = "newid.productVersionId.versionId") // Ánh xạ versionId của ProductVersion
     ImportReceiptDetailsResponse toImportReceiptDetailsResponse (ImportReceiptDetail importReceiptDetail);
 
@@ -36,7 +36,7 @@ public interface ImportReceiptDetailsMapper {
         return service.GetProductVersionById(id);
     }
 
-    @Mapping(target = "newid.id", source = "id")
+    @Mapping(target = "newid.import_id", source = "import_id")
     @Mapping(target = "newid.productVersionId", source = "productVersionId")
     ImportReceiptDetail toImportReceiptDetails(ImportReceiptDetailsRequest request, @Context ImportReceiptService importService, @Context ProductVersionService productVersionService);
 
@@ -48,7 +48,7 @@ public interface ImportReceiptDetailsMapper {
 
     default ImportReceiptDetail.ImportReceiptDetailId getInforImportReceiptDetails(ImportReceiptDetailsRequest request, ImportReceipt im , ProductVersion version){
         ImportReceiptDetail.ImportReceiptDetailId ird = toImportIDDetails(request);
-        ird.setId(im);
+        ird.setImport_id(im);
         ird.setProductVersionId(version);
         return ird;
     }

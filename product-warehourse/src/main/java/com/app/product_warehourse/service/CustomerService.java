@@ -34,4 +34,10 @@ public class CustomerService {
         return customerMapper.toCustomerResponse(customerRepository.save(customer));
     }
 
+
+    public Customer getCustomer(String customerId) {
+        return customerRepository.findById(customerId).orElseThrow(() -> new AppException(ErrorCode.CUSTOMER_NOT_EXIST));
+    }
+
+
 }

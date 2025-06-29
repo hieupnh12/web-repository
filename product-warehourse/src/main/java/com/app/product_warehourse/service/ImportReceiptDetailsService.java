@@ -37,12 +37,12 @@ public class ImportReceiptDetailsService {
 
     public ImportReceiptDetailsResponse createImportReceiptDetails(ImportReceiptDetailsRequest request) {
         // Xác thực đầu vào
-        if (request.getId() == null || request.getProductVersionId() == null) {
+        if (request.getImport_id() == null || request.getProductVersionId() == null) {
             throw new IllegalArgumentException("ID của ImportReceipt và ProductVersion không được để trống");
         }
 
         // Lấy thực thể ImportReceipt và ProductVersion
-        ImportReceipt importReceipt = importService.getImportReceipt(request.getId());
+        ImportReceipt importReceipt = importService.getImportReceipt(request.getImport_id());
         ProductVersion productVersion = productVersionService.GetProductVersionById(request.getProductVersionId());
 
         if (importReceipt == null || productVersion == null) {

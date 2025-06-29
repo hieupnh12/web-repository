@@ -14,7 +14,7 @@ import lombok.experimental.FieldDefaults;
 public class ImportReceiptDetailsResponse {
 
 
-    String id;
+    String import_id;
 
     String productVersionId;
 
