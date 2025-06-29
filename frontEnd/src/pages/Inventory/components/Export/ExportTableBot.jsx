@@ -1,13 +1,6 @@
-import React, { forwardRef, useImperativeHandle, useState } from "react";
 
-const ExportTable = forwardRef(({ products }, refP) => {
-  // chọn item trong bảng để hiển thị lại data trên productForm
-  const [itemChoose, setItemChoose] = useState(null);
-  useImperativeHandle(refP, () => ({
-    itemChoose,
-    setItemChoose
-  }));
-  console.log(itemChoose);
+const ExportTable = ({ itemChoose, setItemChoose, products}) => {
+  // chọn item trong bảng để hiển thị lại data trên productForm 
 
   return (
     <div className="bg-white rounded-lg shadow p-2 overflow-y-auto overflow-x-auto max-h-[300px] h-[245px]">
@@ -70,6 +63,6 @@ const ExportTable = forwardRef(({ products }, refP) => {
       </table>
     </div>
   );
-});
+};
 
 export default ExportTable;

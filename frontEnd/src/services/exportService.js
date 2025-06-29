@@ -49,12 +49,6 @@ export const fetchFullExportReceipts = async () => {
 };
 
 
-
-// login function
-export const login = (data) => {
-  return axios.post(`http://localhost:8080/warehouse/auth/login`, data);
-};
-
 // api load product in create receipt export
 export const loadProductVerson = () => {
     const response = BASE_URL[GET]("productVersions?_embed=productItems");
@@ -64,7 +58,11 @@ export const loadProductVerson = () => {
 
 export const loadCustomers = () => {
     const response = BASE_URL[GET]("customers");
+    return response;
+}
 
+export const loadCustomersV2 = () => {
+    const response = axios.get("http://localhost:3004/customers");
     return response;
 }
 
