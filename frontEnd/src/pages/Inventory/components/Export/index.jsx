@@ -45,6 +45,7 @@ const ExportPage = () => {
   };
 
   const handleProductAdd = (product) => {
+
     // Tìm imei trước khi thêm để set imei để tránh sót imei khi tạo mới (trong cùng 1 version khi thêm mới lại cái đã thêm bằng cách bớt đi 1 imei thì phải xóa đi tất cả imei có trong version đó rồi ms tạo ds imei mới)
     const imeiDup = form.products?.find(
       (p) =>
@@ -53,7 +54,7 @@ const ExportPage = () => {
     );
     // console.log("dúpđ", imeiDup);
     setUsedImeis((prev) =>
-      prev.filter((imei) => !imeiDup.imeis.includes(imei))
+      prev.filter((imei) => !imeiDup?.imeis?.includes(imei))
     );
 
     setForm((prev) => {
@@ -161,38 +162,7 @@ const ExportPage = () => {
     setPage(1);
   };
 
-  // const handleEditImeis = (updatedProduct) => {
-  //   setForm((prev) => {
-  //     const newList = prev.products.map((p) =>
-  //       p.idProduct === updatedProduct.idProduct &&
-  //       p.idProductVersion === updatedProduct.idProductVersion
-  //         ? updatedProduct
-  //         : p
-  //     );
-
-  //     const newTotal = newList.reduce(
-  //       (sum, p) => sum + p.price * p.quantity,
-  //       0
-  //     );
-
-  //     return { ...prev, products: newList, total: newTotal };
-  //   });
-
-  //   if (exportTableRef.current) {
-  //     exportTableRef.current.setItemChoose(null);
-  //   }
-  // };
-
-  // const handleEditProduct = () => {
-  //   if (exportTableRef.current?.itemChoose) {
-  //     if (productFormRef.current) {
-  //       productFormRef.current.handleEditImeis();
-  //     }
-  //   } else {
-  //     alert("Vui lòng chọn một sản phẩm để sửa!");
-  //   }
-  // };
-
+  
   const handleAddButtonClick = () => {
     if (productFormRef.current) {
       productFormRef.current.handleAdd();

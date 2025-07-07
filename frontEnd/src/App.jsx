@@ -27,19 +27,19 @@ const Dashboard = lazy(
 );
 const ExportStock = lazy(() => import("./pages/Inventory/ExportStock"));
 const Export = lazy(() => import("./pages/Inventory/components/Export"));
+const Import = lazy(() => import("./pages/Inventory/components/Import"));
 const Login = lazy(() => import("./pages/Login/Login"));
 const ForgotPassword = lazy(() => import("./pages/Login/ForgotPassword"));
 const ProductsPage = lazy(() => import("./pages/Products"));
 
-// const ImportStock = lazy(() => import('./pages/Inventory/ImportStock'));
+const ImportStock = lazy(() => import("./pages/Inventory/ImportStock"));
 // const Products = lazy(() => import('./pages/Products/Products'));
 // const Inventory = lazy(() => import('./pages/Inventory/Inventory'));
 const WarehouseAreas = lazy(() => import("./pages/Storage"));
-const Customers = lazy(() => import('./pages/Customers'));
-const Suppliers = lazy(() => import('./pages/Suppliers'));
+const Customers = lazy(() => import("./pages/Customers"));
+const Suppliers = lazy(() => import("./pages/Suppliers"));
 const Staff = lazy(() => import("./pages/Staff/Staff"));
 const Account = lazy(() => import("./pages/Account/Account"));
-
 
 // Optional: 404 Not Found page
 const NotFound = () => (
@@ -124,7 +124,7 @@ const router = createBrowserRouter(
               </LazyLoader>
             }
           />
-          {/* <Route path="import" element={<ImportStock />} /> */}
+          {/* <Route path="import" element={<ImportStock />} />
           <Route
             path="export"
             element={
@@ -132,7 +132,7 @@ const router = createBrowserRouter(
                 <ExportStock />
               </LazyLoader>
             }
-          />
+          /> */}
           <Route
             path="suppliers"
             element={
@@ -149,15 +149,15 @@ const router = createBrowserRouter(
                 <Staff />
               </LazyLoader>
             }
-            />
-           <Route
+          />
+          <Route
             path="account"
             element={
               <LazyLoader>
                 <Account />
               </LazyLoader>
             }
-            />
+          />
           <Route
             path="permissions"
             element={
@@ -165,23 +165,34 @@ const router = createBrowserRouter(
                 <Permissions />
               </LazyLoader>
             }
-            />
-            <Route
+          />
+          <Route
             path="Customers"
             element={
               <LazyLoader>
                 <Customers />
               </LazyLoader>
             }
+          />
+          <Route path="import">
+            <Route
+              index
+              element={
+                <LazyLoader>
+                  <ImportStock />
+                </LazyLoader>
+              }
             />
             <Route
-            path="import"
-            element={
-              <LazyLoader>
-                <ImportStock />
-              </LazyLoader>
-            }
+              path="addimport"
+              element={
+                <LazyLoader>
+                  <Import />
+                </LazyLoader>
+              }
             />
+          </Route>
+
           <Route path="statistics" element={<StatisticsLayout />}>
             <Route index element={<Overview />} />
             <Route path="overview" element={<Overview />} />

@@ -22,7 +22,7 @@ export const takeCustomer = () => {
 
 // Tạo 1 khách hàng
 export const takeCreateCustomer = (data) => {
-    const responds = BASE_URL[POST](`customer`, data);
+    const responds = BASE_URL[POST]("customer", data);
     return responds;
 }
 

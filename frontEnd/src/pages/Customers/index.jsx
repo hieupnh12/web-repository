@@ -95,7 +95,11 @@ const Customers = () => {
 
   const handleCreateCustomer = async (newCustomer) => {
     try {
+      console.log("new", newCustomer);
+      
       const response = await takeCreateCustomer(newCustomer);
+      console.log("csodso",response);
+      
       if (response.status === 200) {
         setCustomers([...customers, response.data.result]);
         setSnackbar({
@@ -104,10 +108,12 @@ const Customers = () => {
           severity: "success",
         });
       }
-    } catch {
+    } catch (error) {
+      console.log("aa", error);
+      
       setSnackbar({
         open: true,
-        message: "Error adding customer",
+        message: "Error adding customer" + error.response.data.message,
         severity: "error",
       });
     }

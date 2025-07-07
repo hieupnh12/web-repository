@@ -2,8 +2,9 @@ import React from "react";
 import html2canvas from "html2canvas";
 import jsPDF from "jspdf";
 import ContractTemplate from "../pages/Inventory/components/ExportContractTemplate";
+import ImportReceiptForm from "../pages/Inventory/components/ImportContractTemPlate";
 
-export default function ContractPreviewModal({ data, onClose }) {
+export default function ContractPreviewModal({ data, onClose, IOreceipt = true }) {
   const handleDownloadPDF = async () => {
     const element = document.getElementById("contract-content");
     if (!element) return;
@@ -21,7 +22,7 @@ export default function ContractPreviewModal({ data, onClose }) {
 
   return (
     <div className="fixed inset-0 bg-black/50 z-50 flex justify-center items-center">
-      <div className="bg-white w-[900px] max-h-[90vh] rounded-xl p-6 shadow-xl overflow-y-auto relative">
+      <div className="bg-white w-[900px] max-h-[90vh] rounded-xl p-6 shadow-xl overflow-y-auto relative custom-scroll">
         {/* Nút đóng */}
         <button
           onClick={onClose}
@@ -37,7 +38,7 @@ export default function ContractPreviewModal({ data, onClose }) {
           id="contract-content"
           className="border p-4 rounded bg-white text-sm space-y-3"
         >
-          <ContractTemplate data={data} />
+          {IOreceipt? <ImportReceiptForm data={data}/>:<ContractTemplate data={data} />}
         </div>
 
         {/* Nút tải xuống */}
