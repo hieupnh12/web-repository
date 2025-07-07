@@ -15,10 +15,6 @@ import lombok.experimental.FieldDefaults;
 public class ProductItem {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name ="item_id")
-    Long item_id;
-
     @Column(name ="imei")
     String imei;
 

@@ -12,7 +12,7 @@ import lombok.experimental.FieldDefaults;
 public class ExportReceiptDetailsResponse {
 
     String export_id;
-    String imei;
+    String productVersionId;
     Integer quantity;
     Integer unitPrice;
 

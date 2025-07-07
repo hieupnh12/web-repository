@@ -18,7 +18,7 @@ public class ExportReceiptDetailsRequest {
 
 
     String export_id;
-    Long item_id;
+    String imei; // Đổi tên từ productVersionId thành itemId để rõ ràng
     Integer quantity;
     Integer unitPrice;
 

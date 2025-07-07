@@ -47,17 +47,17 @@ public class ProductItemService {
                 .collect(Collectors.toList());
     }
 
-    public ProductItem getProductItemByid(Long id) {
-        return productItemRepo.findById(id)
+    public ProductItem getProductItemByid(String imei) {
+        return productItemRepo.findById(imei)
                 .orElseThrow(() -> new RuntimeException("ProductItem not found"));
     }
 
-    public void deleteProductItemById(Long id) {
+    public void deleteProductItemById(String id) {
         productItemRepo.deleteById(id);
     }
 
-    public ProductItemResponse updateProductItem(Long id, ProductItemRequest request) {
-        ProductItem productItem = productItemRepo.findById(id)
+    public ProductItemResponse updateProductItem(String imei, ProductItemRequest request) {
+        ProductItem productItem = productItemRepo.findById(imei)
                 .orElseThrow(() -> new RuntimeException("ProductItem not found"));
 
         ProductVersion version = versionService.GetProductVersionById(request.getProductVersionId());
@@ -73,4 +73,20 @@ public class ProductItemService {
 
         return productItemMapper.toProductItemResponse(productItemRepo.save(productItem));
     }
+
+
+
+    // Updated method to return list of imei by productVersionId
+//    public List<String> getProductItemByProductVersionId(String productVersionId) {
+//        // Fetch the list of IMEIs
+//        List<String> imeis = productItemRepo.findImeiByProductVersionId(productVersionId);
+//
+//        // Check if the result is empty
+//        if (imeis.isEmpty()) {
+//            throw new RuntimeException("No IMEIs found for product version ID " + productVersionId);
+//        }
+//
+//        return imeis;
+//    }
+
 }

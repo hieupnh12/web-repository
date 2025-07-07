@@ -48,8 +48,7 @@ public class ProductService  {
 
 
 
-    public ProductResponse createProduct(ProductRequest request)  {
-
+    public ProductResponse createProduct(ProductRequest request, MultipartFile image) throws IOException {
         Origin origin = originService.getOriginById(request.getOriginId());
         WarehouseArea wa = warehouseAreaService.getWarehouseAreaById(request.getWarehouseAreaId());
 
@@ -60,9 +59,15 @@ public class ProductService  {
         Brand br = brandService.GetBrandById(request.getBrandId());
         OperatingSystem os = operatingSystemService.getOSById(request.getOperatingSystemId());
 
-        // Tạo Product và gán imageUrl thủ công
+        // Tạo Product với các thực thể liên quan
         Product product = productMapper.toProductWithOrigin(request, origin, os, br, wa);
 
+        // Xử lý ảnh nếu có (sử dụng logic trong ProductMapper)
+        if (image != null && !image.isEmpty()) {
+            ImageRequest imageRequest = ImageRequest.builder().image(image).build();
+            Product updatedProduct = productMapper.toImageProduct(imageRequest, cloudinary);
+            product.setImage(updatedProduct.getImage());
+        }
 
         Product savedProduct = productRepository.save(product);
         return productMapper.toProductResponse(savedProduct);

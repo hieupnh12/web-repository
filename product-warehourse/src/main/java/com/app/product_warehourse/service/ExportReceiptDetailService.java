@@ -34,7 +34,11 @@ public class ExportReceiptDetailService {
 
 
        public ExportReceiptDetailsResponse CreateExportReceiptDetails(ExportReceiptDetailsRequest request) {
-           ProductItem item = productItemService.getProductItemByid(request.getItem_id());
+
+
+           // Lấy ProductItem từ item_id (giả sử productVersionId trong request là item_id)
+           ProductItem item = productItemService.getProductItemByid(String.valueOf(request.getImei()));
+
            ExportReceipt exportReceipt = exportReceiptService.getExportreceipt(request.getExport_id());
 
            ExportReceiptDetail response = exDMapper.toExportDetails(request,productItemService,exportReceiptService);
@@ -58,23 +62,23 @@ public class ExportReceiptDetailService {
 
 
 
-      public ExportReceiptDetail getExportReceiptDetailById(String export_id , Long item_id ){
+      public ExportReceiptDetail getExportReceiptDetailById(String export_id ,String productVersionId){
           // Xác thực đầu vào
-          if (export_id == null | item_id == null) {
+          if (export_id == null | productVersionId == null) {
               throw new IllegalArgumentException("ID của ExportReceipt và Item_id không được để trống");
           }
-           ExportReceiptDetail response= exDRepo.findByExportIdAndItemId(export_id,item_id);
+           ExportReceiptDetail response= exDRepo.findByExportIdAndProductVersionId(export_id,productVersionId);
           if (response == null) {
-              throw new IllegalArgumentException("Không tìm thấy  exportId: " + export_id + " và item_id: " + item_id);
+              throw new IllegalArgumentException("Không tìm thấy  exportId: " + export_id + " và item_id: " + productVersionId);
           }
           return response;
       }
 
 
-      public ExportReceiptDetailsResponse UpdateExportReceiptDetail(ExportReceiptDetailUpdateRequest request, String export_id , Long item_id ){
-           ExportReceiptDetail response= getExportReceiptDetailById(export_id,item_id);
+      public ExportReceiptDetailsResponse UpdateExportReceiptDetail(ExportReceiptDetailUpdateRequest request, String export_id , String productVersionId ){
+           ExportReceiptDetail response= getExportReceiptDetailById(export_id,productVersionId);
           if (response == null) {
-              throw new IllegalArgumentException("Không tìm thấy  exportId: " + export_id + " và item_id: " + item_id);
+              throw new IllegalArgumentException("Không tìm thấy  exportId: " + export_id + " và item_id: " + productVersionId);
           }
           exDMapper.toUpdateExportDetail(request,response);
           ExportReceiptDetail complete = exDRepo.save(response);
@@ -83,10 +87,10 @@ public class ExportReceiptDetailService {
 
 
 
-      public void DeleteExportReceiptDetail(String export_id , Long item_id ){
-          ExportReceiptDetail response= getExportReceiptDetailById(export_id,item_id);
+      public void DeleteExportReceiptDetail(String export_id , String productVersionId ){
+          ExportReceiptDetail response= getExportReceiptDetailById(export_id,productVersionId);
           if (response == null) {
-              throw new IllegalArgumentException("Không tìm thấy  exportId: " + export_id + " và item_id: " + item_id);
+              throw new IllegalArgumentException("Không tìm thấy  exportId: " + export_id + " và item_id: " + productVersionId);
           }
           exDRepo.delete(response);
       }

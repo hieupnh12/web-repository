@@ -17,7 +17,9 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
-
+@RequiredArgsConstructor  // thay cho autowrid
+@FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true) //bo private final
+@Slf4j
 @RestController
 @RequestMapping("/exportDetail")
 public class ExportReceiptDetailsController {
@@ -43,8 +45,8 @@ public class ExportReceiptDetailsController {
 
 
        @DeleteMapping("/{export_id}/{item_id}")
-    public ApiResponse<Void> DeleteExportReceiptDetails(@PathVariable("export_id") String export_id,@PathVariable("item_id") Long item_id) {
-           exDservice.DeleteExportReceiptDetail(export_id,item_id);
+    public ApiResponse<Void> DeleteExportReceiptDetails(@PathVariable("export_id") String export_id,@PathVariable("item_id") String productVersionId) {
+           exDservice.DeleteExportReceiptDetail(export_id,productVersionId);
            return ApiResponse.<Void>builder()
                    .message("Delete export receipt detail")
                    .build();
@@ -52,12 +54,12 @@ public class ExportReceiptDetailsController {
 
 
 
-       @PutMapping("/{export_id}/{item_id}")
+       @PutMapping("/{export_id}/{productVersionId}")
     public ApiResponse<ExportReceiptDetailsResponse> UpdateExportReceiptDetails(ExportReceiptDetailUpdateRequest request,
                                                                                 @PathVariable("export_id") String export_id,
-                                                                                @PathVariable("item_id") Long item_id) {
+                                                                                @PathVariable("productVersionId") String productVersionId) {
            return ApiResponse.<ExportReceiptDetailsResponse>builder()
-                   .result(exDservice.UpdateExportReceiptDetail(request, export_id, item_id))
+                   .result(exDservice.UpdateExportReceiptDetail(request, export_id, productVersionId))
                    .message("Update export receipt detail")
                    .build();
        }

@@ -91,7 +91,7 @@ public class ImportReceiptDetailsService {
     public ImportReceiptDetailsResponse  UpdateImportReceiptDetails(ImportReceiptDetailsUpdateRequest request, String id , String productVersionId) {
         ImportReceiptDetail importDetails = getImportReceiptDetails(id,productVersionId);
         if (importDetails == null) {
-            throw new AppException(ErrorCode.IMPORTDETAIL_NOT_EXIST);
+            throw new AppException(ErrorCode.IMPORT_DETAIL_NOT_EXIST);
         }
         importDmapper.toUpdateImportDetail(request,importDetails);
         ImportReceiptDetail savedDetail = importDrepo.save(importDetails);
@@ -102,7 +102,7 @@ public class ImportReceiptDetailsService {
     public void deleteImportReceiptDetails( String id , String productVersionId) {
         ImportReceiptDetail importDetails = getImportReceiptDetails(id,productVersionId);
         if (importDetails == null) {
-            throw new AppException(ErrorCode.IMPORTDETAIL_NOT_EXIST);
+            throw new AppException(ErrorCode.IMPORT_DETAIL_NOT_EXIST);
         }
         importDrepo.deleteByImportIdAndProductVersionId(id,productVersionId);
     }

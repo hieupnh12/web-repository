@@ -13,7 +13,14 @@ public enum ErrorCode {
     PRODUCT_NOT_EXIST(2004,"Product Not Exist", HttpStatus.NOT_FOUND),
     NAME_ALREADY_EXIST(2005,"Name Exist! ", HttpStatus.CONFLICT),
     SUPPLIER_NOT_EXIST(2006,"Supplier Not Exist", HttpStatus.NOT_FOUND),
-    IMPORTDETAIL_NOT_EXIST(2007,"ImportDetail Not Exist", HttpStatus.NOT_FOUND),
+    IMPORT_DETAIL_NOT_EXIST(2007,"ImportDetail Not Exist", HttpStatus.NOT_FOUND),
+    FORM_ERROR(2008,"Form  Not Correct Because Not True JSON or Type ",  HttpStatus.UNSUPPORTED_MEDIA_TYPE),
+    JSON_MAPPING_ERROR(2009,"Json Mapping Error",  HttpStatus.BAD_REQUEST),
+    MISSING_REQUEST_PART(2010, "Missing request part", HttpStatus.BAD_REQUEST),
+    INVALID_PARAMETER_TYPE(2011, "Invalid parameter type", HttpStatus.BAD_REQUEST),
+    INVALID_JSON_FORMAT(2012, "Invalid JSON format or encoding", HttpStatus.BAD_REQUEST),
+
+
 
     UNCATEGORIZE_EXCEPTION(9999, "Uncategorized error", HttpStatus.INTERNAL_SERVER_ERROR),
     INVALID_KEY(1001, "Invalid message key", HttpStatus.BAD_REQUEST),

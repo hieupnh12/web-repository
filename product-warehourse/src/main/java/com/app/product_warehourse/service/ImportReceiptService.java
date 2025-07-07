@@ -1,6 +1,8 @@
 package com.app.product_warehourse.service;
 
+import com.app.product_warehourse.dto.request.ImportReceiptDetailsRequest;
 import com.app.product_warehourse.dto.request.ImportReceiptRequest;
+import com.app.product_warehourse.dto.request.ProductItemRequest;
 import com.app.product_warehourse.dto.response.ImportReceiptResponse;
 import com.app.product_warehourse.entity.Account;
 import com.app.product_warehourse.entity.ImportReceipt; // ✅ đúng
@@ -73,6 +75,17 @@ public class ImportReceiptService {
         // Map to response DTO
         return importmapper.toImportReceiptResponse(savedReceipt);
     }
+
+
+
+//    public ImportReceiptResponse createImportReceiptResponse(ImportReceipt request1, ImportReceiptDetailsRequest request2, ProductItemRequest request3) {
+//
+//    }
+
+
+
+
+
 
 
 

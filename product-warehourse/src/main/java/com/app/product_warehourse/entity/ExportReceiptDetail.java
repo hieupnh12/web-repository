@@ -29,8 +29,8 @@ public class ExportReceiptDetail {
         ExportReceipt export_id;
 
         @OneToOne(fetch = FetchType.LAZY)
-        @JoinColumn(name ="imei")
-        ProductItem item_id;
+        @JoinColumn(name ="product_version_id")
+        ProductItem productVersionId;
     }
 
     @EmbeddedId
