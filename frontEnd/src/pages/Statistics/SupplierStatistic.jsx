@@ -66,5 +66,4 @@ export const SupplierStatistic = () => {
     </div>
   );
 };
-
 export default SupplierStatistic;

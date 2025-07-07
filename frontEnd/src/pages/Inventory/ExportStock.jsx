@@ -5,6 +5,7 @@ import useSmartFilter from "../../hooks/useSmartFilter";
 
 export default function ExportStock() {
   const [tableData, setTableData] = useState([]);
+console.log(tableData);
 
   useEffect(() => {
     fetchFullExportReceipts()
@@ -32,27 +33,6 @@ export default function ExportStock() {
     },
   });
 
-  const handleReload = () => {
-    const mock = [
-      {
-        idExportReciept: 1,
-        customer: { nameCustomer: "Trần Đức Minh" },
-        idStaff: "Thanh Li",
-        totalCost: 500000,
-        time: "2025-05-29T10:00:00",
-      },
-      {
-        idExportReciept: 2,
-        customer: { nameCustomer: "Lê Văn Thành" },
-        idStaff: "Thanh Li",
-        totalCost: 700000,
-        time: "2025-05-29T11:30:00",
-      },
-    ];
-    setFilter({ searchQuery: "", searchField: "all" });
-    setCurrentPage(1);
-    setTableData(mock);
-  };
 
   return (
     <>
@@ -60,7 +40,7 @@ export default function ExportStock() {
         tableData={paginatedData}
         filter={filter}
         onFilterChange={setFilter}
-        onReload={handleReload}
+        // onReload={handleReload}
         currentPage={currentPage}
         totalPages={totalPages}
         onPageChange={setCurrentPage}

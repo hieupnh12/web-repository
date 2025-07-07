@@ -66,9 +66,9 @@ const ExportSummary = ({
             />
             <button
               onClick={chooseCustomer}
-              className="w-1/3 border border-gray-300 rounded-lg px-2 py-2 bg-white text-gray-800"
+              className="w-1/3 border border-gray-300 rounded-lg px-2 py-2 bg-blue-500 text-white"
             >
-              ...
+              Choose
             </button>
           </div>
 

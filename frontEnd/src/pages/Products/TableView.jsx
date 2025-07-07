@@ -1,5 +1,5 @@
 import React from "react";
-import { Package, Edit, Info } from "lucide-react";
+import { Package, Edit, Info, Trash } from "lucide-react";
 
 const TableView = ({
   products,
@@ -8,8 +8,9 @@ const TableView = ({
   onSort,
   sortBy,
   sortOrder,
-  onEdit,    // callback mở modal sửa
-  onDetail,  // callback mở modal chi tiết
+  onEdit,
+  onDetail,
+  onDelete,
 }) => {
   const getStockStatus = (quantity) => {
     if (quantity === 0)
@@ -107,7 +108,7 @@ const TableView = ({
               const stockInfo = getStockStatus(product.stockQuantity);
               return (
                 <tr
-                  key={product.id}
+                  key={product.productId}
                   className="hover:bg-gray-50 transition-colors duration-200"
                 >
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-600">
@@ -164,6 +165,13 @@ const TableView = ({
                       title="Chi tiết"
                     >
                       <Info className="w-4 h-4" />
+                    </button>
+                    <button
+                      onClick={() => onDelete && onDelete(product)}
+                      className="inline-flex items-center px-2 py-1 text-red-600 hover:text-red-800 rounded-md transition"
+                      title="Xóa"
+                    >
+                      <Trash className="w-4 h-4" />
                     </button>
                   </td>
                 </tr>

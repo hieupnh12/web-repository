@@ -1,9 +1,12 @@
-import { forwardRef, useImperativeHandle } from "react";
+import { forwardRef, useImperativeHandle, useRef } from "react";
 import { useEffect, useState } from "react";
 import BarcodeScanner from "../../../../utils/useImeiCam";
 
 const ProductForm = forwardRef(
-  ({ selected, onAdd, editProduct, usedImeis, setEditProduct }, ref) => {
+  (
+    { selected, onAdd, editProduct, usedImeis, setEditProduct, setImei },
+    ref
+  ) => {
     const [formData, setFormData] = useState({
       idProduct: "",
       nameProduct: "",
@@ -16,7 +19,7 @@ const ProductForm = forwardRef(
     const [isModalOpen, setIsModalOpen] = useState(false); // Trạng thái modal
     const [products, setProducts] = useState([]); // Lưu danh sách sản phẩm đã chọn option và imei trước đó để cập nhật
     const [showScanner, setShowScanner] = useState(false);
-    console.log("edit", editProduct);
+    // Chặn quét trùng bằng biến flag tạm thời
 
     useEffect(() => {
       if (selected) {
@@ -31,9 +34,9 @@ const ProductForm = forwardRef(
           quantity: "",
         });
       }
-    }, [selected?.idProduct, products]);
+    }, [selected?.idProduct, products, usedImeis]);
 
-    // Khi bấm nút sửa và editProduct thay đổi
+    // Khi editProduct thay đổi
     useEffect(() => {
       if (!editProduct || !products.length) return;
 
@@ -60,7 +63,7 @@ const ProductForm = forwardRef(
         selectedImeis: usedImeisForThisOption,
         quantity: editProduct.quantity.toString(),
       });
-    }, [editProduct, usedImeis]);
+    }, [editProduct]);
 
     // thay đổi cấu hình
     const handleOptionChange = (e) => {
@@ -71,7 +74,7 @@ const ProductForm = forwardRef(
 
       const imeisFromOption = option?.imeiList.map((item) => item.imei) || [];
       const usedImeisForThisOption = imeisFromOption.filter((imei) =>
-        usedImeis.includes(imei)
+        usedImeis?.includes(imei)
       );
 
       setFormData((prev) => ({
@@ -92,36 +95,34 @@ const ProductForm = forwardRef(
       });
     };
 
-    const handleScanImei = () => {
-      setShowScanner(true);
-     
-    };
+    const scannedImeisRef = useRef(new Set());
 
     const handleScanSuccess = (scannedImei) => {
-      setShowScanner(false);
-      console.log(scannedImei);
+  // ✅ Nếu đã xử lý mã này rồi (dù đúng hay sai), thì bỏ qua
+  if (scannedImeisRef.current.has(scannedImei)) return;
 
-      // Kiểm tra IMEI có hợp lệ và thêm vào form
-      if (
-        formData.selectedOption?.imeiList.some(
-          (item) => item.imei === scannedImei && item.status === "in-stock"
-        )
-      ) {
-        setFormData((prev) => ({
-          ...prev,
-          selectedImeis: [...new Set([...prev.selectedImeis, scannedImei])],
-        }));
-      } else {
-        console.log("IMEI không hợp lệ hoặc không có trong kho!");
-      }
-    };
+  // ✅ Đánh dấu là đã xử lý
+  scannedImeisRef.current.add(scannedImei);
+
+  const isValid = formData.selectedOption?.imeiList.some(
+    (item) => item.imei === scannedImei
+  );
+
+  if (isValid) {
+    setFormData((prev) => ({
+      ...prev,
+      selectedImeis: [...new Set([...prev.selectedImeis, scannedImei])],
+    }));
+    setShowScanner(false); // ✅ chỉ đóng nếu đúng
+  } else {
+    // ❌ chỉ báo lỗi duy nhất 1 lần cho mã sai này
+    alert("IMEI không hợp lệ hoặc không có trong kho!");
+  }
+};
+
 
     const handleAdd = () => {
-      if (
-        formData.selectedOption &&
-        formData?.selectedImeis.length > 0
-        //&& parseInt(formData.quantity) >= formData.selectedImeis.length
-      ) {
+      if (formData.selectedOption && formData?.selectedImeis.length > 0) {
         const newProduct = {
           idProduct: formData.idProduct,
           nameProduct: formData.nameProduct,
@@ -136,6 +137,7 @@ const ProductForm = forwardRef(
           const existingIndex = prev.findIndex(
             (p) => p.idProduct === selected.idProduct
           );
+
           if (existingIndex !== -1) {
             const newProducts = [...prev];
             newProducts[existingIndex] = selected;
@@ -172,8 +174,17 @@ const ProductForm = forwardRef(
       <div className="md:w-1/2 space-y-4">
         <BarcodeScanner
           open={showScanner}
-          onResult={handleScanSuccess}
-          onClose={() => setShowScanner(false)}
+          onResult={(code, isValid) => {
+    if (isValid) {
+      handleScanSuccess(code);
+    } else {
+      handleScanSuccess(code); // lỗi cũng truyền vào xử lý, sẽ bị bỏ qua nếu đã gặp
+    }
+  }}
+          onClose={() => {
+  setShowScanner(false);
+  scannedImeisRef.current.clear(); // reset để lần sau xử lý lại được
+}}
         />
         <div className="bg-white rounded shadow h-[350px] p-2">
           <div className="container mx-auto p-4">
@@ -265,7 +276,10 @@ const ProductForm = forwardRef(
                       Chọn IMEI
                     </button>
                     <button
-                      onClick={handleScanImei}
+                      onClick={() => {
+                        scannedImeisRef.current = new Set(); // ✅ RESET danh sách mã đã quét
+                        setShowScanner(true); // ✅ MỞ scanner lại
+                      }}
                       className="bg-blue-500 text-white px-2 py-1 rounded-md hover:bg-blue-600 w-fit"
                       disabled={!formData.selectedOption}
                     >
