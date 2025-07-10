@@ -28,8 +28,8 @@ public enum ErrorCode {
     QUERY_TIMEOUT(2017, "Query Timeout", HttpStatus.SERVICE_UNAVAILABLE),
     CONCURRENT_MODIFICATION(2017, "Concurrent Modification", HttpStatus.CONFLICT),
     REQUEST_FIRST_NOT_FOUND(2017, "Request First Not Exist", HttpStatus.NOT_FOUND),
-
-
+    IMEI_NOT_FOUND(2017, "IMEI Not Exist", HttpStatus.NOT_FOUND),
+    NOT_SAME_VERSION(2017, "Not Same Version", HttpStatus.CONFLICT),
 
 
 

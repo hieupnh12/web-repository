@@ -73,10 +73,19 @@ public class ProductItemService {
                 .collect(Collectors.toList());
     }
 
-    public ProductItem getProductItemByid(String imei) {
-        return productItemRepo.findById(imei)
+
+
+
+    public ProductItemResponse getProductItemByid(String imei) {
+        var productItem = productItemRepo.getProductItemByImei(imei)
                 .orElseThrow(() -> new RuntimeException("ProductItem not found"));
+        return productItemMapper.toProductItemResponse(productItem);
     }
+
+
+
+
+
 
     public void deleteProductItemById(String id) {
         productItemRepo.deleteById(id);

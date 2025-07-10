@@ -194,6 +194,7 @@ public class ExportReceiptService {
                     logger.error("Invalid ProductItem: IMEI is null or duplicate");
                     throw new AppException(ErrorCode.INVALID_REQUEST);
                 }
+                logger.info("Checking ProductItem with IMEI: {}", item.getImei());
                 item.setExportId(savedExportEntity.getExport_id());
 
                 // Kiểm tra ProductVersion
@@ -219,9 +220,12 @@ public class ExportReceiptService {
                 ExportReceiptDetailsResponse detailResponse = exportReceiptDetailService.CreateExportReceiptDetails(updatedDetailRequest);
                 logger.info("Saved ExportReceiptDetailsResponse: {}", detailResponse);
                 savedDetails.add(detailResponse);
+                log.info("Đã thêm detailResponse: {}", detailResponse);
 
                 // Thu thập IMEI để cập nhật exportId
                 imeiList.add(item.getImei());
+                log.info("Thu thập IMEI: {}", item.getImei());
+
             }
 
             // Kiểm tra số lượng ProductItems có khớp với quantity trong detailRequest
@@ -233,7 +237,7 @@ public class ExportReceiptService {
 
             // Cập nhật exportId trong ProductItem
             logger.info("Updating ProductItems with exportId: {} for IMEIs: {}", savedExportEntity.getExport_id(), imeiList);
-            productItemRepo.updateExportIdByImeis(savedExportEntity.getExport_id(), imeiList);
+            productItemRepo.updateExportIdByImei(savedExportEntity.getExport_id(), imeiList);
             logger.info("Updated ProductItems successfully");
         }
 
