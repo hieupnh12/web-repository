@@ -10,7 +10,6 @@ import org.mapstruct.Mapping;
 public interface ProductItemMapper {
     ProductItem toProductItem(ProductItemRequest request);
 
-    @Mapping(source = "item_id", target = "item_id")
     @Mapping(source = "versionId.versionId", target = "productVersionId")
     @Mapping(source = "import_id.import_id", target = "importId")
     @Mapping(source = "export_id.export_id", target = "exportId")

@@ -1,16 +1,15 @@
 package com.app.product_warehourse.controller;
 
 
+import com.app.product_warehourse.dto.request.DayInMonthRequest;
+import com.app.product_warehourse.dto.request.YearToYearRequest;
 import com.app.product_warehourse.dto.response.*;
 import com.app.product_warehourse.service.StatisticsService;
-import com.cloudinary.Api;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
@@ -42,11 +41,30 @@ public class StatisticsController {
                 .build();
     }
 
-    @GetMapping("/productStatictis")
-    public ApiResponse<ProductInfoCountAreaResponse> productStatictis() {
+    @GetMapping("/productStatistics")
+    public ApiResponse<ProductInfoCountAreaResponse> productStatistics() {
         return ApiResponse.<ProductInfoCountAreaResponse>builder()
                 .result(statisticsService.getReportProductCountArea())
                 .build();
     }
 
+    @GetMapping("/revenue/moth/{year}")
+    public ApiResponse<List<MonthInYearResponse>> monthInYearStatistics(@PathVariable Long year ) {
+        return ApiResponse.<List<MonthInYearResponse>>builder()
+                .result(statisticsService.getReportMonthInYear(year))
+                .build();
+    }
+
+    @GetMapping("/date")
+    public ApiResponse<List<DayInMonthResponse>> dateStatistics(@RequestBody DayInMonthRequest request) {
+        return ApiResponse.<List<DayInMonthResponse>>builder()
+                .result(statisticsService.getReportDayInMonth(request))
+                .build();
+    }
+    @GetMapping("/year")
+    public ApiResponse<List<YearToYearResponse>> yearStatistics(@RequestBody YearToYearRequest request) {
+        return ApiResponse.<List<YearToYearResponse>>builder()
+                .result(statisticsService.getReportYearToYear(request))
+                .build();
+    }
 }
