@@ -12,6 +12,9 @@ import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
@@ -38,13 +41,20 @@ public class CustomerService {
         return customerMapper.toCustomerResponse(customerRepository.save(customer));
     }
 
-    public Customer getCustomer(String customerId) {
-        return customerRepository.findById(customerId).orElseThrow(() -> new AppException(ErrorCode.CUSTOMER_NOT_EXIST));
+    public Page<CustomerResponse> getCustomers(int page, int size) {
+        Pageable pageable = PageRequest.of(page, size);
+        return customerRepository.findAll(pageable)
+                .map(customerMapper::toCustomerResponse);
     }
 
-
-    public List<CustomerResponse>  getAllCustomer() {
-        List<CustomerResponse> customerResponseList = customerRepository.findAll().stream().map(customerMapper::toCustomerResponse).collect(Collectors.toList());
-        return customerResponseList;
+    public Page<CustomerResponse> searchCustomers(String keyword, int page, int size) {
+        Pageable pageable = PageRequest.of(page, size);
+        return customerRepository
+                .findByCustomerNameContainingIgnoreCaseOrAddressContainingIgnoreCaseOrPhoneContainingIgnoreCase(
+                        keyword, keyword, keyword, pageable)
+                .map(customerMapper::toCustomerResponse);
+    }
+    public Customer getCustomer(String customerId) {
+        return customerRepository.findById(customerId).orElseThrow(() -> new AppException(ErrorCode.CUSTOMER_NOT_EXIST));
     }
 }

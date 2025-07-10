@@ -45,7 +45,9 @@ public class RoleController {
     @DeleteMapping("/{roleId}")
     public ApiResponse<Void> deleteRole(@PathVariable long roleId) {
       roleService.deleteRoleById(roleId);
-        return ApiResponse.<Void>builder().build();
+        return ApiResponse.<Void>builder()
+                .message("Role deleted")
+                .build();
     }
 
 
@@ -57,7 +59,7 @@ public class RoleController {
     }
 
     @PutMapping("/update/{roleId}")
-    public ApiResponse<RoleResponse> getRoleById(@PathVariable Long roleId, @RequestBody RoleUpdateRequest request) {
+    public ApiResponse<RoleResponse> updateRole(@PathVariable Long roleId, @RequestBody RoleUpdateRequest request) {
         return ApiResponse.<RoleResponse>builder()
                 .result(roleService.updateRole(roleId,request))
                 .build();

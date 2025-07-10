@@ -66,6 +66,7 @@ public enum ErrorCode {
     ACCOUNT_INACTIVE(1025, "Account is inactive.",HttpStatus.BAD_REQUEST),
     FUNCTION_NOT_EXIST(1026, "Function not exist.",HttpStatus.BAD_REQUEST),
     CUSTOMER_NOT_EXIST(1027, "Customer not exist.",HttpStatus.BAD_REQUEST),
+    INVENTORY_NOT_FOUND(1028, "Inventory not exist.",HttpStatus.BAD_REQUEST),
 
     ;
 

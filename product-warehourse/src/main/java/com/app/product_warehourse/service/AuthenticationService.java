@@ -58,7 +58,7 @@ public class AuthenticationService {
     protected  Long REFRESHABLE_DURATION;
 
     public AuthenticationResponse authenticate(AuthenticationRequest request) {
-        Account account = (Account) accountRepository.findByUserName(request.getUsername())
+        var account = accountRepository.findByUserName(request.getUsername())
                 .orElseThrow(() -> new AppException(ErrorCode.ACCOUNT_NOT_EXIST));
         if (!account.getStatus()) {
             throw new AppException(ErrorCode.ACCOUNT_INACTIVE);
