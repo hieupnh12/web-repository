@@ -54,4 +54,7 @@ public class CustomerService {
                         keyword, keyword, keyword, pageable)
                 .map(customerMapper::toCustomerResponse);
     }
+    public Customer getCustomer(String customerId) {
+        return customerRepository.findById(customerId).orElseThrow(() -> new AppException(ErrorCode.CUSTOMER_NOT_EXIST));
+    }
 }

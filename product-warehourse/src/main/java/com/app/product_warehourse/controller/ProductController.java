@@ -11,6 +11,9 @@ import com.app.product_warehourse.entity.Product;
 import com.app.product_warehourse.service.ProductService;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
@@ -21,17 +24,19 @@ import java.util.List;
 @RestController
 @RequestMapping("/product")
 public class ProductController {
-         @Autowired
-        private ProductService productService;
+    @Autowired
+    private ProductService productService;
 
-         //tao new Product su dung Post
-         @PostMapping
-         public ApiResponse<ProductResponse>  addProduct(@RequestBody @Valid ProductRequest request) {
-            ApiResponse<ProductResponse> api = new ApiResponse<>();
-             ProductResponse response = productService.createProduct(request);
-             api.setResult(response);
-             return api;
-         }
+    // Tạo mới Product với ảnh, sử dụng multipart/form-data
+    @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public ApiResponse<ProductResponse> addProduct(
+            @RequestPart(value = "product") @Valid ProductRequest request,
+            @RequestPart(value = "image", required = false) MultipartFile image) throws IOException {
+        ApiResponse<ProductResponse> api = new ApiResponse<>();
+        ProductResponse response = productService.createProduct(request, image);
+        api.setResult(response);
+        return api;
+    }
 
 
     @PutMapping(value = "/upload_image/{id}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
@@ -57,42 +62,38 @@ public class ProductController {
 //    }
 
 
+    @GetMapping
+    ApiResponse<Page<ProductResponse>> getAll(@PageableDefault(size = 10) Pageable pageable) { //Thêm @PageableDefault để mặc định trả về 10 bản ghi mỗi trang. Người dùng có thể truyền
+        ApiResponse<Page<ProductResponse>> resp = new ApiResponse<>();
+        resp.setCode(1010);
+        resp.setResult(productService.getAllProducts(pageable));
+        return resp;
+    }
 
 
-
-           @GetMapping
-           public List<ProductResponse> getProducts() {
-             return productService.getAllProducts();
-         }
-
-
-          @GetMapping("/{idproduct}")
-           Product getProduct(@PathVariable("idproduct") Long  idproduct) {
-               return productService.getProductById(idproduct);
-          }
+    @GetMapping("/{idproduct}")
+    Product getProduct(@PathVariable("idproduct") Long idproduct) {
+        return productService.getProductById(idproduct);
+    }
 
 
-          @PutMapping("/{idproduct}")
-           ApiResponse<ProductResponse> updateProduct(@PathVariable("idproduct") Long  idproduct, @RequestBody ProductUpdateRequest request)  {
+    @PutMapping("/{idproduct}")
+    ApiResponse<ProductResponse> updateProduct(@PathVariable("idproduct") Long idproduct, @RequestBody ProductUpdateRequest request) {
 
-             ApiResponse<ProductResponse> api = new ApiResponse<>();
-             api.setResult(productService.updateProduct(idproduct, request));
-             return api;
-          }
-
-
+        ApiResponse<ProductResponse> api = new ApiResponse<>();
+        api.setResult(productService.updateProduct(idproduct, request));
+        return api;
+    }
 
 
-          @DeleteMapping("/{idproduct}")
-          public   void deleteProduct(@PathVariable("idproduct") Long  idproduct) {
-               productService.deleteProduct(idproduct);
-              System.out.println("Product deleted successfully");
-          }
+    @DeleteMapping("/{idproduct}")
+    public void deleteProduct(@PathVariable("idproduct") Long idproduct) {
+        productService.deleteProduct(idproduct);
+        System.out.println("Product deleted successfully");
+    }
 
 
-
-          //test ket hop productversion va product
-
+    //test ket hop productversion va product
 
 
     //cach 2 : su dụng trigger bang class StockQuantityInitializer
@@ -107,17 +108,15 @@ public class ProductController {
     }
 
 
-
-
     //load anh len front_end
     @PostMapping("/upload_image/{productId}")
     public ApiResponse<ImageResponse> uploadImage(@PathVariable("productId") Long productId,
-                                                  @RequestParam("image") MultipartFile file)  throws IOException {
-          String imageUrl = productService.uploadImage(productId,file);
-          ApiResponse<ImageResponse> api = new ApiResponse<>();
-          api.setCode(1200);
-          api.setMessage(imageUrl);
-          return api;
+                                                  @RequestParam("image") MultipartFile file) throws IOException {
+        String imageUrl = productService.uploadImage(productId, file);
+        ApiResponse<ImageResponse> api = new ApiResponse<>();
+        api.setCode(1200);
+        api.setMessage(imageUrl);
+        return api;
     }
 
 

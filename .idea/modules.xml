@@ -2,6 +2,7 @@
 <project version="4">
   <component name="ProjectModuleManager">
     <modules>
+      <module fileurl="file://$PROJECT_DIR$/product-warehourse/product-warehourse.iml" filepath="$PROJECT_DIR$/product-warehourse/product-warehourse.iml" />
       <module fileurl="file://$PROJECT_DIR$/.idea/web-repository.iml" filepath="$PROJECT_DIR$/.idea/web-repository.iml" />
     </modules>
   </component>

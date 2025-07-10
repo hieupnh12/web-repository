@@ -1,14 +1,14 @@
 package com.app.product_warehourse.entity;
 
 
-import com.app.product_warehourse.dto.response.AccountResponse;
+
 import jakarta.persistence.*;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
 import org.hibernate.annotations.CreationTimestamp;
 
 import java.time.LocalDateTime;
-
+import java.util.List;
 @Builder                 // Tạo builder pattern giúp tạo đối tượng dễ dàng, linh hoạt
 @Entity                  // Đánh dấu class này là entity, ánh xạ tới bảng trong DB
 @Data                    // Tự sinh getter, setter, toString, equals, hashCode
@@ -27,11 +27,11 @@ public class ImportReceipt {
     LocalDateTime time;
 
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name ="supplier_id")
     Suppliers suppliers;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name ="created_id")
     Account staff;
 
@@ -41,4 +41,7 @@ public class ImportReceipt {
     @Column(name ="status")
     Integer status;
 
+
+    @OneToMany(mappedBy = "newid.import_id", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    List<ImportReceiptDetail> importReceiptDetails;
 }

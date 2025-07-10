@@ -1,5 +1,14 @@
 package com.app.product_warehourse.exception;
 
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+
+@Data
+@Builder
+@NoArgsConstructor
+
 public class AppException extends RuntimeException {
     private ErrorCode errorCode;
 
