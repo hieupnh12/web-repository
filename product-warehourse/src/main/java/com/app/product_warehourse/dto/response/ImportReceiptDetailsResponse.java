@@ -1,9 +1,12 @@
 package com.app.product_warehourse.dto.response;
 
+import com.app.product_warehourse.dto.request.ProductItemRequest;
 import jakarta.persistence.Column;
 import jakarta.persistence.Id;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
+
+import java.util.List;
 
 
 @Builder                 // Tạo builder pattern giúp tạo đối tượng dễ dàng, linh hoạt
@@ -24,5 +27,6 @@ public class ImportReceiptDetailsResponse {
 
     Boolean type;
 
+    List<ImeiResponse> imei;   //importRequest3
 
 }

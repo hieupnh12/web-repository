@@ -19,16 +19,16 @@ public class ProductItem {
     String imei;
 
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name ="product_version_id")
     ProductVersion versionId;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name ="import_id")
     ImportReceipt import_id;
 
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name ="export_id")
     ExportReceipt export_id;
 

@@ -19,6 +19,21 @@ public enum ErrorCode {
     MISSING_REQUEST_PART(2010, "Missing request part", HttpStatus.BAD_REQUEST),
     INVALID_PARAMETER_TYPE(2011, "Invalid parameter type", HttpStatus.BAD_REQUEST),
     INVALID_JSON_FORMAT(2012, "Invalid JSON format or encoding", HttpStatus.BAD_REQUEST),
+    IMPORT_RECEIPT_NOT_FOUND(2013, "Import Receipt Not Exist", HttpStatus.NOT_FOUND),
+    PRODUCT_VERSION_NOT_FOUND(2014, "Product Version Not Exist", HttpStatus.NOT_FOUND),
+    PRODUCT_ITEM_NOT_FOUND(2015, "Product Item Not Exist", HttpStatus.NOT_FOUND),
+    EXPORT_RECEIPT_NOT_FOUND(2016, "Export Receipt Not Exist", HttpStatus.NOT_FOUND),
+    EXPORT_DETAIL_NOT_FOUND(2017, "Export Detail Not Exist", HttpStatus.NOT_FOUND),
+    INVALID_REQUEST(2017, "Invalid Request", HttpStatus.BAD_REQUEST),
+    QUERY_TIMEOUT(2017, "Query Timeout", HttpStatus.SERVICE_UNAVAILABLE),
+    CONCURRENT_MODIFICATION(2017, "Concurrent Modification", HttpStatus.CONFLICT),
+    REQUEST_FIRST_NOT_FOUND(2017, "Request First Not Exist", HttpStatus.NOT_FOUND),
+
+
+
+
+
+
 
 
 

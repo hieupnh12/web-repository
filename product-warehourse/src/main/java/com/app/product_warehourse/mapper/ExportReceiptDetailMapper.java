@@ -17,23 +17,22 @@ public interface ExportReceiptDetailMapper {
 
     @Mapping(target = "export_id", source = "newExId.export_id.export_id")
     @Mapping(target = "productVersionId", source = "newExId.productVersionId.versionId", qualifiedByName = "mapProductVersionToId")
+    @Mapping(target = "imei", source = "productItems") // Ánh xạ trực tiếp từ productItems
     ExportReceiptDetailsResponse toExportDetailsResponse(ExportReceiptDetail exportDetail);
 
     @Mapping(target = "export_id", ignore = true)
     @Mapping(target = "productVersionId", ignore = true)
     ExportReceiptDetail.ExportReceiptDetailId toExportReceiptDetailId(ExportReceiptDetailsRequest request);
 
-    default ExportReceipt mapStringToExportReceipt(String id, @Context ExportReceiptService service) {
-        return service.getExportreceipt(id);
-    }
 
-    default ProductItem mapStringToProductItem(String imei, @Context ProductItemService service) {
-        return service.getProductItemByid(imei);
-    }
 
-    @Mapping(target = "newExId.export_id", source = "export_id")
-    @Mapping(target = "newExId.productVersionId", source = "imei")
-    ExportReceiptDetail toExportDetails(ExportReceiptDetailsRequest request, @Context ProductItemService productItemService, @Context ExportReceiptService exportReceiptService);
+
+    @Mapping(target = "newExId", ignore = true)
+    @Mapping(target = "quantity", source = "request.quantity")
+    @Mapping(target = "unitPrice", source = "request.unitPrice")
+    ExportReceiptDetail toExportDetails(ExportReceiptDetailsRequest request, ProductItem productItem, ExportReceipt exportReceipt);
+
+
 
     void toUpdateExportDetail(ExportReceiptDetailUpdateRequest request, @MappingTarget ExportReceiptDetail exportDetail);
 

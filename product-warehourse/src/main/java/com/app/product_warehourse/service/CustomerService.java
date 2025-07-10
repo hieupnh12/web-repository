@@ -38,6 +38,11 @@ public class CustomerService {
         return customerMapper.toCustomerResponse(customerRepository.save(customer));
     }
 
+    public Customer getCustomer(String customerId) {
+        return customerRepository.findById(customerId).orElseThrow(() -> new AppException(ErrorCode.CUSTOMER_NOT_EXIST));
+    }
+
+
     public List<CustomerResponse>  getAllCustomer() {
         List<CustomerResponse> customerResponseList = customerRepository.findAll().stream().map(customerMapper::toCustomerResponse).collect(Collectors.toList());
         return customerResponseList;

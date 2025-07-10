@@ -6,7 +6,11 @@ import com.app.product_warehourse.entity.ExportReceipt;
 import com.app.product_warehourse.entity.ImportReceipt;
 import com.app.product_warehourse.entity.ProductItem;
 import com.app.product_warehourse.entity.ProductVersion;
+import com.app.product_warehourse.exception.AppException;
+import com.app.product_warehourse.exception.ErrorCode;
 import com.app.product_warehourse.mapper.ProductItemMapper;
+import com.app.product_warehourse.repository.ExportReceiptRepository;
+import com.app.product_warehourse.repository.ImportReceiptRepository;
 import com.app.product_warehourse.repository.ProductItemRepository;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
@@ -26,19 +30,41 @@ public class ProductItemService {
     ProductItemMapper productItemMapper;
 
     ProductVersionService versionService;
-    ImportReceiptService importReceiptService;
-    ExportReceiptService exportReceiptService;
+
+    ExportReceiptRepository exportReceiptRepo;
+
+    ImportReceiptRepository importReceiptRepo; // Thay thế ImportReceiptService
+
+//    public ProductItem createProductItem(ProductItemRequest request) {
+//        ProductVersion version = versionService.GetProductVersionById(request.getProductVersionId());
+//        ImportReceipt imports = importReceiptService.getImportReceipt(request.getImportId());
+//        ExportReceipt exports = request.getExportId() != null
+//                ? exportReceiptService.getExportreceipt(request.getExportId())
+//                : null;
+//
+//        ProductItem productItem = productItemMapper.ToProducItemcreate(request, version, imports, exports);
+//        return productItemRepo.save(productItem);
+//    }
+
 
     public ProductItem createProductItem(ProductItemRequest request) {
         ProductVersion version = versionService.GetProductVersionById(request.getProductVersionId());
-        ImportReceipt imports = importReceiptService.getImportReceipt(request.getImportId());
+        ImportReceipt imports = importReceiptRepo.findById(request.getImportId())
+                .orElseThrow(() -> new AppException(ErrorCode.IMPORT_RECEIPT_NOT_FOUND));
         ExportReceipt exports = request.getExportId() != null
-                ? exportReceiptService.getExportreceipt(request.getExportId())
+                ? exportReceiptRepo.findById(request.getExportId()).orElseThrow(() -> new AppException(ErrorCode.EXPORT_RECEIPT_NOT_FOUND))
                 : null;
 
         ProductItem productItem = productItemMapper.ToProducItemcreate(request, version, imports, exports);
         return productItemRepo.save(productItem);
     }
+
+
+
+
+
+
+
 
     public List<ProductItemResponse> getAllProductItems() {
         List<ProductItem> productItems = productItemRepo.findAll();
@@ -61,9 +87,10 @@ public class ProductItemService {
                 .orElseThrow(() -> new RuntimeException("ProductItem not found"));
 
         ProductVersion version = versionService.GetProductVersionById(request.getProductVersionId());
-        ImportReceipt imports = importReceiptService.getImportReceipt(request.getImportId());
+        ImportReceipt imports = importReceiptRepo.findById(request.getImportId())
+                .orElseThrow(() -> new AppException(ErrorCode.IMPORT_RECEIPT_NOT_FOUND));
         ExportReceipt exports = request.getExportId() != null
-                ? exportReceiptService.getExportreceipt(request.getExportId())
+                ? exportReceiptRepo.findById(request.getExportId()).orElseThrow(() -> new AppException(ErrorCode.EXPORT_RECEIPT_NOT_FOUND))
                 : null;
 
         productItem.setVersionId(version);

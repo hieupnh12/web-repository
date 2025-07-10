@@ -7,6 +7,7 @@ import lombok.*;
 import lombok.experimental.FieldDefaults;
 
 import java.io.Serializable;
+import java.util.List;
 
 @Builder                 // Tạo builder pattern giúp tạo đối tượng dễ dàng, linh hoạt
 @Entity                  // Đánh dấu class này là entity, ánh xạ tới bảng trong DB
@@ -43,6 +44,15 @@ public class ExportReceiptDetail {
 
     @Column(name ="unit_price")
     Integer unitPrice;
+
+
+    // Thêm mối quan hệ OneToMany với ProductItem
+    @OneToMany(fetch = FetchType.LAZY)
+    @JoinColumns({
+            @JoinColumn(name = "export_id", referencedColumnName = "export_id"),
+            @JoinColumn(name = "product_version_id", referencedColumnName = "product_version_id")
+    })
+    List<ProductItem> productItems;
 
 
 }

@@ -7,6 +7,7 @@ import lombok.experimental.FieldDefaults;
 import org.hibernate.annotations.CreationTimestamp;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Builder                 // Tạo builder pattern giúp tạo đối tượng dễ dàng, linh hoạt
 @Entity                  // Đánh dấu class này là entity, ánh xạ tới bảng trong DB
@@ -41,5 +42,8 @@ public class ExportReceipt {
 
     @Column(name ="status")
     Integer status;
+
+    @OneToMany(mappedBy = "newExId.export_id", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    List<ExportReceiptDetail> exportReceiptDetails;
 
 }

@@ -7,6 +7,7 @@ import com.app.product_warehourse.entity.*;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 
+import java.util.List;
 @Mapper(componentModel = "Spring")
 public interface ProductVersionMapper {
 
@@ -49,5 +50,9 @@ public interface ProductVersionMapper {
         version.setProduct(product);
         return version;
     }
+
+
+
+
 
 }

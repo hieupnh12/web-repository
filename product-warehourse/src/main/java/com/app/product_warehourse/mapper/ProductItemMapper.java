@@ -26,4 +26,5 @@ public interface ProductItemMapper {
 
     void toUpdateProductItem(ProductItemRequest request,@MappingTarget ProductItem productItem);
 
+
 }

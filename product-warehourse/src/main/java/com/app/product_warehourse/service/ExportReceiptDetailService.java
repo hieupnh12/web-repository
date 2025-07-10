@@ -8,8 +8,12 @@ import com.app.product_warehourse.dto.response.ExportReceiptDetailsResponse;
 import com.app.product_warehourse.entity.ExportReceipt;
 import com.app.product_warehourse.entity.ExportReceiptDetail;
 import com.app.product_warehourse.entity.ProductItem;
+import com.app.product_warehourse.exception.AppException;
+import com.app.product_warehourse.exception.ErrorCode;
 import com.app.product_warehourse.mapper.ExportReceiptDetailMapper;
 import com.app.product_warehourse.repository.ExportReceiptDetailsRepository;
+import com.app.product_warehourse.repository.ExportReceiptRepository;
+import com.app.product_warehourse.repository.ProductItemRepository;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
@@ -29,19 +33,19 @@ public class ExportReceiptDetailService {
        ExportReceiptDetailMapper exDMapper;
        ExportReceiptDetailsRepository exDRepo;
 
-       ProductItemService productItemService;
-       ExportReceiptService exportReceiptService;
+       ProductItemRepository productItemRepo;
 
+       ExportReceiptRepository exportReceiptRepo;
 
        public ExportReceiptDetailsResponse CreateExportReceiptDetails(ExportReceiptDetailsRequest request) {
 
 
            // Lấy ProductItem từ item_id (giả sử productVersionId trong request là item_id)
-           ProductItem item = productItemService.getProductItemByid(String.valueOf(request.getImei()));
+           ProductItem item = productItemRepo.findById(String.valueOf(request.getImei())).orElseThrow(()->new AppException(ErrorCode.PRODUCT_ITEM_NOT_FOUND));
 
-           ExportReceipt exportReceipt = exportReceiptService.getExportreceipt(request.getExport_id());
+           ExportReceipt exportReceipt = exportReceiptRepo.findById(request.getExport_id()).orElseThrow(()->new AppException(ErrorCode.EXPORT_RECEIPT_NOT_FOUND));
 
-           ExportReceiptDetail response = exDMapper.toExportDetails(request,productItemService,exportReceiptService);
+           ExportReceiptDetail response = exDMapper.toExportDetails(request,item,exportReceipt);
 
            ExportReceiptDetail.ExportReceiptDetailId id = exDMapper.ExportReceiptToConnect(request,item,exportReceipt);
            response.setNewExId(id);
