@@ -25,13 +25,6 @@ import java.util.List;
 public class CustomerController {
     CustomerService customerService;
 
-    @GetMapping
-    public ApiResponse<List<CustomerResponse>> getAllCustomers() {
-        return ApiResponse.<List<CustomerResponse>>builder()
-                .result(customerService.getAllCustomer())
-                .build();
-    }
-
     @PostMapping
     public ApiResponse<CustomerResponse> addCustomer(@Valid  @RequestBody CustomerCreateRequest request) {
         return ApiResponse.<CustomerResponse>builder()
