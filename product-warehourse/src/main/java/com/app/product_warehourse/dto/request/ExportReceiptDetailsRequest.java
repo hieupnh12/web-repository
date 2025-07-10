@@ -8,6 +8,8 @@ import jakarta.validation.constraints.Min;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
 
+import java.util.List;
+
 
 @Builder                 // Tạo builder pattern giúp tạo đối tượng dễ dàng, linh hoạt
 @Data                    // Tự sinh getter, setter, toString, equals, hashCode
@@ -18,8 +20,9 @@ public class ExportReceiptDetailsRequest {
 
 
     String export_id;
-    String imei; // Đổi tên từ productVersionId thành itemId để rõ ràng
+    String productVersionId; // Đổi tên từ productVersionId thành itemId để rõ ràng
     Integer quantity;
     Integer unitPrice;
 
+    List<ProductItemRequest> imei;   //importRequest3
 }

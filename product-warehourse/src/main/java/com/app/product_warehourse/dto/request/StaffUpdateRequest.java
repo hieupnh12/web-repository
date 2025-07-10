@@ -26,6 +26,6 @@ public class StaffUpdateRequest {
     @NotBlank(message = "EMAIL_NOT_BLANK")
     @Email(message = "EMAIL_INVALID")
     String email;
-    boolean status;
+    Boolean status;
 
 }

@@ -4,9 +4,14 @@ package com.app.product_warehourse.controller;
 import com.app.product_warehourse.dto.request.ProductVersionRequest;
 import com.app.product_warehourse.dto.response.ApiResponse;
 import com.app.product_warehourse.dto.response.ProductVersionResponse;
+import com.app.product_warehourse.entity.Product;
+import com.app.product_warehourse.service.ProductService;
 import com.app.product_warehourse.service.ProductVersionService;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -17,6 +22,8 @@ public class ProductVersionController {
 
     @Autowired
     ProductVersionService pvs;
+    @Autowired
+    private ProductService productService;
 
 //      @PostMapping
 //      ApiResponse<ProductVersionResponse> create(@PathVariable Long id, @RequestBody @Valid ProductVersionRequest request) {
@@ -36,18 +43,16 @@ public class ProductVersionController {
 
 
 
+    @GetMapping("/{productId}")
+    public ApiResponse<List<ProductVersionResponse>> getAll(@PathVariable("productId") Long productId) {
+        ApiResponse<List<ProductVersionResponse>> resp = new ApiResponse<>();
+        Product product = productService.getProductById(productId);
+        resp.setCode(1010);
+        resp.setResult(pvs.ListProductVersion(product));
+        return resp;
+    }
 
-
-      @GetMapping
-      ApiResponse<List<ProductVersionResponse>> getAll() {
-           ApiResponse<List<ProductVersionResponse>> resp = new ApiResponse<>();
-           resp.setCode(1010);
-           resp.setResult(pvs.ListProductVersion());
-           return resp;
-      }
-
-
-      @PutMapping("/{id}")
+    @PutMapping("/{id}")
       ApiResponse<ProductVersionResponse> update(@PathVariable String id, @RequestBody @Valid ProductVersionRequest request) {
           ApiResponse<ProductVersionResponse> resp = new ApiResponse<>();
           resp.setCode(1011);

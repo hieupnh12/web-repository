@@ -17,6 +17,8 @@ import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
@@ -34,18 +36,16 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor  // thay cho autowrid
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true) //bo private final
 @Slf4j
-public class ProductService  {
+public class ProductService {
 
-     ProductRepository productRepository;
-     ProductMapper productMapper;
-     final OriginService originService;
+    ProductRepository productRepository;
+    ProductMapper productMapper;
+    final OriginService originService;
     final WarehouseAreaService warehouseAreaService;
     final BrandService brandService;
-     final OperatingSystemService operatingSystemService;
-     final ProductVersionRepository productVersionRepository;
+    final OperatingSystemService operatingSystemService;
+    final ProductVersionRepository productVersionRepository;
     Cloudinary cloudinary;
-
-
 
 
     public ProductResponse createProduct(ProductRequest request, MultipartFile image) throws IOException {
@@ -93,27 +93,27 @@ public class ProductService  {
     }
 
 
-
-
-
-
-    public List<ProductResponse> getAllProducts() {
-        List<Product> products = productRepository.findAll();
-        return products.stream()
-                .map(productMapper::toProductResponse)
-                .collect(Collectors.toList());
+    public Page<ProductResponse> getAllProducts(Pageable pageable) {
+        Page<Product> products = productRepository.findAllWithRelations(pageable);
+        return products.map(productMapper::toProductResponse);
     }
 
 
 
 
     public Product getProductById(Long id) {
-        return productRepository.findById(id).orElseThrow(()-> new RuntimeException("Product not found"));
+        long start = System.nanoTime();
+        Product product = productRepository.findById(id)
+                .orElseThrow(() -> new AppException(ErrorCode.PRODUCT_NOT_EXIST));
+        long end = System.nanoTime();
+        log.info("getProductById took {} ms", (end - start) / 1_000_000);
+        return product;
     }
 
 
 
-    public ProductResponse updateProduct(Long id, ProductUpdateRequest request)   {
+
+    public ProductResponse updateProduct(Long id, ProductUpdateRequest request) {
         log.info("Nhận được ProductUpdateRequest với originId: {}", request.getOriginId());
         // Lấy sản phẩm hiện có
         Product product = getProductById(id); // Đảm bảo lấy sản phẩm với productId = 18
@@ -137,15 +137,12 @@ public class ProductService  {
 
 
 
+
+
+
     public void deleteProduct(Long id) {
         productRepository.deleteById(id);
     }
-
-
-
-
-
-
 
 
     // cac method khong phai la CRUD
@@ -153,13 +150,8 @@ public class ProductService  {
 
     // Phương thức tính stock_quantity cho Product
     public int calculateStockQuantity(Product product) {
-        return productVersionRepository
-                .findByProduct(product)
-                .stream()
-                .mapToInt(ProductVersion::getStockQuantity)
-                .sum();
+        return productRepository.calculateStockQuantity(product);
     }
-
 
 
     // Phương thức cập nhật stock_quantity cho Product
@@ -170,7 +162,6 @@ public class ProductService  {
         product.setStockQuantity(totalStock);
         productRepository.save(product);
     }
-
 
 
     // Phương thức mới để cập nhật stock_quantity cho tất cả Product
@@ -190,16 +181,10 @@ public class ProductService  {
     }
 
 
-
-
-
-
-
-
-    public String uploadImage(Long id ,MultipartFile file) throws IOException {
+    public String uploadImage(Long id, MultipartFile file) throws IOException {
 
         //Kiểm tra file
-        if(file.isEmpty() || !isImageFile(file)) {
+        if (file.isEmpty() || !isImageFile(file)) {
             throw new IllegalArgumentException(" Invalid image file");
         }
 
@@ -222,16 +207,14 @@ public class ProductService  {
         String imageUrl = (String) uploadResult.get("secure_url");
 
 
-
         //cap nhat san pham
-        Product product = productRepository.findById(id).orElseThrow(()-> new RuntimeException("Product not found"));
+        Product product = productRepository.findById(id).orElseThrow(() -> new RuntimeException("Product not found"));
         product.setImage(imageUrl);
         productRepository.save(product);
 
         return imageUrl;
 
     }
-
 
 
     private boolean isImageFile(MultipartFile file) {

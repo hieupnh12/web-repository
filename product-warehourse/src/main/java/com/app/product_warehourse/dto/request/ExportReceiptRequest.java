@@ -16,14 +16,10 @@ import java.time.LocalDateTime;
 @AllArgsConstructor      // Tạo constructor với tất cả các tham số
 @FieldDefaults(level = AccessLevel.PRIVATE) // Mặc định các biến thành private, không cần khai báo riêng
 public class ExportReceiptRequest {
-
-
-    Long totalAmount;
-
     String staffId;
 
     String customerId;
-
+    Long totalAmount;
     Integer status;
 
 }

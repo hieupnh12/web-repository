@@ -37,7 +37,7 @@ public class Product {
     @Column(name = "screen_size")
     private Double screenSize;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "operating_system")
     private OperatingSystem operatingSystem;
 
@@ -53,11 +53,11 @@ public class Product {
     @Column(name = "warranty_period")
     private Integer warrantyPeriod;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "brand")
     private Brand brand;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "warehouse_area")
     private WarehouseArea warehouseArea;
 

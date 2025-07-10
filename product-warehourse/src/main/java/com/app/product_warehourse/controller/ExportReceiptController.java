@@ -1,8 +1,10 @@
 package com.app.product_warehourse.controller;
 
 
+import com.app.product_warehourse.dto.request.ExportReceiptFullRequest;
 import com.app.product_warehourse.dto.request.ExportReceiptRequest;
 import com.app.product_warehourse.dto.response.ApiResponse;
+import com.app.product_warehourse.dto.response.ExportReceiptFULLResponse;
 import com.app.product_warehourse.dto.response.ExportReceiptResponse;
 import com.app.product_warehourse.entity.ExportReceipt;
 import com.app.product_warehourse.service.ExportReceiptService;
@@ -29,18 +31,31 @@ public class ExportReceiptController {
 
        ExportReceiptService exportReceiptService;
 
-       @PostMapping
-     public ApiResponse<ExportReceipt> addexportReceipt(@RequestBody @Valid ExportReceiptRequest request, BindingResult result) {
-           if (result.hasErrors()) {
-               log.error("Validation errors: {}", result.getAllErrors());
-               throw new RuntimeException("Invalid request: " + result.getAllErrors());
-           }
-           log.info("Request received: {}", request);
-           return ApiResponse.<ExportReceipt>builder()
-                   .result(exportReceiptService.CreateExportReceipt(request))
-                   .build();
-       }
+//       @PostMapping
+//     public ApiResponse<ExportReceipt> addexportReceipt(@RequestBody @Valid ExportReceiptRequest request, BindingResult result) {
+//           if (result.hasErrors()) {
+//               log.error("Validation errors: {}", result.getAllErrors());
+//               throw new RuntimeException("Invalid request: " + result.getAllErrors());
+//           }
+//           log.info("Request received: {}", request);
+//           return ApiResponse.<ExportReceipt>builder()
+//                   .result(exportReceiptService.CreateExportReceipt(request))
+//                   .build();
+//       }
 
+    @PostMapping("/init")
+    public ApiResponse<ExportReceiptFULLResponse> initExportReceipt(@Valid @RequestBody ExportReceiptFullRequest request) {
+        return ApiResponse.<ExportReceiptFULLResponse>builder()
+                .result(exportReceiptService.initExportReceipt(request))
+                .build();
+    }
+
+    @PostMapping("/full/confirm")
+    public ApiResponse<ExportReceiptFULLResponse> createExportReceipt(@Valid @RequestBody ExportReceiptFullRequest request) {
+          return ApiResponse.<ExportReceiptFULLResponse>builder()
+                  .result(exportReceiptService.createImportReceiptFull(request))
+                  .build();
+    }
 
 
      @GetMapping

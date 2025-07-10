@@ -12,6 +12,7 @@ import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -24,12 +25,12 @@ import java.util.List;
 public class CustomerController {
     CustomerService customerService;
 
-    @GetMapping
-    public ApiResponse<List<CustomerResponse>> getAllCustomers() {
-        return ApiResponse.<List<CustomerResponse>>builder()
-                .result(customerService.getAllCustomer())
-                .build();
-    }
+//    @GetMapping
+//    public ApiResponse<List<CustomerResponse>> getAllCustomers() {
+//        return ApiResponse.<List<CustomerResponse>>builder()
+//                .result(customerService.getAllCustomer())
+//                .build();
+//    }
 
     @PostMapping
     public ApiResponse<CustomerResponse> addCustomer(@Valid  @RequestBody CustomerCreateRequest request) {
@@ -44,4 +45,27 @@ public class CustomerController {
                 .result(customerService.updateCustomer(customerId,request))
                 .build();
     }
+
+    @GetMapping
+    public ApiResponse<Page<CustomerResponse>> getCustomers(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size) {
+
+        return ApiResponse.<Page<CustomerResponse>>builder()
+                .result(customerService.getCustomers(page, size))
+                .build();
+    }
+
+    @GetMapping("/search")
+    public ApiResponse<Page<CustomerResponse>> searchCustomers(
+            @RequestParam String keyword,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "5") int size) {
+
+        return ApiResponse.<Page<CustomerResponse>>builder()
+                .result(customerService.searchCustomers(keyword, page, size))
+                .build();
+    }
+
+
 }

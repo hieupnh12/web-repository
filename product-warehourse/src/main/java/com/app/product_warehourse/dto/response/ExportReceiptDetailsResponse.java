@@ -1,8 +1,11 @@
 package com.app.product_warehourse.dto.response;
 
 
+import com.app.product_warehourse.dto.request.ProductItemRequest;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
+
+import java.util.List;
 
 @Builder                 // Tạo builder pattern giúp tạo đối tượng dễ dàng, linh hoạt
 @Data                    // Tự sinh getter, setter, toString, equals, hashCode
@@ -15,5 +18,8 @@ public class ExportReceiptDetailsResponse {
     String productVersionId;
     Integer quantity;
     Integer unitPrice;
+
+
+    List<ImeiResponse> imei;   //importRequest3
 
 }

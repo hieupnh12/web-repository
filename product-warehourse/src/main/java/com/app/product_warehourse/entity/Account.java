@@ -20,10 +20,10 @@ public class Account {
     String password;
     @Column(nullable = false)
     Boolean status = true;
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "role_id")
     Role role;
-    @OneToOne
+    @OneToOne(fetch = FetchType.LAZY)
     @MapsId
     @JoinColumn(name = "staff_id")
     Staff staff;
