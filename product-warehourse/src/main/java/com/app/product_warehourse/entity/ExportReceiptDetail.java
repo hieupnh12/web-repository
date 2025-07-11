@@ -50,7 +50,7 @@ public class ExportReceiptDetail {
     @OneToMany(fetch = FetchType.LAZY)
     @JoinColumns({
             @JoinColumn(name = "export_id", referencedColumnName = "export_id"),
-            @JoinColumn(name = "product_version_id", referencedColumnName = "product_version_id")
+            @JoinColumn(name = "imei", referencedColumnName = "product_version_id")
     })
     List<ProductItem> productItems;
 

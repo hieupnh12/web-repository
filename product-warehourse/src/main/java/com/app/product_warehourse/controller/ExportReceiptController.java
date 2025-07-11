@@ -13,6 +13,9 @@ import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
@@ -59,9 +62,12 @@ public class ExportReceiptController {
 
 
      @GetMapping
-    public ApiResponse<List<ExportReceiptResponse>> getAllExportReceipts() {
-           return ApiResponse.<List<ExportReceiptResponse>>builder()
-                   .result(exportReceiptService.GetAllExportReceipt())
+    public ApiResponse<Page<ExportReceiptFULLResponse>> getAllExportReceipts(
+             @RequestParam(defaultValue = "0") int page,
+             @RequestParam(defaultValue = "10") int size) {
+         Pageable pageable = PageRequest.of(page, size);
+         return ApiResponse.<Page<ExportReceiptFULLResponse>>builder()
+                   .result(exportReceiptService.GetAllExportReceipt(pageable))
                    .build();
      }
 

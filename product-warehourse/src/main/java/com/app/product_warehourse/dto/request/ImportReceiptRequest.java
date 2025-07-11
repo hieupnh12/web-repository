@@ -15,8 +15,6 @@ public class ImportReceiptRequest {
 
     String supplierId;
 
-    String staffId;
-
     Long totalAmount;
 
     Integer status;
