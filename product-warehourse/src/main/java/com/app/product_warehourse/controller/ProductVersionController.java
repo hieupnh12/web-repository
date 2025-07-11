@@ -72,6 +72,12 @@ public class ProductVersionController {
       }
 
 
-
+      @GetMapping
+      public ApiResponse<List<ProductVersionResponse>> getAllVersion() {
+          ApiResponse<List<ProductVersionResponse>> resp = new ApiResponse<>();
+          resp.setCode(1010);
+          resp.setResult(pvs.listAll());
+          return resp;
+      }
 
 }
