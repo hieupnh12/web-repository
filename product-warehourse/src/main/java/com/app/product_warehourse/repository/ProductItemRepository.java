@@ -1,6 +1,7 @@
 package com.app.product_warehourse.repository;
 
 import com.app.product_warehourse.dto.response.ImeiResponse;
+import com.app.product_warehourse.entity.ExportReceipt;
 import com.app.product_warehourse.entity.ExportReceiptDetail;
 import com.app.product_warehourse.entity.ProductItem;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -21,7 +22,7 @@ public interface ProductItemRepository extends JpaRepository<ProductItem, String
 
     // Cập nhật exportId trong ProductItem dựa trên danh sách IMEI
     @Modifying
-    @Query("UPDATE ProductItem pi SET pi.export_id = :exportId, pi.status = TRUE WHERE pi.imei IN :imeis AND (pi.export_id IS NULL OR pi.export_id != :exportId)")
+    @Query("UPDATE ProductItem pi SET pi.export_id = (SELECT er FROM ExportReceipt er WHERE er.export_id = :exportId), pi.status = TRUE WHERE pi.imei IN :imeis AND (pi.export_id IS NULL OR pi.export_id.export_id != :exportId)")
     void updateExportIdByImei(@Param("exportId") String exportId, @Param("imeis") List<String> imeis);
 
 
