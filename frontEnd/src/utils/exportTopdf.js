@@ -1,7 +1,7 @@
 import React from "react";
 import html2canvas from "html2canvas";
 import jsPDF from "jspdf";
-import ContractTemplate from "../pages/Inventory/components/ExportContractTemplate";
+import ContractTemplate from "../pages/Stock/components/ExportContractTemplate";
 
 export default function ContractPreviewModal({ data, onClose }) {
   const handleDownloadPDF = async () => {

@@ -25,23 +25,19 @@ const Dashboard = lazy(
       setTimeout(() => resolve(import("./pages/Dashboard/Dashboard")), 600)
     )
 );
-const ExportStock = lazy(() => import("./pages/Inventory/ExportStock"));
-const Export = lazy(() => import("./pages/Inventory/components/Export"));
+const ExportStock = lazy(() => import("./pages/Stock/ExportStock"));
+const Export = lazy(() => import("./pages/Stock/components/Export"));
 const Login = lazy(() => import("./pages/Login/Login"));
 const ForgotPassword = lazy(() => import("./pages/Login/ForgotPassword"));
 const ProductsPage = lazy(() => import("./pages/Products"));
+const WarehouseAreas = lazy(() => import("./pages/Storages"));
+const Customers = lazy(() => import("./pages/Customers"));
+const Suppliers = lazy(() => import("./pages/Suppliers"));
+const Staff = lazy(() => import("./pages/Staffs/Staff"));
+const Account = lazy(() => import("./pages/Accounts/Account"));
+const InventoryPage = lazy(() => import("./pages/Inventory"));
+const AttributesPage = lazy(() => import("./pages/Attributes"));
 
-// const ImportStock = lazy(() => import('./pages/Inventory/ImportStock'));
-// const Products = lazy(() => import('./pages/Products/Products'));
-// const Inventory = lazy(() => import('./pages/Inventory/Inventory'));
-const WarehouseAreas = lazy(() => import("./pages/Storage"));
-const Customers = lazy(() => import('./pages/Customers'));
-const Suppliers = lazy(() => import('./pages/Suppliers'));
-const Staff = lazy(() => import("./pages/Staff/Staff"));
-const Account = lazy(() => import("./pages/Account/Account"));
-
-
-// Optional: 404 Not Found page
 const NotFound = () => (
   <div className="p-10 text-center text-xl">404 - Không tìm thấy trang</div>
 );
@@ -67,6 +63,7 @@ const router = createBrowserRouter(
           }
         />
       </Route>
+
       <Route element={<AuthGuard />}>
         {/* Route cho Manager */}
         <Route path="manager" element={<LayoutCommon />}>
@@ -87,25 +84,22 @@ const router = createBrowserRouter(
             }
           />
 
-          {/* Route cha: export */}
-          <Route path="export">
-            <Route
-              index
-              element={
-                <LazyLoader>
-                  <ExportStock />
-                </LazyLoader>
-              }
-            />
-            <Route
-              path="addexport"
-              element={
-                <LazyLoader>
-                  <Export />
-                </LazyLoader>
-              }
-            />
-          </Route>
+          <Route
+            path="export"
+            element={
+              <LazyLoader>
+                <ExportStock />
+              </LazyLoader>
+            }
+          />
+          <Route
+            path="export/addexport"
+            element={
+              <LazyLoader>
+                <Export />
+              </LazyLoader>
+            }
+          />
 
           <Route
             path="products"
@@ -115,21 +109,21 @@ const router = createBrowserRouter(
               </LazyLoader>
             }
           />
-          {/* <Route path="inventory" element={<Inventory />} /> */}
+
+          <Route
+            path="inventory"
+            element={
+              <LazyLoader>
+                <InventoryPage />
+              </LazyLoader>
+            }
+          />
+
           <Route
             path="storage"
             element={
               <LazyLoader>
                 <WarehouseAreas />
-              </LazyLoader>
-            }
-          />
-          {/* <Route path="import" element={<ImportStock />} /> */}
-          <Route
-            path="export"
-            element={
-              <LazyLoader>
-                <ExportStock />
               </LazyLoader>
             }
           />
@@ -141,7 +135,6 @@ const router = createBrowserRouter(
               </LazyLoader>
             }
           />
-          {/* <Route path="customers" element={<Customers />} /> */}
           <Route
             path="staff"
             element={
@@ -149,15 +142,15 @@ const router = createBrowserRouter(
                 <Staff />
               </LazyLoader>
             }
-            />
-           <Route
+          />
+          <Route
             path="account"
             element={
               <LazyLoader>
                 <Account />
               </LazyLoader>
             }
-            />
+          />
           <Route
             path="permissions"
             element={
@@ -165,23 +158,24 @@ const router = createBrowserRouter(
                 <Permissions />
               </LazyLoader>
             }
-            />
-            <Route
-            path="Customers"
+          />
+          <Route
+            path="customers"
             element={
               <LazyLoader>
                 <Customers />
               </LazyLoader>
             }
-            />
-            <Route
-            path="import"
+          />
+          <Route
+            path="attributes"
             element={
               <LazyLoader>
-                <ImportStock />
+                <AttributesPage />
               </LazyLoader>
             }
-            />
+          />
+
           <Route path="statistics" element={<StatisticsLayout />}>
             <Route index element={<Overview />} />
             <Route path="overview" element={<Overview />} />
@@ -220,6 +214,24 @@ const router = createBrowserRouter(
               </LazyLoader>
             }
           />
+          <Route
+            path="attributes"
+            element={
+              <LazyLoader>
+                <AttributesPage />
+              </LazyLoader>
+            }
+          />
+
+          <Route
+            path="inventory"
+            element={
+              <LazyLoader>
+                <InventoryPage />
+              </LazyLoader>
+            }
+          />
+
           <Route path="statistics" element={<StatisticsLayout />}>
             <Route index element={<Overview />} />
             <Route path="overview" element={<Overview />} />
@@ -229,9 +241,6 @@ const router = createBrowserRouter(
             <Route path="customers" element={<CustomerStatistic />} />
           </Route>
 
-          {/* <Route path="import" element={<ImportStock />} /> */}
-          {/* <Route path="inventory" element={<Inventory />} /> */}
-          {/* <Route path="products" element={<Products />} /> */}
           <Route path="*" element={<NotFound />} />
         </Route>
       </Route>
