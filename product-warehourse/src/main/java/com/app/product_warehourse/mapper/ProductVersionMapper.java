@@ -17,6 +17,7 @@ public interface ProductVersionMapper {
     @Mapping(source ="rom.rom_size", target = "romName")
     @Mapping(source = "color.name" , target="colorName")
     @Mapping(source = "product.productName", target ="productName")
+    @Mapping(target = "imei", source = "productItems") // Ánh xạ trực tiếp từ productItems
     ProductVersionResponse ToProductVersionResponse (ProductVersion productVersion);
 
     default ProductVersion ToProducVersionMakeName (ProductVersionRequest request, Ram ram , Rom rom , Color color, Product product) {
