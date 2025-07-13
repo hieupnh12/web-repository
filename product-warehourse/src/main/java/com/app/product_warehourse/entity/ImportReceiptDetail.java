@@ -1,6 +1,7 @@
 package com.app.product_warehourse.entity;
 
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.Min;
 import lombok.*;
@@ -51,6 +52,7 @@ public class ImportReceiptDetail  {
     public static class ImportReceiptDetailId implements Serializable {
         @ManyToOne(fetch = FetchType.LAZY)
         @JoinColumn(name = "import_id")
+        @JsonBackReference
         ImportReceipt import_id;
 
         @ManyToOne(fetch = FetchType.LAZY)

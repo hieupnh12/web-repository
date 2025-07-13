@@ -83,9 +83,9 @@ public class ImportReceiptController {
 
 
         @GetMapping("/import-receipts")
-        public Page<ImportReceipt> searchImportReceipts(
-                @RequestParam(required = false) String supplierKeyword,
-                @RequestParam(required = false) String staffKeyword,
+        public Page<ImportReceiptFULLResponse> searchImportReceipts(
+                @RequestParam(required = false) String supplierName,
+                @RequestParam(required = false) String staffName,
                 @RequestParam(required = false) String importId,
                 @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime startDate,
                 @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime endDate,
@@ -93,7 +93,7 @@ public class ImportReceiptController {
                 @RequestParam(defaultValue = "10") int size) {
                 Pageable pageable = PageRequest.of(page, size);
                 return importservice.searchImportReceipts(
-                        supplierKeyword, staffKeyword, importId, startDate, endDate, pageable);
+                        supplierName, staffName, importId, startDate, endDate, pageable);
         }
 
 

@@ -56,21 +56,20 @@ public interface ImportReceiptRepository extends JpaRepository<ImportReceipt, St
 
 
 
-
     @Query("SELECT i FROM ImportReceipt i " +
             "LEFT JOIN FETCH i.suppliers s " +
             "LEFT JOIN FETCH i.staff a " +
             "LEFT JOIN FETCH i.importReceiptDetails d " +
             "LEFT JOIN FETCH d.newid.productVersionId " +
-            "WHERE (:supplierKeyword IS NULL OR LOWER(s.name) LIKE LOWER(CONCAT('%', :supplierKeyword, '%'))) " +
-            "AND (:staffKeyword IS NULL OR LOWER(a.userName) LIKE LOWER(CONCAT('%', :staffKeyword, '%'))) " +
-            "AND (:importId IS NULL OR i.import_id LIKE CONCAT('%', :importId, '%')) " +
+            "WHERE (:supplierName IS NULL OR LOWER(s.name) LIKE LOWER(CONCAT('%', :supplierName, '%'))) " +
+            "AND (:staffName IS NULL OR LOWER(a.userName) LIKE LOWER(CONCAT('%', :staffName, '%'))) " +
+            "AND (:importId IS NULL OR LOWER(i.import_id) LIKE LOWER(CONCAT('%', :importId, '%'))) " +
             "AND (:startDate IS NULL OR i.time >= :startDate) " +
             "AND (:endDate IS NULL OR i.time <= :endDate) " +
             "ORDER BY i.time DESC")
     Page<ImportReceipt> searchImportReceipts(
-            @Param("supplierKeyword") String supplierKeyword,
-            @Param("staffKeyword") String staffKeyword,
+            @Param("supplierName") String supplierName,
+            @Param("staffName") String staffName,
             @Param("importId") String importId,
             @Param("startDate") LocalDateTime startDate,
             @Param("endDate") LocalDateTime endDate,
@@ -79,5 +78,17 @@ public interface ImportReceiptRepository extends JpaRepository<ImportReceipt, St
 
 
 
+
+    // Tìm kiếm theo nhà cung cấp
+    @Query("SELECT i FROM ImportReceipt i " +
+            "LEFT JOIN FETCH i.suppliers s " +
+            "LEFT JOIN FETCH i.staff a " +
+            "LEFT JOIN FETCH i.importReceiptDetails d " +
+            "LEFT JOIN FETCH d.newid.productVersionId " +
+            "WHERE :supplierKeyword IS NULL OR LOWER(s.name) LIKE LOWER(CONCAT('%', :supplierKeyword, '%')) " +
+            "ORDER BY i.time DESC")
+    Page<ImportReceipt> searchBySupplier(
+            @Param("supplierKeyword") String supplierKeyword,
+            Pageable pageable);
 }
 

@@ -14,7 +14,7 @@ import org.mapstruct.Mapping;
 @Mapper(componentModel = "spring", uses = {ImportReceiptDetailsMapper.class})
 public interface ImportReceiptMapper {
 
-    @Mapping(target ="time" ,ignore = true)
+//    @Mapping(target ="time" ,ignore = true)
     ImportReceipt  toImportReceipt(ImportReceiptRequest request);
 
 
