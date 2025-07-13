@@ -21,6 +21,13 @@ public interface ProductRepository extends JpaRepository<Product, Long> {
     Page<Product> findAllWithRelations(Pageable pageable);
 
 
+    @Query("SELECT p FROM Product p " +
+            "LEFT JOIN FETCH p.origin " +
+            "LEFT JOIN FETCH p.brand " +
+            "LEFT JOIN FETCH p.operatingSystem " +
+            "LEFT JOIN FETCH p.warehouseArea " +
+            "LEFT JOIN FETCH p.productVersion")
+    List<Product> findAll();
 
     @Query("SELECT COALESCE(SUM(pv.stockQuantity), 0) FROM ProductVersion pv WHERE pv.product = :product")
     int calculateStockQuantity(@Param("product") Product product);

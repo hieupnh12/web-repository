@@ -2,12 +2,17 @@ package com.app.product_warehourse.mapper;
 
 
 import com.app.product_warehourse.dto.request.ProductVersionRequest;
+import com.app.product_warehourse.dto.response.ImeiResponse;
 import com.app.product_warehourse.dto.response.ProductVersionResponse;
 import com.app.product_warehourse.entity.*;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
+import org.mapstruct.Named;
 
+import java.util.Collections;
 import java.util.List;
+import java.util.stream.Collectors;
+
 @Mapper(componentModel = "Spring")
 public interface ProductVersionMapper {
 
@@ -17,8 +22,13 @@ public interface ProductVersionMapper {
     @Mapping(source ="rom.rom_size", target = "romName")
     @Mapping(source = "color.name" , target="colorName")
     @Mapping(source = "product.productName", target ="productName")
-    @Mapping(target = "imei", source = "productItems") // Ánh xạ trực tiếp từ productItems
+    @Mapping(target = "imei", source = "productItems", qualifiedByName = "mapProductItemsToImei") // Ánh xạ trực tiếp từ productItems
     ProductVersionResponse ToProductVersionResponse (ProductVersion productVersion);
+
+
+
+
+
 
     default ProductVersion ToProducVersionMakeName (ProductVersionRequest request, Ram ram , Rom rom , Color color, Product product) {
         ProductVersion productVersion = ToProductVersion(request);
@@ -53,7 +63,15 @@ public interface ProductVersionMapper {
     }
 
 
-
+    @Named("mapProductItemsToImei")
+    default List<ImeiResponse> mapProductItemsToImei(List<ProductItem> productItems) {
+        if (productItems == null) {
+            return Collections.emptyList();
+        }
+        return productItems.stream()
+                .map(item -> ImeiResponse.builder().imei(item.getImei()).build())
+                .collect(Collectors.toList());
+    }
 
 
 }

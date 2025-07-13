@@ -23,7 +23,7 @@ public interface ExportReceiptDetailMapper {
 
     @Mapping(target = "export_id", source = "newExId.export_id.export_id")
     @Mapping(target = "productVersionId", source = "newExId.productVersionId.versionId", qualifiedByName = "mapProductVersionToId")
-    @Mapping(target = "productVersion", source = "newid.productVersionId") // Ánh xạ trực tiếp từ productItems
+    @Mapping(target = "productVersion", source = "newExId.productVersionId") // Ánh xạ trực tiếp từ productItems
     ExportReceiptDetailsResponse toExportDetailsResponse(ExportReceiptDetail exportDetail);
 
     @Mapping(target = "export_id", ignore = true)

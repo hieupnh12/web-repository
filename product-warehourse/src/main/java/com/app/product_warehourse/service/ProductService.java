@@ -103,6 +103,14 @@ public class ProductService {
 
 
 
+    public List<ProductFULLResponse> ListAllProducts() {
+        List<Product> products = productRepository.findAll();
+        return products.stream()
+                       .map(productMapper::toProductFULLResponse)
+                       .collect(Collectors.toList());
+    }
+
+
 
     public Product getProductById(Long id) {
         long start = System.nanoTime();
