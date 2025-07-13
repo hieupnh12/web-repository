@@ -42,5 +42,6 @@ public class ProductFULLResponse {
     Integer stockQuantity;
 
     Boolean status;
+
     List<ProductVersionResponse> productVersionResponses;
 }

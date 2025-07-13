@@ -75,6 +75,11 @@ public class ProductController {
     }
 
 
+    @GetMapping("/All")
+     ApiResponse<List<ProductFULLResponse>> getAll() {
+        return ApiResponse.<List<ProductFULLResponse>>builder().build();
+    }
+
     @GetMapping("/{idproduct}")
     Product getProduct(@PathVariable("idproduct") Long idproduct) {
         return productService.getProductById(idproduct);

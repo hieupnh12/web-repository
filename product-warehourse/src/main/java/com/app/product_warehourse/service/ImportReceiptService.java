@@ -296,4 +296,22 @@ public class ImportReceiptService {
         // Xóa ImportReceipt
         importrepo.deleteByImportId(importId);
     }
+
+
+
+
+    public Page<ImportReceipt> searchImportReceipts(
+            String supplierKeyword,
+            String staffKeyword,
+            String importId,
+            LocalDateTime startDate,
+            LocalDateTime endDate,
+            Pageable pageable) {
+        return importrepo.searchImportReceipts(
+                supplierKeyword, staffKeyword, importId, startDate, endDate, pageable);
+    }
+
+
+
+
 }

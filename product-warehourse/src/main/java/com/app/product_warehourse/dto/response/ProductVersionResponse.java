@@ -1,6 +1,7 @@
 package com.app.product_warehourse.dto.response;
 
 
+import com.app.product_warehourse.entity.Product;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
 
@@ -33,5 +34,6 @@ public class ProductVersionResponse {
     Boolean status;
 
     List<ImeiResponse> imei;   //importRequest3
+
 
 }

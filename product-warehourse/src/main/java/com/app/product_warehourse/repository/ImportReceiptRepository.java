@@ -12,6 +12,7 @@ import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDateTime;
 import java.util.List;
 @Repository
 public interface ImportReceiptRepository extends JpaRepository<ImportReceipt, String> {
@@ -20,7 +21,8 @@ public interface ImportReceiptRepository extends JpaRepository<ImportReceipt, St
             "LEFT JOIN FETCH i.suppliers " +
             "LEFT JOIN FETCH i.staff " +
             "LEFT JOIN FETCH i.importReceiptDetails d " +
-            "LEFT JOIN FETCH d.newid.productVersionId")
+            "LEFT JOIN FETCH d.newid.productVersionId " +
+            "ORDER BY i.time DESC")
     Page<ImportReceipt> findAll(Pageable pageable);
 
     // Kiểm tra xem có ProductItem nào với export_id không NULL
@@ -51,5 +53,31 @@ public interface ImportReceiptRepository extends JpaRepository<ImportReceipt, St
     @Transactional
     @Query("DELETE FROM ImportReceipt i WHERE i.import_id = :importId")
     void deleteByImportId(@Param("importId") String importId);
+
+
+
+
+    @Query("SELECT i FROM ImportReceipt i " +
+            "LEFT JOIN FETCH i.suppliers s " +
+            "LEFT JOIN FETCH i.staff a " +
+            "LEFT JOIN FETCH i.importReceiptDetails d " +
+            "LEFT JOIN FETCH d.newid.productVersionId " +
+            "WHERE (:supplierKeyword IS NULL OR LOWER(s.name) LIKE LOWER(CONCAT('%', :supplierKeyword, '%'))) " +
+            "AND (:staffKeyword IS NULL OR LOWER(a.userName) LIKE LOWER(CONCAT('%', :staffKeyword, '%'))) " +
+            "AND (:importId IS NULL OR i.import_id LIKE CONCAT('%', :importId, '%')) " +
+            "AND (:startDate IS NULL OR i.time >= :startDate) " +
+            "AND (:endDate IS NULL OR i.time <= :endDate) " +
+            "ORDER BY i.time DESC")
+    Page<ImportReceipt> searchImportReceipts(
+            @Param("supplierKeyword") String supplierKeyword,
+            @Param("staffKeyword") String staffKeyword,
+            @Param("importId") String importId,
+            @Param("startDate") LocalDateTime startDate,
+            @Param("endDate") LocalDateTime endDate,
+            Pageable pageable);
+
+
+
+
 }
 
