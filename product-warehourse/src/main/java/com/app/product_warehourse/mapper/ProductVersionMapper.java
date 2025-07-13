@@ -3,6 +3,7 @@ package com.app.product_warehourse.mapper;
 
 import com.app.product_warehourse.dto.request.ProductVersionRequest;
 import com.app.product_warehourse.dto.response.ImeiResponse;
+import com.app.product_warehourse.dto.response.ProductVerResponse;
 import com.app.product_warehourse.dto.response.ProductVersionResponse;
 import com.app.product_warehourse.entity.*;
 import org.mapstruct.Mapper;
@@ -13,7 +14,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
-@Mapper(componentModel = "Spring")
+@Mapper(componentModel = "Spring", uses = {ProductTestMapper.class})
 public interface ProductVersionMapper {
 
     ProductVersion ToProductVersion (ProductVersionRequest request);
@@ -26,7 +27,13 @@ public interface ProductVersionMapper {
     ProductVersionResponse ToProductVersionResponse (ProductVersion productVersion);
 
 
-
+    @Mapping(source= "ram.name", target="ramName")
+    @Mapping(source ="rom.rom_size", target = "romName")
+    @Mapping(source = "color.name" , target="colorName")
+    @Mapping(source = "product.productName", target ="productName")
+    @Mapping(target = "imei", source = "productItems", qualifiedByName = "mapProductItemsToImei") // Ánh xạ trực tiếp từ productItems
+    @Mapping(source = "product", target ="product")
+    ProductVerResponse ToProductVerResponse (ProductVersion productVersion);
 
 
 

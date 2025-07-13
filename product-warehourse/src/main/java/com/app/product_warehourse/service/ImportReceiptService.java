@@ -300,16 +300,18 @@ public class ImportReceiptService {
 
 
 
-    public Page<ImportReceipt> searchImportReceipts(
-            String supplierKeyword,
-            String staffKeyword,
+    public Page<ImportReceiptFULLResponse> searchImportReceipts(
+            String supplierName,
+            String staffName,
             String importId,
             LocalDateTime startDate,
             LocalDateTime endDate,
             Pageable pageable) {
         return importrepo.searchImportReceipts(
-                supplierKeyword, staffKeyword, importId, startDate, endDate, pageable);
+                supplierName, staffName, importId, startDate, endDate, pageable)
+                .map(importmapper::toImportReceiptFULLResponse);
     }
+
 
 
 

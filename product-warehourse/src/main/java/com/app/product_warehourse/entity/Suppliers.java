@@ -12,7 +12,7 @@ import lombok.experimental.FieldDefaults;
 @AllArgsConstructor
 @Table(name = "supplier" )
 @FieldDefaults(level = AccessLevel.PRIVATE)
-public class Suppliers {
+public class    Suppliers {
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
     @Column(name ="supplier_id")

@@ -2,6 +2,7 @@ package com.app.product_warehourse.entity;
 
 
 
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
@@ -29,10 +30,12 @@ public class ImportReceipt {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name ="supplier_id")
+    @JsonManagedReference
     Suppliers suppliers;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name ="created_id")
+    @JsonManagedReference
     Account staff;
 
     @Column(name ="total_amount")
@@ -43,5 +46,6 @@ public class ImportReceipt {
 
 
     @OneToMany(mappedBy = "newid.import_id", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @JsonManagedReference
     List<ImportReceiptDetail> importReceiptDetails;
 }
