@@ -16,14 +16,14 @@ import org.mapstruct.Named;
 import java.util.List;
 import java.util.stream.Collectors;
 
-@Mapper(componentModel = "spring")
+@Mapper(componentModel = "spring", uses = {ProductVersionMapper.class})
 public interface ExportReceiptDetailMapper {
 
 //    @Mapping(target = "productVersionId", source = "newExId.productVersionId.imei", qualifiedByName = "mapProductVersionToId")
 
     @Mapping(target = "export_id", source = "newExId.export_id.export_id")
     @Mapping(target = "productVersionId", source = "newExId.productVersionId.versionId", qualifiedByName = "mapProductVersionToId")
-    @Mapping(target = "imei", source = "productItems", qualifiedByName = "mapProductItemsToImeiResponse")
+    @Mapping(target = "productVersion", source = "newid.productVersionId") // Ánh xạ trực tiếp từ productItems
     ExportReceiptDetailsResponse toExportDetailsResponse(ExportReceiptDetail exportDetail);
 
     @Mapping(target = "export_id", ignore = true)

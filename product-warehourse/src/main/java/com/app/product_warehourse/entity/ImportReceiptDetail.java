@@ -41,6 +41,8 @@ public class ImportReceiptDetail  {
     })
     List<ProductItem> productItems;
 
+
+
     // Định nghĩa lớp Embeddable bên trong entity
     @Embeddable
     @Data

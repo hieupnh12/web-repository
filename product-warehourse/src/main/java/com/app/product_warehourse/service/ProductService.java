@@ -3,6 +3,7 @@ package com.app.product_warehourse.service;
 import com.app.product_warehourse.dto.request.ImageRequest;
 import com.app.product_warehourse.dto.request.ProductRequest;
 import com.app.product_warehourse.dto.request.ProductUpdateRequest;
+import com.app.product_warehourse.dto.response.ProductFULLResponse;
 import com.app.product_warehourse.dto.response.ProductResponse;
 import com.app.product_warehourse.entity.*;
 import com.app.product_warehourse.exception.AppException;
@@ -93,9 +94,11 @@ public class ProductService {
     }
 
 
-    public Page<ProductResponse> getAllProducts(Pageable pageable) {
+
+
+    public Page<ProductFULLResponse> getAllProducts(Pageable pageable) {
         Page<Product> products = productRepository.findAllWithRelations(pageable);
-        return products.map(productMapper::toProductResponse);
+        return products.map(productMapper::toProductFULLResponse);
     }
 
 
