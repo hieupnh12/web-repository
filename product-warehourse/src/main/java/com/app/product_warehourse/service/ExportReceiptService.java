@@ -233,7 +233,7 @@ public class ExportReceiptService {
 
             // Cập nhật exportId trong ProductItem
             logger.info("Updating ProductItems with exportId: {} for IMEIs: {}", savedExportEntity.getExport_id(), imeiList);
-            productItemRepo.updateExportIdByImeis(savedExportEntity.getExport_id(), imeiList);
+            productItemRepo.updateExportIdByImei(savedExportEntity.getExport_id(), imeiList);
             logger.info("Updated ProductItems successfully");
         }
 

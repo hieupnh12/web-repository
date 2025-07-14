@@ -1,7 +1,9 @@
 package com.app.product_warehourse.controller;
 
 
+import com.app.product_warehourse.dto.request.DateToDateRequest;
 import com.app.product_warehourse.dto.request.DayInMonthRequest;
+import com.app.product_warehourse.dto.request.InventoryStatisticsRequest;
 import com.app.product_warehourse.dto.request.YearToYearRequest;
 import com.app.product_warehourse.dto.response.*;
 import com.app.product_warehourse.service.StatisticsService;
@@ -67,4 +69,25 @@ public class StatisticsController {
                 .result(statisticsService.getReportYearToYear(request))
                 .build();
     }
+
+    @GetMapping("/date-to-date")
+    public ApiResponse<List<DateToDateResponse>> dateStatistics(@RequestBody DateToDateRequest request) {
+        return ApiResponse.<List<DateToDateResponse>>builder()
+                .result(statisticsService.getReportDateToDate(request))
+                .build();
+    }
+    @GetMapping("/customer-statistics")
+    public ApiResponse<List<CustomerStatisticsResponse>> customerStatistics() {
+        return ApiResponse.<List<CustomerStatisticsResponse>>builder()
+                .result(statisticsService.getReportCustomer())
+                .build();
+    }
+
+    @GetMapping("/inventory-statistic")
+    public ApiResponse<List<InventoryStatisticsResponse>> inventoryStatistics(@RequestBody InventoryStatisticsRequest request) {
+        return ApiResponse.<List<InventoryStatisticsResponse>>builder()
+                .result(statisticsService.getReportInventory(request))
+                .build();
+    }
+
 }

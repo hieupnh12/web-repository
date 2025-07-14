@@ -24,9 +24,8 @@ public interface ProductItemRepository extends JpaRepository<ProductItem, String
 
     // Cập nhật exportId trong ProductItem dựa trên danh sách IMEI
     @Modifying
-    @Query("UPDATE ProductItem pi SET pi.export_id = :exportId, pi.status = 1 WHERE pi.imei IN :imeis AND (pi.export_id IS NULL OR pi.export_id != :exportId)")
-    void updateExportIdByImeis(@Param("exportId") String exportId, @Param("imeis") List<String> imeis);
-
+    @Query("UPDATE ProductItem pi SET pi.export_id = :exportId, pi.status = TRUE WHERE pi.imei IN :imeis AND (pi.export_id IS NULL OR pi.export_id != :exportId)")
+    void updateExportIdByImei(@Param("exportId") String exportId, @Param("imeis") List<String> imeis);
     @Query(value = """
     select * from product_item where imei = ?
     """,nativeQuery = true)
