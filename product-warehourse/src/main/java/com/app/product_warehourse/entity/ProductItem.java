@@ -15,6 +15,7 @@ import lombok.experimental.FieldDefaults;
 public class ProductItem {
 
     @Id
+    @Column(name ="imei")
     String imei;
 
 

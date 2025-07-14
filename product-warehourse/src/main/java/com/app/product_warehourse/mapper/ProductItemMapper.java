@@ -5,6 +5,7 @@ import com.app.product_warehourse.dto.response.ProductItemResponse;
 import com.app.product_warehourse.entity.*;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
+import org.mapstruct.MappingTarget;
 
 @Mapper(componentModel = "spring")
 public interface ProductItemMapper {
@@ -22,4 +23,8 @@ public interface ProductItemMapper {
         item.setExport_id(exports);
         return item;
     }
+
+    void toUpdateProductItem(ProductItemRequest request,@MappingTarget ProductItem productItem);
+
+
 }

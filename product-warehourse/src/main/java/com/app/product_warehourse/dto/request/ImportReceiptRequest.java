@@ -13,11 +13,7 @@ import java.time.LocalDateTime;
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class ImportReceiptRequest {
 
-
-
     String supplierId;
-
-    String staffId;
 
     Long totalAmount;
 

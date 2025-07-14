@@ -1,12 +1,14 @@
 package com.app.product_warehourse.entity;
 
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.Min;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
 
 import java.io.Serializable;
+import java.util.List;
 
 @Builder                 // Tạo builder pattern giúp tạo đối tượng dễ dàng, linh hoạt
 @Entity                  // Đánh dấu class này là entity, ánh xạ tới bảng trong DB
@@ -17,20 +19,6 @@ import java.io.Serializable;
 @FieldDefaults(level = AccessLevel.PRIVATE) // Mặc định các biến thành private, không cần khai báo riêng
 public class ImportReceiptDetail  {
 
-    // Định nghĩa lớp Embeddable bên trong entity
-    @Embeddable
-    @Data
-    @NoArgsConstructor
-    @AllArgsConstructor
-    public static class ImportReceiptDetailId implements Serializable {
-        @ManyToOne
-        @JoinColumn(name = "import_id")
-        ImportReceipt id;
-
-        @ManyToOne
-        @JoinColumn(name = "product_version_id")
-        ProductVersion productVersionId;
-    }
     @EmbeddedId
     ImportReceiptDetailId newid;
 
@@ -44,4 +32,37 @@ public class ImportReceiptDetail  {
 
     @Column(name ="import_type")
     Boolean type;
+
+
+    // Thêm mối quan hệ OneToMany với ProductItem
+    @OneToMany(fetch = FetchType.LAZY)
+    @JoinColumns({
+            @JoinColumn(name = "import_id", referencedColumnName = "import_id"),
+            @JoinColumn(name = "product_version_id", referencedColumnName = "product_version_id")
+    })
+    List<ProductItem> productItems;
+
+
+
+    // Định nghĩa lớp Embeddable bên trong entity
+    @Embeddable
+    @Data
+    @NoArgsConstructor
+//    @AllArgsConstructor
+    public static class ImportReceiptDetailId implements Serializable {
+        @ManyToOne(fetch = FetchType.LAZY)
+        @JoinColumn(name = "import_id")
+        @JsonBackReference
+        ImportReceipt import_id;
+
+        @ManyToOne(fetch = FetchType.LAZY)
+        @JoinColumn(name = "product_version_id")
+        ProductVersion productVersionId;
+
+        // Constructor bổ sung
+        public ImportReceiptDetailId(ImportReceipt import_id, ProductVersion productVersionId) {
+            this.import_id = import_id;
+            this.productVersionId = productVersionId;
+        }
+    }
 }

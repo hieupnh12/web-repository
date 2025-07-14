@@ -5,7 +5,7 @@ import lombok.*;
 import lombok.experimental.FieldDefaults;
 
 import java.math.BigDecimal;
-
+import java.util.List;
 @Builder                 // Tạo builder pattern giúp tạo đối tượng dễ dàng, linh hoạt
 @Entity                  // Đánh dấu class này là entity, ánh xạ tới bảng trong DB
 @Data                    // Tự sinh getter, setter, toString, equals, hashCode
@@ -54,7 +54,8 @@ public class ProductVersion {
     Boolean status;
 
 
-
+    @OneToMany(mappedBy = "versionId", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+     List<ProductItem> productItems;
 
 
 

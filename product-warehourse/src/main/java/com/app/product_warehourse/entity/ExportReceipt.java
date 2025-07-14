@@ -4,8 +4,10 @@ package com.app.product_warehourse.entity;
 import jakarta.persistence.*;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
+import org.hibernate.annotations.CreationTimestamp;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Builder                 // Tạo builder pattern giúp tạo đối tượng dễ dàng, linh hoạt
 @Entity                  // Đánh dấu class này là entity, ánh xạ tới bảng trong DB
@@ -20,19 +22,28 @@ public class ExportReceipt {
     @Column(name ="export_id")
     String export_id;
 
+
+    @CreationTimestamp
     @Column(name ="export_time")
     LocalDateTime exportTime;
 
     @Column(name ="total_amount")
     Long totalAmount;
 
-    @Column(name ="creater_id")
-    String staffId;
 
-    @Column(name ="customer_id")
-    String customerId;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name ="creater_id")
+    Account staff;
+
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name ="customer_id")
+    Customer customer;
 
     @Column(name ="status")
     Integer status;
+
+    @OneToMany(mappedBy = "newExId.export_id", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    List<ExportReceiptDetail> exportReceiptDetails;
 
 }

@@ -5,7 +5,7 @@ import com.app.product_warehourse.dto.request.SupplierRequest;
 import com.app.product_warehourse.dto.response.SupplierResponse;
 import com.app.product_warehourse.entity.Suppliers;
 import com.app.product_warehourse.mapper.SupplierMapper;
-import com.app.product_warehourse.repository.SupplierRepository;
+import com.app.product_warehourse.repository.SuppliersRepository;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
@@ -13,7 +13,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
-import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
 
@@ -23,7 +22,7 @@ import java.util.stream.Collectors;
 @Slf4j
 public class SupplierService {
 
-    SupplierRepository supplierRepo;
+    SuppliersRepository supplierRepo;
     SupplierMapper supplierMap;
 
 

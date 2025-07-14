@@ -2,10 +2,13 @@ package com.app.product_warehourse.mapper;
 
 import com.app.product_warehourse.dto.request.ImportReceiptDetailsRequest;
 import com.app.product_warehourse.dto.request.ImportReceiptDetailsUpdateRequest;
+import com.app.product_warehourse.dto.response.DetailsResponse;
 import com.app.product_warehourse.dto.response.ImportReceiptDetailsResponse;
 import com.app.product_warehourse.entity.ImportReceipt;
 import com.app.product_warehourse.entity.ImportReceiptDetail;
 import com.app.product_warehourse.entity.ProductVersion;
+import com.app.product_warehourse.repository.ImportReceiptRepository;
+import com.app.product_warehourse.repository.ProductVersionRepository;
 import com.app.product_warehourse.service.ImportReceiptService;
 import com.app.product_warehourse.service.ProductVersionService;
 import org.mapstruct.Context;
@@ -14,31 +17,36 @@ import org.mapstruct.Mapping;
 import org.mapstruct.MappingTarget;
 
 
-@Mapper(componentModel = "spring")
+@Mapper(componentModel = "spring" , uses = {ProductVersionMapper.class})
 public interface ImportReceiptDetailsMapper {
 
-    @Mapping(target = "id", ignore = true) // Bỏ qua ánh xạ id
+    @Mapping(target = "import_id", ignore = true) // Bỏ qua ánh xạ id
     @Mapping(target = "productVersionId", ignore = true) // Bỏ qua ánh xạ productVersionId
     ImportReceiptDetail.ImportReceiptDetailId toImportIDDetails(ImportReceiptDetailsRequest request);
 
 
-    @Mapping(target = "id", source = "newid.id.import_id") // Ánh xạ import_id của ImportReceipt
+    @Mapping(target = "import_id", source = "newid.import_id.import_id") // Ánh xạ import_id của ImportReceipt
     @Mapping(target = "productVersionId", source = "newid.productVersionId.versionId") // Ánh xạ versionId của ProductVersion
+    @Mapping(target = "productVersion", source = "newid.productVersionId") // Ánh xạ trực tiếp từ productItems
     ImportReceiptDetailsResponse toImportReceiptDetailsResponse (ImportReceiptDetail importReceiptDetail);
 
+    @Mapping(target = "productVersionId", source = "newid.productVersionId.versionId") // Ánh xạ versionId của ProductVersion
+    @Mapping(target = "imei", source = "productItems") // Ánh xạ trực tiếp từ productItems
+    DetailsResponse toImportReceiptDetailsResponse2 (ImportReceiptDetail importReceiptDetail);
 
 
-    default ImportReceipt mapStringToImportReceipt(String id, @Context ImportReceiptService service) {
-        return service.getImportReceipt(id);
-    }
 
-    default ProductVersion mapStringToProductVersion(String id, @Context ProductVersionService service) {
-        return service.GetProductVersionById(id);
-    }
+    @Mapping(target = "newid", ignore = true)
+    @Mapping(target = "quantity", source = "request.quantity")
+    @Mapping(target = "unitPrice", source = "request.unitPrice")
+    ImportReceiptDetail toImportReceiptDetails(ImportReceiptDetailsRequest request, ImportReceipt importReceipt, ProductVersion productVersion);
 
-    @Mapping(target = "newid.id", source = "id")
-    @Mapping(target = "newid.productVersionId", source = "productVersionId")
-    ImportReceiptDetail toImportReceiptDetails(ImportReceiptDetailsRequest request, @Context ImportReceiptService importService, @Context ProductVersionService productVersionService);
+//    default ImportReceiptDetail toImportReceiptDetailsWithId(ImportReceiptDetailsRequest request, ImportReceipt importReceipt, ProductVersion productVersion) {
+//        ImportReceiptDetail detail = toImportReceiptDetails(request, importReceipt, productVersion);
+//        ImportReceiptDetail.ImportReceiptDetailId newid = new ImportReceiptDetail.ImportReceiptDetailId(importReceipt, productVersion);
+//        detail.setNewid(newid);
+//        return detail;
+//    }
 
 
 
@@ -48,7 +56,7 @@ public interface ImportReceiptDetailsMapper {
 
     default ImportReceiptDetail.ImportReceiptDetailId getInforImportReceiptDetails(ImportReceiptDetailsRequest request, ImportReceipt im , ProductVersion version){
         ImportReceiptDetail.ImportReceiptDetailId ird = toImportIDDetails(request);
-        ird.setId(im);
+        ird.setImport_id(im);
         ird.setProductVersionId(version);
         return ird;
     }

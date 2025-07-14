@@ -26,13 +26,13 @@ public class ImportReceiptDetailsController {
 
     ImportReceiptDetailsService importDservice;
 
-    @PostMapping
-    public ApiResponse<ImportReceiptDetailsResponse> addImportReceiptDetails(@RequestBody ImportReceiptDetailsRequest request) {
-        log.info("Nhận được ImportReceiptDetailsRequest: {}", request);
-        ApiResponse<ImportReceiptDetailsResponse> apiResponse = new ApiResponse<>();
-        apiResponse.setResult(importDservice.createImportReceiptDetails(request));
-        return apiResponse;
-    }
+//    @PostMapping
+//    public ApiResponse<ImportReceiptDetailsResponse> addImportReceiptDetails(@RequestBody ImportReceiptDetailsRequest request) {
+//        log.info("Nhận được ImportReceiptDetailsRequest: {}", request);
+//        ApiResponse<ImportReceiptDetailsResponse> apiResponse = new ApiResponse<>();
+//        apiResponse.setResult(importDservice.createImportReceiptDetails(request));
+//        return apiResponse;
+//    }
 
 
     @GetMapping

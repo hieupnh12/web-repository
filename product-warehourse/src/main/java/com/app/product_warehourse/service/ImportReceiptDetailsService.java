@@ -11,6 +11,8 @@ import com.app.product_warehourse.exception.AppException;
 import com.app.product_warehourse.exception.ErrorCode;
 import com.app.product_warehourse.mapper.ImportReceiptDetailsMapper;
 import com.app.product_warehourse.repository.ImportReceiptDetailsRespository;
+import com.app.product_warehourse.repository.ImportReceiptRepository;
+import com.app.product_warehourse.repository.ProductVersionRepository;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
@@ -31,26 +33,26 @@ public class ImportReceiptDetailsService {
             ImportReceiptDetailsRespository importDrepo;
             ImportReceiptDetailsMapper importDmapper;
 
-            ImportReceiptService importService;
-            ProductVersionService productVersionService;
+            ImportReceiptRepository importRepo; // Thay thế ImportReceiptService
+            ProductVersionRepository productVersionRepo;
 
 
     public ImportReceiptDetailsResponse createImportReceiptDetails(ImportReceiptDetailsRequest request) {
         // Xác thực đầu vào
-        if (request.getId() == null || request.getProductVersionId() == null) {
+        if (request.getImport_id() == null || request.getProductVersionId() == null) {
             throw new IllegalArgumentException("ID của ImportReceipt và ProductVersion không được để trống");
         }
 
         // Lấy thực thể ImportReceipt và ProductVersion
-        ImportReceipt importReceipt = importService.getImportReceipt(request.getId());
-        ProductVersion productVersion = productVersionService.GetProductVersionById(request.getProductVersionId());
+        ImportReceipt importReceipt = importRepo.findById(request.getImport_id()).orElseThrow(() -> new AppException(ErrorCode.IMPORT_RECEIPT_NOT_FOUND));;
+        ProductVersion productVersion = productVersionRepo.findById(request.getProductVersionId()).orElseThrow(() -> new AppException(ErrorCode.PRODUCT_VERSION_NOT_FOUND));
 
         if (importReceipt == null || productVersion == null) {
             throw new IllegalArgumentException("Không tìm thấy ImportReceipt hoặc ProductVersion với ID được cung cấp");
         }
 
         // Ánh xạ request sang ImportReceiptDetail, bao gồm khóa phức hợp
-        ImportReceiptDetail detail = importDmapper.toImportReceiptDetails(request,importService,productVersionService);
+        ImportReceiptDetail detail = importDmapper.toImportReceiptDetails(request,importReceipt,productVersion);
 
         // Thiết lập khóa phức hợp thủ công
         ImportReceiptDetail.ImportReceiptDetailId compositeId = importDmapper.getInforImportReceiptDetails(request,importReceipt,productVersion);
@@ -91,7 +93,7 @@ public class ImportReceiptDetailsService {
     public ImportReceiptDetailsResponse  UpdateImportReceiptDetails(ImportReceiptDetailsUpdateRequest request, String id , String productVersionId) {
         ImportReceiptDetail importDetails = getImportReceiptDetails(id,productVersionId);
         if (importDetails == null) {
-            throw new AppException(ErrorCode.IMPORTDETAIL_NOT_EXIST);
+            throw new AppException(ErrorCode.IMPORT_DETAIL_NOT_EXIST);
         }
         importDmapper.toUpdateImportDetail(request,importDetails);
         ImportReceiptDetail savedDetail = importDrepo.save(importDetails);
@@ -102,7 +104,7 @@ public class ImportReceiptDetailsService {
     public void deleteImportReceiptDetails( String id , String productVersionId) {
         ImportReceiptDetail importDetails = getImportReceiptDetails(id,productVersionId);
         if (importDetails == null) {
-            throw new AppException(ErrorCode.IMPORTDETAIL_NOT_EXIST);
+            throw new AppException(ErrorCode.IMPORT_DETAIL_NOT_EXIST);
         }
         importDrepo.deleteByImportIdAndProductVersionId(id,productVersionId);
     }
