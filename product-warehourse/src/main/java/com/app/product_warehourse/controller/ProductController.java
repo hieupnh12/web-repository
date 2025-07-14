@@ -2,6 +2,7 @@ package com.app.product_warehourse.controller;
 
 
 import com.app.product_warehourse.dto.request.ImageRequest;
+import com.app.product_warehourse.dto.request.ProductFullRequest;
 import com.app.product_warehourse.dto.request.ProductRequest;
 import com.app.product_warehourse.dto.request.ProductUpdateRequest;
 import com.app.product_warehourse.dto.response.ApiResponse;
@@ -29,16 +30,24 @@ public class ProductController {
     @Autowired
     private ProductService productService;
 
+    @PostMapping("/init")
+    public ApiResponse<ProductFULLResponse> InitProduct(){
+         return ApiResponse.<ProductFULLResponse>builder()
+                 .result(productService.initProduct())
+                 .build();
+    }
+
+
+
     // Tạo mới Product với ảnh, sử dụng multipart/form-data
-//    @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-//    public ApiResponse<ProductResponse> addProduct(
-//            @RequestPart(value = "product") @Valid ProductRequest request,
-//            @RequestPart(value = "image", required = false) MultipartFile image) throws IOException {
-//        ApiResponse<ProductResponse> api = new ApiResponse<>();
-//        ProductResponse response = productService.createProduct(request, image);
-//        api.setResult(response);
-//        return api;
-//    }
+    @PostMapping(value="/full/confirm",consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public ApiResponse<ProductFULLResponse> addProduct(
+            @RequestPart(value = "product") @Valid ProductFullRequest request,
+            @RequestPart(value = "image", required = false) MultipartFile image) throws IOException {
+        return ApiResponse.<ProductFULLResponse>builder()
+                          .result(productService.createProductFull(request,image))
+                          .build();
+    }
 
 
     @PutMapping(value = "/upload_image/{id}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
@@ -97,9 +106,11 @@ public class ProductController {
 
 
     @DeleteMapping("/{idproduct}")
-    public void deleteProduct(@PathVariable("idproduct") Long idproduct) {
+    public ApiResponse<Void> deleteProduct(@PathVariable("idproduct") Long idproduct) {
         productService.deleteProduct(idproduct);
-        System.out.println("Product deleted successfully");
+        return  ApiResponse.<Void>builder()
+                .message("DELETE PRODUCT SUCCESSFULLY")
+                .build();
     }
 
 

@@ -233,26 +233,19 @@ public class ExportReceiptService {
 
     @Transactional
     public void deleteExportReceipt(String exportId) {
-        log.info("Bắt đầu xóa ExportReceipt với exportId: {}", exportId);
 
         if (repo.existsById(exportId)) {
-            log.info("Tìm thấy ExportReceipt với exportId: {}, tiến hành xóa", exportId);
 
             // Đặt export_id trong ProductItem thành null
-            log.info("Đặt export_id thành null trong ProductItem cho exportId: {}", exportId);
             repo.resetExportIdByExportId(exportId);
 
             // Xóa các ExportReceiptDetail liên quan
-            log.info("Xóa ExportReceiptDetail liên quan đến exportId: {}", exportId);
              repo.deleteDetailsByExportId(exportId);
 
             // Xóa ExportReceipt
-            log.info("Xóa ExportReceipt với exportId: {}", exportId);
             repo.deleteByExportId(exportId);
 
-            log.info("Hoàn tất xóa ExportReceipt với exportId: {}", exportId);
         } else {
-            log.warn("Không tìm thấy ExportReceipt với exportId: {}", exportId);
             throw new AppException(ErrorCode.EXPORT_RECEIPT_NOT_FOUND);
         }
     }

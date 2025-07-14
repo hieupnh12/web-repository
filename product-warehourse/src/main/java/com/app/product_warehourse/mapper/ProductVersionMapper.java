@@ -21,6 +21,8 @@ public interface ProductVersionMapper {
 
     ProductVersion ToProductVersion (ProductVersionRequest request);
 
+    List<ProductVersion> ToProductVersions (List<ProductVersionRequest> requests);
+
     @Mapping(source= "ram.name", target="ramName")
     @Mapping(source ="rom.rom_size", target = "romName")
     @Mapping(source = "color.name" , target="colorName")
@@ -56,6 +58,8 @@ public interface ProductVersionMapper {
          productVersion.setProduct(product);
          return productVersion;
     }
+
+
 
 
     default ProductVersion ToUpdateProductVersion (ProductVersionRequest request, ProductVersion version ,Ram ram , Rom rom , Color color, Product product) {

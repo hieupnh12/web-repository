@@ -33,8 +33,12 @@ public enum ErrorCode {
     PRODUCT_ITEM_HAD_EXPORT(2017, "Product Item Had Export", HttpStatus.NOT_FOUND),
     INVALID_QUANTITY(2017, "Invalid Quantity", HttpStatus.BAD_REQUEST),
     IMEI_DUPLICATE(2017, "Duplicate IMEI", HttpStatus.CONFLICT),
-
-
+    ORIGIN_NOT_FOUND(2017, "Origin Not Exist", HttpStatus.NOT_FOUND),
+    BRAND_NOT_FOUND(2017, "Brand Not Exist", HttpStatus.NOT_FOUND),
+    OPERATING_SYSTEM_NOT_FOUND(2017, "Operating System Not Exist", HttpStatus.NOT_FOUND),
+   RAM_NOT_FOUND(2017, "Ram Not Exist", HttpStatus.NOT_FOUND),
+    ROM_NOT_FOUND(2017, "Rom Not Exist", HttpStatus.NOT_FOUND),
+    COLOR_NOT_FOUND(2017, "Color Not Exist", HttpStatus.NOT_FOUND),
 
 
     UNCATEGORIZE_EXCEPTION(9999, "Uncategorized error", HttpStatus.INTERNAL_SERVER_ERROR),
