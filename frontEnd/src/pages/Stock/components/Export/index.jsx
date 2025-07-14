@@ -243,7 +243,7 @@ const ExportPage = () => {
       const payload = {
         exportId: form.code,
         exportReceipt: {
-          customerId: form.customer,
+          customerId: form.customer.customerId,
           totalAmount: form.total,
           status: 1,
         },

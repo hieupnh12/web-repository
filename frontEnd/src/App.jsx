@@ -17,6 +17,8 @@ import Overview from "./pages/Statistics/Overview";
 import RevenueStatistic from "./pages/Statistics/RevenueStatistic";
 import StatisticsLayout from "./pages/Statistics/StatisticsLayout";
 import SupplierStatistic from "./pages/Statistics/SupplierStatistic";
+import { ToastContainer, toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 
 // Các page (dùng lazy load)
 const Dashboard = lazy(
@@ -261,6 +263,17 @@ function App() {
   return (<>
     <QueryClientProvider client={queryClient}>
       <RouterProvider router={router} />
+        <ToastContainer
+        position="top-right"
+        autoClose={2000}
+        hideProgressBar={false}
+        newestOnTop={false}
+        closeOnClick
+        pauseOnFocusLoss
+        draggable
+        pauseOnHover
+        theme="colored"
+      />
     </QueryClientProvider>
     </>
   );

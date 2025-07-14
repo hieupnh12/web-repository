@@ -68,7 +68,7 @@ export default function ExportForm({
       (searchQuery, searchField, startDate, endDate) => {
         const newFilter = { startDate, endDate };
         if (searchField === "export_id") {
-          newFilter.importId = searchQuery;
+          newFilter.exportId = searchQuery;
         } else if (searchField === "customerName") {
           newFilter.customerName = searchQuery;
         } else if (searchField === "staffName") {
@@ -76,7 +76,7 @@ export default function ExportForm({
         } else {
           newFilter.customerName = searchQuery;
           newFilter.staffName = searchQuery;
-          newFilter.importId = searchQuery;
+          newFilter.exportId = searchQuery;
         }
         return newFilter;
       },
