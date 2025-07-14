@@ -5,6 +5,8 @@ import {
   createRoutesFromElements,
   Route,
 } from "react-router-dom";
+import { ToastContainer } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 import LayoutCommon from "./components/layout/Layout";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import LazyLoader from "./components/layout/LazyLoader";
@@ -259,6 +261,17 @@ function App() {
   return (
     <QueryClientProvider client={queryClient}>
       <RouterProvider router={router} />
+      <ToastContainer
+        position="top-right"
+        autoClose={2000}
+        hideProgressBar={false}
+        newestOnTop={false}
+        closeOnClick
+        pauseOnFocusLoss
+        draggable
+        pauseOnHover
+        theme="colored"
+      />
     </QueryClientProvider>
   );
 }

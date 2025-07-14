@@ -1,4 +1,3 @@
-
 import React, { useEffect, useState } from "react";
 import {
   Dialog,
@@ -14,7 +13,14 @@ import {
   Stack,
   Typography,
 } from "@mui/material";
-import { getAllROMs, createROM, updateROM, deleteROM } from "../../../services/attributeService";
+import { toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
+import {
+  getAllROMs,
+  createROM,
+  updateROM,
+  deleteROM,
+} from "../../../services/attributeService";
 
 const ROMModal = ({ open, onClose }) => {
   const [romName, setROMName] = useState("");
@@ -24,7 +30,7 @@ const ROMModal = ({ open, onClose }) => {
   const fetchROMs = async () => {
     try {
       const res = await getAllROMs();
-      setROMs(res.data.result || []);
+      setROMs(res || []);
     } catch (err) {
       console.error("Lỗi khi lấy danh sách ROM:", err);
     }
@@ -40,9 +46,10 @@ const ROMModal = ({ open, onClose }) => {
 
   const handleAdd = async () => {
     try {
-      await createROM({ name: romName });
+      await createROM({ rom_size: romName });
       fetchROMs();
       setROMName("");
+      toast.success("Thêm ROM thành công!");
     } catch (err) {
       console.error("Lỗi khi thêm ROM:", err);
     }
@@ -63,7 +70,7 @@ const ROMModal = ({ open, onClose }) => {
   const handleUpdate = async () => {
     if (!selectedROMId) return;
     try {
-      await updateROM(selectedROMId, { name: romName });
+      await updateROM(selectedROMId, { rom_size: romName });
       fetchROMs();
       setROMName("");
       setSelectedROMId(null);
@@ -73,8 +80,8 @@ const ROMModal = ({ open, onClose }) => {
   };
 
   const handleRowClick = (rom) => {
-    setSelectedROMId(rom.id);
-    setROMName(rom.name);
+    setSelectedROMId(rom.rom_id);
+    setROMName(rom.rom_size);
   };
 
   return (
@@ -104,21 +111,25 @@ const ROMModal = ({ open, onClose }) => {
         <Table>
           <TableHead>
             <TableRow>
-              <TableCell><strong>Mã</strong></TableCell>
-              <TableCell><strong>Tên ROM</strong></TableCell>
+              <TableCell>
+                <strong>Mã</strong>
+              </TableCell>
+              <TableCell>
+                <strong>Tên ROM</strong>
+              </TableCell>
             </TableRow>
           </TableHead>
           <TableBody>
             {roms.map((rom) => (
               <TableRow
-                key={rom.id}
+                key={rom.rom_id}
                 hover
-                selected={rom.id === selectedROMId}
+                selected={rom.rom_id === selectedROMId}
                 onClick={() => handleRowClick(rom)}
                 sx={{ cursor: "pointer" }}
               >
-                <TableCell>{rom.id}</TableCell>
-                <TableCell>{rom.name}</TableCell>
+                <TableCell>{rom.rom_id}</TableCell>
+                <TableCell>{rom.rom_size}</TableCell>
               </TableRow>
             ))}
           </TableBody>
