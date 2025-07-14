@@ -128,13 +128,13 @@ export default function ImportReceiptForm({ data }) {
       {/* Table */}
       <table className="w-full border border-black border-collapse text-center text-xs">
         <thead>
-          <tr className="bg-gray-100 font-bold">
-            <th className="border border-black w-8">STT</th>
-            <th className="border border-black">Tên hàng hóa (RAM/ROM/Màu)</th>
-            <th className="border border-black w-16">ĐVT</th>
-            <th className="border border-black w-20">Số lượng</th>
-            <th className="border border-black w-28">Đơn giá</th>
-            <th className="border border-black w-28">Thành tiền</th>
+          <tr className="bg-gray-100 font-bold py-2">
+            <th className="border border-black w-8 py-2">STT</th>
+            <th className="border border-black py-2">Tên hàng hóa (RAM/ROM/Màu)</th>
+            <th className="border border-black w-16 py-2">ĐVT</th>
+            <th className="border border-black w-20 py-2">Số lượng</th>
+            <th className="border border-black w-28 py-2">Đơn giá</th>
+            <th className="border border-black w-28 py-2">Thành tiền</th>
           </tr>
         </thead>
         <tbody>
@@ -145,28 +145,28 @@ export default function ImportReceiptForm({ data }) {
 
             return (
               <tr key={idx}>
-                <td className="border border-black">{idx + 1}</td>
-                <td className="border border-black text-left px-1">{name}</td>
-                <td className="border border-black">Chiếc</td>
-                <td className="border border-black">{quantity}</td>
-                <td className="border border-black text-right px-1">
+                <td className="border border-black py-2">{idx + 1}</td>
+                <td className="border border-black text-left px-1 py-2">{name}</td>
+                <td className="border border-black py-2">Chiếc</td>
+                <td className="border border-black py-2">{quantity}</td>
+                <td className="border border-black text-right px-1 py-2">
                   {unitPrice.toLocaleString()}
                 </td>
-                <td className="border border-black text-right px-1">
+                <td className="border border-black text-right px-1 py-2">
                   {total.toLocaleString()}
                 </td>
               </tr>
             );
           })}
           <tr className="font-bold">
-            <td colSpan={3} className="border border-black text-center">
+            <td colSpan={3} className="border border-black text-cente 1.5">
               Cộng
             </td>
-            <td className="border border-black">
+            <td className="border border-black py-1.5">
               {data.reduce((sum, item) => sum + item.quantity, 0)}
             </td>
-            <td className="border border-black"></td>
-            <td className="border border-black text-right px-1">
+            <td className="border border-black py-1.5"></td>
+            <td className="border border-black text-right px-1 py-1.5">
               {totalAmount.toLocaleString()}
             </td>
           </tr>

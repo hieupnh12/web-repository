@@ -1,8 +1,8 @@
 import React from "react";
 import html2canvas from "html2canvas";
 import jsPDF from "jspdf";
-import ContractTemplate from "../pages/Inventory/components/ExportContractTemplate";
-import ImportReceiptForm from "../pages/Inventory/components/ImportContractTemPlate";
+import ContractTemplate from "../pages/Stock/components/ExportContractTemplate";
+import ImportReceiptForm from "../pages/Stock/components/ImportContractTemPlate";
 
 export default function ContractPreviewModal({ data, onClose, IOreceipt = true }) {
   const handleDownloadPDF = async () => {

@@ -13,11 +13,22 @@ import { DELETE, GET, POST, PUT } from "../constants/httpMethod";
         },
  */
 
-// lấy danh sách khách hàng (trả về tất cả)
-export const takeCustomer = () => {
-    const responds = BASE_URL[GET]("customer");
-    return responds;
-}
+// Lấy danh sách khách hàng phân trang
+export const takeCustomer = async (page = 0, size = 10) => {
+  const response = BASE_URL[GET](`/customer?page=${page}&size=${size}`);
+  return response;
+};
+
+export const takeCustomerAll = async () => {
+  const response = BASE_URL[GET](`/customer`);
+  return response;
+};
+
+// Tìm kiếm khách hàng theo từ khóa với phân trang
+export const searchCustomers = async (keyword, page = 0, size = 5) => {
+  const response = BASE_URL[GET](`/customer/search?keyword=${keyword}&page=${page}&size=${size}`);
+  return response;
+};
 
 
 // Tạo 1 khách hàng

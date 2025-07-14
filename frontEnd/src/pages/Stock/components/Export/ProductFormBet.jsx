@@ -8,8 +8,8 @@ const ProductForm = forwardRef(
     ref
   ) => {
     const [formData, setFormData] = useState({
-      idProduct: "",
-      nameProduct: "",
+      productId: "",
+      productName: "",
       selectedOption: null,
       exportPrice: "",
       stockQuantity: "",
@@ -26,8 +26,8 @@ const ProductForm = forwardRef(
       if (selected) {
         setEditProduct(null);
         setFormData({
-          idProduct: selected.idProduct || "",
-          nameProduct: selected.nameProduct || "",
+          productId: selected.productId || "",
+          productName: selected.productName || "",
           selectedOption: null,
           exportPrice: "",
           stockQuantity: selected.stockQuantity || 0,
@@ -35,29 +35,31 @@ const ProductForm = forwardRef(
           quantity: "",
         });
       }
-    }, [selected?.idProduct, products, usedImeis]);
+    }, [selected?.productId, products, usedImeis]);
 
     // Khi editProduct thay đổi
     useEffect(() => {
       if (!editProduct || !products.length) return;
 
       const matchedProduct = products.find(
-        (p) => p.idProduct === editProduct.idProduct
+        (p) => p.productId === editProduct.productId
       );
       if (!matchedProduct) return;
-
-      const option = matchedProduct.options.find(
-        (opt) => opt.idProductVersion === editProduct.idProductVersion
+      console.log("mssd", matchedProduct);
+      
+      const option = matchedProduct.productVersionResponses.find(
+        (opt) => opt.versionId === editProduct.versionId
       );
-
-      const imeisFromOption = option?.imeiList.map((item) => item.imei) || [];
+      console.log("eidit", editProduct);
+      
+      const imeisFromOption = option?.imei.map((item) => item.imei) || [];
       const usedImeisForThisOption = editProduct.imeis.length
         ? editProduct.imeis
         : imeisFromOption.filter((imei) => usedImeis.includes(imei));
 
       setFormData({
-        idProduct: matchedProduct.idProduct,
-        nameProduct: matchedProduct.nameProduct,
+        productId: matchedProduct.productId,
+        productName: matchedProduct.productName,
         selectedOption: option,
         exportPrice: editProduct.price,
         stockQuantity: matchedProduct.stockQuantity || 0,
@@ -65,15 +67,17 @@ const ProductForm = forwardRef(
         quantity: editProduct.quantity.toString(),
       });
     }, [editProduct]);
-
+    console.log("selected", selected);
+    
     // thay đổi cấu hình
     const handleOptionChange = (e) => {
-      const optionId = parseInt(e.target.value);
-      const option = selected.options.find(
-        (opt) => opt.idProductVersion === optionId
+      const optionId = (e.target.value);
+      const option = selected.productVersionResponses.find(
+        (opt) => opt.versionId === optionId
       );
-
-      const imeisFromOption = option?.imeiList.map((item) => item.imei) || [];
+      console.log("option", option);
+      
+      const imeisFromOption = option?.imei.map((item) => item.imei) || [];
       const usedImeisForThisOption = imeisFromOption.filter((imei) =>
         usedImeis?.includes(imei)
       );
@@ -98,8 +102,8 @@ const ProductForm = forwardRef(
 
     useEffect(() => {
       if (itemScan) {
-    handleScanSuccess(itemScan);
-  }
+        handleScanSuccess(itemScan);
+      }
     }, [itemScan]);
 
     const handleScanSuccess = () => {
@@ -121,16 +125,14 @@ const ProductForm = forwardRef(
       }
     };
 
-
-
-    // Thực hiên thêm sản phẩm 
+    // Thực hiên thêm sản phẩm
     const handleAdd = () => {
       if (formData.selectedOption && formData?.selectedImeis.length > 0) {
         const newProduct = {
-          idProduct: formData.idProduct,
-          nameProduct: formData.nameProduct,
-          idProductVersion: formData.selectedOption.idProductVersion,
-          configuration: `${formData.selectedOption.color}, ${formData.selectedOption.ram}, ${formData.selectedOption.rom}`,
+          productId: formData.productId,
+          productName: formData.productName,
+          versionId: formData.selectedOption.versionId,
+          configuration: `${formData.selectedOption.colorName}, ${formData.selectedOption.ramName}, ${formData.selectedOption.romName}`,
           price: parseFloat(formData.selectedOption.exportPrice),
           imeis: formData.selectedImeis,
           quantity: parseInt(formData.selectedImeis.length),
@@ -138,7 +140,7 @@ const ProductForm = forwardRef(
         // Cập nhật mảng products
         setProducts((prev) => {
           const existingIndex = prev.findIndex(
-            (p) => p.idProduct === selected.idProduct
+            (p) => p.productId === selected.productId
           );
 
           if (existingIndex !== -1) {
@@ -154,8 +156,8 @@ const ProductForm = forwardRef(
         onAdd(newProduct);
         // Làm mới formData
         setFormData({
-          idProduct: selected?.idProduct || "",
-          nameProduct: selected?.nameProduct || "",
+          productId: selected?.productId || "",
+          productName: selected?.productName || "",
           selectedOption: null,
           exportPrice: "",
           stockQuantity: selected?.stockQuantity || 0,
@@ -172,6 +174,7 @@ const ProductForm = forwardRef(
     useImperativeHandle(ref, () => ({
       handleAdd,
     }));
+console.log("formdata", formData);
 
     return (
       <div className="md:w-1/2 space-y-4">
@@ -192,7 +195,7 @@ const ProductForm = forwardRef(
                 <input
                   type="text"
                   name="maSP"
-                  value={formData?.idProduct}
+                  value={formData?.productId}
                   className="mt-1 block w-full border-gray-700 rounded-md shadow-sm p-1 border"
                   readOnly
                 />
@@ -204,7 +207,7 @@ const ProductForm = forwardRef(
                 <input
                   type="text"
                   name="tenSanPham"
-                  value={formData?.nameProduct}
+                  value={formData?.productName}
                   className="mt-1 block w-full border-gray-700 rounded-md shadow-sm p-1 border"
                   readOnly
                 />
@@ -228,17 +231,17 @@ const ProductForm = forwardRef(
                   Cấu hình
                 </label>
                 <select
-                  value={formData?.selectedOption?.idProductVersion || ""}
+                  value={formData?.selectedOption?.versionId || ""}
                   onChange={handleOptionChange}
                   className="mt-1 block w-full border-gray-700 rounded-md shadow-sm p-1 border"
                 >
                   <option value="">Chọn cấu hình</option>
-                  {selected?.options?.map((option) => (
+                  {selected?.productVersionResponses?.map((option) => (
                     <option
-                      key={option.idProductVersion}
-                      value={option.idProductVersion}
+                      key={option.versionId}
+                      value={option.versionId}
                     >
-                      {`${option.color} - ${option.ram} - ${option.rom}`}
+                      {`${option.colorName} - ${option.ramName} - ${option.romName}`}
                     </option>
                   ))}
                 </select>
@@ -253,7 +256,7 @@ const ProductForm = forwardRef(
                     type="text"
                     name="soLuongTon"
                     readOnly
-                    value={formData?.selectedOption?.imeiList?.length || 0}
+                    value={formData?.selectedOption?.imei?.length || 0}
                     className=" block border border-gray-700 rounded-md shadow-sm p-1 w-1/4"
                   />
                 </div>
@@ -299,8 +302,7 @@ const ProductForm = forwardRef(
             <div className="bg-white rounded-lg p-4 w-96 max-h-[80vh] overflow-y-auto">
               <h2 className="text-lg font-medium mb-4">Chọn IMEI</h2>
               <div className="space-y-2">
-                {formData.selectedOption?.imeiList
-                  ?.filter((item) => item.status === "in-stock")
+                {formData.selectedOption?.imei
                   .map((item) => (
                     <div key={item.imei} className="flex items-center">
                       <input
@@ -311,7 +313,7 @@ const ProductForm = forwardRef(
                         className="mr-2"
                       />
                       <label htmlFor={`imei-${item.imei}`}>
-                        {item.imei} ({item.status})
+                        {item.imei}
                       </label>
                     </div>
                   ))}

@@ -25,14 +25,14 @@ const Dashboard = lazy(
       setTimeout(() => resolve(import("./pages/Dashboard/Dashboard")), 600)
     )
 );
-const ExportStock = lazy(() => import("./pages/Inventory/ExportStock"));
-const Export = lazy(() => import("./pages/Inventory/components/Export"));
-const Import = lazy(() => import("./pages/Inventory/components/Import"));
+const ExportStock = lazy(() => import("./pages/Stock/ExportStock"));
+const Export = lazy(() => import("./pages/Stock/components/Export"));
+const Import = lazy(() => import("./pages/Stock/components/Import"));
 const Login = lazy(() => import("./pages/Login/Login"));
 const ForgotPassword = lazy(() => import("./pages/Login/ForgotPassword"));
 const ProductsPage = lazy(() => import("./pages/Products"));
 
-const ImportStock = lazy(() => import("./pages/Inventory/ImportStock"));
+const ImportStock = lazy(() => import("./pages/Stock/ImportStock"));
 // const Products = lazy(() => import('./pages/Products/Products'));
 // const Inventory = lazy(() => import('./pages/Inventory/Inventory'));
 const WarehouseAreas = lazy(() => import("./pages/Storage"));
@@ -258,10 +258,11 @@ const router = createBrowserRouter(
 const queryClient = new QueryClient();
 
 function App() {
-  return (
+  return (<>
     <QueryClientProvider client={queryClient}>
       <RouterProvider router={router} />
     </QueryClientProvider>
+    </>
   );
 }
 

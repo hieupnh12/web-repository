@@ -1,5 +1,5 @@
 
-const ExportTable = ({ itemChoose, setItemChoose, products}) => {
+const ImportTable = ({ itemChoose, setItemChoose, products}) => {
   // chọn item trong bảng để hiển thị lại data trên productForm 
 
   return (
@@ -25,28 +25,28 @@ const ExportTable = ({ itemChoose, setItemChoose, products}) => {
                  <tr
                   key={index}
                   className={`hover:bg-gray-200 transition cursor-pointer ${
-                    itemChoose?.idProduct === product?.idProduct &&
-                    itemChoose?.idProductVersion === product?.idProductVersion
+                    itemChoose?.productId === product?.productId &&
+                    itemChoose?.versionId === product?.versionId
                       ? "bg-gray-300"
                       : ""
                   }`}
                   onClick={() =>
                     setItemChoose(
-                      itemChoose?.idProduct === product?.idProduct &&
-                        itemChoose?.idProductVersion === product?.idProductVersion
+                      itemChoose?.productId === product?.productId &&
+                        itemChoose?.versionId === product?.versionId
                         ? null
                         : product
                     )
                   }
                 >
                   <td className="text-center">{index + 1}</td>
-                  <td className="text-center py-2">{product.idProduct}</td>
-                  <td>{product.nameProduct}</td>
+                  <td className="text-center py-2">{product.productId}</td>
+                  <td>{product.productName}</td>
                   <td className="text-center py-2">{ram}</td>
                   <td className="text-center py-2">{rom}</td>
                   <td className="text-center py-2">{color}</td>
                   <td className="text-right py-2">
-                    {product.price.toLocaleString()} VND
+                    {(product.importPrice * product.quantity).toLocaleString()} VND
                   </td>
                   <td className="text-center py-2">{product.quantity}</td>
                 </tr>
@@ -65,4 +65,4 @@ const ExportTable = ({ itemChoose, setItemChoose, products}) => {
   );
 };
 
-export default ExportTable;
+export default ImportTable;

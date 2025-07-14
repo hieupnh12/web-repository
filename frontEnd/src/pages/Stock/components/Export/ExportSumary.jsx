@@ -1,9 +1,12 @@
 import React, { useState } from "react";
 
-const ImportSummary = ({
-  importInfo,
-  setImportInfo,
-  suppliers,
+const ExportSummary = ({
+  code,
+  user,
+  total,
+  customer,
+  customers,
+  onCustomerChange,
   onSubmit,
 }) => {
   const [customerPopup, setCustomerPopup] = useState(false);
@@ -12,7 +15,7 @@ const ImportSummary = ({
   const chooseCustomer = () => setCustomerPopup(true);
 
   const handleSelectCustomer = (c) => {
-    setImportInfo(importInfo.supplierName === c); // cập nhật lên component cha
+    onCustomerChange(c); // cập nhật lên component cha
     setCustomerPopup(false);
     setSearchText("");
   };
@@ -28,7 +31,7 @@ const ImportSummary = ({
             </label>
             <input
               type="text"
-              value={importInfo?.import_id}
+              value={code}
               readOnly
               className="w-full border border-gray-300 rounded-lg px-2 py-2 bg-gray-100 text-gray-800"
               placeholder="Mã phiếu nhập"
@@ -40,7 +43,7 @@ const ImportSummary = ({
             </label>
             <input
               type="text"
-              value={importInfo?.staffName}
+              value={user}
               readOnly
               className="w-full border border-gray-300 rounded-lg px-2 py-2 bg-gray-100 text-gray-800"
               placeholder="Nhân viên nhập"
@@ -58,7 +61,7 @@ const ImportSummary = ({
               disabled
               className="w-2/3 border border-gray-300 rounded-lg px-2 py-2 bg-white text-gray-800"
               type="text"
-              value={suppliers ? suppliers.supplierName : ""}
+              value={customer ? customer.customerName : ""}
               placeholder="Chưa chọn khách hàng"
             />
             <button
@@ -90,23 +93,23 @@ const ImportSummary = ({
                   className="w-full mb-3 px-3 py-2 border border-gray-300 rounded"
                 />
                 <div className="max-h-60 overflow-y-auto space-y-1">
-                  {suppliers
+                  {customers
                     ?.filter((c) =>
-                      c.supplierName
+                      c.customerName
                         .toLowerCase()
                         .includes(searchText.toLowerCase())
                     )
                     .map((c) => (
                       <div
-                        key={c.idSupplier}
+                        key={c.customerId}
                         onClick={() => handleSelectCustomer(c)}
                         className="p-2 rounded hover:bg-gray-100 cursor-pointer"
                       >
-                        {c.supplierName}
+                        {c.customerName}
                       </div>
                     ))}
-                  {suppliers?.filter((c) =>
-                    c.supplierName
+                  {customers.filter((c) =>
+                    c.customerName
                       .toLowerCase()
                       .includes(searchText.toLowerCase())
                   ).length === 0 && (
@@ -126,7 +129,7 @@ const ImportSummary = ({
         <div className="text-center text-base sm:text-lg font-semibold text-red-600">
           TỔNG TIỀN:{" "}
           <span className="text-gray-600">
-            {importInfo?.totalAmount.toLocaleString("vi-VN")}₫
+            {total.toLocaleString("vi-VN")}₫
           </span>
         </div>
         <button
@@ -140,4 +143,4 @@ const ImportSummary = ({
   );
 };
 
-export default ImportSummary;
+export default ExportSummary;

@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 
-const ProductList = ({ products, onSelect, onSearch }) => {
+const ProductList = ({ products, onSelect, onSearch, selectedProduct, editProduct }) => {
   const [searchText, setSearchText] = useState("");
 
   const handleSearchChange = (e) => {
@@ -9,7 +9,7 @@ const ProductList = ({ products, onSelect, onSearch }) => {
   };
 
   const filteredProducts = products.filter((product) =>
-    product.nameProduct.toLowerCase().includes(searchText.toLowerCase())
+    product.productName.toLowerCase().includes(searchText.toLowerCase())
   );
 
   // console.log("check product", onSelect);
@@ -41,15 +41,23 @@ const ProductList = ({ products, onSelect, onSearch }) => {
                 {filteredProducts.length > 0 ? (
                   filteredProducts.map((product) => (
                     <tr
-                      key={product.idProduct}
-                      onClick={() => onSelect(product)}
-                      className="cursor-pointer hover:bg-gray-200"
+                      key={product.productId}
+                      onClick={() => {
+                        if (!editProduct) {
+                          onSelect(product);
+                        }
+                      }}
+                      className={`cursor-pointer hover:bg-gray-200 ${
+                        selectedProduct?.productId === product.productId
+                          ? "bg-gray-300"
+                          : ""
+                      }${editProduct ? "opacity-50 cursor-not-allowed bg-gray-300" : ""}`}
                     >
                       <td className="py-2 px-4 border-b">
-                        {product.idProduct}
+                        {product.productId}
                       </td>
                       <td className="py-2 px-4 border-b">
-                        {product.nameProduct}
+                        {product.productName}
                       </td>
                       <td className="py-2 px-4 border-b">
                         {product.stockQuantity}
