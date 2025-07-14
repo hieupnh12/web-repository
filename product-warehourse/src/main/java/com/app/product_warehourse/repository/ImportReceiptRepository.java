@@ -79,16 +79,5 @@ public interface ImportReceiptRepository extends JpaRepository<ImportReceipt, St
 
 
 
-    // Tìm kiếm theo nhà cung cấp
-    @Query("SELECT i FROM ImportReceipt i " +
-            "LEFT JOIN FETCH i.suppliers s " +
-            "LEFT JOIN FETCH i.staff a " +
-            "LEFT JOIN FETCH i.importReceiptDetails d " +
-            "LEFT JOIN FETCH d.newid.productVersionId " +
-            "WHERE :supplierKeyword IS NULL OR LOWER(s.name) LIKE LOWER(CONCAT('%', :supplierKeyword, '%')) " +
-            "ORDER BY i.time DESC")
-    Page<ImportReceipt> searchBySupplier(
-            @Param("supplierKeyword") String supplierKeyword,
-            Pageable pageable);
 }
 

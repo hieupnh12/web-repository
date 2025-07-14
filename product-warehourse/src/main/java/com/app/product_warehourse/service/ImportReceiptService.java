@@ -282,19 +282,25 @@ public class ImportReceiptService {
 
     @Transactional
     public void deleteImportReceipt(String importId) {
-        // Kiểm tra điều kiện: có ProductItem nào với export_id không NULL hay không
-        if (importrepo.hasProductItemsWithExportId(importId)) {
-            throw new AppException(ErrorCode.PRODUCT_ITEM_HAD_EXPORT);
+        if(importrepo.existsById(importId)) {
+            // Kiểm tra điều kiện: có ProductItem nào với export_id không NULL hay không
+            if (importrepo.hasProductItemsWithExportId(importId) ) {
+                throw new AppException(ErrorCode.PRODUCT_ITEM_HAD_EXPORT);
+            }
+
+            // Xóa ProductItem trước
+            importrepo.deleteProductItemsByImportId(importId);
+
+            // Xóa ImportReceiptDetail
+            importrepo.deleteImportReceiptDetailsByImportId(importId);
+
+            // Xóa ImportReceipt
+            importrepo.deleteByImportId(importId);
+        }
+        else {
+            throw new AppException(ErrorCode.IMPORT_RECEIPT_NOT_FOUND);
         }
 
-        // Xóa ProductItem trước
-        importrepo.deleteProductItemsByImportId(importId);
-
-        // Xóa ImportReceiptDetail
-        importrepo.deleteImportReceiptDetailsByImportId(importId);
-
-        // Xóa ImportReceipt
-        importrepo.deleteByImportId(importId);
     }
 
 
