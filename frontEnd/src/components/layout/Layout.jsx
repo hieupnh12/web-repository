@@ -55,6 +55,46 @@ const pageConfig = {
     title: "Permissions",
     breadcrumb: [{ label: "Permissions" }],
   },
+   "/statistics/overview": {
+    title: "Tổng quan thống kê",
+    breadcrumb: [{ label: "Thống kê" }],
+  },
+  "/statistics/inventory": {
+    title: "Thống kê tồn kho",
+    breadcrumb: [{ label: "Thống kê" }, { label: "Tồn kho" }],
+  },
+  "/statistics/suppliers": {
+    title: "Thống kê nhà cung cấp",
+    breadcrumb: [{ label: "Thống kê" }, { label: "Nhà cung cấp" }],
+  },
+  "/statistics/customers": {
+    title: "Thống kê khách hàng",
+    breadcrumb: [{ label: "Thống kê" }, { label: "Khách hàng" }],
+  },
+  "/statistics/revenue/year": {
+    title: "Doanh thu theo năm",
+    breadcrumb: [
+      { label: "Thống kê", href: "/statistics/overview" },
+      { label: "Doanh thu", href: "/statistics/revenue" },
+      { label: "Theo năm" },
+    ],
+  },
+  "/statistics/revenue/month": {
+    title: "Doanh thu theo tháng",
+    breadcrumb: [
+      { label: "Thống kê", href: "/statistics/overview" },
+      { label: "Doanh thu", href: "/statistics/revenue" },
+      { label: "Theo tháng" },
+    ],
+  },
+  "/statistics/revenue/day": {
+    title: "Doanh thu theo ngày",
+    breadcrumb: [
+      { label: "Thống kê", href: "/statistics/overview" },
+      { label: "Doanh thu", href: "/statistics/revenue" },
+      { label: "Theo ngày" },
+    ],
+  },
 };
 
 const LayoutCommon = () => {

@@ -1,4 +1,6 @@
 import React, { lazy } from "react";
+import { Navigate } from "react-router-dom";
+
 import {
   RouterProvider,
   createBrowserRouter,
@@ -9,14 +11,17 @@ import LayoutCommon from "./components/layout/Layout";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import LazyLoader from "./components/layout/LazyLoader";
 import Permissions from "./pages/Permission";
-
-import CustomerStatistic from "./pages/Statistics/CustomerStatistic";
-import InventoryStatistic from "./pages/Statistics/InventoryStatistic";
-import AuthGuard from "./utils/AuthGuard";
-import Overview from "./pages/Statistics/Overview";
-import RevenueStatistic from "./pages/Statistics/RevenueStatistic";
-import StatisticsLayout from "./pages/Statistics/StatisticsLayout";
-import SupplierStatistic from "./pages/Statistics/SupplierStatistic";
+import AuthGuard from "./utils/AuthGuard"
+import StatisticsLayout from "./pages/Statistics/StatisticLayout";
+import Overview from "./pages/Statistics/pages/statistic/Overview";
+import Inventory from "./pages/Statistics/pages/statistic/Inventory";
+import Supplier from "./pages/Statistics/pages/statistic/Supplier";
+import Customer from "./pages/Statistics/pages/statistic/Customer";
+import RevenueLayout from "./pages/Statistics/RevenueTabs"; // dùng làm layout
+import RevenueByYears from "./pages/Statistics/pages/statistic/RevenueByYears";
+import RevenueByMonths from "./pages/Statistics/pages/statistic/RevenueByMonth";
+import RevenueByDays from "./pages/Statistics/pages/statistic/RevenueByDay";
+import RevenueDatetoDate from "./pages/Statistics/pages/statistic/RevenueByDatetoDate";
 
 // Các page (dùng lazy load)
 const Dashboard = lazy(
@@ -174,22 +179,23 @@ const router = createBrowserRouter(
               </LazyLoader>
             }
             />
-            <Route
-            path="import"
-            element={
-              <LazyLoader>
-                <ImportStock />
-              </LazyLoader>
-            }
-            />
+            
           <Route path="statistics" element={<StatisticsLayout />}>
-            <Route index element={<Overview />} />
-            <Route path="overview" element={<Overview />} />
-            <Route path="inventory" element={<InventoryStatistic />} />
-            <Route path="revenue" element={<RevenueStatistic />} />
-            <Route path="suppliers" element={<SupplierStatistic />} />
-            <Route path="customers" element={<CustomerStatistic />} />
-          </Route>
+    <Route index element={<Navigate to="overview" replace />} />
+    <Route path="overview" element={<Overview />} />
+    <Route path="inventory" element={<Inventory />} />
+    <Route path="suppliers" element={<Supplier />} />
+    <Route path="customers" element={<Customer />} />
+
+    {/* Route doanh thu tab */}
+    <Route path="revenue" element={<RevenueLayout />}>
+      <Route index element={<Navigate to="year" replace />} />
+      <Route path="year" element={<RevenueByYears />} />
+      <Route path="month" element={<RevenueByMonths />} />
+      <Route path="day" element={<RevenueByDays />} />
+      <Route path="datetodate" element={<RevenueDatetoDate />} />
+    </Route>
+  </Route>
 
           <Route path="*" element={<NotFound />} />
         </Route>
@@ -220,14 +226,23 @@ const router = createBrowserRouter(
               </LazyLoader>
             }
           />
-          <Route path="statistics" element={<StatisticsLayout />}>
-            <Route index element={<Overview />} />
-            <Route path="overview" element={<Overview />} />
-            <Route path="inventory" element={<InventoryStatistic />} />
-            <Route path="revenue" element={<RevenueStatistic />} />
-            <Route path="suppliers" element={<SupplierStatistic />} />
-            <Route path="customers" element={<CustomerStatistic />} />
-          </Route>
+            
+           <Route path="statistics" element={<StatisticsLayout />}>
+    <Route index element={<Navigate to="overview" replace />} />
+    <Route path="overview" element={<Overview />} />
+    <Route path="inventory" element={<Inventory />} />
+    <Route path="suppliers" element={<Supplier />} />
+    <Route path="customers" element={<Customer />} />
+
+    {/* Route doanh thu tab */}
+    <Route path="revenue" element={<RevenueLayout />}>
+      <Route index element={<Navigate to="year" replace />} />
+      <Route path="year" element={<RevenueByYears />} />
+      <Route path="month" element={<RevenueByMonths />} />
+      <Route path="day" element={<RevenueByDays />} />
+      <Route path="datetodate" element={<RevenueDatetoDate />} />      
+    </Route>
+  </Route>
 
           {/* <Route path="import" element={<ImportStock />} /> */}
           {/* <Route path="inventory" element={<Inventory />} /> */}

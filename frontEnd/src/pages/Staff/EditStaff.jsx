@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { editStaff } from '../../services/staffService';
-import { useNavigate } from 'react-router-dom';
+import { X, User } from 'lucide-react';
 
 const EditStaff = ({ staff, onClose, onSave }) => {
   const [form, setForm] = useState({
@@ -11,7 +11,6 @@ const EditStaff = ({ staff, onClose, onSave }) => {
     status: '1',
     birthDate: '',
   });
-  const navigate = useNavigate();
 
   useEffect(() => {
     if (staff) {
@@ -35,119 +34,64 @@ const EditStaff = ({ staff, onClose, onSave }) => {
     e.preventDefault();
     try {
       const formattedForm = {
-        staffId: staff.staffId, // Include staffId to identify the record to update
+        staffId: staff.staffId,
         fullName: form.fullName,
-        gender: form.gender === 'Nam' ? true : false,
+        gender: form.gender === 'Nam',
         phoneNumber: form.phoneNumber,
         email: form.email,
         birthDate: form.birthDate.split('-').reverse().join('-'),
         status: parseInt(form.status),
       };
-
-      await editStaff(staff.staffId, formattedForm);
-      alert('Cập nhật nhân viên thành công!');
       await onSave?.(formattedForm);
-      onClose();
-      navigate('/manager/staff');
     } catch (err) {
-      console.error('Lỗi khi cập nhật nhân viên:', err);
-      alert('Đã xảy ra lỗi khi cập nhật nhân viên.');
+      console.error('Update failed:', err);
     }
-  };
-
-  const handleClose = () => {
-    onClose();
-    setForm({
-      fullName: '',
-      gender: '',
-      phoneNumber: '',
-      email: '',
-      status: '1',
-      birthDate: '',
-    });
   };
 
   if (!staff) return null;
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50">
-      <div className="bg-white p-6 rounded-lg shadow-lg w-full max-w-md relative">
-        <button
-          onClick={handleClose}
-          className="absolute top-2 right-2 text-gray-500 hover:text-gray-700"
-        >
-          ✕
-        </button>
-        <h2 className="text-xl font-semibold mb-4 text-center">Edit Staff</h2>
-        <form onSubmit={handleSubmit} className="grid gap-3">
-          <input
-            name="fullName"
-            placeholder="Full Name"
-            value={form.fullName}
-            onChange={handleChange}
-            className="border border-gray-300 p-2 rounded"
-            required
-          />
-          <select
-            name="gender"
-            value={form.gender}
-            onChange={handleChange}
-            className="border border-gray-300 p-2 rounded"
-            required
+    <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center">
+      <div className="bg-white rounded-2xl w-full max-w-3xl h-[85%] overflow-y-auto shadow-2xl relative">
+        <div className="bg-gradient-to-r from-yellow-600 to-yellow-400 text-white p-6 relative">
+          <div className="flex items-center gap-4">
+            <div className="bg-white bg-opacity-20 rounded-full p-3">
+              <User />
+            </div>
+            <div>
+              <h2 className="text-2xl font-bold">Edit Staff</h2>
+              <p className="text-sm opacity-90">Update staff details</p>
+            </div>
+          </div>
+          <button
+            onClick={onClose}
+            className="absolute top-4 right-4 p-2 rounded-full bg-white bg-opacity-10 hover:bg-opacity-20 transition"
           >
-            <option value="">Select Gender</option>
-            <option value="Nam">Nam</option>
-            <option value="Nữ">Nữ</option>
-          </select>
-          <input
-            name="phoneNumber"
-            placeholder="Phone Number"
-            value={form.phoneNumber}
-            onChange={handleChange}
-            className="border border-gray-300 p-2 rounded"
-            required
-          />
-          <input
-            name="email"
-            placeholder="Email"
-            type="email"
-            value={form.email}
-            onChange={handleChange}
-            className="border border-gray-300 p-2 rounded"
-            required
-          />
-          <input
-            type="date"
-            name="birthDate"
-            value={form.birthDate}
-            onChange={handleChange}
-            className="border border-gray-300 p-2 rounded"
-            required
-          />
-          <select
-            name="status"
-            value={form.status}
-            onChange={handleChange}
-            className="border border-gray-300 p-2 rounded"
-            required
-          >
+            <X />
+          </button>
+        </div>
+
+        <form onSubmit={handleSubmit} className="p-6 space-y-6">
+          <input name="fullName" value={form.fullName} onChange={handleChange} className="w-full p-3 border rounded-lg" required />
+          <div className="grid grid-cols-2 gap-4">
+            <select name="gender" value={form.gender} onChange={handleChange} className="p-3 border rounded-lg" required>
+              <option value="">Select Gender</option>
+              <option value="Nam">Nam</option>
+              <option value="Nữ">Nữ</option>
+            </select>
+            <input type="date" name="birthDate" value={form.birthDate} onChange={handleChange} className="p-3 border rounded-lg" required />
+          </div>
+          <div className="grid grid-cols-2 gap-4">
+            <input name="phoneNumber" value={form.phoneNumber} onChange={handleChange} className="p-3 border rounded-lg" required />
+            <input type="email" name="email" value={form.email} onChange={handleChange} className="p-3 border rounded-lg" required />
+          </div>
+          <select name="status" value={form.status} onChange={handleChange} className="w-full p-3 border rounded-lg">
             <option value="1">Active</option>
             <option value="0">Inactive</option>
           </select>
-          <div className="flex justify-end gap-2">
-            <button
-              type="button"
-              onClick={handleClose}
-              className="bg-gray-500 text-white px-4 py-2 rounded hover:bg-gray-600"
-            >
-              Cancel
-            </button>
-            <button
-              type="submit"
-              className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700"
-            >
-              Update
-            </button>
+          <div className="flex justify-end gap-2 pt-4">
+            <button type="button" onClick={onClose} className="px-4 py-2 border rounded hover:bg-gray-100">Cancel</button>
+            <button type="submit" className="px-6 py-2 bg-yellow-500 text-white rounded hover:bg-yellow-600">Update</button>
           </div>
         </form>
       </div>

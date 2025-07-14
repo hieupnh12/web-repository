@@ -1,17 +1,41 @@
-import React, { useState } from 'react';
-import { createStaff } from '../../services/staffService';
-import { useNavigate } from 'react-router-dom';
+import React, { useState, useEffect } from "react";
+import { createStaff } from "../../services/staffService";
+import { useNavigate } from "react-router-dom";
+import {
+  Add as AddIcon,
+  Email as EmailIcon,
+  Phone as PhoneIcon,
+  CalendarToday as CalendarIcon,
+  Person as PersonIcon,
+  X,
+} from "@mui/icons-material";
 
-const CreateStaff = ({ onClose, onSave }) => {
+const AddStaff = ({ open, onClose, onSave }) => {
   const [form, setForm] = useState({
-    fullName: '',
-    gender: '',
-    phoneNumber: '',
-    email: '',
-    status: '1',
-    birthDate: '',
+    fullName: "",
+    gender: "",
+    phoneNumber: "",
+    email: "",
+    birthDate: "",
+    status: "1",
   });
+
   const navigate = useNavigate();
+
+  useEffect(() => {
+    if (open) {
+      setForm({
+        fullName: "",
+        gender: "",
+        phoneNumber: "",
+        email: "",
+        birthDate: "",
+        status: "1",
+      });
+    }
+  }, [open]);
+
+  if (!open) return null;
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -21,121 +45,164 @@ const CreateStaff = ({ onClose, onSave }) => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      const formattedForm = {
-        fullName: form.fullName,
-        gender: form.gender === 'Nam' ? true : false,
-        phoneNumber: form.phoneNumber,
-        email: form.email,
-        birthDate: form.birthDate.split('-').reverse().join('-'),
+      const formatted = {
+        ...form,
+        gender: form.gender === "Nam" ? true : false,
+        birthDate: form.birthDate.split("-").reverse().join("-"),
         status: parseInt(form.status),
       };
-      await createStaff(formattedForm);
-      alert('Thêm nhân viên thành công!');
-      await onSave?.(formattedForm);
+      await createStaff(formatted);
+      onSave?.(formatted);
       onClose();
-      navigate('/manager/staff');
+      navigate("/manager/staff");
     } catch (err) {
-      console.error('Lỗi khi thêm nhân viên:', err);
-      alert('Đã xảy ra lỗi khi thêm nhân viên.');
+      alert("Lỗi khi thêm nhân viên");
     }
   };
 
-  const handleClose = () => {
-    onClose();
-    setForm({
-      fullName: '',
-      gender: '',
-      phoneNumber: '',
-      email: '',
-      status: '1',
-      birthDate: '',
-    });
-  };
-
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50">
-      <div className="bg-white p-6 rounded-lg shadow-lg w-full max-w-md relative">
-        <button
-          onClick={handleClose}
-          className="absolute top-2 right-2 text-gray-500 hover:text-gray-700"
-        >
-          ✕
-        </button>
-        <h2 className="text-xl font-semibold mb-4 text-center">Create Staff</h2>
-        <form onSubmit={handleSubmit} className="grid gap-3">
-          <input
-            name="fullName"
-            placeholder="Full Name"
-            value={form.fullName}
-            onChange={handleChange}
-            className="border border-gray-300 p-2 rounded"
-            required
-          />
-          <select
-            name="gender"
-            value={form.gender}
-            onChange={handleChange}
-            className="border border-gray-300 p-2 rounded"
-            required
+    <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center">
+      <div className="bg-white rounded-2xl w-full max-w-3xl h-[85%] overflow-y-auto custom-scroll shadow-2xl relative">
+        {/* Header */}
+        <div className="bg-gradient-to-r from-green-600 to-green-400 text-white p-6 relative">
+          <div className="flex items-center gap-4">
+            <div className="bg-white bg-opacity-20 rounded-full p-3">
+              <AddIcon />
+            </div>
+            <div>
+              <h2 className="text-2xl font-bold">Add New Staff</h2>
+              <p className="text-sm opacity-90">
+                Please fill in all the required fields
+              </p>
+            </div>
+          </div>
+          <button
+            onClick={onClose}
+            className="absolute top-4 right-4 p-2 rounded-full bg-white bg-opacity-10 hover:bg-opacity-20 transition"
           >
-            <option value="">Select Gender</option>
-            <option value="Nam">Nam</option>
-            <option value="Nữ">Nữ</option>
-          </select>
-          <input
-            name="phoneNumber"
-            placeholder="Phone Number"
-            value={form.phoneNumber}
-            onChange={handleChange}
-            className="border border-gray-300 p-2 rounded"
-            required
-          />
-          <input
-            name="email"
-            placeholder="Email"
-            type="email"
-            value={form.email}
-            onChange={handleChange}
-            className="border border-gray-300 p-2 rounded"
-            required
-          />
-          <input
-            type="date"
-            name="birthDate"
-            value={form.birthDate}
-            onChange={handleChange}
-            className="border border-gray-300 p-2 rounded"
-            required
-          />
-          <select
-            name="status"
-            value={form.status}
-            onChange={handleChange}
-            className="border border-gray-300 p-2 rounded"
-            required
-          >
-            <option value="1">Active</option>
-            <option value="0">Inactive</option>
-          </select>
-          <div className="flex justify-end gap-2">
-            <button
-              type="button"
-              onClick={handleClose}
-              className="bg-gray-500 text-white px-4 py-2 rounded hover:bg-gray-600"
+            <X />
+          </button>
+        </div>
+
+        {/* Content */}
+        <form onSubmit={handleSubmit} className="p-6 space-y-6">
+          {/* Full Name */}
+          <div>
+            <div className="flex items-center mb-2">
+              <PersonIcon className="text-green-600 mr-2" />
+              <span className="text-sm text-gray-600">Full Name</span>
+            </div>
+            <input
+              name="fullName"
+              value={form.fullName}
+              onChange={handleChange}
+              placeholder="Full name *"
+              required
+              className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500"
+            />
+          </div>
+
+          {/* Gender + Birth Date */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+              <label className="text-sm text-gray-600 mb-2 block">
+                Gender
+              </label>
+              <select
+                name="gender"
+                value={form.gender}
+                onChange={handleChange}
+                required
+                className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500"
+              >
+                <option value="">Select Gender</option>
+                <option value="Nam">Nam</option>
+                <option value="Nữ">Nữ</option>
+              </select>
+            </div>
+            <div>
+              <label className="text-sm text-gray-600 mb-2 block flex items-center gap-1">
+                <CalendarIcon fontSize="small" /> Birth Date
+              </label>
+              <input
+                type="date"
+                name="birthDate"
+                value={form.birthDate}
+                onChange={handleChange}
+                required
+                className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500"
+              />
+            </div>
+          </div>
+
+          {/* Phone + Email */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+              <label className="text-sm text-gray-600 mb-2 block flex items-center gap-1">
+                <PhoneIcon fontSize="small" /> Phone Number
+              </label>
+              <input
+                name="phoneNumber"
+                value={form.phoneNumber}
+                onChange={handleChange}
+                placeholder="Phone number"
+                required
+                className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500"
+              />
+            </div>
+            <div>
+              <label className="text-sm text-gray-600 mb-2 block flex items-center gap-1">
+                <EmailIcon fontSize="small" /> Email
+              </label>
+              <input
+                type="email"
+                name="email"
+                value={form.email}
+                onChange={handleChange}
+                placeholder="Email"
+                required
+                className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500"
+              />
+            </div>
+          </div>
+
+          {/* Status */}
+          <div className="mt-4 flex items-center gap-4">
+            <label className="text-sm font-semibold text-gray-700">
+              Status:
+            </label>
+            <select
+              name="status"
+              value={form.status}
+              onChange={handleChange}
+              className="p-2 border border-gray-300 rounded-lg"
             >
-              Cancel
-            </button>
-            <button
-              type="submit"
-              className="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700"
-            >
-              Create
-            </button>
+              <option value="1">Active</option>
+              <option value="0">Inactive</option>
+            </select>
           </div>
         </form>
+
+        {/* Footer */}
+        <hr className="border-gray-200 mt-6" />
+        <div className="p-6 flex justify-end gap-4">
+          <button
+            type="button"
+            onClick={onClose}
+            className="px-6 py-2 border border-gray-300 rounded-lg text-gray-700 font-semibold hover:bg-gray-100 transition"
+          >
+            Cancel
+          </button>
+          <button
+            onClick={handleSubmit}
+            className="px-8 py-2 bg-gradient-to-r from-green-600 to-green-400 text-white rounded-lg font-semibold hover:from-green-700 hover:to-green-500 transition"
+          >
+            Create
+          </button>
+        </div>
       </div>
     </div>
   );
 };
 
-export default CreateStaff;
+export default AddStaff;
