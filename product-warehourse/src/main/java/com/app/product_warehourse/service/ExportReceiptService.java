@@ -23,6 +23,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.orm.hibernate5.HibernateOptimisticLockingFailureException;
 
+import java.time.LocalDateTime;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -206,12 +207,12 @@ public class ExportReceiptService {
 
     }
 
-
-    public void deleteExportReceipt(String id) {
-        var exportReceipt = repo.findById(id)
-                .orElseThrow(() -> new RuntimeException("Export receipt not found"));
-        repo.deleteById(id);
-    }
+//
+//    public void deleteExportReceipt(String id) {
+//        var exportReceipt = repo.findById(id)
+//                .orElseThrow(() -> new RuntimeException("Export receipt not found"));
+//        repo.deleteById(id);
+//    }
 
 
 
@@ -219,4 +220,46 @@ public class ExportReceiptService {
     public ExportReceipt getExportreceipt(String id) {
         return repo.findById(id).orElseThrow(()-> new RuntimeException("export_receipt not found"));
     }
+
+
+    public Page<ExportReceiptFULLResponse> searchExportReceipts(
+            String customerName,
+            String staffName,
+            String exportId,
+            LocalDateTime startDate,
+            LocalDateTime endDate,
+            Pageable pageable) {
+        return repo.searchExportReceipts(
+                        customerName, staffName, exportId, startDate, endDate, pageable)
+                .map(exportMapper::toExportreceiptFULLResponse);
+    }
+
+
+    @Transactional
+    public void deleteExportReceipt(String exportId) {
+        log.info("Bắt đầu xóa ExportReceipt với exportId: {}", exportId);
+
+        if (repo.existsById(exportId)) {
+            log.info("Tìm thấy ExportReceipt với exportId: {}, tiến hành xóa", exportId);
+
+            // Đặt export_id trong ProductItem thành null
+            log.info("Đặt export_id thành null trong ProductItem cho exportId: {}", exportId);
+            repo.resetExportIdByExportId(exportId);
+
+            // Xóa các ExportReceiptDetail liên quan
+            log.info("Xóa ExportReceiptDetail liên quan đến exportId: {}", exportId);
+             repo.deleteDetailsByExportId(exportId);
+
+            // Xóa ExportReceipt
+            log.info("Xóa ExportReceipt với exportId: {}", exportId);
+            repo.deleteByExportId(exportId);
+
+            log.info("Hoàn tất xóa ExportReceipt với exportId: {}", exportId);
+        } else {
+            log.warn("Không tìm thấy ExportReceipt với exportId: {}", exportId);
+            throw new AppException(ErrorCode.EXPORT_RECEIPT_NOT_FOUND);
+        }
+    }
+
+
 }

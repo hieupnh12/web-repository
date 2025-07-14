@@ -5,7 +5,9 @@ import com.app.product_warehourse.dto.request.ProductVersionRequest;
 import com.app.product_warehourse.dto.response.ImeiResponse;
 import com.app.product_warehourse.dto.response.ProductVerResponse;
 import com.app.product_warehourse.dto.response.ProductVersionResponse;
+import com.app.product_warehourse.dto.response.VersionResponse;
 import com.app.product_warehourse.entity.*;
+import org.mapstruct.Context;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.Named;
@@ -34,6 +36,15 @@ public interface ProductVersionMapper {
     @Mapping(target = "imei", source = "productItems", qualifiedByName = "mapProductItemsToImei") // Ánh xạ trực tiếp từ productItems
     @Mapping(source = "product", target ="product")
     ProductVerResponse ToProductVerResponse (ProductVersion productVersion);
+
+
+
+    @Mapping(source= "ram.name", target="ramName")
+    @Mapping(source ="rom.rom_size", target = "romName")
+    @Mapping(source = "color.name" , target="colorName")
+    @Mapping(source = "product.productName", target ="productName")
+    @Mapping(source = "product", target ="product")
+    VersionResponse ToVersionResponse (ProductVersion productVersion);
 
 
 

@@ -1,10 +1,8 @@
 package com.app.product_warehourse.dto.response;
 
 
-import com.app.product_warehourse.dto.request.ProductItemRequest;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
-
 import java.util.List;
 
 @Builder                 // Tạo builder pattern giúp tạo đối tượng dễ dàng, linh hoạt
@@ -12,20 +10,9 @@ import java.util.List;
 @NoArgsConstructor       // Tạo constructor không tham số (mặc định)
 @AllArgsConstructor      // Tạo constructor với tất cả các tham số
 @FieldDefaults(level = AccessLevel.PRIVATE) // Mặc định các biến thành private, không cần khai báo riêng
-public class ExportReceiptDetailsResponse {
+public class ItemsResponse {
 
-    String export_id;
-    String productVersionId;
-    Integer quantity;
-    Integer unitPrice;
+    ImeiResponse imei;
 
-
-//    List<ImeiResponse> productVersion;
-    //importRequest3
-
-//    ImeiResponse productVersion;
-
-//    VersionResponse productVersion;
-
-      ItemsResponse productVersion;
+    VersionResponse version;
 }

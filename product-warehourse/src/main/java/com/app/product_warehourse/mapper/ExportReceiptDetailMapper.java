@@ -19,12 +19,15 @@ import java.util.stream.Collectors;
 @Mapper(componentModel = "spring", uses = {ProductVersionMapper.class})
 public interface ExportReceiptDetailMapper {
 
-//    @Mapping(target = "productVersionId", source = "newExId.productVersionId.imei", qualifiedByName = "mapProductVersionToId")
 
     @Mapping(target = "export_id", source = "newExId.export_id.export_id")
     @Mapping(target = "productVersionId", source = "newExId.productVersionId.versionId", qualifiedByName = "mapProductVersionToId")
-    @Mapping(target = "productVersion", source = "newExId.productVersionId") // Ánh xạ trực tiếp từ productItems
+    @Mapping(target = "productVersion.version", source = "newExId.productVersionId.versionId") // Ánh xạ trực tiếp từ productItems
+    @Mapping(target = "productVersion.imei.imei", source = "newExId.productVersionId.imei") // Ánh xạ trực tiếp từ productItems
     ExportReceiptDetailsResponse toExportDetailsResponse(ExportReceiptDetail exportDetail);
+
+
+
 
     @Mapping(target = "export_id", ignore = true)
     @Mapping(target = "productVersionId", ignore = true)
