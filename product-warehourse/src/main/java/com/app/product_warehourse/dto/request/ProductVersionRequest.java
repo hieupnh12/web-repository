@@ -26,7 +26,5 @@ public class ProductVersionRequest {
 
     BigDecimal exportPrice;
 
-    Integer stockQuantity;
-
     Boolean status;
 }
