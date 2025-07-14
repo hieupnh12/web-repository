@@ -8,8 +8,8 @@ const ProductForm = forwardRef(
     ref
   ) => {
     const [formData, setFormData] = useState({
-      idProduct: "",
-      nameProduct: "",
+      productId: "",
+      productName: "",
       selectedOption: null,
       exportPrice: "",
       stockQuantity: "",
@@ -20,13 +20,14 @@ const ProductForm = forwardRef(
     const [products, setProducts] = useState([]); // Lưu danh sách sản phẩm đã chọn option và imei trước đó để cập nhật
     const [showScanner, setShowScanner] = useState(false);
     // Chặn quét trùng bằng biến flag tạm thời
+    const [itemScan, setItemScan] = useState(null);
 
     useEffect(() => {
       if (selected) {
         setEditProduct(null);
         setFormData({
-          idProduct: selected.idProduct || "",
-          nameProduct: selected.nameProduct || "",
+          productId: selected.productId || "",
+          productName: selected.productName || "",
           selectedOption: null,
           exportPrice: "",
           stockQuantity: selected.stockQuantity || 0,
@@ -34,29 +35,31 @@ const ProductForm = forwardRef(
           quantity: "",
         });
       }
-    }, [selected?.idProduct, products, usedImeis]);
+    }, [selected?.productId, products, usedImeis]);
 
     // Khi editProduct thay đổi
     useEffect(() => {
       if (!editProduct || !products.length) return;
 
       const matchedProduct = products.find(
-        (p) => p.idProduct === editProduct.idProduct
+        (p) => p.productId === editProduct.productId
       );
       if (!matchedProduct) return;
-
-      const option = matchedProduct.options.find(
-        (opt) => opt.idProductVersion === editProduct.idProductVersion
+      console.log("mssd", matchedProduct);
+      
+      const option = matchedProduct.productVersionResponses.find(
+        (opt) => opt.versionId === editProduct.versionId
       );
-
-      const imeisFromOption = option?.imeiList.map((item) => item.imei) || [];
+      console.log("eidit", editProduct);
+      
+      const imeisFromOption = option?.imei.map((item) => item.imei) || [];
       const usedImeisForThisOption = editProduct.imeis.length
         ? editProduct.imeis
         : imeisFromOption.filter((imei) => usedImeis.includes(imei));
 
       setFormData({
-        idProduct: matchedProduct.idProduct,
-        nameProduct: matchedProduct.nameProduct,
+        productId: matchedProduct.productId,
+        productName: matchedProduct.productName,
         selectedOption: option,
         exportPrice: editProduct.price,
         stockQuantity: matchedProduct.stockQuantity || 0,
@@ -64,15 +67,17 @@ const ProductForm = forwardRef(
         quantity: editProduct.quantity.toString(),
       });
     }, [editProduct]);
-
+    console.log("selected", selected);
+    
     // thay đổi cấu hình
     const handleOptionChange = (e) => {
-      const optionId = parseInt(e.target.value);
-      const option = selected.options.find(
-        (opt) => opt.idProductVersion === optionId
+      const optionId = (e.target.value);
+      const option = selected.productVersionResponses.find(
+        (opt) => opt.versionId === optionId
       );
-
-      const imeisFromOption = option?.imeiList.map((item) => item.imei) || [];
+      console.log("option", option);
+      
+      const imeisFromOption = option?.imei.map((item) => item.imei) || [];
       const usedImeisForThisOption = imeisFromOption.filter((imei) =>
         usedImeis?.includes(imei)
       );
@@ -95,39 +100,40 @@ const ProductForm = forwardRef(
       });
     };
 
-    const scannedImeisRef = useRef(new Set());
+    useEffect(() => {
+      if (itemScan) {
+        handleScanSuccess(itemScan);
+      }
+    }, [itemScan]);
 
-    const handleScanSuccess = (scannedImei) => {
-  // ✅ Nếu đã xử lý mã này rồi (dù đúng hay sai), thì bỏ qua
-  if (scannedImeisRef.current.has(scannedImei)) return;
+    const handleScanSuccess = () => {
+      setShowScanner(true);
+      const isValid = formData.selectedOption?.imeiList.some(
+        (item) => item.imei === itemScan
+      );
 
-  // ✅ Đánh dấu là đã xử lý
-  scannedImeisRef.current.add(scannedImei);
+      if (isValid) {
+        setFormData((prev) => ({
+          ...prev,
+          selectedImeis: [...new Set([...prev.selectedImeis, itemScan])],
+        }));
+        setShowScanner(false); // ✅ chỉ đóng nếu đúng
+        handleAdd();
+      } else {
+        // ❌ chỉ báo lỗi duy nhất 1 lần cho mã sai này
+        alert("IMEI không hợp lệ hoặc không có trong kho!");
+      }
+    };
 
-  const isValid = formData.selectedOption?.imeiList.some(
-    (item) => item.imei === scannedImei
-  );
-
-  if (isValid) {
-    setFormData((prev) => ({
-      ...prev,
-      selectedImeis: [...new Set([...prev.selectedImeis, scannedImei])],
-    }));
-    setShowScanner(false); // ✅ chỉ đóng nếu đúng
-  } else {
-    // ❌ chỉ báo lỗi duy nhất 1 lần cho mã sai này
-    alert("IMEI không hợp lệ hoặc không có trong kho!");
-  }
-};
-
-
+    // Thực hiên thêm sản phẩm
     const handleAdd = () => {
       if (formData.selectedOption && formData?.selectedImeis.length > 0) {
         const newProduct = {
-          idProduct: formData.idProduct,
-          nameProduct: formData.nameProduct,
-          idProductVersion: formData.selectedOption.idProductVersion,
-          configuration: `${formData.selectedOption.color}, ${formData.selectedOption.ram}, ${formData.selectedOption.rom}`,
+          productId: formData.productId,
+          productName: formData.productName,
+          versionId: formData.selectedOption.versionId,
+          configuration: `${formData.selectedOption.colorName}, ${formData.selectedOption.ramName}, ${formData.selectedOption.romName}`,
+
           price: parseFloat(formData.selectedOption.exportPrice),
           imeis: formData.selectedImeis,
           quantity: parseInt(formData.selectedImeis.length),
@@ -135,7 +141,7 @@ const ProductForm = forwardRef(
         // Cập nhật mảng products
         setProducts((prev) => {
           const existingIndex = prev.findIndex(
-            (p) => p.idProduct === selected.idProduct
+            (p) => p.productId === selected.productId
           );
 
           if (existingIndex !== -1) {
@@ -151,8 +157,8 @@ const ProductForm = forwardRef(
         onAdd(newProduct);
         // Làm mới formData
         setFormData({
-          idProduct: selected?.idProduct || "",
-          nameProduct: selected?.nameProduct || "",
+          productId: selected?.productId || "",
+          productName: selected?.productName || "",
           selectedOption: null,
           exportPrice: "",
           stockQuantity: selected?.stockQuantity || 0,
@@ -169,22 +175,16 @@ const ProductForm = forwardRef(
     useImperativeHandle(ref, () => ({
       handleAdd,
     }));
+console.log("formdata", formData);
 
     return (
       <div className="md:w-1/2 space-y-4">
         <BarcodeScanner
           open={showScanner}
-          onResult={(code, isValid) => {
-    if (isValid) {
-      handleScanSuccess(code);
-    } else {
-      handleScanSuccess(code); // lỗi cũng truyền vào xử lý, sẽ bị bỏ qua nếu đã gặp
-    }
-  }}
+          onResult={setItemScan}
           onClose={() => {
-  setShowScanner(false);
-  scannedImeisRef.current.clear(); // reset để lần sau xử lý lại được
-}}
+            setShowScanner(false);
+          }}
         />
         <div className="bg-white rounded shadow h-[350px] p-2">
           <div className="container mx-auto p-4">
@@ -196,7 +196,7 @@ const ProductForm = forwardRef(
                 <input
                   type="text"
                   name="maSP"
-                  value={formData?.idProduct}
+                  value={formData?.productId}
                   className="mt-1 block w-full border-gray-700 rounded-md shadow-sm p-1 border"
                   readOnly
                 />
@@ -208,7 +208,7 @@ const ProductForm = forwardRef(
                 <input
                   type="text"
                   name="tenSanPham"
-                  value={formData?.nameProduct}
+                  value={formData?.productName}
                   className="mt-1 block w-full border-gray-700 rounded-md shadow-sm p-1 border"
                   readOnly
                 />
@@ -232,17 +232,17 @@ const ProductForm = forwardRef(
                   Cấu hình
                 </label>
                 <select
-                  value={formData?.selectedOption?.idProductVersion || ""}
+                  value={formData?.selectedOption?.versionId || ""}n
                   onChange={handleOptionChange}
                   className="mt-1 block w-full border-gray-700 rounded-md shadow-sm p-1 border"
                 >
                   <option value="">Chọn cấu hình</option>
-                  {selected?.options?.map((option) => (
+                  {selected?.productVersionResponses?.map((option) => (
                     <option
-                      key={option.idProductVersion}
-                      value={option.idProductVersion}
+                      key={option.versionId}
+                      value={option.versionId}
                     >
-                      {`${option.color} - ${option.ram} - ${option.rom}`}
+                      {`${option.colorName} - ${option.ramName} - ${option.romName}`}
                     </option>
                   ))}
                 </select>
@@ -257,7 +257,7 @@ const ProductForm = forwardRef(
                     type="text"
                     name="soLuongTon"
                     readOnly
-                    value={formData?.selectedOption?.imeiList?.length || 0}
+                    value={formData?.selectedOption?.imei?.length || 0}
                     className=" block border border-gray-700 rounded-md shadow-sm p-1 w-1/4"
                   />
                 </div>
@@ -277,11 +277,9 @@ const ProductForm = forwardRef(
                     </button>
                     <button
                       onClick={() => {
-                        scannedImeisRef.current = new Set(); // ✅ RESET danh sách mã đã quét
                         setShowScanner(true); // ✅ MỞ scanner lại
                       }}
                       className="bg-blue-500 text-white px-2 py-1 rounded-md hover:bg-blue-600 w-fit"
-                      disabled={!formData.selectedOption}
                     >
                       Quét IMEI
                     </button>
@@ -305,8 +303,7 @@ const ProductForm = forwardRef(
             <div className="bg-white rounded-lg p-4 w-96 max-h-[80vh] overflow-y-auto">
               <h2 className="text-lg font-medium mb-4">Chọn IMEI</h2>
               <div className="space-y-2">
-                {formData.selectedOption?.imeiList
-                  ?.filter((item) => item.status === "in-stock")
+                {formData.selectedOption?.imei
                   .map((item) => (
                     <div key={item.imei} className="flex items-center">
                       <input
@@ -317,7 +314,7 @@ const ProductForm = forwardRef(
                         className="mr-2"
                       />
                       <label htmlFor={`imei-${item.imei}`}>
-                        {item.imei} ({item.status})
+                        {item.imei}
                       </label>
                     </div>
                   ))}

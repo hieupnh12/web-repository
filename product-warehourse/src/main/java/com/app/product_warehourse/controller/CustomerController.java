@@ -68,4 +68,9 @@ public class CustomerController {
     }
 
 
+    @DeleteMapping("/{customerId}")
+    public ApiResponse<Void> deleteCustomer(@PathVariable String customerId) {
+        customerService.deleteCustomer(customerId);
+        return new ApiResponse<>(1005, "Successfully deleted Customer", null);
+    }
 }

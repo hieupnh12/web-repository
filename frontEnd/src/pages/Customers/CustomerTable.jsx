@@ -1,4 +1,3 @@
-// src/components/CustomerTable.jsx
 import React from "react";
 import {
   Box,
@@ -85,6 +84,8 @@ const CustomerTable = ({
   filteredCustomers,
   page,
   rowsPerPage,
+  totalElements,
+  totalPages,
   handleChangePage,
   handleChangeRowsPerPage,
   handleEdit,
@@ -106,117 +107,126 @@ const CustomerTable = ({
             </TableRow>
           </StyledTableHead>
           <TableBody>
-            {loading
-              ? [...Array(5)].map((_, index) => (
-                  <TableRow key={index}>
-                    <TableCell colSpan={7}>
-                      <Skeleton animation="wave" height={60} />
-                    </TableCell>
-                  </TableRow>
-                ))
-              : filteredCustomers
-                  .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
-                  .map((customer, index) => (
-                    <StyledTableRow key={customer.customerId}>
-                      <TableCell>{page * rowsPerPage + index + 1}</TableCell>
-                      <TableCell>
-                        <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
-                          <PersonIcon color="primary" fontSize="small" />
-                          <Typography variant="body2" fontWeight={500}>
-                            {customer.customerName}
+            {loading ? (
+              [...Array(5)].map((_, index) => (
+                <TableRow key={index}>
+                  <TableCell colSpan={7}>
+                    <Skeleton animation="wave" height={60} />
+                  </TableCell>
+                </TableRow>
+              ))
+            ) : filteredCustomers.length === 0 ? (
+              <TableRow>
+                <TableCell colSpan={7} align="center">
+                  <Typography>No customers found</Typography>
+                </TableCell>
+              </TableRow>
+            ) : (
+              filteredCustomers.map((customer, index) => (
+                <StyledTableRow key={customer.customerId}>
+                  <TableCell>{page * rowsPerPage + index + 1}</TableCell>
+                  <TableCell>
+                    <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+                      <PersonIcon color="primary" fontSize="small" />
+                      <Typography variant="body2" fontWeight={500}>
+                        {customer.customerName}
+                      </Typography>
+                    </Box>
+                  </TableCell>
+                  <TableCell>
+                    <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+                      <PhoneIcon color="action" fontSize="small" />
+                      {customer.phone}
+                    </Box>
+                  </TableCell>
+                  <TableCell>
+                    <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+                      <LocationIcon color="action" fontSize="small" />
+                      <Tooltip title={customer.address} placement="top">
+                        <span>
+                          <Typography variant="body2" noWrap sx={{ maxWidth: 200 }}>
+                            {customer.address}
                           </Typography>
-                        </Box>
-                      </TableCell>
-                      <TableCell>
-                        <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
-                          <PhoneIcon color="action" fontSize="small" />
-                          {customer.phone}
-                        </Box>
-                      </TableCell>
-                      <TableCell>
-                        <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
-                          <LocationIcon color="action" fontSize="small" />
-                          <Tooltip title={customer.address} placement="top">
-                            <span>
-                            <Typography variant="body2" noWrap sx={{ maxWidth: 200 }}>
-                              {customer.address}
-                            </Typography>
-                            </span>
-                          </Tooltip>
-                        </Box>
-                      </TableCell>
-                      <TableCell>
-                        {new Date(customer.joinDate).toLocaleDateString()}
-                      </TableCell>
-                      <TableCell align="center">
-                        <Tooltip title={customer.status ? "Active" : "Inactive"}>
-                          <span>
-                            <Chip
-                              label={customer.status ? "Active" : "Inactive"}
-                              color={customer.status ? "success" : "error"}
-                              size="small"
-                              icon={
-                                customer.status ? (
-                                  <CheckCircleIcon />
-                                ) : (
-                                  <CancelIcon />
-                                )
-                              }
-                              sx={{ fontWeight: 500, pointerEvents: "none" }}
-                            />
-                          </span>
-                        </Tooltip>
-                      </TableCell>
-                      <TableCell align="center">
-                        <Box sx={{ display: "flex", gap: 1, justifyContent: "center" }}>
-                          <Tooltip title="Edit" placement="top">
-                            <IconButton
-                              size="small"
-                              onClick={() => handleEdit(customer)}
-                              sx={{
-                                color: "#2196f3",
-                                "&:hover": {
-                                  backgroundColor: "#e3f2fd",
-                                  transform: "scale(1.1)",
-                                },
-                                transition: "all 0.3s ease",
-                              }}
-                            >
-                              <EditIcon fontSize="small" />
-                            </IconButton>
-                          </Tooltip>
-                          <Tooltip title="Delete" placement="top">
-                            <IconButton
-                              size="small"
-                              onClick={() => handleDeleteCustomer(customer.customerId)}
-                              sx={{
-                                color: "#f44336",
-                                "&:hover": {
-                                  backgroundColor: "#ffebee",
-                                  transform: "scale(1.1)",
-                                },
-                                transition: "all 0.3s ease",
-                              }}
-                            >
-                              <DeleteIcon fontSize="small" />
-                            </IconButton>
-                          </Tooltip>
-                        </Box>
-                      </TableCell>
-                    </StyledTableRow>
-                  ))}
+                        </span>
+                      </Tooltip>
+                    </Box>
+                  </TableCell>
+                  <TableCell>
+                    {new Date(customer.joinDate).toLocaleDateString("en-US")}
+                  </TableCell>
+                  <TableCell align="center">
+                    <Tooltip title={customer.status ? "Active" : "Inactive"}>
+                      <span>
+                        <Chip
+                          label={customer.status ? "Active" : "Inactive"}
+                          color={customer.status ? "success" : "error"}
+                          size="small"
+                          icon={
+                            customer.status ? (
+                              <CheckCircleIcon />
+                            ) : (
+                              <CancelIcon />
+                            )
+                          }
+                          sx={{ fontWeight: 500, pointerEvents: "none" }}
+                        />
+                      </span>
+                    </Tooltip>
+                  </TableCell>
+                  <TableCell align="center">
+                    <Box sx={{ display: "flex", gap: 1, justifyContent: "center" }}>
+                      <Tooltip title="Edit" placement="top">
+                        <IconButton
+                          size="small"
+                          onClick={() => handleEdit(customer)}
+                          sx={{
+                            color: "#2196f3",
+                            "&:hover": {
+                              backgroundColor: "#e3f2fd",
+                              transform: "scale(1.1)",
+                            },
+                            transition: "all 0.3s ease",
+                          }}
+                        >
+                          <EditIcon fontSize="small" />
+                        </IconButton>
+                      </Tooltip>
+                      <Tooltip title="Delete" placement="top">
+                        <IconButton
+                          size="small"
+                          onClick={() => handleDeleteCustomer(customer.customerId)}
+                          sx={{
+                            color: "#f44336",
+                            "&:hover": {
+                              backgroundColor: "#ffebee",
+                              transform: "scale(1.1)",
+                            },
+                            transition: "all 0.3s ease",
+                          }}
+                        >
+                          <DeleteIcon fontSize="small" />
+                        </IconButton>
+                      </Tooltip>
+                    </Box>
+                  </TableCell>
+                </StyledTableRow>
+              ))
+            )}
           </TableBody>
         </Table>
       </StyledTableContainer>
       <TablePagination
         rowsPerPageOptions={[5, 10, 25]}
         component="div"
-        count={filteredCustomers.length}
+        count={totalElements}
         rowsPerPage={rowsPerPage}
         page={page}
         onPageChange={handleChangePage}
         onRowsPerPageChange={handleChangeRowsPerPage}
         labelRowsPerPage="Rows per page:"
+        labelDisplayedRows={({ from, to, count }) =>
+          `${from}–${to} of ${count !== -1 ? count : `more than ${to}`}`
+        }
         sx={{
           borderTop: "1px solid #e0e0e0",
           backgroundColor: "#fafafa",

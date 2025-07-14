@@ -1,5 +1,5 @@
 
-const ExportTable = ({ itemChoose, setItemChoose, products}) => {
+const ImportTable = ({ itemChoose, setItemChoose, products}) => {
   // chọn item trong bảng để hiển thị lại data trên productForm 
 
   return (
@@ -46,7 +46,7 @@ const ExportTable = ({ itemChoose, setItemChoose, products}) => {
                   <td className="text-center py-2">{rom}</td>
                   <td className="text-center py-2">{color}</td>
                   <td className="text-right py-2">
-                    {product.price.toLocaleString()} VND
+                    {(product.importPrice * product.quantity).toLocaleString()} VND
                   </td>
                   <td className="text-center py-2">{product.quantity}</td>
                 </tr>
@@ -65,4 +65,4 @@ const ExportTable = ({ itemChoose, setItemChoose, products}) => {
   );
 };
 
-export default ExportTable;
+export default ImportTable;

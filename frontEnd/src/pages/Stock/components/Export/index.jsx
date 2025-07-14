@@ -3,19 +3,23 @@ import { useQuery } from "@tanstack/react-query";
 import {
   getFullProductVersions,
   loadCustomersV2,
+  takeConfirmExport,
+  takeIdCreateExport,
 } from "../../../../services/exportService";
 import ProductForm from "./ProductFormBet";
 import ProductList from "./ProductListLeft";
 import ExportTable from "./ExportTableBot";
 import ExportSummary from "./ExportSumary";
 import { pre } from "framer-motion/client";
+import { takeProduct } from "../../../../services/productService";
+import { takeCustomerAll } from "../../../../services/customerService";
+import { useSelector } from "react-redux";
 
 const ExportPage = () => {
   const [form, setForm] = useState({
-    code: "PX001",
-    user: { id: 1, name: "Nhất Sinh" },
+    code: "",
+    user: "",
     customer: null,
-    // supplier: null,
     total: 0,
     products: [],
   });
@@ -29,16 +33,102 @@ const ExportPage = () => {
   const exportTableRef = useRef();
   const [editProduct, setEditProducts] = useState(null);
 
-  const { data } = useQuery({
-    queryKey: ["products", { page, limit: 20, search }],
-    queryFn: getFullProductVersions,
-    keepPreviousData: true,
+  const {
+    data: productData,
+    isLoading,
+    isError,
+    refetch,
+  } = useQuery({
+    queryKey: ["product"],
+    queryFn: async () => {
+      const resp = await takeProduct();
+      if (!resp?.data?.result) {
+        throw new Error("Invalid response format");
+      }
+      console.log("dffđssd", resp);
+
+      return resp.data.result;
+    },
+    staleTime: 1000 * 60 * 5,
+    gcTime: 1000 * 60 * 10,
+    onError: (error) => {
+      console.error("Error fetching imports:", error);
+    },
   });
 
   const { data: customers = { data: [] } } = useQuery({
     queryKey: ["customers"],
-    queryFn: loadCustomersV2,
+    queryFn: async () => {
+      const resp = await takeCustomerAll();
+      if (!resp?.data?.result.content) {
+        throw new Error("Invalid response format");
+      }
+      console.log("dff", resp.data.result.content);
+
+      return resp.data.result.content;
+    },
+    staleTime: 1000 * 60 * 5,
+    gcTime: 1000 * 60 * 10,
+    onError: (error) => {
+      console.error("Error fetching imports:", error);
+    },
   });
+  // const { data: customers = { data: [] } } = useQuery({
+  //   queryKey: ["customers"],
+  //   queryFn: takeCustomerAll,
+  // });
+
+   // Kiểm tra và lấy mã phiếu xuất từ localStorage
+  const loadIdImport = async () => {
+    try {
+      // Kiểm tra mã phiếu trong localStorage
+      const savedExportId = localStorage.getItem("pending_export_id");
+      if (savedExportId) {
+        // Nếu có mã phiếu, sử dụng nó
+        setForm((prev) => ({
+          ...prev,
+          code: savedExportId,
+        }));
+      } else {
+        // Nếu không có, tạo phiếu mới
+        const data = {
+          exportReceipt: {
+            customerId: "",
+            totalAmount: 0,
+            status: 0,
+          },
+          product: [],
+        };
+        const idResp = await takeIdCreateExport(data);
+        console.log("Phieus trả về nhjap",idResp);
+        
+        if (idResp.status === 200) {
+          const newExportId = idResp.data.result.export_id; // Giả sử API trả về exportId
+          setForm((prev) => ({
+            ...prev,
+            code: newExportId,
+          }));
+          // Lưu mã phiếu vào localStorage
+          localStorage.setItem("pending_export_id", newExportId);
+        }
+      }
+    } catch (error) {
+      console.log("Lỗi khi kiểm tra/tạo mã phiếu", error);
+    }
+  };
+  const staffInfo = useSelector((state) => state.auth.userInfo);
+
+  useEffect(() => {
+      setForm((prev) => ({
+            ...prev,
+            user: staffInfo?.fullName, // thay đổi mã code tại đây
+          }));
+      loadIdImport();
+    }, []);
+
+  console.log("SelectPro", selectedProduct);
+  console.log("customer", customers);
+
 
   const handleCustomerChange = (customer) => {
     setForm((prev) => ({ ...prev, customer }));
@@ -48,12 +138,11 @@ const ExportPage = () => {
     // Tìm imei trước khi thêm để set imei để tránh sót imei khi tạo mới (trong cùng 1 version khi thêm mới lại cái đã thêm bằng cách bớt đi 1 imei thì phải xóa đi tất cả imei có trong version đó rồi ms tạo ds imei mới)
     const imeiDup = form.products?.find(
       (p) =>
-        p.idProduct === product.idProduct &&
-        p.idProductVersion === product.idProductVersion
+        p.productId === product.productId && p.versionId === product.versionId
     );
     // console.log("dúpđ", imeiDup);
     setUsedImeis((prev) =>
-      prev.filter((imei) => !imeiDup.imeis.includes(imei))
+      prev.filter((imei) => !imeiDup?.imeis?.includes(imei))
     );
 
     setForm((prev) => {
@@ -64,12 +153,12 @@ const ExportPage = () => {
       const oldProduct = isEditing
         ? prev.products.find(
             (p) =>
-              p.idProduct === editProduct.idProduct &&
-              p.idProductVersion === editProduct.idProductVersion
+              p.productId === editProduct.productId &&
+              p.versionId === editProduct.versionId
           )
         : null;
 
-        // gán cũ hoặc k có
+      // gán cũ hoặc k có
       const oldImeis = oldProduct?.imeis || [];
       const newImeis = product.imeis;
       const filteredImeis = newImeis;
@@ -82,8 +171,8 @@ const ExportPage = () => {
         // Nếu đang sửa → cập nhật lại sản phẩm
         newList = prev.products.map((p) => {
           if (
-            p.idProduct === editProduct.idProduct &&
-            p.idProductVersion === editProduct.idProductVersion
+            p.productId === editProduct.productId &&
+            p.versionId === editProduct.versionId
           ) {
             return {
               ...product,
@@ -104,8 +193,8 @@ const ExportPage = () => {
         // Nếu thêm mới
         const existingIndex = prev.products.findIndex(
           (p) =>
-            p.idProduct === product.idProduct &&
-            p.idProductVersion === product.idProductVersion
+            p.productId === product.productId &&
+            p.versionId === product.versionId
         );
 
         if (existingIndex !== -1) {
@@ -150,10 +239,41 @@ const ExportPage = () => {
     });
   };
 
-  const handleSubmit = () => {
-    console.log("Submit đơn hàng:", form);
-    // Nếu muốn reset IMEI sau khi submit:
-    // setUsedImeis([]);
+  const handleSubmitExport = async () => {
+    try {
+      const payload = {
+        exportId: form.code,
+        exportReceipt: {
+          customerId: form.customer.customerId,
+          totalAmount: form.total,
+          status: 1,
+        },
+        product: form.products.map((p) => ({
+          productVersionId: p.versionId,
+          quantity: p.quantity,
+          unitPrice: p.price,
+          imei: p.imeis.map((imei) => ({
+            imei,
+            productVersionId: p.versionId,
+          })),
+        })),
+      };
+      console.log("data", payload);
+
+      const res = await takeConfirmExport(payload);
+
+      if (res.status === 200) {
+        alert("Xuất hàng thành công!");
+        // Xóa mã phiếu và dữ liệu liên quan khỏi localStorage sau khi xuất thành công
+        localStorage.removeItem("pending_export_id");
+        localStorage.removeItem("import_info");
+        localStorage.removeItem("selected_products");
+      }
+    } catch (err) {
+      console.log("Submit lỗi", err);
+      alert("Gặp lỗi khi xuất hàng: " + err);
+    }
+
   };
 
   const handleSearch = (searchText) => {
@@ -161,37 +281,6 @@ const ExportPage = () => {
     setPage(1);
   };
 
-  // const handleEditImeis = (updatedProduct) => {
-  //   setForm((prev) => {
-  //     const newList = prev.products.map((p) =>
-  //       p.idProduct === updatedProduct.idProduct &&
-  //       p.idProductVersion === updatedProduct.idProductVersion
-  //         ? updatedProduct
-  //         : p
-  //     );
-
-  //     const newTotal = newList.reduce(
-  //       (sum, p) => sum + p.price * p.quantity,
-  //       0
-  //     );
-
-  //     return { ...prev, products: newList, total: newTotal };
-  //   });
-
-  //   if (exportTableRef.current) {
-  //     exportTableRef.current.setItemChoose(null);
-  //   }
-  // };
-
-  // const handleEditProduct = () => {
-  //   if (exportTableRef.current?.itemChoose) {
-  //     if (productFormRef.current) {
-  //       productFormRef.current.handleEditImeis();
-  //     }
-  //   } else {
-  //     alert("Vui lòng chọn một sản phẩm để sửa!");
-  //   }
-  // };
 
   const handleAddButtonClick = () => {
     if (productFormRef.current) {
@@ -205,7 +294,7 @@ const ExportPage = () => {
         ...pre,
         total: pre.total - editProduct.price * editProduct.quantity,
         products: pre.products.filter(
-          (item) => item.idProduct !== editProduct.idProduct
+          (item) => item.productId !== editProduct.productId
         ),
       }));
       setUsedImeis((prev) =>
@@ -224,8 +313,8 @@ const ExportPage = () => {
           customer={form.customer}
           onCustomerChange={handleCustomerChange}
           total={form.total}
-          onSubmit={handleSubmit}
-          customers={customers.data}
+          onSubmit={handleSubmitExport}
+          customers={customers}
         />
       </div>
 
@@ -234,9 +323,11 @@ const ExportPage = () => {
         <div className="w-full lg:w-4/4 space-y-2">
           <div className="flex flex-col md:flex-row gap-2">
             <ProductList
-              products={data?.data || []}
+              products={productData || []}
               onSearch={handleSearch}
               onSelect={setSelectedProduct}
+              selectedProduct={selectedProduct}
+              editProduct={editProduct}
             />
             <ProductForm
               ref={productFormRef}

@@ -3,8 +3,12 @@ import { Link } from "react-router-dom";
 import debounce from "lodash.debounce";
 import ConfirmDialog from "../../../components/ui/ConfirmDialog";
 import usePagination from "../../../hooks/usePagination";
-import { Download, Plus } from "lucide-react";
+import { Download, Plus, Trash } from "lucide-react";
 import ContractPreviewModal from "../../../utils/exportTopdf";
+import { takeDeleteExportReceipt } from "../../../services/exportService";
+import { toast } from "react-toastify";
+import DateRangeButton from "./DateRangeButton";
+import Button from "../../../components/ui/Button";
 
 export default function ExportForm({
   tableData,
@@ -14,33 +18,98 @@ export default function ExportForm({
   currentPage,
   totalPages,
   onPageChange,
+  isLoading,
+  isError,
 }) {
   // Search của thanh input
-  const [searchInput, setSearchInput] = useState(filter.searchQuery);
+  const [searchInput, setSearchInput] = useState("");
 
   // Search của select
-  const [selectField, setSelectField] = useState(filter.searchField || "all");
+  const [selectField, setSelectField] = useState("all");
+
+   const [startDate, setStartDate] = useState(filter.startDate || null);
+    const [endDate, setEndDate] = useState(filter.endDate || null);
 
   // Hiển thị thông tin chi tiết của từng phiếu (thông tin từng version)
   const [selectProduct, setSelectProduct] = useState(null);
-
+  console.log("select", selectProduct);
+  
   // Show confirm when click delete receipt
   const [showConfirm, setShowConfirm] = useState(false);
 
   // Show PDF
   const [showPreview, setShowPreview] = useState(false);
 
-  // gọi `onFilterChange` sau khi dừng nhập 300ms
-  useEffect(() => {
-    const timeout = setTimeout(() => {
-      onFilterChange({
-        ...filter,
-        searchQuery: searchInput,
-        searchField: selectField,
-      });
-    }, 300);
-    return () => clearTimeout(timeout);
-  }, [searchInput, selectField]);
+ const handleDeleteExport = async () => {
+     setShowConfirm(false);
+     try {
+       if (!selectProduct?.export_id) {
+         toast.warning("Vui lòng chọn một phiếu nhập để xóa.");
+         return;
+       }
+ 
+       const resp = await takeDeleteExportReceipt(selectProduct.export_id);
+       console.log("dsad",resp);
+       
+       if (resp.status === 200) {
+         toast.success(resp.data.message || "Xóa phiếu nhập thành công!");
+         setSelectProduct(null);
+         onReload();
+       } else {
+         throw new Error("Xóa thất bại");
+       }
+     } catch (error) {
+       console.error("Lỗi khi xóa phiếu nhập:", error);
+       toast.error("Xóa phiếu nhập thất bại!");
+     }
+   };
+
+  const mapFilterToApi = useCallback(
+      (searchQuery, searchField, startDate, endDate) => {
+        const newFilter = { startDate, endDate };
+        if (searchField === "export_id") {
+          newFilter.exportId = searchQuery;
+        } else if (searchField === "customerName") {
+          newFilter.customerName = searchQuery;
+        } else if (searchField === "staffName") {
+          newFilter.staffName = searchQuery;
+        } else {
+          newFilter.customerName = searchQuery;
+          newFilter.staffName = searchQuery;
+          newFilter.exportId = searchQuery;
+        }
+        return newFilter;
+      },
+      []
+    );
+
+    const handleSearch = () => {
+    const newFilter = mapFilterToApi(searchInput, selectField, startDate, endDate);
+    console.log('Search filter:', newFilter); // Debug
+    onFilterChange(newFilter);
+  };
+
+  const handleReset = () => {
+    setSearchInput("");
+    setSelectField("all");
+    setStartDate(null);
+    setEndDate(null);
+    onFilterChange({ customerName: '', staffName: '', exportId: '', startDate: null, endDate: null });
+  };
+
+const debouncedFilterChange = useCallback(
+    debounce((newFilter) => {
+      onFilterChange(newFilter);
+      onPageChange(0);
+    }, 400),
+    [onFilterChange]
+  );
+
+   useEffect(() => {
+      const newFilter = mapFilterToApi(searchInput, selectField, startDate, endDate);
+      debouncedFilterChange(newFilter);
+      return () => debouncedFilterChange.cancel();
+    }, [searchInput, startDate, endDate, debouncedFilterChange, mapFilterToApi]);
 
   const handleSearchChange = (e) => setSearchInput(e.target.value);
   const handleFieldChange = (e) => setSelectField(e.target.value);
@@ -51,11 +120,14 @@ export default function ExportForm({
       const search = document.getElementById("search-value");
       const searchSelect = document.getElementById("search-select");
       const searchPag = document.getElementById("search-pagination");
+      const searchDate = document.getElementById("search-date");
 
       if (
         (search && search.contains(event.target)) ||
         (searchSelect && searchSelect.contains(event.target)) ||
-        (searchPag && searchPag.contains(event.target))
+        (searchPag && searchPag.contains(event.target)) ||
+        (searchDate && searchDate.contains(event.target))
+
       ) {
         setSelectProduct(null);
       }
@@ -80,6 +152,7 @@ export default function ExportForm({
       {showPreview && (
         <ContractPreviewModal
           data={selectProduct}
+          IOreceipt={false}
           onClose={() => setShowPreview(false)}
         />
       )}
@@ -100,16 +173,41 @@ export default function ExportForm({
             <button
               className="bg-green-700 hover:bg-green-800 text-white px-4 py-2 rounded-lg text-sm font-medium flex items-center space-x-2"
               onClick={() => setShowPreview(true)}
-              disabled={!selectProduct?.idExportReciept}
+              disabled={!selectProduct?.export_id}
             >
               <Download className="w-5 h-5" />
               <span>Print</span>
             </button>
-          
+          <Button
+            onClick={() => setShowConfirm(true)}
+            className="group flex items-center gap-2 bg-red-600 text-white hover:bg-red-700 hover:scale-105 transform transition-all duration-300 shadow-lg hover:shadow-xl px-3 py-2 text-sm"
+            disabled={!selectProduct?.export_id}
+          >
+            <Trash className="w-4 h-4 group-hover:scale-110 transition-transform duration-300" />
+            <span className="hidden sm:inline">Delete</span>
+          </Button>
+          <ConfirmDialog
+            isOpen={showConfirm}
+            title="Xóa phiếu nhập"
+            message="Bạn có chắc muốn xóa phiếu nhập này?"
+            onConfirm={handleDeleteExport}
+            onCancel={() => setShowConfirm(false)}
+          />
         </div>
 
         {/* Search by input and select */}
         <div className="flex items-center space-x-2">
+          <div id="search-date">
+            <DateRangeButton
+              startDate={startDate}
+              endDate={endDate}
+              onStartDateChange={(date) => setStartDate(date)}
+              onEndDateChange={(date) => setEndDate(date)}
+              onApply={handleSearch}
+              onClear={handleReset}
+            />
+          </div>
+
           <select
             id="search-select"
             value={selectField}
@@ -117,9 +215,9 @@ export default function ExportForm({
             className="border border-gray-300 rounded-lg px-3 py-2 text-sm text-gray-700 focus:ring-teal-500 focus:border-teal-500"
           >
             <option value="all">All</option>
-            <option value="idExportReciept">Code receipt</option>
-            <option value="customer.nameCustomer">Customer</option>
-            <option value="idStaff">Staff</option>
+            <option value="export_id">Code receipt</option>
+            <option value="customerName">Customer</option>
+            <option value="staffName">Staff</option>
           </select>
           <input
             type="text"
@@ -147,15 +245,15 @@ export default function ExportForm({
               Product details
             </div>
 
-            <div className="overflow-y-scroll flex-1 max-h-[475px] text-sm p-2 space-y-2">
+            <div className="overflow-y-scroll custom-scroll flex-1 max-h-[475px] text-sm p-2 space-y-2">
               {selectProduct?.details?.map((value, index) => (
                 <div
-                  key={`${value.idProductVersion}-${index}`}
+                  key={`${value.export_id}-${index}`}
                   className="border border-gray-300 rounded-2xl p-2 flex gap-2 bg-white"
                 >
                   <div className="w-[100px] h-[100px] rounded-2xl overflow-hidden flex items-center justify-center border border-gray-200">
                     <img
-                      src="https://cdn.nguyenkimmall.com/images/detailed/824/dien-thoai-iphone-14-pro-max-256gb-vang-3.jpg"
+                      src={value?.productVersion?.version.product?.image || "/placeholder-image.jpg"}
                       alt="jj"
                       className="object-cover w-full h-full"
                     />
@@ -163,10 +261,10 @@ export default function ExportForm({
 
                   <div className="flex flex-col justify-around items-center text-left">
                     <div className="w-full text-sm font-medium">
-                      {value.idProductVersion}
+                       {value?.productVersion?.version.product?.productName || "N/A"}
                     </div>
                     <div className="w-full">
-                      Total: {value.price.toLocaleString()} VND
+                      Total: {(value.unitPrice * value.quantity).toLocaleString()} VND
                     </div>
                     <div className="w-full">Quantity: {value.quantity}</div>
                   </div>
@@ -175,18 +273,13 @@ export default function ExportForm({
             </div>
 
             <div className="p-1 mt-2">
-              <button
-                onClick={() => setShowConfirm(true)}
-                className="w-full bg-red-500 text-white py-2 rounded-lg hover:bg-red-600 transition duration-200 text-sm font-medium"
-                disabled={!selectProduct?.idExportReciept}
+             <button
+                onClick={() => setShowPreview(true)} // Sửa để mở PDF thay vì ConfirmDialog
+                className="w-full bg-white border border-gray-400 py-2 rounded-lg hover:bg-blue-300 transition duration-200 text-sm font-medium text-gray-600"
+                disabled={!selectProduct?.export_id}
               >
-                Cancel receipt
+                Xem chi tiết
               </button>
-              <ConfirmDialog
-                isOpen={showConfirm}
-                title={`Confirm cancellation with id of receipt ${selectProduct?.idExportReciept}`}
-                onCancel={() => setShowConfirm(false)}
-              />
             </div>
           </div>
 
@@ -211,29 +304,29 @@ export default function ExportForm({
                     <tr
                       key={index}
                       className={`hover:bg-blue-50 transition ${
-                        selectProduct?.idExportReciept === item.idExportReciept
+                        selectProduct?.export_id === item.export_id
                           ? "bg-blue-100"
                           : ""
                       }`}
                       onClick={() =>
                         setSelectProduct(
-                          selectProduct?.idExportReciept ===
-                            item.idExportReciept
+                          selectProduct?.export_id ===
+                            item.export_id
                             ? null
                             : item
                         )
                       }
                     >
                       <td className="px-4 py-3">
-                        {(currentPage - 1) * 10 + index + 1}
+                        {currentPage * 7 + index + 1}
                       </td>
-                      <td className="px-4 py-3">{item.idExportReciept}</td>
+                      <td className="px-4 py-3">{item.export_id}</td>
                       <td className="px-4 py-3">
-                        {item.customer.nameCustomer}
+                        {item.customerName}
                       </td>
-                      <td className="px-4 py-3">{item.idStaff}</td>
+                      <td className="px-4 py-3">{item.staffName}</td>
                       <td className="px-4 py-3">
-                        {item.totalCost.toLocaleString()}
+                        {item.totalAmount.toLocaleString()}
                       </td>
                       <td className="px-4 py-3">
                         {new Intl.DateTimeFormat("vi-VN", {
@@ -243,7 +336,7 @@ export default function ExportForm({
                           hour: "2-digit",
                           minute: "2-digit",
                           hour12: false,
-                        }).format(new Date(item.time))}
+                        }).format(new Date(item.exportTime))}
                       </td>
                     </tr>
                   ))}

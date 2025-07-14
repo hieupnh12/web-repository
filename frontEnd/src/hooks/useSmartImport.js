@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useState, useMemo } from "react";
 
 // Truy cập giá trị sâu trong object: "customer.nameCustomer"
 function getNestedValue(obj, path) {
@@ -15,20 +15,21 @@ function deepSearch(obj, keyword) {
   });
 }
 
-export default function useSmartFilter(data = [], options = {}) {
+export default function useSmartImport(data = [], options = {}) {
   const {
     initialFilter = { searchQuery: "", searchField: "all" },
-    itemsPerPage = 7,
   } = options;
 
   const [filter, setFilter] = useState(initialFilter);
-  const [filteredData, setFilteredData] = useState([]);
-  const [currentPage, setCurrentPage] = useState(1);
 
-  useEffect(() => {
-    const { searchQuery, searchField, ...rest } = filter;
+  // Tính toán filteredData và sắp xếp theo time
+  const filteredData = useMemo(() => {
+    if (!data || !Array.isArray(data)) return [];
 
+    // Lọc dữ liệu dựa trên filter
     const result = data.filter((item) => {
+      const { searchQuery, searchField, ...rest } = filter;
+
       const matchSearch = searchQuery
         ? searchField === "all"
           ? deepSearch(item, searchQuery)
@@ -47,22 +48,15 @@ export default function useSmartFilter(data = [], options = {}) {
       return matchSearch && matchRest;
     });
 
-    setFilteredData(result);
-    setCurrentPage(1);
+    // Sắp xếp theo time giảm dần (mới nhất trước)
+    return result.sort((a, b) => new Date(b.time) - new Date(a.time));
   }, [data, filter]);
-
-  const paginatedData = filteredData.slice(
-    (currentPage - 1) * itemsPerPage,
-    currentPage * itemsPerPage
-  );
 
   return {
     filter,
     setFilter,
-    currentPage,
-    setCurrentPage,
-    paginatedData,
-    totalPages: Math.ceil(filteredData.length / itemsPerPage),
+    paginatedData: filteredData, // Không phân trang lại
     fullData: filteredData,
   };
 }
+

@@ -19,6 +19,8 @@ import Overview from "./pages/Statistics/Overview";
 import RevenueStatistic from "./pages/Statistics/RevenueStatistic";
 import StatisticsLayout from "./pages/Statistics/StatisticsLayout";
 import SupplierStatistic from "./pages/Statistics/SupplierStatistic";
+import { ToastContainer, toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 
 // Các page (dùng lazy load)
 const Dashboard = lazy(
@@ -29,6 +31,7 @@ const Dashboard = lazy(
 );
 const ExportStock = lazy(() => import("./pages/Stock/ExportStock"));
 const Export = lazy(() => import("./pages/Stock/components/Export"));
+const Import = lazy(() => import("./pages/Stock/components/Import"));
 const Login = lazy(() => import("./pages/Login/Login"));
 const ForgotPassword = lazy(() => import("./pages/Login/ForgotPassword"));
 const ProductsPage = lazy(() => import("./pages/Products"));
@@ -40,6 +43,16 @@ const Account = lazy(() => import("./pages/Accounts/Account"));
 const InventoryPage = lazy(() => import("./pages/Inventory"));
 const AttributesPage = lazy(() => import("./pages/Attributes"));
 
+const ImportStock = lazy(() => import("./pages/Stock/ImportStock"));
+// const Products = lazy(() => import('./pages/Products/Products'));
+// const Inventory = lazy(() => import('./pages/Inventory/Inventory'));
+const WarehouseAreas = lazy(() => import("./pages/Storage"));
+const Customers = lazy(() => import("./pages/Customers"));
+const Suppliers = lazy(() => import("./pages/Suppliers"));
+const Staff = lazy(() => import("./pages/Staff/Staff"));
+const Account = lazy(() => import("./pages/Account/Account"));
+
+// Optional: 404 Not Found page
 const NotFound = () => (
   <div className="p-10 text-center text-xl">404 - Không tìm thấy trang</div>
 );
@@ -120,15 +133,15 @@ const router = createBrowserRouter(
               </LazyLoader>
             }
           />
-
-          <Route
+          {/* <Route path="import" element={<ImportStock />} />
+        <Route
             path="storage"
             element={
               <LazyLoader>
                 <WarehouseAreas />
               </LazyLoader>
             }
-          />
+          /> */}
           <Route
             path="suppliers"
             element={
@@ -162,13 +175,32 @@ const router = createBrowserRouter(
             }
           />
           <Route
-            path="customers"
+            path="Customers"
             element={
               <LazyLoader>
                 <Customers />
               </LazyLoader>
             }
           />
+          <Route path="import">
+            <Route
+              index
+              element={
+                <LazyLoader>
+                  <ImportStock />
+                </LazyLoader>
+              }
+            />
+            <Route
+              path="addimport"
+              element={
+                <LazyLoader>
+                  <Import />
+                </LazyLoader>
+              }
+            />
+          </Route>
+
           <Route
             path="attributes"
             element={
@@ -258,10 +290,10 @@ const router = createBrowserRouter(
 const queryClient = new QueryClient();
 
 function App() {
-  return (
+  return (<>
     <QueryClientProvider client={queryClient}>
       <RouterProvider router={router} />
-      <ToastContainer
+        <ToastContainer
         position="top-right"
         autoClose={2000}
         hideProgressBar={false}
@@ -273,6 +305,7 @@ function App() {
         theme="colored"
       />
     </QueryClientProvider>
+    </>
   );
 }
 
