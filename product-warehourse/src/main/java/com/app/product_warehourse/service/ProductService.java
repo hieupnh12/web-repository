@@ -262,7 +262,28 @@ public class ProductService {
     }
 
 
+
     // cac method khong phai la CRUD
+
+
+    public Page<ProductFULLResponse> SearchProduct(String brandName,
+                                                   String warehouseAreaName,
+                                                   String originName,
+                                                   String operatingSystemName,
+                                                   String productName,
+                                                   Pageable pageable) {
+        return productRepository.findProductsWithFilters(
+                brandName,warehouseAreaName,originName,operatingSystemName,productName,pageable)
+                .map(productMapper::toProductFULLResponse);
+    }
+
+
+
+
+
+
+
+
 
 
     // Phương thức tính stock_quantity cho Product

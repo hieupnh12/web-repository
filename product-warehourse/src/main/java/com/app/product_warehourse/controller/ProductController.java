@@ -141,4 +141,18 @@ public class ProductController {
     }
 
 
+    @GetMapping("/search")
+    public Page<ProductFULLResponse> searchProducts(
+            @RequestParam(required = false) String brandName,
+            @RequestParam(required = false) String warehouseAreaName,
+            @RequestParam(required = false) String originName,
+            @RequestParam(required = false) String operatingSystemName,
+            @RequestParam(required = false) String productName,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size) {
+        Pageable pageable = PageRequest.of(page, size);
+        return productService.SearchProduct(
+                brandName, warehouseAreaName, originName, operatingSystemName, productName, pageable);
+    }
+
 }
