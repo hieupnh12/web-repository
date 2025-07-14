@@ -239,7 +239,7 @@ const AddProduct = ({ onSuccess, onClose }) => {
         await new Promise((resolve) => setTimeout(resolve, 1000));
       }
 
-      const response = await createProduct(dataToSubmit);
+      const response = await createProduct(dataToSubmit, formData.image);
       const productId = response.data?.idproduct;
       if (!productId) {
         throw new Error("Không nhận được productId từ phản hồi API");

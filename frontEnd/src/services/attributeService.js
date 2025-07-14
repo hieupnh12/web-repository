@@ -17,7 +17,6 @@ const handleApiError = (error, defaultMessage) => {
   throw new Error(errorMessage);
 };
 
-// Utility function for consistent response format
 const extractDataList = (res) => {
   return Array.isArray(res.data) ? res.data : res.data?.content || res.data?.data || [];
 };
@@ -26,7 +25,7 @@ const extractDataList = (res) => {
 export const getAllBrands = async () => {
   try {
     const res = await BASE_URL[GET]("brand");
-    return { data: extractDataList(res) };
+    return extractDataList(res); 
   } catch (error) {
     handleApiError(error, "Không thể tải danh sách thương hiệu");
   }
@@ -60,7 +59,7 @@ export const deleteBrand = async (id) => {
 export const getAllOrigins = async () => {
   try {
     const res = await BASE_URL[GET]("origin");
-    return { data: extractDataList(res) };
+    return extractDataList(res);
   } catch (error) {
     handleApiError(error, "Không thể tải danh sách xuất xứ");
   }
@@ -94,7 +93,7 @@ export const deleteOrigin = async (id) => {
 export const getAllOSs = async () => {
   try {
     const res = await BASE_URL[GET]("operating_system");
-    return { data: extractDataList(res) };
+    return extractDataList(res);
   } catch (error) {
     handleApiError(error, "Không thể tải danh sách hệ điều hành");
   }
@@ -128,11 +127,12 @@ export const deleteOS = async (id) => {
 export const getAllRAMs = async () => {
   try {
     const res = await BASE_URL[GET]("ram");
-    return { data: extractDataList(res) };
+    return res.data?.result || []; 
   } catch (error) {
     handleApiError(error, "Không thể tải danh sách RAM");
   }
 };
+
 
 export const createRAM = async (data) => {
   try {
@@ -162,11 +162,12 @@ export const deleteRAM = async (id) => {
 export const getAllROMs = async () => {
   try {
     const res = await BASE_URL[GET]("rom");
-    return { data: extractDataList(res) };
+    return res.data?.result || [];
   } catch (error) {
     handleApiError(error, "Không thể tải danh sách ROM");
   }
 };
+
 
 export const createROM = async (data) => {
   try {
@@ -196,7 +197,7 @@ export const deleteROM = async (id) => {
 export const getAllColors = async () => {
   try {
     const res = await BASE_URL[GET]("color");
-    return { data: extractDataList(res) };
+    return res.data?.result || [];
   } catch (error) {
     handleApiError(error, "Không thể tải danh sách màu sắc");
   }

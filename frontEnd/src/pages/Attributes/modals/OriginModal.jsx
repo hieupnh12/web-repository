@@ -20,14 +20,15 @@ const OriginModal = ({ open, onClose }) => {
   const [origins, setOrigins] = useState([]);
   const [selectedOriginId, setSelectedOriginId] = useState(null);
 
-  const fetchOrigins = async () => {
-    try {
-      const res = await getAllOrigins();
-      setOrigins(res.data.result || []);
-    } catch (err) {
-      console.error("Lỗi khi lấy danh sách xuất xứ:", err);
-    }
-  };
+const fetchOrigins = async () => {
+  try {
+    const res = await getAllOrigins();
+    setOrigins(res || []);
+  } catch (err) {
+    console.error("Lỗi khi lấy danh sách xuất xứ:", err);
+  }
+};
+
 
   useEffect(() => {
     if (open) {

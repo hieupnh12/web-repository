@@ -22,13 +22,14 @@ const RAMModal = ({ open, onClose }) => {
   const [selectedRAMId, setSelectedRAMId] = useState(null);
 
   const fetchRAMs = async () => {
-    try {
-      const res = await getAllRAMs();
-      setRAMs(res.data.result || []);
-    } catch (err) {
-      console.error("Lỗi khi lấy danh sách RAM:", err);
-    }
-  };
+  try {
+    const res = await getAllRAMs(); 
+    setRAMs(res || []);
+  } catch (err) {
+    console.error("Lỗi khi lấy danh sách RAM:", err);
+  }
+};
+
 
   useEffect(() => {
     if (open) {
@@ -73,7 +74,7 @@ const RAMModal = ({ open, onClose }) => {
   };
 
   const handleRowClick = (ram) => {
-    setSelectedRAMId(ram.id);
+    setSelectedRAMId(ram.ram_id);
     setRAMName(ram.name);
   };
 
@@ -111,13 +112,13 @@ const RAMModal = ({ open, onClose }) => {
           <TableBody>
             {rams.map((ram) => (
               <TableRow
-                key={ram.id}
+                key={ram.ram_id}
                 hover
-                selected={ram.id === selectedRAMId}
+                selected={ram.ram_id === selectedRAMId}
                 onClick={() => handleRowClick(ram)}
                 sx={{ cursor: "pointer" }}
               >
-                <TableCell>{ram.id}</TableCell>
+                <TableCell>{ram.ram_id}</TableCell>
                 <TableCell>{ram.name}</TableCell>
               </TableRow>
             ))}

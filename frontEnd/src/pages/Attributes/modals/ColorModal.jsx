@@ -21,14 +21,14 @@ const ColorModal = ({ open, onClose }) => {
   const [colors, setColors] = useState([]);
   const [selectedColorId, setSelectedColorId] = useState(null);
 
-  const fetchColors = async () => {
-    try {
-      const res = await getAllColors();
-      setColors(res.data.result || []);
-    } catch (err) {
-      console.error("Lỗi khi lấy danh sách màu sắc:", err);
-    }
-  };
+const fetchColors = async () => {
+  try {
+    const res = await getAllColors();     
+    setColors(res || []);               
+  } catch (err) {
+    console.error("Lỗi khi lấy danh sách màu sắc:", err);
+  }
+};
 
   useEffect(() => {
     if (open) {

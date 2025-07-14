@@ -30,7 +30,7 @@ const BrandModal = ({ open, onClose }) => {
   const fetchBrands = async () => {
     try {
       const res = await getAllBrands();
-      setBrands(res.data.result || []);
+      setBrands(res || []);
     } catch (err) {
       console.error("Lỗi khi lấy danh sách thương hiệu:", err);
     }
@@ -132,8 +132,8 @@ const BrandModal = ({ open, onClose }) => {
                       brand.id === selectedBrandId ? "#e3f2fd" : "inherit",
                   }}
                 >
-                  <TableCell>{brand.id}</TableCell>
-                  <TableCell>{brand.name}</TableCell>
+                  <TableCell>{brand.idBrand}</TableCell>
+                  <TableCell>{brand.brandName}</TableCell>
                 </TableRow>
               ))}
             </TableBody>

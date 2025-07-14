@@ -15,7 +15,8 @@ const handleApiError = (error, defaultMessage) => {
   throw new Error(errorMessage);
 };
 
-// 📌 1. Tạo phiếu kiểm kê đầy đủ
+///////////////////////
+// 📌 1. Tạo phiếu kiểm kê đầy đủ (Inventory + Details + IMEI)
 export const createFullStock = async (data) => {
   try {
     const response = await BASE_URL[POST]("/inventory", data, {
@@ -25,11 +26,12 @@ export const createFullStock = async (data) => {
     });
     return response.data;
   } catch (error) {
-    handleApiError(error, "Không thể tạo phiếu tồn kho");
+    handleApiError(error, "Không thể tạo phiếu kiểm kê");
   }
 };
 
-// 📌 2. Lấy danh sách các phiếu kiểm kê
+///////////////////////
+// 📌 2. Lấy danh sách phiếu kiểm kê (có phân trang + filter)
 export const getFullStocks = async ({
   page = 1,
   limit = 10,
@@ -41,7 +43,7 @@ export const getFullStocks = async ({
     const params = new URLSearchParams({ page, limit });
     if (search) params.append("search", search);
     if (areaId) params.append("areaId", areaId);
-    if (status) params.append("status", status);
+    if (status !== null) params.append("status", status);
 
     const res = await BASE_URL[GET](`/inventory?${params.toString()}`);
     const data = res.data || {};
@@ -58,40 +60,47 @@ export const getFullStocks = async ({
       },
     };
   } catch (error) {
-    handleApiError(error, "Không thể tải danh sách kiểm kê");
+    handleApiError(error, "Không thể tải danh sách phiếu kiểm kê");
   }
 };
 
-// 📌 3. Lấy chi tiết phiếu kiểm kê theo ID
+///////////////////////
+// 📌 3. Lấy chi tiết phiếu kiểm kê theo ID (Inventory + Details + IMEI)
 export const getStockById = async (id) => {
   try {
     const res = await BASE_URL[GET](`/inventory/${id}`);
     return res.data?.result || res.data;
   } catch (error) {
-    handleApiError(error, `Không thể lấy chi tiết phiếu tồn kho #${id}`);
+    handleApiError(error, `Không thể lấy chi tiết phiếu kiểm kê #${id}`);
   }
 };
 
-// 📌 4. Cập nhật trạng thái phiếu kiểm kê (ví dụ: hoàn tất)
-export const updateStockStatus = async (id, status = 2) => {
+///////////////////////
+// 📌 4. Cập nhật phiếu kiểm kê (trạng thái, chi tiết, IMEI)
+export const updateFullStock = async (id, data) => {
   try {
-    return await BASE_URL[PUT](`/inventory/${id}`, { status });
+    return await BASE_URL[PUT](`/inventory/${id}`, data, {
+      headers: {
+        "Content-Type": "application/json",
+      },
+    });
   } catch (error) {
-    handleApiError(error, `Không thể cập nhật trạng thái phiếu #${id}`);
+    handleApiError(error, `Không thể cập nhật phiếu kiểm kê #${id}`);
   }
 };
 
-// 📌 5. Cập nhật tồn kho theo số lượng kiểm kê
+///////////////////////
+// 📌 5. Cập nhật tồn kho sau khi kiểm kê (Adjust Stock Quantity)
 export const updateProductVersionStock = async (inventoryId) => {
   try {
-    // Lưu ý: bạn cần có API tương ứng backend như PUT /inventory/update-stock/{inventoryId}
     return await BASE_URL[PUT](`/inventory/update-stock/${inventoryId}`);
   } catch (error) {
     handleApiError(error, `Không thể cập nhật tồn kho từ phiếu #${inventoryId}`);
   }
 };
 
-// 📌 6. Lấy chi tiết số lượng (InventoryDetails)
+///////////////////////
+// 📌 6. Lấy chi tiết số lượng kiểm kê (InventoryDetails)
 export const getReportInventoryDetails = async (inventoryId) => {
   try {
     const res = await BASE_URL[GET](`/inventory-details/${inventoryId}`);
@@ -101,7 +110,21 @@ export const getReportInventoryDetails = async (inventoryId) => {
   }
 };
 
-// 📌 7. Gửi danh sách IMEI đã quét
+///////////////////////
+// 📌 7. Lấy danh sách IMEI theo khu vực & phiên bản sản phẩm
+export const getImeiByAreaAndVersion = async ({ areaId, productVersionId }) => {
+  try {
+    const res = await BASE_URL[GET](`/inventory-product-details`, {
+      data: { areaId, productVersionId },
+    });
+    return res.data?.result || [];
+  } catch (error) {
+    handleApiError(error, "Không thể lấy danh sách IMEI theo khu vực và phiên bản sản phẩm");
+  }
+};
+
+///////////////////////
+// 📌 8. Gửi danh sách IMEI đã quét
 export const submitImeiDetails = async (imeiList) => {
   try {
     return await BASE_URL[POST](`/inventory-product-details`, imeiList, {
@@ -114,7 +137,8 @@ export const submitImeiDetails = async (imeiList) => {
   }
 };
 
-// 📌 8. Đánh dấu các IMEI bị thiếu
+///////////////////////
+// 📌 9. Đánh dấu các IMEI bị thiếu (MISSING)
 export const markMissingImeis = async (inventoryId, productVersionId) => {
   try {
     return await BASE_URL[POST](`/inventory-product-details/mark-missing/${inventoryId}/${productVersionId}`);

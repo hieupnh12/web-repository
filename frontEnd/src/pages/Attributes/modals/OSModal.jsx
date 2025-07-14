@@ -21,14 +21,15 @@ const OSModal = ({ open, onClose }) => {
   const [oss, setOSs] = useState([]);
   const [selectedOSId, setSelectedOSId] = useState(null);
 
-  const fetchOSs = async () => {
-    try {
-      const res = await getAllOSs();
-      setOSs(res.data.result || []);
-    } catch (err) {
-      console.error("Lỗi khi lấy danh sách hệ điều hành:", err);
-    }
-  };
+const fetchOSs = async () => {
+  try {
+    const res = await getAllOSs(); 
+    setOSs(res || []);
+  } catch (err) {
+    console.error("Lỗi khi lấy danh sách hệ điều hành:", err);
+  }
+};
+
 
   useEffect(() => {
     if (open) {
