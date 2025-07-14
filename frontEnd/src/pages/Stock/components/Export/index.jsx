@@ -129,6 +129,7 @@ const ExportPage = () => {
   console.log("SelectPro", selectedProduct);
   console.log("customer", customers);
 
+
   const handleCustomerChange = (customer) => {
     setForm((prev) => ({ ...prev, customer }));
   };
@@ -272,12 +273,14 @@ const ExportPage = () => {
       console.log("Submit lỗi", err);
       alert("Gặp lỗi khi xuất hàng: " + err);
     }
+
   };
 
   const handleSearch = (searchText) => {
     setSearch(searchText);
     setPage(1);
   };
+
 
   const handleAddButtonClick = () => {
     if (productFormRef.current) {

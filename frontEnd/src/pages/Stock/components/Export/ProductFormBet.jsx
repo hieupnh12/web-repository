@@ -133,6 +133,7 @@ const ProductForm = forwardRef(
           productName: formData.productName,
           versionId: formData.selectedOption.versionId,
           configuration: `${formData.selectedOption.colorName}, ${formData.selectedOption.ramName}, ${formData.selectedOption.romName}`,
+
           price: parseFloat(formData.selectedOption.exportPrice),
           imeis: formData.selectedImeis,
           quantity: parseInt(formData.selectedImeis.length),
@@ -231,7 +232,7 @@ console.log("formdata", formData);
                   Cấu hình
                 </label>
                 <select
-                  value={formData?.selectedOption?.versionId || ""}
+                  value={formData?.selectedOption?.versionId || ""}n
                   onChange={handleOptionChange}
                   className="mt-1 block w-full border-gray-700 rounded-md shadow-sm p-1 border"
                 >
