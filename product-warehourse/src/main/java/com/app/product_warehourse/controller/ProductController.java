@@ -30,15 +30,15 @@ public class ProductController {
     private ProductService productService;
 
     // Tạo mới Product với ảnh, sử dụng multipart/form-data
-    @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    public ApiResponse<ProductResponse> addProduct(
-            @RequestPart(value = "product") @Valid ProductRequest request,
-            @RequestPart(value = "image", required = false) MultipartFile image) throws IOException {
-        ApiResponse<ProductResponse> api = new ApiResponse<>();
-        ProductResponse response = productService.createProduct(request, image);
-        api.setResult(response);
-        return api;
-    }
+//    @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+//    public ApiResponse<ProductResponse> addProduct(
+//            @RequestPart(value = "product") @Valid ProductRequest request,
+//            @RequestPart(value = "image", required = false) MultipartFile image) throws IOException {
+//        ApiResponse<ProductResponse> api = new ApiResponse<>();
+//        ProductResponse response = productService.createProduct(request, image);
+//        api.setResult(response);
+//        return api;
+//    }
 
 
     @PutMapping(value = "/upload_image/{id}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
@@ -78,7 +78,8 @@ public class ProductController {
     @GetMapping("/All")
      ApiResponse<List<ProductFULLResponse>> getAll() {
         return ApiResponse.<List<ProductFULLResponse>>builder()
-                .result(productService.ListAllProducts()).build();
+                .result(productService.ListAllProducts())
+                .build();
     }
 
     @GetMapping("/{idproduct}")

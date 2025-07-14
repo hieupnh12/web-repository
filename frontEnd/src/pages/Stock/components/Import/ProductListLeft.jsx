@@ -1,6 +1,13 @@
 import React, { useState } from "react";
+import { CheckCircle2, List, Search } from "lucide-react";
 
-const ProductList = ({ products, onSelect, onSearch, selectedProduct, editProduct }) => {
+const ProductList = ({
+  products,
+  onSelect,
+  onSearch,
+  selectProduct,
+  editProduct,
+}) => {
   const [searchText, setSearchText] = useState("");
 
   const handleSearchChange = (e) => {
@@ -13,10 +20,18 @@ const ProductList = ({ products, onSelect, onSearch, selectedProduct, editProduc
   );
 
   // console.log("check product", onSelect);
-  
+
   return (
     <div className="md:w-1/2">
-      <div className="bg-white rounded shadow p-2 h-[350px] overflow-y-auto">
+      <div className="bg-white rounded shadow p-2 h-[440px] overflow-y-auto">
+        <div className="flex items-center gap-3 mb-6 pt-4 px-4">
+          <div className="bg-blue-500 p-2 rounded-lg">
+            <List className="w-5 h-5 text-white" />
+          </div>
+          <h2 className="text-xl font-semibold text-gray-800">
+            Danh sách sản phẩm
+          </h2>
+        </div>
         {/* Bảng data sản phẩm */}
         <div>
           <div>
@@ -48,7 +63,7 @@ const ProductList = ({ products, onSelect, onSearch, selectedProduct, editProduc
                         }
                       }}
                       className={`cursor-pointer hover:bg-gray-200 ${
-                        selectedProduct?.productId === product.productId
+                        selectProduct?.productId === product.productId
                           ? "bg-gray-300"
                           : ""
                       }${editProduct ? "opacity-50 cursor-not-allowed bg-gray-300" : ""}`}
@@ -57,10 +72,27 @@ const ProductList = ({ products, onSelect, onSearch, selectedProduct, editProduc
                         {product.productId}
                       </td>
                       <td className="py-2 px-4 border-b">
-                        {product.productName}
+                        <div className="flex items-center gap-2">
+                          {selectProduct?.productId === product.productId && (
+                            <CheckCircle2 className="w-4 h-4 text-blue-500" />
+                          )}
+                          <span className="text-sm text-gray-900 font-medium">
+                            {product.productName}
+                          </span>
+                        </div>
                       </td>
                       <td className="py-2 px-4 border-b">
-                        {product.stockQuantity}
+                        <span
+                          className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
+                            product.stockQuantity > 10
+                              ? "bg-green-100 text-green-800"
+                              : product.stockQuantity > 0
+                              ? "bg-yellow-100 text-yellow-800"
+                              : "bg-red-100 text-red-800"
+                          }`}
+                        >
+                          {product.stockQuantity}
+                        </span>
                       </td>
                     </tr>
                   ))

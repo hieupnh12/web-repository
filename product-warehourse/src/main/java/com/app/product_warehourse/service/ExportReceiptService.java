@@ -58,12 +58,8 @@ public class ExportReceiptService {
         Account account  =  accountRepository.findByUserName(name).orElseThrow(
                 () -> new AppException(ErrorCode.ACCOUNT_NOT_EXIST));
 
-        Customer customer = customerService.getCustomer(request.getExportReceipt().getCustomerId());
-        if (customer == null) {
-            throw new AppException(ErrorCode.CUSTOMER_NOT_EXIST);
-        }
         // Create and save import receipt
-        ExportReceipt exportReceipt = exportMapper.toExportReceiptToconnect(request.getExportReceipt(),account,customer);
+        ExportReceipt exportReceipt = exportMapper.toExportReceiptToconnect(request.getExportReceipt(),account,null);
         ExportReceipt savedReceipt = repo.save(exportReceipt);
 
         // Map to response DTO

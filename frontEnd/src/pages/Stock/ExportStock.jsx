@@ -1,49 +1,77 @@
 import React, { useEffect, useState } from "react";
 import ExportForm from "./components/ExportForm";
-import { fetchFullExportReceipts } from "../../services/exportService";
+import { fetchFullExportReceipts, takeSearchExport } from "../../services/exportService";
 import useSmartFilter from "../../hooks/useSmartFilter";
+import { toast } from "react-toastify";
+import { useQuery } from "@tanstack/react-query";
 
 export default function ExportStock() {
-  const [tableData, setTableData] = useState([]);
-console.log(tableData);
-
-  useEffect(() => {
-    fetchFullExportReceipts()
-      .then((data) => {
-        const sortData = [...data].sort(
-          (a, b) => new Date(b.time) - new Date(a.time)
-        );
-        setTableData(sortData);
-      })
-      .catch((error) => console.log("Lỗi", error));
-  }, []);
+  const [currentPageServer, setCurrentPageServer] = useState(0);
+  const [totalPages, setTotalPages] = useState(0);
+  const [filter, setFilter] = useState({
+    customerName: '',
+    staffName: '',
+    exportId: '',
+    startDate: null,
+    endDate: null,
+  });
 
   const {
-    filter,
-    setFilter,
-    currentPage,
-    setCurrentPage,
-    paginatedData,
-    totalPages,
-  } = useSmartFilter(tableData, {
-    itemsPerPage: 10,
-    initialFilter: {
-      searchQuery: "",
-      searchField: "all", // default là tìm toàn bộ
+    data: exportData,
+    isLoading,
+    isError,
+    refetch,
+  } = useQuery({
+    queryKey: ['exports', currentPageServer, filter],
+    queryFn: async () => {
+      console.log("fillter", filter);
+      
+      const resp = await takeSearchExport({
+        customerName: filter.customerName,
+        staffName: filter.staffName,
+        exportId: filter.exportId,
+        startDate: filter.startDate,
+        endDate: filter.endDate,
+        page: currentPageServer,
+        size: 7,
+      });
+      console.log("trả về Ex",resp);
+      
+      // Xử lý response từ hai API
+      const data = resp.data;
+      if (!data?.content) {
+        throw new Error('Invalid response format');
+      }
+      return data;
+    },
+    staleTime: 1000 * 60 * 5,
+    gcTime: 1000 * 60 * 10,
+    onError: (error) => {
+      console.error('Error fetching imports:', error);
+      toast.error('Không thể tải danh sách phiếu nhập!');
     },
   });
+
+  useEffect(() => {
+    if (exportData?.totalPages) {
+      setTotalPages(exportData.totalPages);
+    }
+  }, [exportData]);
+
 
 
   return (
     <>
       <ExportForm
-        tableData={paginatedData}
+        tableData={exportData?.content || []}
         filter={filter}
         onFilterChange={setFilter}
-        // onReload={handleReload}
-        currentPage={currentPage}
+        onReload={refetch}
+        currentPage={currentPageServer}
         totalPages={totalPages}
-        onPageChange={setCurrentPage}
+        onPageChange={setCurrentPageServer}
+        isLoading={isLoading}
+      isError={isError}
       />
       
     </>

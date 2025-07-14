@@ -66,9 +66,7 @@ public interface ProductVersionMapper {
         if (request.getImportPrice() != null) {
             version.setImportPrice(request.getImportPrice());
         }
-        if (request.getStockQuantity() != null) {
-            version.setStockQuantity(request.getStockQuantity());
-        }
+
         if (request.getStatus() != null) {
             version.setStatus(request.getStatus());
         }

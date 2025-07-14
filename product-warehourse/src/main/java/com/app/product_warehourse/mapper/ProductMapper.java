@@ -1,6 +1,7 @@
 package com.app.product_warehourse.mapper;
 
 import com.app.product_warehourse.dto.request.ImageRequest;
+import com.app.product_warehourse.dto.request.ProductFullRequest;
 import com.app.product_warehourse.dto.request.ProductRequest;
 import com.app.product_warehourse.dto.request.ProductUpdateRequest;
 import com.app.product_warehourse.dto.response.ProductFULLResponse;
@@ -20,6 +21,9 @@ public interface ProductMapper {
 //    @Mapping(target = "lastname", ignore = true)       không mapping đối với lastname (tức là không đụng tới nó luôn --> null)
     @Mapping(target = "image", ignore = true) // Bỏ qua ánh xạ image, xử lý thủ công
     Product toProduct (ProductRequest request);
+
+    @Mapping(target = "image", ignore = true) // Bỏ qua ánh xạ image, xử lý thủ công
+    Product toProductV2 (ProductFullRequest request);
 
     @Mapping(source = "origin.name", target = "originName")
     @Mapping(source = "operatingSystem.name", target = "operatingSystemName")

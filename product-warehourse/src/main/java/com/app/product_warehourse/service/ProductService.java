@@ -1,6 +1,7 @@
 package com.app.product_warehourse.service;
 
 import com.app.product_warehourse.dto.request.ImageRequest;
+import com.app.product_warehourse.dto.request.ProductFullRequest;
 import com.app.product_warehourse.dto.request.ProductRequest;
 import com.app.product_warehourse.dto.request.ProductUpdateRequest;
 import com.app.product_warehourse.dto.response.ProductFULLResponse;
@@ -48,8 +49,39 @@ public class ProductService {
     final ProductVersionRepository productVersionRepository;
     Cloudinary cloudinary;
 
+//     @Transactional
+//     public ProductFULLResponse createProductFull(ProductFullRequest request){
+//           if(request == null || request.getVersions() == null || request.getVersions().isEmpty()){
+//               throw new AppException(ErrorCode.INVALID_REQUEST);
+//           }
+//
+//         Origin origin = originService.getOriginById(request.getOriginId());
+//         WarehouseArea wa = warehouseAreaService.getWarehouseAreaById(request.getWarehouseAreaId());
+//
+//         if (!wa.isStatus()) {
+//             throw new AppException(ErrorCode.WAREHOUSE_UNAVAILABLE);
+//         }
+//
+//         Brand br = brandService.GetBrandById(request.getBrandId());
+//         OperatingSystem os = operatingSystemService.getOSById(request.getOperatingSystemId());
+//
+//
+//
+//     }
 
-    public ProductResponse createProduct(ProductRequest request, MultipartFile image) throws IOException {
+
+
+
+
+
+
+
+
+
+
+
+    @Transactional
+    public ProductResponse createProductWithImage(ProductRequest request, MultipartFile image) throws IOException {
         Origin origin = originService.getOriginById(request.getOriginId());
         WarehouseArea wa = warehouseAreaService.getWarehouseAreaById(request.getWarehouseAreaId());
 
@@ -123,7 +155,7 @@ public class ProductService {
 
 
 
-
+    @Transactional
     public ProductResponse updateProduct(Long id, ProductUpdateRequest request) {
         log.info("Nhận được ProductUpdateRequest với originId: {}", request.getOriginId());
         // Lấy sản phẩm hiện có
@@ -150,7 +182,7 @@ public class ProductService {
 
 
 
-
+    @Transactional
     public void deleteProduct(Long id) {
         productRepository.deleteById(id);
     }

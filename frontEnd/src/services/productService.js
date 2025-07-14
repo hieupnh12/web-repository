@@ -170,3 +170,11 @@ export const getAllWarehouseAreas = async () => {
     handleApiError(error, "Không thể tải danh sách khu vực kho");
   }
 };
+
+export const takeProductById = (id) => {
+  return BASE_URL[GET](`/products/${id}`);
+};
+
+export const takeProduct = () => {
+  return BASE_URL[GET](`/product/All`);
+};
