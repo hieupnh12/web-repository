@@ -12,5 +12,6 @@ import lombok.experimental.FieldDefaults;
 public class InventoryProductDetailsResponse {
     Long inventoryId;
     String imei;
+    String productVersionId;
     ProductStatus status;
 }

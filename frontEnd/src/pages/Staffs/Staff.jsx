@@ -1,27 +1,91 @@
-import React, { useEffect, useState } from 'react';
-import CreateStaff from './CreateStaff';
-import EditStaff from './EditStaff';
-import { fetchStaffList, createStaff, editStaff, removeStaff } from '../../services/staffService';
-import { Plus, Edit, Trash, RotateCw, Search } from 'lucide-react';
+// Staff.jsx
+import React, { useEffect, useState } from "react";
+import {
+  Box,
+  Container,
+  IconButton,
+  Button,
+  TextField,
+  InputAdornment,
+  Tooltip,
+  Snackbar,
+  Alert,
+} from "@mui/material";
+import {
+  Add as AddIcon,
+  Search as SearchIcon,
+  Refresh as RefreshIcon,
+} from "@mui/icons-material";
+import { styled } from "@mui/material/styles";
+import ConfirmDialog from "../../components/ui/ConfirmDialog";
+import StaffDialog from "./CreateStaff";
+import EditStaff from "./EditStaff";
+import StaffTable from "./StaffTable";
+import {
+  fetchStaffList,
+  createStaff,
+  editStaff,
+  removeStaff,
+} from "../../services/staffService";
+
+const StyledButton = styled(Button)(() => ({
+  borderRadius: 8,
+  textTransform: "none",
+  fontWeight: 500,
+  padding: "10px 24px",
+  background: "linear-gradient(45deg, #2196f3 30%, #64b5f6 90%)",
+  boxShadow: "0 3px 15px rgba(33, 150, 243, 0.3)",
+  transition: "all 0.3s ease",
+  "&:hover": {
+    transform: "translateY(-2px)",
+    boxShadow: "0 6px 25px rgba(33, 150, 243, 0.4)",
+  },
+}));
+
+const StyledTextField = styled(TextField)(() => ({
+  "& .MuiOutlinedInput-root": {
+    borderRadius: 10,
+    backgroundColor: "white",
+    transition: "all 0.3s ease",
+    "&:hover": {
+      boxShadow: "0 4px 12px rgba(33, 150, 243, 0.1)",
+    },
+    "&.Mui-focused": {
+      boxShadow: "0 4px 20px rgba(33, 150, 243, 0.2)",
+    },
+  },
+}));
 
 export default function Staff() {
   const [staffs, setStaffs] = useState([]);
-  const [showForm, setShowForm] = useState(false);
-  const [editMode, setEditMode] = useState(false);
+  const [loading, setLoading] = useState(true);
+  const [page, setPage] = useState(0);
+  const [rowsPerPage, setRowsPerPage] = useState(10);
+  const [search, setSearch] = useState("");
+  const [selectedStaff, setSelectedStaff] = useState(null);
+  const [openCreate, setOpenCreate] = useState(false);
+  const [openEdit, setOpenEdit] = useState(false);
+  const [confirmOpen, setConfirmOpen] = useState(false);
   const [selectedId, setSelectedId] = useState(null);
-  const [search, setSearch] = useState('');
-  const [error, setError] = useState(null);
+  const [deleting, setDeleting] = useState(false); // ✅ thêm để xử lý loading nút xóa
 
-  const selectedStaff = staffs.find((s) => s.staffId === selectedId);
+  const [snackbar, setSnackbar] = useState({
+    open: false,
+    message: "",
+    severity: "success",
+  });
 
   const loadStaffs = async () => {
+    setLoading(true);
     try {
-      setError(null);
       const response = await fetchStaffList();
-      setStaffs(response?.data?.result || []);
-    } catch (err) {
-      console.error('❌ Lỗi tải danh sách:', err);
-      setError('Không thể tải danh sách nhân viên.');
+      if (response.status === 200) {
+        setStaffs(response.data.result);
+      }
+    } catch {
+      setSnackbar({ open: true, message: "Error loading employee list", severity: "error" });
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -29,170 +93,146 @@ export default function Staff() {
     loadStaffs();
   }, []);
 
-  const handleSave = async (formData) => {
+  const handleCreateStaff = async (newStaff) => {
     try {
-      const payload = {
-        ...(editMode && selectedStaff ? { staffId: selectedStaff.staffId } : {}),
-        fullName: formData.fullName,
-        gender: formData.gender,
-        phoneNumber: formData.phoneNumber,
-        email: formData.email,
-        birthDate: formData.birthDate,
-        status: formData.status,
-      };
-
-      if (editMode) {
-        await editStaff(selectedStaff.staffId, payload);
-      } else {
-        await createStaff(payload);
+      const response = await createStaff(newStaff);
+      if (response.status === 200) {
+        setStaffs([...staffs, response.data.result]);
+        setSnackbar({ open: true, message: "Add employee successfully", severity: "success" });
       }
-
-      await loadStaffs();
-      setShowForm(false);
-      setEditMode(false);
-      setSelectedId(null);
-    } catch (err) {
-      console.error('❌ Lỗi lưu nhân viên:', err);
-      setError(err.message || 'Lỗi khi lưu nhân viên');
+    } catch {
+      setSnackbar({ open: true, message: "Error adding employee", severity: "error" });
     }
   };
 
-  const handleDelete = async () => {
-    if (!selectedId) return alert('Vui lòng chọn nhân viên để xoá!');
-    if (window.confirm('Bạn có chắc chắn muốn xoá?')) {
-      try {
-        await removeStaff(selectedId);
-        await loadStaffs();
-        setSelectedId(null);
-      } catch (err) {
-        console.error('❌ Lỗi xoá:', err);
-        setError(err.message || 'Lỗi khi xoá nhân viên');
+  const handleSaveStaff = async (updatedStaff) => {
+    try {
+      const response = await editStaff(selectedStaff.staffId, updatedStaff);
+      if (response.status === 200) {
+        setStaffs((prev) =>
+          prev.map((s) =>
+            s.staffId === response.data.result.staffId ? response.data.result : s
+          )
+        );
+        setSnackbar({ open: true, message: "Employee update successful", severity: "success" });
+        setOpenEdit(false);
+        setSelectedStaff(null);
       }
+    } catch {
+      setSnackbar({ open: true, message: "Error while updating", severity: "error" });
     }
   };
 
-  const filtered = staffs.filter((staff) =>
-    staff.fullName?.toLowerCase().includes(search.toLowerCase()) ||
-    staff.email?.toLowerCase().includes(search.toLowerCase()) ||
-    staff.phoneNumber?.includes(search)
+  const handleDeleteStaff = async () => {
+    try {
+      setDeleting(true);
+      const response = await removeStaff(selectedId);
+      if (response.status === 200) {
+        setStaffs((prev) => prev.filter((s) => s.staffId !== selectedId));
+        setSnackbar({ open: true, message: "Delete successful", severity: "success" });
+      }
+    } catch {
+      setSnackbar({ open: true, message: "Staff currently employed", severity: "error" });
+    } finally {
+      setDeleting(false);
+      setConfirmOpen(false);
+    }
+  };
+
+  const filtered = staffs.filter(
+    (staff) =>
+      staff.fullName?.toLowerCase().includes(search.toLowerCase()) ||
+      staff.phoneNumber?.includes(search) ||
+      staff.email?.toLowerCase().includes(search.toLowerCase())
   );
 
   return (
-    <div className="min-h-screen w-full bg-gradient-to-br from-gray-50 to-blue-50 p-4">
-      {error && (
-        <div className="mb-4 p-2 bg-red-100 text-red-700 border border-red-400 rounded">
-          {error}
-        </div>
+    <Container maxWidth="xl" sx={{ py: 4 }}>
+      {/* Header */}
+      <Box sx={{ mb: 4, display: "flex", justifyContent: "space-between", gap: 2, flexWrap: "wrap" }}>
+        <StyledButton variant="contained" startIcon={<AddIcon />} onClick={() => setOpenCreate(true)}>
+          Add Staff
+        </StyledButton>
+        <Box sx={{ display: "flex", width: "40%", alignItems: "center", gap: 1 }}>
+          <StyledTextField
+            fullWidth
+            placeholder="Search by name, phone number or email..."
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            InputProps={{
+              startAdornment: (
+                <InputAdornment position="start">
+                  <SearchIcon color="primary" />
+                </InputAdornment>
+              ),
+            }}
+          />
+          <Tooltip title="Reload">
+            <IconButton onClick={loadStaffs} disabled={loading}>
+              <RefreshIcon color="primary" />
+            </IconButton>
+          </Tooltip>
+        </Box>
+      </Box>
+
+      {/* Table */}
+      <StaffTable
+        loading={loading}
+        filteredStaffs={filtered}
+        page={page}
+        rowsPerPage={rowsPerPage}
+        handleChangePage={(e, newPage) => setPage(newPage)}
+        handleChangeRowsPerPage={(e) => {
+          setRowsPerPage(parseInt(e.target.value, 10));
+          setPage(0);
+        }}
+        handleEdit={(staff) => {
+          setSelectedStaff(staff);
+          setOpenEdit(true);
+        }}
+        handleDeleteRequest={(id) => {
+          setSelectedId(id);
+          setConfirmOpen(true);
+        }}
+      />
+
+      {/* Dialogs */}
+      {openCreate && (
+        <StaffDialog open={openCreate} onClose={() => setOpenCreate(false)} onSubmit={handleCreateStaff} />
       )}
 
-      <div className="bg-white rounded-2xl shadow-lg p-4 sm:p-6 mb-6">
-        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-          <div className="flex flex-wrap gap-2 sm:gap-3 items-center">
-            <button
-              onClick={() => {
-                setEditMode(false);
-                setShowForm(true);
-              }}
-              className="flex items-center gap-2 bg-green-600 text-white hover:bg-green-700 hover:scale-105 transform transition-all duration-300 shadow-lg hover:shadow-xl px-3 py-2 text-sm rounded"
-            >
-              <Plus className="w-4 h-4" /> Thêm mới
-            </button>
-
-            <button
-              onClick={() => {
-                if (!selectedId) return setError('Vui lòng chọn nhân viên để sửa!');
-                setEditMode(true);
-                setShowForm(true);
-              }}
-              className="flex items-center gap-2 bg-blue-600 text-white hover:bg-blue-700 hover:scale-105 transform transition-all duration-300 shadow-lg hover:shadow-xl px-3 py-2 text-sm rounded"
-            >
-              <Edit className="w-4 h-4" /> Sửa
-            </button>
-
-            <button
-              onClick={handleDelete}
-              className="flex items-center gap-2 bg-red-600 text-white hover:bg-red-700 hover:scale-105 transform transition-all duration-300 shadow-lg hover:shadow-xl px-3 py-2 text-sm rounded"
-            >
-              <Trash className="w-4 h-4" /> Xoá
-            </button>
-
-            <button
-              onClick={loadStaffs}
-              className="flex items-center gap-2 bg-gray-500 text-white hover:bg-gray-600 hover:scale-105 transform transition-all duration-300 shadow-lg hover:shadow-xl px-3 py-2 text-sm rounded"
-            >
-              <RotateCw className="w-4 h-4" /> Tải lại
-            </button>
-          </div>
-
-          <div className="relative w-full sm:w-72">
-            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
-            <input
-              type="text"
-              placeholder="Tìm kiếm nhân viên..."
-              className="w-full pl-10 pr-4 py-2 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
-              value={search}
-              onChange={(e) => setSearch(e.target.value)}
-            />
-          </div>
-        </div>
-      </div>
-
-      <div className="bg-white rounded-xl shadow-md overflow-hidden">
-        <table className="w-full text-sm text-center">
-          <thead className="bg-blue-100 text-gray-700 font-semibold">
-            <tr>
-              <th className="px-4 py-2">#</th>
-              <th className="px-4 py-2">Họ tên</th>
-              <th className="px-4 py-2">Giới tính</th>
-              <th className="px-4 py-2">Ngày sinh</th>
-              <th className="px-4 py-2">SĐT</th>
-              <th className="px-4 py-2">Email</th>
-              <th className="px-4 py-2">Trạng thái</th>
-            </tr>
-          </thead>
-          <tbody className="divide-y divide-gray-200">
-            {filtered.map((staff, index) => (
-              <tr
-                key={staff.staffId}
-                className={`hover:bg-blue-50 cursor-pointer ${selectedId === staff.staffId ? 'bg-blue-100 font-bold' : ''}`}
-                onClick={() => setSelectedId(staff.staffId)}
-              >
-                <td className="px-4 py-2">{index + 1}</td>
-                <td className="px-4 py-2">{staff.fullName}</td>
-                <td className="px-4 py-2">{staff.gender === true || staff.gender === '1' ? 'Nam' : 'Nữ'}</td>
-                <td className="px-4 py-2">{staff.birthDate || 'N/A'}</td>
-                <td className="px-4 py-2">{staff.phoneNumber}</td>
-                <td className="px-4 py-2">{staff.email}</td>
-                <td className="px-4 py-2">{staff.status === '1' || staff.status === 1 ? 'Active' : 'Inactive'}</td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
-
-      {showForm && (
-        editMode ? (
-          <EditStaff
-            staff={selectedStaff}
-            onClose={() => {
-              setShowForm(false);
-              setEditMode(false);
-              setSelectedId(null);
-            }}
-            onSave={handleSave}
-          />
-        ) : (
-          <CreateStaff
-            staff={null}
-            onClose={() => {
-              setShowForm(false);
-              setEditMode(false);
-              setSelectedId(null);
-            }}
-            onSave={handleSave}
-          />
-        )
+      {selectedStaff && openEdit && (
+        <EditStaff
+          staff={selectedStaff}
+          onClose={() => {
+            setOpenEdit(false);
+            setSelectedStaff(null);
+          }}
+          onSave={handleSaveStaff}
+        />
       )}
-    </div>
+
+      <ConfirmDialog
+        isOpen={confirmOpen}
+        title="Delete Staff"
+        message="Are you sure you want to delete this staff member? This action cannot be undone."
+        onConfirm={handleDeleteStaff}
+        onCancel={() => setConfirmOpen(false)}
+        loading={deleting}
+        action="delete"
+      />
+
+      {/* Snackbar */}
+      <Snackbar
+        open={snackbar.open}
+        autoHideDuration={3000}
+        onClose={() => setSnackbar({ ...snackbar, open: false })}
+        anchorOrigin={{ vertical: "top", horizontal: "right" }}
+      >
+        <Alert severity={snackbar.severity} sx={{ width: "100%" }}>
+          {snackbar.message}
+        </Alert>
+      </Snackbar>
+    </Container>
   );
 }
