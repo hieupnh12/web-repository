@@ -7,7 +7,7 @@ import { takeSupplier } from "../../../../services/supplierService";
 import { useSelector } from "react-redux";
 import { useQuery } from "@tanstack/react-query";
 import { Plus, Trash2 } from "lucide-react";
-import { data, select } from "framer-motion/client";
+import { data, select } from "framer-motion";
 import { takeConfirmImport, takeIdCreateImport } from "../../../../services/importService";
 import { useNavigate, useLocation } from 'react-router-dom';
 import { takeProduct } from "../../../../services/productService";
