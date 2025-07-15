@@ -7,6 +7,7 @@ import com.app.product_warehourse.dto.response.CustomerResponse;
 import com.app.product_warehourse.entity.Customer;
 import com.app.product_warehourse.repository.CustomerRepository;
 import com.app.product_warehourse.service.CustomerService;
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
@@ -49,7 +50,7 @@ public class CustomerController {
     @GetMapping
     public ApiResponse<Page<CustomerResponse>> getCustomers(
             @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "10") int size) {
+            @RequestParam(defaultValue = "10000000000") int size,   HttpServletRequest request) {
 
         return ApiResponse.<Page<CustomerResponse>>builder()
                 .result(customerService.getCustomers(page, size))
@@ -60,7 +61,7 @@ public class CustomerController {
     public ApiResponse<Page<CustomerResponse>> searchCustomers(
             @RequestParam String keyword,
             @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "5") int size) {
+            @RequestParam(defaultValue = "10") int size) {
 
         return ApiResponse.<Page<CustomerResponse>>builder()
                 .result(customerService.searchCustomers(keyword, page, size))
