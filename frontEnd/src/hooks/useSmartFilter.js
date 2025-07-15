@@ -18,7 +18,7 @@ function deepSearch(obj, keyword) {
 export default function useSmartFilter(data = [], options = {}) {
   const {
     initialFilter = { searchQuery: "", searchField: "all" },
-    itemsPerPage = 5,
+    itemsPerPage = 7,
   } = options;
 
   const [filter, setFilter] = useState(initialFilter);

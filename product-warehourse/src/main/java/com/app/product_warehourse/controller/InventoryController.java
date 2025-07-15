@@ -3,6 +3,7 @@ package com.app.product_warehourse.controller;
 import com.app.product_warehourse.dto.request.InventoryRequest;
 import com.app.product_warehourse.dto.request.InventoryUpdateRequest;
 import com.app.product_warehourse.dto.response.ApiResponse;
+import com.app.product_warehourse.dto.response.InventoryResponse;
 import com.app.product_warehourse.dto.response.ReportInventoryResponse;
 import com.app.product_warehourse.service.InventoryService;
 import lombok.AccessLevel;
@@ -50,6 +51,12 @@ public class InventoryController {
        inventoryService.updateFullInventory(id, request);
         return ApiResponse.<Void>builder()
                 .message("Update inventory has successful")
+                .build();
+    }
+    @GetMapping("/{id}")
+    public ApiResponse<InventoryResponse> getInventoryById(@PathVariable Long id) {
+        return ApiResponse.<InventoryResponse>builder()
+                .result(inventoryService.getInventoryById(id))
                 .build();
     }
 

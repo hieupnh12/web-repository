@@ -87,7 +87,8 @@ public class ProductController {
     @GetMapping("/All")
      ApiResponse<List<ProductFULLResponse>> getAll() {
         return ApiResponse.<List<ProductFULLResponse>>builder()
-                .result(productService.ListAllProducts()).build();
+                .result(productService.ListAllProducts())
+                .build();
     }
 
     @GetMapping("/{idproduct}")
