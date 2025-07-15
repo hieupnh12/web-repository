@@ -1,8 +1,13 @@
-import React, { useEffect, useState, useCallback } from "react";
-import { getFullProducts, updateProduct, uploadProductImage } from "../../services/productService";
+import React, { useEffect, useState, useCallback, useMemo } from "react";
+import {
+  getFullProducts,
+  getAllProductsWithoutPaging,
+  updateProduct,
+  uploadProductImage,
+} from "../../services/productService";
 import Button from "../../components/ui/Button";
 import ProductList from "./ProductList";
-import { Plus, Trash, Scan, Download, Loader2 } from "lucide-react";
+import { Plus, Trash, Scan, Download } from "lucide-react";
 import AddProductModal from "./modals/AddProductModal";
 import EditProductModal from "./modals/EditProductModal";
 import ProductDetailModal from "./modals/ProductDetailModal";
@@ -11,6 +16,7 @@ import DeleteProductModal from "./modals/DeleteProductModal";
 
 const ProductsPage = () => {
   const [products, setProducts] = useState([]);
+  const [allProducts, setAllProducts] = useState([]); // ✅ New
   const [pagination, setPagination] = useState({
     page: 1,
     limit: 10,
@@ -33,16 +39,13 @@ const ProductsPage = () => {
   const loadData = useCallback(async () => {
     try {
       setIsLoading(true);
-      console.log("Loading data with filters:", { page: pagination.page, ...filters });
-      
       const { data, pagination: pageInfo } = await getFullProducts({
         page: pagination.page,
         limit: pagination.limit,
         ...filters,
       });
-      
       setProducts(data);
-      setPagination(prev => ({ ...prev, total: pageInfo.total }));
+      setPagination((prev) => ({ ...prev, total: pageInfo.total }));
     } catch (error) {
       console.error("Error loading products:", error);
       alert("Could not load product data.");
@@ -51,9 +54,22 @@ const ProductsPage = () => {
     }
   }, [pagination.page, pagination.limit, filters]);
 
+  const loadAllProducts = useCallback(async () => {
+    try {
+      const all = await getAllProductsWithoutPaging();
+      setAllProducts(all);
+    } catch (error) {
+      console.error("Error loading all products:", error);
+    }
+  }, []);
+
   useEffect(() => {
     loadData();
   }, [loadData]);
+
+  useEffect(() => {
+    loadAllProducts();
+  }, [loadAllProducts]);
 
   const handleEdit = (product) => {
     setSelectedProduct(product);
@@ -66,8 +82,8 @@ const ProductsPage = () => {
   };
 
   const handleDelete = (product) => {
-      setSelectedProduct(product);
-      setShowDeleteModal(true);
+    setSelectedProduct(product);
+    setShowDeleteModal(true);
   };
 
   const handleScanIMEI = () => {
@@ -84,17 +100,16 @@ const ProductsPage = () => {
 
   const handleSaveEdit = async (editedData) => {
     try {
-      console.log("Saving edited product:", editedData);
-
       if (!editedData.productId && !editedData.id) {
         throw new Error("Product ID is required");
       }
 
-      // Validation
       const errors = [];
       if (!editedData.origin?.id) errors.push("Product origin is required");
-      if (!editedData.operatingSystem?.id) errors.push("Operating system is required");
-      if (!editedData.warehouseArea?.id) errors.push("Warehouse area is required");
+      if (!editedData.operatingSystem?.id)
+        errors.push("Operating system is required");
+      if (!editedData.warehouseArea?.id)
+        errors.push("Warehouse area is required");
       if (!editedData.brand?.idBrand) errors.push("Product brand is required");
 
       if (errors.length > 0) {
@@ -110,23 +125,31 @@ const ProductsPage = () => {
         chipset: editedData.chipset || null,
         rearCamera: editedData.rearCamera || "",
         frontCamera: editedData.frontCamera || "",
-        warrantyPeriod: editedData.warrantyPeriod ? Number(editedData.warrantyPeriod) : null,
+        warrantyPeriod: editedData.warrantyPeriod
+          ? Number(editedData.warrantyPeriod)
+          : null,
         brandId: String(editedData.brand.idBrand),
         warehouseAreaId: String(editedData.warehouseArea.id),
-        stockQuantity: editedData.stockQuantity ? Number(editedData.stockQuantity) : 0,
+        stockQuantity: editedData.stockQuantity
+          ? Number(editedData.stockQuantity)
+          : 0,
         status: editedData.status ?? true,
       };
 
       await updateProduct(editedData.productId || editedData.id, updateData);
 
       if (editedData.image) {
-        await uploadProductImage(editedData.productId || editedData.id, editedData.image);
+        await uploadProductImage(
+          editedData.productId || editedData.id,
+          editedData.image
+        );
       }
 
       alert("Product updated successfully!");
       setShowEditModal(false);
       setSelectedProduct(null);
       await loadData();
+      await loadAllProducts(); // Cập nhật thống kê
     } catch (error) {
       console.error("Error saving product:", error);
       alert(`Failed to update product: ${error.message || "Unknown error"}`);
@@ -134,10 +157,19 @@ const ProductsPage = () => {
   };
 
   const handleFilterChange = useCallback((newFilters) => {
-    console.log("Filters changed:", newFilters);
     setFilters(newFilters);
-    setPagination(prev => ({ ...prev, page: 1 }));
+    setPagination((prev) => ({ ...prev, page: 1 }));
   }, []);
+
+  const stats = useMemo(() => {
+    const totalProducts = allProducts.length;
+    const inStock = allProducts.filter((p) => p.stockQuantity >= 20).length;
+    const lowStock = allProducts.filter(
+      (p) => p.stockQuantity > 0 && p.stockQuantity < 10
+    ).length;
+    const outOfStock = allProducts.filter((p) => p.stockQuantity === 0).length;
+    return { totalProducts, inStock, lowStock, outOfStock };
+  }, [allProducts]);
 
   return (
     <div className="min-h-screen w-full bg-gradient-to-br from-gray-50 to-blue-100 flex flex-col">
@@ -169,15 +201,7 @@ const ProductsPage = () => {
                 </Button>
               </div>
             </div>
-            
             <SearchFilter onFilterChange={handleFilterChange} />
-            
-            {/* {isLoading && (
-              <div className="flex justify-center items-center py-4">
-                <Loader2 className="w-6 h-6 text-blue-500 animate-spin" />
-                <span className="ml-2">Loading products...</span>
-              </div>
-            )} */}
           </div>
         </div>
 
@@ -186,11 +210,13 @@ const ProductsPage = () => {
           currentPage={pagination.page}
           itemsPerPage={pagination.limit}
           totalItems={pagination.total}
-          onPageChange={(p) => setPagination(prev => ({ ...prev, page: p }))}
+          isLoading={isLoading}
+          onPageChange={(p) => setPagination((prev) => ({ ...prev, page: p }))}
           onEdit={handleEdit}
           onDetail={handleDetail}
           onDelete={handleDelete}
           onSelect={onSelectProduct}
+          stats={stats} 
         />
       </div>
 
@@ -200,6 +226,7 @@ const ProductsPage = () => {
           onSuccess={() => {
             setShowAddModal(false);
             loadData();
+            loadAllProducts();
           }}
         />
       )}
@@ -224,6 +251,7 @@ const ProductsPage = () => {
           }}
         />
       )}
+
       {showDeleteModal && selectedProduct && (
         <DeleteProductModal
           product={selectedProduct}
@@ -235,6 +263,7 @@ const ProductsPage = () => {
             setShowDeleteModal(false);
             setSelectedProduct(null);
             loadData();
+            loadAllProducts(); 
           }}
         />
       )}

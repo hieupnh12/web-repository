@@ -239,7 +239,7 @@ const AddProduct = ({ onSuccess, onClose }) => {
         await new Promise((resolve) => setTimeout(resolve, 1000));
       }
 
-      const response = await createProduct(dataToSubmit);
+      const response = await createProduct(dataToSubmit, formData.image);
       const productId = response.data?.idproduct;
       if (!productId) {
         throw new Error("Không nhận được productId từ phản hồi API");
@@ -283,7 +283,7 @@ const AddProduct = ({ onSuccess, onClose }) => {
           </Transition.Child>
 
           <div className="fixed inset-0 flex items-center justify-center p-0">
-            <Dialog.Panel className="bg-white rounded-2xl w-full max-w-4xl p-6 sm:p-8 sm:pt-20 shadow-2xl max-h-[90vh] overflow-y-auto">
+            <Dialog.Panel className="bg-white rounded-2xl w-full max-w-4xl p-6 sm:p-8 sm:pt-20 shadow-2xl max-h-[90vh] overflow-y-auto custom-scroll">
               {apiError && (
                 <div className="text-red-500 text-center mb-4">{apiError}</div>
               )}

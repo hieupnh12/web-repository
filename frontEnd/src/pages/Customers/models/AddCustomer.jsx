@@ -12,7 +12,6 @@ import AddressSelector from "./AddressSelector";
 const CustomerDialog = ({ open, onClose, onSubmit, editData = null }) => {
   const [formData, setFormData] = useState({
     customerName: "",
-    email: "",
     phone: "",
     address: "",
     status: true,
@@ -27,7 +26,6 @@ const CustomerDialog = ({ open, onClose, onSubmit, editData = null }) => {
       } else {
         setFormData({
           customerName: "",
-          email: "",
           phone: "",
           address: "",
           status: true,
@@ -57,12 +55,10 @@ const CustomerDialog = ({ open, onClose, onSubmit, editData = null }) => {
       newErrors.customerName = "Customer name is required";
     }
 
-    if (formData.email && !/\S+@\S+\.\S+/.test(formData.email)) {
-      newErrors.email = "Invalid email format";
-    }
-
-    if (formData.phone && !/^[\d\s()+-]+$/.test(formData.phone)) {
-      newErrors.phone = "Invalid phone number format";
+    if (!formData.phone) {
+      newErrors.phone = "Phone number is required";
+    } else if (!/^((\+84)|0)(3|5|7|8|9)\d{8}$/.test(formData.phone)) {
+      newErrors.phone = "Invalid Vietnamese phone number";
     }
 
     setErrors(newErrors);
@@ -146,25 +142,6 @@ const CustomerDialog = ({ open, onClose, onSubmit, editData = null }) => {
 
             {/* Email and Phone */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div>
-                <div className="flex items-center mb-2">
-                  <EmailIcon className="text-blue-600 mr-2" size={20} />
-                  <span className="text-sm text-gray-600">Contact Email</span>
-                </div>
-                <input
-                  type="email"
-                  name="email"
-                  value={formData.email}
-                  onChange={handleChange}
-                  placeholder="Email"
-                  className={`w-full p-3 border ${
-                    errors.email ? "border-red-500" : "border-gray-300"
-                  } rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition`}
-                />
-                {errors.email && (
-                  <p className="text-red-500 text-xs mt-1">{errors.email}</p>
-                )}
-              </div>
               <div>
                 <div className="flex items-center mb-2">
                   <PhoneIcon className="text-blue-600 mr-2" size={20} />

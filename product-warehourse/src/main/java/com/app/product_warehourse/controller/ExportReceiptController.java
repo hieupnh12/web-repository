@@ -6,6 +6,7 @@ import com.app.product_warehourse.dto.request.ExportReceiptRequest;
 import com.app.product_warehourse.dto.response.ApiResponse;
 import com.app.product_warehourse.dto.response.ExportReceiptFULLResponse;
 import com.app.product_warehourse.dto.response.ExportReceiptResponse;
+import com.app.product_warehourse.dto.response.ImportReceiptFULLResponse;
 import com.app.product_warehourse.entity.ExportReceipt;
 import com.app.product_warehourse.service.ExportReceiptService;
 import jakarta.validation.Valid;
@@ -13,10 +14,15 @@ import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.stereotype.Service;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 
@@ -59,9 +65,12 @@ public class ExportReceiptController {
 
 
      @GetMapping
-    public ApiResponse<List<ExportReceiptResponse>> getAllExportReceipts() {
-           return ApiResponse.<List<ExportReceiptResponse>>builder()
-                   .result(exportReceiptService.GetAllExportReceipt())
+    public ApiResponse<Page<ExportReceiptFULLResponse>> getAllExportReceipts(
+             @RequestParam(defaultValue = "0") int page,
+             @RequestParam(defaultValue = "10") int size) {
+         Pageable pageable = PageRequest.of(page, size);
+         return ApiResponse.<Page<ExportReceiptFULLResponse>>builder()
+                   .result(exportReceiptService.GetAllExportReceipt(pageable))
                    .build();
      }
 
@@ -74,5 +83,23 @@ public class ExportReceiptController {
                    .message("Delete ExportReceipt Successfull")
                    .build();
      }
+
+
+
+    @GetMapping("/export-receipts")
+    public Page<ExportReceiptFULLResponse> searchExportReceipts(
+            @RequestParam(required = false) String customerName,
+            @RequestParam(required = false) String staffName,
+            @RequestParam(required = false) String exportId,
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime startDate,
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime endDate,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size) {
+        Pageable pageable = PageRequest.of(page, size);
+        return exportReceiptService.searchExportReceipts(
+                customerName, staffName, exportId, startDate, endDate, pageable);
+    }
+
+
 
 }

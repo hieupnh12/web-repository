@@ -1,8 +1,10 @@
 package com.app.product_warehourse.mapper;
 
 import com.app.product_warehourse.dto.request.ImageRequest;
+import com.app.product_warehourse.dto.request.ProductFullRequest;
 import com.app.product_warehourse.dto.request.ProductRequest;
 import com.app.product_warehourse.dto.request.ProductUpdateRequest;
+import com.app.product_warehourse.dto.response.ProductFULLResponse;
 import com.app.product_warehourse.dto.response.ProductResponse;
 import com.app.product_warehourse.entity.*;
 import com.cloudinary.Cloudinary;
@@ -12,7 +14,7 @@ import org.springframework.web.multipart.MultipartFile;
 import java.io.IOException;
 import java.util.Map;
 
-@Mapper(componentModel = "spring")
+@Mapper(componentModel = "spring", uses = {ProductVersionMapper.class})
 public interface ProductMapper {
 
 //    @Mapping(source = "firstname", target = "lastname")     cái này tức là cho dữ liệu của firstname giống với lastname
@@ -20,11 +22,21 @@ public interface ProductMapper {
     @Mapping(target = "image", ignore = true) // Bỏ qua ánh xạ image, xử lý thủ công
     Product toProduct (ProductRequest request);
 
+    @Mapping(target = "image", ignore = true) // Bỏ qua ánh xạ image, xử lý thủ công
+    Product toProductV2 (ProductFullRequest request);
+
     @Mapping(source = "origin.name", target = "originName")
     @Mapping(source = "operatingSystem.name", target = "operatingSystemName")
     @Mapping(source = "brand.brandName", target = "brandName")
     @Mapping(source = "warehouseArea.name", target = "warehouseAreaName")
     ProductResponse toProductResponse (Product product);
+
+    @Mapping(source = "origin.name", target = "originName")
+    @Mapping(source = "operatingSystem.name", target = "operatingSystemName")
+    @Mapping(source = "brand.brandName", target = "brandName")
+    @Mapping(source = "warehouseArea.name", target = "warehouseAreaName")
+    @Mapping(target = "productVersionResponses", source ="productVersion")
+    ProductFULLResponse toProductFULLResponse (Product product);
 
 
     @Mapping(target = "image", ignore = true)

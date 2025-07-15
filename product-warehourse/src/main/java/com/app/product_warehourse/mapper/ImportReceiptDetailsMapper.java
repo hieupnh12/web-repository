@@ -17,7 +17,7 @@ import org.mapstruct.Mapping;
 import org.mapstruct.MappingTarget;
 
 
-@Mapper(componentModel = "spring")
+@Mapper(componentModel = "spring" , uses = {ProductVersionMapper.class})
 public interface ImportReceiptDetailsMapper {
 
     @Mapping(target = "import_id", ignore = true) // Bỏ qua ánh xạ id
@@ -27,7 +27,7 @@ public interface ImportReceiptDetailsMapper {
 
     @Mapping(target = "import_id", source = "newid.import_id.import_id") // Ánh xạ import_id của ImportReceipt
     @Mapping(target = "productVersionId", source = "newid.productVersionId.versionId") // Ánh xạ versionId của ProductVersion
-    @Mapping(target = "imei", source = "productItems") // Ánh xạ trực tiếp từ productItems
+    @Mapping(target = "productVersion", source = "newid.productVersionId") // Ánh xạ trực tiếp từ productItems
     ImportReceiptDetailsResponse toImportReceiptDetailsResponse (ImportReceiptDetail importReceiptDetail);
 
     @Mapping(target = "productVersionId", source = "newid.productVersionId.versionId") // Ánh xạ versionId của ProductVersion

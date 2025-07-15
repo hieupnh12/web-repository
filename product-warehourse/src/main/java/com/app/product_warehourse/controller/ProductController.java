@@ -6,12 +6,14 @@ import com.app.product_warehourse.dto.request.ProductRequest;
 import com.app.product_warehourse.dto.request.ProductUpdateRequest;
 import com.app.product_warehourse.dto.response.ApiResponse;
 import com.app.product_warehourse.dto.response.ImageResponse;
+import com.app.product_warehourse.dto.response.ProductFULLResponse;
 import com.app.product_warehourse.dto.response.ProductResponse;
 import com.app.product_warehourse.entity.Product;
 import com.app.product_warehourse.service.ProductService;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.http.MediaType;
@@ -28,15 +30,15 @@ public class ProductController {
     private ProductService productService;
 
     // Tạo mới Product với ảnh, sử dụng multipart/form-data
-    @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    public ApiResponse<ProductResponse> addProduct(
-            @RequestPart(value = "product") @Valid ProductRequest request,
-            @RequestPart(value = "image", required = false) MultipartFile image) throws IOException {
-        ApiResponse<ProductResponse> api = new ApiResponse<>();
-        ProductResponse response = productService.createProduct(request, image);
-        api.setResult(response);
-        return api;
-    }
+//    @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+//    public ApiResponse<ProductResponse> addProduct(
+//            @RequestPart(value = "product") @Valid ProductRequest request,
+//            @RequestPart(value = "image", required = false) MultipartFile image) throws IOException {
+//        ApiResponse<ProductResponse> api = new ApiResponse<>();
+//        ProductResponse response = productService.createProduct(request, image);
+//        api.setResult(response);
+//        return api;
+//    }
 
 
     @PutMapping(value = "/upload_image/{id}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
@@ -63,13 +65,22 @@ public class ProductController {
 
 
     @GetMapping
-    ApiResponse<Page<ProductResponse>> getAll(@PageableDefault(size = 10) Pageable pageable) { //Thêm @PageableDefault để mặc định trả về 10 bản ghi mỗi trang. Người dùng có thể truyền
-        ApiResponse<Page<ProductResponse>> resp = new ApiResponse<>();
+    ApiResponse<Page<ProductFULLResponse>> getAll( @RequestParam(defaultValue = "0") int page,
+                                                   @RequestParam(defaultValue = "10") int size) { //Thêm @PageableDefault để mặc định trả về 10 bản ghi mỗi trang. Người dùng có thể truyền
+        ApiResponse<Page<ProductFULLResponse>> resp = new ApiResponse<>();
+        Pageable pageable = PageRequest.of(page, size);
         resp.setCode(1010);
         resp.setResult(productService.getAllProducts(pageable));
         return resp;
     }
 
+
+    @GetMapping("/All")
+     ApiResponse<List<ProductFULLResponse>> getAll() {
+        return ApiResponse.<List<ProductFULLResponse>>builder()
+                .result(productService.ListAllProducts())
+                .build();
+    }
 
     @GetMapping("/{idproduct}")
     Product getProduct(@PathVariable("idproduct") Long idproduct) {

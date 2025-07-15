@@ -10,13 +10,16 @@ const handleApiError = (error, defaultMessage) => {
   console.error(defaultMessage, errorDetails);
   const errorMessage =
     error.response?.data?.message ||
-    (typeof error.response?.data === "object" ? JSON.stringify(error.response?.data) : error.message) ||
+    (typeof error.response?.data === "object"
+      ? JSON.stringify(error.response?.data)
+      : error.message) ||
     defaultMessage;
   throw new Error(errorMessage);
 };
 
+// ✅ FIXED: Lấy danh sách sản phẩm có phân trang (chuyển page - 1)
 export const getFullProducts = async ({
-  page = 1,
+  page = 1, // frontend giữ 1-based để hiển thị đúng
   limit = 10,
   search = "",
   brandId = null,
@@ -25,29 +28,27 @@ export const getFullProducts = async ({
   warehouseAreaId = null,
 } = {}) => {
   try {
-    const params = new URLSearchParams({ page, limit });
+    const params = new URLSearchParams({
+      page: Math.max(0, page - 1), // ✅ convert sang 0-based cho Spring Boot backend
+      size: limit,
+    });
     if (search) params.append("search", search);
     if (brandId) params.append("brandId", brandId);
     if (originId) params.append("originId", originId);
     if (operatingSystemId) params.append("operatingSystemId", operatingSystemId);
     if (warehouseAreaId) params.append("warehouseAreaId", warehouseAreaId);
 
-    const productsRes = await BASE_URL[GET](`product?${params.toString()}`);
-    const data = productsRes.data || {};
-    const total = data.totalElements || data.length || 0;
-    const productList = Array.isArray(data) ? data : data.content || [];
-
-    const products = productList.map((product) => ({
-      ...product,
-      image: product.image || null,
-      versions: [],
-    }));
+    const response = await BASE_URL[GET](`product?${params.toString()}`);
+    const pageData = response.data?.result || {};
+    const productList = pageData.content || [];
+    const total = pageData.totalElements || 0;
+    console.log("Tổng phần tử từ backend:", total);
 
     return {
-      data: products,
+      data: productList,
       pagination: {
         total,
-        page,
+        page, // giữ nguyên page để frontend hiển thị đúng
         limit,
         totalPages: Math.ceil(total / limit),
       },
@@ -57,14 +58,28 @@ export const getFullProducts = async ({
   }
 };
 
-export const createProduct = async (productData) => {
+// Lấy tất cả sản phẩm (không phân trang)
+export const getAllProductsWithoutPaging = async () => {
   try {
-    if (process.env.NODE_ENV === "development") {
-      console.log("Calling createProduct with:", productData);
+    const response = await BASE_URL[GET]("/product/All");
+    return response.data?.result || [];
+  } catch (error) {
+    handleApiError(error, "Không thể lấy toàn bộ sản phẩm");
+  }
+};
+
+// Tạo mới sản phẩm (kèm ảnh)
+export const createProduct = async (productData, imageFile) => {
+  try {
+    const formData = new FormData();
+    formData.append("product", new Blob([JSON.stringify(productData)], { type: "application/json" }));
+    if (imageFile) {
+      formData.append("image", imageFile);
     }
-    const response = await BASE_URL[POST]("/product", productData, {
+
+    const response = await BASE_URL[POST]("/product", formData, {
       headers: {
-        "Content-Type": "application/json",
+        "Content-Type": "multipart/form-data",
       },
     });
     return response;
@@ -73,11 +88,9 @@ export const createProduct = async (productData) => {
   }
 };
 
+// Cập nhật sản phẩm (dữ liệu JSON)
 export const updateProduct = async (productId, productData) => {
   try {
-    if (process.env.NODE_ENV === "development") {
-      console.log("Calling updateProduct with:", { productId, productData });
-    }
     return await BASE_URL[PUT](`/product/${productId}`, productData, {
       headers: {
         "Content-Type": "application/json",
@@ -88,6 +101,7 @@ export const updateProduct = async (productId, productData) => {
   }
 };
 
+// Tải ảnh sản phẩm mới lên (riêng lẻ)
 export const uploadProductImage = async (productId, imageFile) => {
   try {
     const formData = new FormData();
@@ -103,11 +117,9 @@ export const uploadProductImage = async (productId, imageFile) => {
   }
 };
 
+// Xóa sản phẩm
 export const deleteProduct = async (productId) => {
   try {
-    if (process.env.NODE_ENV === "development") {
-      console.log("Calling deleteProduct with:", { productId });
-    }
     const response = await BASE_URL[DELETE](`/product/${productId}`);
     return response;
   } catch (error) {
@@ -115,12 +127,10 @@ export const deleteProduct = async (productId) => {
   }
 };
 
+// Tải danh sách thương hiệu
 export const getAllBrands = async () => {
   try {
     const res = await BASE_URL[GET]("brand");
-    if (process.env.NODE_ENV === "development") {
-      console.log("Brand API response:", res.data);
-    }
     return {
       data: Array.isArray(res.data) ? res.data : res.data?.content || res.data?.data || [],
     };
@@ -129,12 +139,10 @@ export const getAllBrands = async () => {
   }
 };
 
+// Tải danh sách xuất xứ
 export const getAllOrigins = async () => {
   try {
     const res = await BASE_URL[GET]("origin");
-    if (process.env.NODE_ENV === "development") {
-      console.log("Origin API response:", res.data);
-    }
     return {
       data: Array.isArray(res.data) ? res.data : res.data?.content || res.data?.data || [],
     };
@@ -143,12 +151,10 @@ export const getAllOrigins = async () => {
   }
 };
 
+// Tải danh sách hệ điều hành
 export const getAllOperatingSystems = async () => {
   try {
     const res = await BASE_URL[GET]("operating_system");
-    if (process.env.NODE_ENV === "development") {
-      console.log("Operating System API response:", res.data);
-    }
     return {
       data: Array.isArray(res.data) ? res.data : res.data?.content || res.data?.data || [],
     };
@@ -157,16 +163,62 @@ export const getAllOperatingSystems = async () => {
   }
 };
 
+// Tải danh sách khu vực kho
 export const getAllWarehouseAreas = async () => {
   try {
     const res = await BASE_URL[GET]("warehouse_area");
-    if (process.env.NODE_ENV === "development") {
-      console.log("Warehouse Area API response:", res.data);
-    }
     return {
       data: Array.isArray(res.data) ? res.data : res.data?.content || res.data?.data || [],
     };
   } catch (error) {
     handleApiError(error, "Không thể tải danh sách khu vực kho");
+  }
+};
+// Tải danh sách ROM
+export const getAllRoms = async () => {
+  try {
+    const res = await BASE_URL[GET]("rom");
+    return {
+      data: Array.isArray(res.data) ? res.data : res.data?.content || res.data?.data || [],
+    };
+  } catch (error) {
+    handleApiError(error, "Không thể tải danh sách ROM");
+  }
+};
+
+// Tải danh sách RAM
+export const getAllRams = async () => {
+  try {
+    const res = await BASE_URL[GET]("ram");
+    return {
+      data: Array.isArray(res.data) ? res.data : res.data?.content || res.data?.data || [],
+    };
+  } catch (error) {
+    handleApiError(error, "Không thể tải danh sách RAM");
+  }
+};
+
+// Tải danh sách màu sắc
+export const getAllColors = async () => {
+  try {
+    const res = await BASE_URL[GET]("color");
+    return {
+      data: Array.isArray(res.data) ? res.data : res.data?.content || res.data?.data || [],
+    };
+  } catch (error) {
+    handleApiError(error, "Không thể tải danh sách màu sắc");
+  }
+};
+
+// Tạo phiên bản sản phẩm
+export const createProductVersion = async (productVersionData) => {
+  try {
+    return await BASE_URL[POST]("/product_version", productVersionData, {
+      headers: {
+        "Content-Type": "application/json",
+      },
+    });
+  } catch (error) {
+    handleApiError(error, "Không thể tạo phiên bản sản phẩm");
   }
 };

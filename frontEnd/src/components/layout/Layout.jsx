@@ -22,11 +22,11 @@ const pageConfig = {
   },
   "/import": {
     title: "Import Notes",
-    breadcrumb: [{ label: "Import Notes" }],
+    breadcrumb: [{ label: "Import Receipt" }],
   },
   "/export": {
     title: "Export Notes",
-    breadcrumb: [{ label: "Export Notes" }],
+    breadcrumb: [{ label: "Export Receipt" }],
   },
   "/customers": {
     title: "Customer Management",
@@ -47,8 +47,15 @@ const pageConfig = {
   "/export/addexport": {
     title: "Add Export Note",
     breadcrumb: [
-      { label: "Export Notes", href: "export" },
-      { label: "Add Note" },
+      { label: "Export Receipt", href: "export" },
+      { label: "Add Export Receipt" },
+    ],
+  },
+  "/import/addimport": {
+    title: "Add Import Note",
+    breadcrumb: [
+      { label: "Import Receipt", href: "import" },
+      { label: "Add Import Receipt" },
     ],
   },
   "/permissions": {

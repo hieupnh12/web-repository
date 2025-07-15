@@ -76,7 +76,12 @@ public class ProductVersionService {
     }
 
 
-
+    public List<ProductVersionResponse> listAll() {
+        return pvr.findAll()
+                .stream()
+                .map(pvm::ToProductVersionResponse)
+                .collect(Collectors.toList());
+    }
 
 
 

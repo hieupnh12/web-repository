@@ -28,11 +28,11 @@ public enum ErrorCode {
     QUERY_TIMEOUT(2017, "Query Timeout", HttpStatus.SERVICE_UNAVAILABLE),
     CONCURRENT_MODIFICATION(2017, "Concurrent Modification", HttpStatus.CONFLICT),
     REQUEST_FIRST_NOT_FOUND(2017, "Request First Not Exist", HttpStatus.NOT_FOUND),
-
-
-
-
-
+    IMEI_NOT_FOUND(2017, "IMEI Not Exist", HttpStatus.NOT_FOUND),
+    NOT_SAME_VERSION(2017, "Not Same Version", HttpStatus.CONFLICT),
+    PRODUCT_ITEM_HAD_EXPORT(2017, "Product Item Had Export", HttpStatus.NOT_FOUND),
+    INVALID_QUANTITY(2017, "Invalid Quantity", HttpStatus.BAD_REQUEST),
+    IMEI_DUPLICATE(2017, "Duplicate IMEI", HttpStatus.CONFLICT),
 
 
 

@@ -3,6 +3,7 @@ package com.app.product_warehourse.dto.response;
 
 import lombok.*;
 import lombok.experimental.FieldDefaults;
+import java.util.List;
 
 @Data
 @Builder
@@ -41,6 +42,5 @@ public class ProductResponse {
     Integer stockQuantity;
 
      Boolean status;
-
 
 }

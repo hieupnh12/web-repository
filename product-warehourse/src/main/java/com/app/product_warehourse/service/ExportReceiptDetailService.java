@@ -4,6 +4,7 @@ package com.app.product_warehourse.service;
 
 import com.app.product_warehourse.dto.request.ExportReceiptDetailUpdateRequest;
 import com.app.product_warehourse.dto.request.ExportReceiptDetailsRequest;
+import com.app.product_warehourse.dto.request.ProductItemRequest;
 import com.app.product_warehourse.dto.response.ExportReceiptDetailsResponse;
 import com.app.product_warehourse.entity.ExportReceipt;
 import com.app.product_warehourse.entity.ExportReceiptDetail;
@@ -19,6 +20,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -37,28 +39,47 @@ public class ExportReceiptDetailService {
 
        ExportReceiptRepository exportReceiptRepo;
 
-       public ExportReceiptDetailsResponse CreateExportReceiptDetails(ExportReceiptDetailsRequest request) {
+    public ExportReceiptDetailsResponse CreateExportReceiptDetails(ExportReceiptDetailsRequest request) {
+        if (request == null || request.getExport_id() == null || request.getImei() == null || request.getImei().isEmpty()) {
+            throw new AppException(ErrorCode.INVALID_REQUEST);
+        }
+        if (request.getQuantity() == null || request.getQuantity() <= 0) {
+            throw new AppException(ErrorCode.INVALID_REQUEST);
+        }
+        if (request.getUnitPrice() == null || request.getUnitPrice() <= 0) {
+            throw new AppException(ErrorCode.INVALID_REQUEST);
+        }
+        ExportReceipt exportReceipt = exportReceiptRepo.findById(request.getExport_id())
+                .orElseThrow(() -> new AppException(ErrorCode.EXPORT_RECEIPT_NOT_FOUND));
 
+        // Tìm và kiểm tra danh sách ProductItem
+        List<ProductItemRequest> imeis = request.getImei();
+        if (imeis.size() != request.getQuantity()) {
+            throw new AppException(ErrorCode.INVALID_REQUEST);
+        }
+        for (ProductItemRequest itemRequest : imeis) {
+            String imei = itemRequest.getImei();
+            if (imei == null || imei.isEmpty()) {
+                throw new AppException(ErrorCode.INVALID_REQUEST);
+            }
+            ProductItem item = productItemRepo.findById(imei)
+                    .orElseThrow(() -> new AppException(ErrorCode.PRODUCT_ITEM_NOT_FOUND));
+            if (!item.getVersionId().getVersionId().equals(request.getProductVersionId())) {
+                throw new AppException(ErrorCode.NOT_SAME_VERSION);
+            }
+            ExportReceiptDetail detail = exDMapper.toExportDetails(request, item, exportReceipt);
+            ExportReceiptDetail.ExportReceiptDetailId id = exDMapper.ExportReceiptToConnect(request, item, exportReceipt);
+            detail.setNewExId(id);
+            ExportReceiptDetail savedDetail = exDRepo.save(detail);
+            return exDMapper.toExportDetailsResponse(savedDetail);
+        }
+        throw new AppException(ErrorCode.INVALID_REQUEST);
+    }
 
-           // Lấy ProductItem từ item_id (giả sử productVersionId trong request là item_id)
-           ProductItem item = productItemRepo.findById(String.valueOf(request.getImei())).orElseThrow(()->new AppException(ErrorCode.PRODUCT_ITEM_NOT_FOUND));
-
-           ExportReceipt exportReceipt = exportReceiptRepo.findById(request.getExport_id()).orElseThrow(()->new AppException(ErrorCode.EXPORT_RECEIPT_NOT_FOUND));
-
-           ExportReceiptDetail response = exDMapper.toExportDetails(request,item,exportReceipt);
-
-           ExportReceiptDetail.ExportReceiptDetailId id = exDMapper.ExportReceiptToConnect(request,item,exportReceipt);
-           response.setNewExId(id);
-
-
-           ExportReceiptDetail complete = exDRepo.save(response);
-           return exDMapper.toExportDetailsResponse(complete);
-
-       }
 
 
        public List<ExportReceiptDetailsResponse> GetAllExportReceiptDetails() {
-           return exDRepo.findAll()
+           return  exDRepo.findAll()
                    .stream()
                    .map(exDMapper::toExportDetailsResponse)
                    .collect(Collectors.toList());
@@ -79,6 +100,7 @@ public class ExportReceiptDetailService {
       }
 
 
+      @Transactional
       public ExportReceiptDetailsResponse UpdateExportReceiptDetail(ExportReceiptDetailUpdateRequest request, String export_id , String productVersionId ){
            ExportReceiptDetail response= getExportReceiptDetailById(export_id,productVersionId);
           if (response == null) {
@@ -90,13 +112,13 @@ public class ExportReceiptDetailService {
       }
 
 
-
+      @Transactional
       public void DeleteExportReceiptDetail(String export_id , String productVersionId ){
           ExportReceiptDetail response= getExportReceiptDetailById(export_id,productVersionId);
           if (response == null) {
               throw new IllegalArgumentException("Không tìm thấy  exportId: " + export_id + " và item_id: " + productVersionId);
           }
-          exDRepo.delete(response);
+          exDRepo.deleteByExportIdAndItemId(export_id,productVersionId);
       }
 
 }

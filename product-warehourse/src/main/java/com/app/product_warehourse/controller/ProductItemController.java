@@ -36,6 +36,13 @@ public class ProductItemController {
         return response;
     }
 
+    @GetMapping("/{id}")
+    public ApiResponse<ProductItemResponse> getProductItems(@PathVariable("id") String imei) {
+        ApiResponse<ProductItemResponse> response = new ApiResponse<>();
+        response.setResult(productItemService.getProductItemByid(imei));
+        return response;
+    }
+
     @DeleteMapping("/{id}")
     public ApiResponse<Void> deleteProductItem(@PathVariable("id") String imei) {
         productItemService.deleteProductItemById(imei);
