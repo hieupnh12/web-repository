@@ -41,6 +41,13 @@ public class CustomerService {
         return customerMapper.toCustomerResponse(customerRepository.save(customer));
     }
 
+    public List<CustomerResponse> getAllCustomers() {
+        return customerRepository.findAll()
+                .stream()
+                .map(customerMapper::toCustomerResponse)
+                .collect(Collectors.toList());
+    }
+
     public Page<CustomerResponse> getCustomers(int page, int size) {
         Pageable pageable = PageRequest.of(page, size);
         return customerRepository.findAll(pageable)

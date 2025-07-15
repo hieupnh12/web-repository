@@ -42,7 +42,7 @@ public class CustomerController {
     @GetMapping
     public ApiResponse<Page<CustomerResponse>> getCustomers(
             @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "10") int size) {
+            @RequestParam(defaultValue = "1000000") int size) {
 
         return ApiResponse.<Page<CustomerResponse>>builder()
                 .result(customerService.getCustomers(page, size))
