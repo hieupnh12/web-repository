@@ -2,6 +2,7 @@ package com.app.product_warehourse.service;
 
 
 import com.app.product_warehourse.dto.request.SupplierRequest;
+import com.app.product_warehourse.dto.response.CustomerResponse;
 import com.app.product_warehourse.dto.response.SupplierResponse;
 import com.app.product_warehourse.entity.Suppliers;
 import com.app.product_warehourse.mapper.SupplierMapper;
@@ -10,6 +11,10 @@ import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -65,6 +70,21 @@ public class SupplierService {
 
     public void deleteSupplier(String id){
         supplierRepo.deleteById(id);
+    }
+
+
+    public Page<SupplierResponse> getAllSupplierPage(int page, int size){
+        Pageable pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "joinDate"));
+        return supplierRepo.findAll(pageable)
+                .map(supplierMap::toSupplierResponse);
+    }
+
+    public Page<SupplierResponse> searchSuppliers(String keyword, int page, int size) {
+        Pageable pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "joinDate"));
+        return supplierRepo
+                .findByNameContainingIgnoreCaseOrAddressContainingIgnoreCaseOrEmailContainingIgnoreCaseOrPhoneContainingIgnoreCase(
+                        keyword, keyword, keyword, keyword, pageable)
+                .map(supplierMap::toSupplierResponse);
     }
 
 
