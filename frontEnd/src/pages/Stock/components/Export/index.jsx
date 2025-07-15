@@ -10,7 +10,7 @@ import ProductForm from "./ProductFormBet";
 import ProductList from "./ProductListLeft";
 import ExportTable from "./ExportTableBot";
 import ExportSummary from "./ExportSumary";
-import { pre } from "framer-motion/client";
+import { pre } from "framer-motion";
 import { takeProduct } from "../../../../services/productService";
 import { takeCustomerAll } from "../../../../services/customerService";
 import { useSelector } from "react-redux";
