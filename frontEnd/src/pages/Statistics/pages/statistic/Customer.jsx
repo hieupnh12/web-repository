@@ -1,23 +1,34 @@
 import React, { useEffect, useState } from "react";
-import { getSupplierStatistic, getCustomerStatistic } from "../../services/statisticService";
-import { Search, Factory, User2 } from "lucide-react";
+import { getCustomerStatistic } from "../../../../services/statisticService";
+import { Search, User2 } from "lucide-react";
 
-export const CustomerStatistic = () => {
+const CustomerStatistic = () => {
   const [customers, setCustomers] = useState([]);
   const [search, setSearch] = useState("");
+  const [error, setError] = useState(null);
 
   useEffect(() => {
     const fetchData = async () => {
-      const res = await getCustomerStatistic();
-      if (res?.data?.success) {
-        setCustomers(res.data.result);
+      try {
+        const res = await getCustomerStatistic();
+        if (res?.code === 1000) {
+          setCustomers(res.result || []);
+          setError(null);
+        } else {
+          setCustomers([]);
+          setError(res.message || "Không thể tải dữ liệu");
+        }
+      } catch (err) {
+        console.error("Lỗi:", err);
+        setError("Lỗi kết nối API");
+        setCustomers([]);
       }
     };
     fetchData();
   }, []);
 
   const filtered = customers.filter((c) =>
-    c.customerName.toLowerCase().includes(search.toLowerCase())
+    c.customerName?.toLowerCase().includes(search.toLowerCase())
   );
 
   return (
@@ -40,6 +51,12 @@ export const CustomerStatistic = () => {
         </div>
       </div>
 
+      {error && (
+        <div className="bg-red-100 text-red-700 p-4 mb-6 rounded-xl">
+          {error}
+        </div>
+      )}
+
       <div className="bg-white rounded-2xl shadow-lg p-6 overflow-x-auto">
         <table className="w-full text-sm text-left">
           <thead className="bg-gray-100">
@@ -61,10 +78,18 @@ export const CustomerStatistic = () => {
                 <td className="px-4 py-2">{c.totalOrders}</td>
               </tr>
             ))}
+            {filtered.length === 0 && (
+              <tr>
+                <td colSpan={5} className="text-center py-4 text-gray-500">
+                  Không có dữ liệu.
+                </td>
+              </tr>
+            )}
           </tbody>
         </table>
       </div>
     </div>
   );
 };
+
 export default CustomerStatistic;

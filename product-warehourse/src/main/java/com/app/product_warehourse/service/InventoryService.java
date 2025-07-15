@@ -234,5 +234,42 @@ public class InventoryService {
             inventoryProductDetailsRepository.deleteByInventoryId(inventoryId);
         }
     }
+    @Transactional
+    public InventoryResponse getInventoryById(Long inventoryId) {
+        var inventory = inventoryRepository.findById(inventoryId).orElseThrow(
+                ()   -> new AppException(ErrorCode.INVENTORY_NOT_FOUND));
+        return
+                InventoryResponse.builder()
+                .inventoryId(inventory.getInventoryId())
+                .createdId(inventory.getAccount().getStaffId())
+                .areaId(inventory.getArea() != null ? inventory.getArea().getId() : null)
+                .status(inventory.getStatus())
+                .createdAt(inventory.getCreatedAt())
+                .updatedAt(inventory.getUpdatedAt())
+                .inventoryDetailsList(
+                        inventoryDetailsRepository.findByInventoryId(inventoryId)
+                                .stream()
+                                .map(d -> InventoryDetailsResponse.builder()
+                                        .inventoryId(d.getId().getInventoryId())
+                                        .productVersionId(d.getId().getProductVersionId())
+                                        .systemQuantity(d.getSystemQuantity())
+                                        .quantity(d.getQuantity())
+                                        .note(d.getNote())
+                                        .build())
+                                .collect(Collectors.toSet())
+                )
+                .inventoryProductDetailsList(
+                        inventoryProductDetailsRepository.findByInventoryId(inventoryId)
+                                .stream()
+                                .map(d -> InventoryProductDetailsResponse.builder()
+                                        .inventoryId(d.getId().getInventoryId())
+                                        .productVersionId(d.getProductVersion().getVersionId())
+                                        .imei(d.getId().getImei())
+                                        .status(d.getStatus())
+                                        .build())
+                                .collect(Collectors.toSet())
+                )
+                .build();
+    }
 
 }
