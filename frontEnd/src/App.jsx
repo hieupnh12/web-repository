@@ -19,8 +19,7 @@ import Overview from "./pages/Statistics/Overview";
 import RevenueStatistic from "./pages/Statistics/RevenueStatistic";
 import StatisticsLayout from "./pages/Statistics/StatisticsLayout";
 import SupplierStatistic from "./pages/Statistics/SupplierStatistic";
-import { ToastContainer, toast } from 'react-toastify';
-import 'react-toastify/dist/ReactToastify.css';
+
 
 // Các page (dùng lazy load)
 const Dashboard = lazy(
@@ -46,11 +45,6 @@ const AttributesPage = lazy(() => import("./pages/Attributes"));
 const ImportStock = lazy(() => import("./pages/Stock/ImportStock"));
 // const Products = lazy(() => import('./pages/Products/Products'));
 // const Inventory = lazy(() => import('./pages/Inventory/Inventory'));
-const WarehouseAreas = lazy(() => import("./pages/Storage"));
-const Customers = lazy(() => import("./pages/Customers"));
-const Suppliers = lazy(() => import("./pages/Suppliers"));
-const Staff = lazy(() => import("./pages/Staff/Staff"));
-const Account = lazy(() => import("./pages/Account/Account"));
 
 // Optional: 404 Not Found page
 const NotFound = () => (
@@ -133,7 +127,6 @@ const router = createBrowserRouter(
               </LazyLoader>
             }
           />
-          {/* <Route path="import" element={<ImportStock />} />
         <Route
             path="storage"
             element={
@@ -141,7 +134,7 @@ const router = createBrowserRouter(
                 <WarehouseAreas />
               </LazyLoader>
             }
-          /> */}
+          />
           <Route
             path="suppliers"
             element={

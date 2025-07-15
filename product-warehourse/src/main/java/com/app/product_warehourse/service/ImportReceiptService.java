@@ -277,10 +277,10 @@ public class ImportReceiptService {
                     log.info("Generated IMEI: {}", currentImei);
 
                     log.info("Checking for duplicate IMEI in repository: {}", currentImei);
-                    if (productItemRepo.existsById(currentImei)) {
-                        log.error("Duplicate IMEI found: {} for productVersionId: {}", currentImei, detailRequest.getProductVersionId());
-                        throw new AppException(ErrorCode.IMEI_DUPLICATE);
-                    }
+//                    if (productItemRepo.existsById(currentImei)) {
+//                        log.error("Duplicate IMEI found: {} for productVersionId: {}", currentImei, detailRequest.getProductVersionId());
+//                        throw new AppException(ErrorCode.IMEI_DUPLICATE);
+//                    }
                     log.info("Checking for duplicate IMEI in set: {}", currentImei);
                     if (!imeis.add(currentImei)) {
                         log.error("Duplicate IMEI in set: {} for productVersionId: {}", currentImei, detailRequest.getProductVersionId());
@@ -297,7 +297,14 @@ public class ImportReceiptService {
                     item.setProductVersionId(detailRequest.getProductVersionId());
 
                     log.info("Mapping product item request to entity");
-                    ProductItem productItem = productItemMapper.ToProducItemcreate(item, version, savedImportEntity, null);
+                    // Tạo ProductItem mới thủ công
+                    ProductItem productItem = new ProductItem();
+                    productItem.setImei(item.getImei());
+                    productItem.setVersionId(version);
+                    productItem.setImport_id(savedImportEntity);
+                    productItem.setExport_id(null);
+                    productItem.setStatus(false); // Điều chỉnh theo logic của bạn
+//                    ProductItem productItem = productItemMapper.ToProducItemcreate(item, version, savedImportEntity, null);
                     log.info("Saving product item with IMEI: {}", currentImei);
                     productItemRepo.save(productItem);
                     log.info("Saved product item with IMEI: {} for productVersionId: {}", currentImei, detailRequest.getProductVersionId());
@@ -320,10 +327,10 @@ public class ImportReceiptService {
                         throw new AppException(ErrorCode.IMEI_NOT_FOUND);
                     }
                     log.info("Checking for duplicate IMEI in repository: {}", item.getImei());
-                    if (productItemRepo.existsById(item.getImei())) {
-                        log.error("Duplicate IMEI found: {} for productVersionId: {}", item.getImei(), detailRequest.getProductVersionId());
-                        throw new AppException(ErrorCode.IMEI_NOT_FOUND);
-                    }
+//                    if (productItemRepo.existsById(item.getImei())) {
+//                        log.error("Duplicate IMEI found: {} for productVersionId: {}", item.getImei(), detailRequest.getProductVersionId());
+//                        throw new AppException(ErrorCode.IMEI_NOT_FOUND);
+//                    }
                     log.info("Checking for duplicate IMEI in set: {}", item.getImei());
                     if (!imeis.add(item.getImei())) {
                         log.error("Duplicate IMEI in set: {} for productVersionId: {}", item.getImei(), detailRequest.getProductVersionId());
@@ -331,9 +338,9 @@ public class ImportReceiptService {
                     }
 
                     log.info("Setting import ID for product item: {}", savedImportEntity.getImport_id());
-                    item.setImportId(savedImportEntity.getImport_id());
+//                    item.setImportId(savedImportEntity.getImport_id());
                     log.info("Setting product version ID for product item: {}", detailRequest.getProductVersionId());
-                    item.setProductVersionId(detailRequest.getProductVersionId());
+//                    item.setProductVersionId(detailRequest.getProductVersionId());
 
                     log.info("Fetching product version for ID: {}", item.getProductVersionId());
                     ProductVersion version = productVersionRepo.findById(item.getProductVersionId())
@@ -343,7 +350,14 @@ public class ImportReceiptService {
                             });
 
                     log.info("Mapping product item request to entity");
-                    ProductItem productItem = productItemMapper.ToProducItemcreate(item, version, savedImportEntity, null);
+                    // Tạo ProductItem mới thủ công
+                    ProductItem productItem = new ProductItem();
+                    productItem.setImei(item.getImei());
+                    productItem.setVersionId(version);
+                    productItem.setImport_id(savedImportEntity);
+                    productItem.setExport_id(null);
+                    productItem.setStatus(false); // Điều chỉnh theo logic của bạn
+//                    ProductItem productItem = productItemMapper.ToProducItemcreate(item, version, savedImportEntity, null);
                     log.info("Saving product item with IMEI: {}", item.getImei());
                     productItemRepo.save(productItem);
                     log.info("Saved product item with IMEI: {} for productVersionId: {}", item.getImei(), item.getProductVersionId());

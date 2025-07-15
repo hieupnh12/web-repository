@@ -130,13 +130,13 @@ console.log("select", selectProduct);
     maxVisible: 3,
   });
   
-  if (isLoading) {
-    return (
-      <div className="flex justify-center items-center h-[570px] bg-white rounded-2xl">
-        <div className="text-gray-600 text-lg">Đang tải dữ liệu...</div>
-      </div>
-    );
-  }
+  // if (isLoading) {
+  //   return (
+  //     <div className="flex justify-center items-center h-[570px] bg-white rounded-2xl">
+  //       <div className="text-gray-600 text-lg">Đang tải dữ liệu...</div>
+  //     </div>
+  //   );
+  // }
 
   if (isError) {
     return (
@@ -233,7 +233,7 @@ console.log("select", selectProduct);
           />
 
           <button
-            onClick={() => handleReset()}
+            onClick={onReload}
             className="bg-teal-500 hover:bg-teal-600 text-white px-4 py-2 rounded-lg text-sm font-medium"
           >
             Reload
