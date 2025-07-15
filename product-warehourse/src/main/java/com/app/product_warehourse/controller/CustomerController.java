@@ -50,9 +50,7 @@ public class CustomerController {
     @GetMapping
     public ApiResponse<Page<CustomerResponse>> getCustomers(
             @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "10") int size,   HttpServletRequest request) {
-        System.out.println("Full URL: " + request.getRequestURL() + "?" + request.getQueryString());
-        System.out.println("Page: " + page + ", Size: " + size);
+            @RequestParam(defaultValue = "10000000000") int size,   HttpServletRequest request) {
 
         return ApiResponse.<Page<CustomerResponse>>builder()
                 .result(customerService.getCustomers(page, size))
