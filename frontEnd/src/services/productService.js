@@ -222,3 +222,10 @@ export const createProductVersion = async (productVersionData) => {
     handleApiError(error, "Không thể tạo phiên bản sản phẩm");
   }
 };
+export const takeProductById = (id) => {
+  return BASE_URL[GET](`/products/${id}`);
+};
+
+export const takeProduct = () => {
+  return BASE_URL[GET](`/product/All`);
+};
