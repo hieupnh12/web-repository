@@ -43,27 +43,40 @@ public class ImportReceiptDetailsService {
             throw new IllegalArgumentException("ID của ImportReceipt và ProductVersion không được để trống");
         }
 
+        // Kiểm tra xem bản ghi đã tồn tại chưa
+        ImportReceiptDetail.ImportReceiptDetailId compositeId = new ImportReceiptDetail.ImportReceiptDetailId();
+
         // Lấy thực thể ImportReceipt và ProductVersion
-        ImportReceipt importReceipt = importRepo.findById(request.getImport_id()).orElseThrow(() -> new AppException(ErrorCode.IMPORT_RECEIPT_NOT_FOUND));;
-        ProductVersion productVersion = productVersionRepo.findById(request.getProductVersionId()).orElseThrow(() -> new AppException(ErrorCode.PRODUCT_VERSION_NOT_FOUND));
+        ImportReceipt importReceipt = importRepo.findById(request.getImport_id())
+                .orElseThrow(() -> new AppException(ErrorCode.IMPORT_RECEIPT_NOT_FOUND));
+
+        ProductVersion productVersion = productVersionRepo.findById(request.getProductVersionId())
+                .orElseThrow(() -> new AppException(ErrorCode.PRODUCT_VERSION_NOT_FOUND));
+
+        compositeId.setImport_id(importReceipt);
+        compositeId.setProductVersionId(productVersion);
+
+        if (importDrepo.existsById(compositeId)) {
+            throw new AppException(ErrorCode.IMPORT_RECEIPT_DETAIL_ALREADY_EXISTS);
+        }
 
         if (importReceipt == null || productVersion == null) {
             throw new IllegalArgumentException("Không tìm thấy ImportReceipt hoặc ProductVersion với ID được cung cấp");
         }
 
-        // Ánh xạ request sang ImportReceiptDetail, bao gồm khóa phức hợp
-        ImportReceiptDetail detail = importDmapper.toImportReceiptDetails(request,importReceipt,productVersion);
+        // Ánh xạ request sang ImportReceiptDetail
+        ImportReceiptDetail detail = importDmapper.toImportReceiptDetails(request, importReceipt, productVersion);
 
         // Thiết lập khóa phức hợp thủ công
-        ImportReceiptDetail.ImportReceiptDetailId compositeId = importDmapper.getInforImportReceiptDetails(request,importReceipt,productVersion);
         detail.setNewid(compositeId);
-
 
         // Lưu thực thể
         ImportReceiptDetail savedDetail = importDrepo.save(detail);
 
         // Ánh xạ sang response
-        return importDmapper.toImportReceiptDetailsResponse(savedDetail);
+        ImportReceiptDetailsResponse response = importDmapper.toImportReceiptDetailsResponse(savedDetail);
+
+        return response;
     }
 
 

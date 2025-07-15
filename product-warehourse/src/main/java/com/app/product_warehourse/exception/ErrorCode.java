@@ -39,6 +39,9 @@ public enum ErrorCode {
    RAM_NOT_FOUND(2017, "Ram Not Exist", HttpStatus.NOT_FOUND),
     ROM_NOT_FOUND(2017, "Rom Not Exist", HttpStatus.NOT_FOUND),
     COLOR_NOT_FOUND(2017, "Color Not Exist", HttpStatus.NOT_FOUND),
+    IMPORT_RECEIPT_DETAIL_ALREADY_EXISTS(2017, "Import Receipt Detail Already Exists", HttpStatus.CONFLICT),
+
+
 
 
     UNCATEGORIZE_EXCEPTION(9999, "Uncategorized error", HttpStatus.INTERNAL_SERVER_ERROR),

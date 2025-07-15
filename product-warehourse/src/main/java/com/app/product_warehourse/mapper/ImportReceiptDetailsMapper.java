@@ -39,6 +39,7 @@ public interface ImportReceiptDetailsMapper {
     @Mapping(target = "newid", ignore = true)
     @Mapping(target = "quantity", source = "request.quantity")
     @Mapping(target = "unitPrice", source = "request.unitPrice")
+    @Mapping(target = "productItems", ignore = true) // Bỏ qua ánh xạ productItems
     ImportReceiptDetail toImportReceiptDetails(ImportReceiptDetailsRequest request, ImportReceipt importReceipt, ProductVersion productVersion);
 
 //    default ImportReceiptDetail toImportReceiptDetailsWithId(ImportReceiptDetailsRequest request, ImportReceipt importReceipt, ProductVersion productVersion) {
