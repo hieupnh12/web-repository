@@ -1,5 +1,22 @@
 import React, { useEffect, useState } from "react";
-import { getRevenueByYears } from "../../../../services/statisticService";
+import {
+  Box,
+  Typography,
+  Paper,
+  MenuItem,
+  Select,
+  FormControl,
+  InputLabel,
+  Button,
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableRow,
+  TablePagination
+} from "@mui/material";
+import { styled, alpha } from "@mui/material/styles";
 import {
   BarChart,
   Bar,
@@ -12,6 +29,39 @@ import {
 } from "recharts";
 import { FileDown } from "lucide-react";
 import * as XLSX from "xlsx";
+import { getRevenueByYears } from "../../../../services/statisticService";
+
+const StyledPaper = styled(Paper)(({ theme }) => ({
+  background: "linear-gradient(145deg, #ffffff 0%, #f0f7ff 100%)",
+  borderRadius: 16,
+  boxShadow: "0 8px 32px rgba(33, 150, 243, 0.1)",
+  overflow: "hidden",
+  transition: "all 0.3s ease-in-out",
+  "&:hover": {
+    boxShadow: "0 12px 48px rgba(33, 150, 243, 0.2)",
+  },
+}));
+
+const StyledTableHead = styled(TableHead)(({ theme }) => ({
+  backgroundColor: "#2196f3",
+  "& .MuiTableCell-head": {
+    color: "white",
+    fontWeight: 600,
+    fontSize: "0.95rem",
+    borderBottom: "none",
+    padding: "16px",
+  },
+}));
+
+const StyledTableRow = styled(TableRow)(({ theme }) => ({
+  "&:nth-of-type(odd)": {
+    backgroundColor: alpha(theme.palette.primary.light, 0.05),
+  },
+  "&:hover": {
+    backgroundColor: alpha(theme.palette.primary.light, 0.1),
+  },
+  transition: "all 0.3s ease",
+}));
 
 const RevenueByYears = () => {
   const currentYear = new Date().getFullYear();
@@ -20,21 +70,29 @@ const RevenueByYears = () => {
   const [data, setData] = useState([]);
   const [error, setError] = useState(null);
 
-  // Load dữ liệu mỗi khi thay đổi khoảng năm
+  const [page, setPage] = useState(0);
+  const [rowsPerPage, setRowsPerPage] = useState(6);
+
+  const years = [];
+  for (let y = 2020; y <= currentYear; y++) years.push(y);
+
   useEffect(() => {
     fetchData(startYear, endYear);
   }, [startYear, endYear]);
 
-  const fetchData = async (startYear, endYear) => {
-    const res = await getRevenueByYears(startYear, endYear);
-    console.log(res);
-
-     if (res.status === 200) {
-      setData(res.data.result || []);
-      setError(null);
-    } else {
+  const fetchData = async (start, end) => {
+    try {
+      const res = await getRevenueByYears(start, end);
+      if (res.status === 200) {
+        setData(res.data.result || []);
+        setError(null);
+      } else {
+        setData([]);
+        setError(res.message || "Lỗi tải dữ liệu");
+      }
+    } catch (err) {
       setData([]);
-      setError(res.message || "Lỗi tải dữ liệu");
+      setError("Không thể kết nối đến server.");
     }
   };
 
@@ -46,110 +104,145 @@ const RevenueByYears = () => {
       "Doanh thu": item.revenues.toLocaleString("vi-VN") + "đ",
       "Lợi nhuận": item.profits.toLocaleString("vi-VN") + "đ"
     }));
-
     const worksheet = XLSX.utils.json_to_sheet(exportData);
     const workbook = XLSX.utils.book_new();
     XLSX.utils.book_append_sheet(workbook, worksheet, "Doanh thu theo năm");
     XLSX.writeFile(workbook, `thongke_doanhthu_nam_${startYear}_den_${endYear}.xlsx`);
   };
 
-  const years = [];
-  for (let y = 2020; y <= currentYear; y++) {
-    years.push(y);
-  }
+  const handleChangePage = (event, newPage) => setPage(newPage);
+  const handleChangeRowsPerPage = (event) => {
+    setRowsPerPage(parseInt(event.target.value, 10));
+    setPage(0);
+  };
+
+  const paginatedData = data.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage);
 
   return (
-    <div>
-      {/* Bộ lọc khoảng năm + nút export */}
-      <div className="bg-white rounded-2xl shadow-lg p-6 mb-6 flex flex-wrap items-center justify-between gap-4">
-        <h2 className="text-lg font-semibold">
-          Thống kê doanh thu từ năm {startYear} đến {endYear}
-        </h2>
-        <div className="flex items-center gap-2">
-          <label className="text-sm">Từ</label>
-          <select
-            value={startYear}
-            onChange={(e) => setStartYear(Number(e.target.value))}
-            className="border border-gray-300 rounded-md px-3 py-2 text-sm"
-          >
-            {years.map((y) => (
-              <option key={y} value={y}>Năm {y}</option>
-            ))}
-          </select>
-          <label className="text-sm">Đến</label>
-          <select
-            value={endYear}
-            onChange={(e) => setEndYear(Number(e.target.value))}
-            className="border border-gray-300 rounded-md px-3 py-2 text-sm"
-          >
-            {years.map((y) => (
-              <option key={y} value={y}>Năm {y}</option>
-            ))}
-          </select>
-          <button
-            onClick={handleExportExcel}
-            className="bg-green-600 text-white px-4 py-2 rounded-xl flex items-center gap-2 text-sm"
-          >
-            <FileDown className="w-4 h-4" /> Xuất Excel
-          </button>
-        </div>
-      </div>
+    <Box sx={{ p: 3, background: "linear-gradient(to bottom right, #f9fbfd, #e3f2fd)", minHeight: "100vh" }}>
+      {/* Bộ lọc năm + export */}
+      <StyledPaper sx={{ mb: 3, p: 3 }}>
+        <Box sx={{ display: "flex", flexWrap: "wrap", justifyContent: "space-between", alignItems: "center", gap: 2 }}>
+          <Typography variant="h6" fontWeight={600} color="primary">
+            Thống kê doanh thu từ năm {startYear} đến {endYear}
+          </Typography>
+          <Box sx={{ display: "flex", gap: 2, flexWrap: "wrap" }}>
+            <FormControl size="small">
+              <InputLabel>Từ năm</InputLabel>
+              <Select
+                value={startYear}
+                label="Từ năm"
+                onChange={(e) => setStartYear(Number(e.target.value))}
+                sx={{ borderRadius: 2, backgroundColor: "white", minWidth: 100 }}
+              >
+                {years.map((y) => (
+                  <MenuItem key={y} value={y}>
+                    Năm {y}
+                  </MenuItem>
+                ))}
+              </Select>
+            </FormControl>
+            <FormControl size="small">
+              <InputLabel>Đến năm</InputLabel>
+              <Select
+                value={endYear}
+                label="Đến năm"
+                onChange={(e) => setEndYear(Number(e.target.value))}
+                sx={{ borderRadius: 2, backgroundColor: "white", minWidth: 100 }}
+              >
+                {years.map((y) => (
+                  <MenuItem key={y} value={y}>
+                    Năm {y}
+                  </MenuItem>
+                ))}
+              </Select>
+            </FormControl>
+            <Button
+              variant="contained"
+              color="success"
+              onClick={handleExportExcel}
+              startIcon={<FileDown size={18} />}
+              sx={{ borderRadius: 2 }}
+            >
+              Xuất Excel
+            </Button>
+          </Box>
+        </Box>
+        {error && (
+          <Typography color="error" sx={{ mt: 2 }}>
+            Lỗi: {error}
+          </Typography>
+        )}
+      </StyledPaper>
 
-      {error && (
-        <div className="bg-red-100 text-red-700 p-4 mb-6 rounded-xl">
-          Lỗi: {error}
-        </div>
-      )}
-
-      {/* Biểu đồ cột */}
-      <div className="bg-white rounded-2xl shadow-lg p-6 mb-6">
-        <ResponsiveContainer width="100%" height={350}>
-          <BarChart data={data}>
-            <CartesianGrid strokeDasharray="3 3" />
-            <XAxis dataKey="year" />
-            <YAxis />
-            <Tooltip />
-            <Legend />
-            <Bar dataKey="expenses" fill="#f97316" name="Chi phí" />
-            <Bar dataKey="revenues" fill="#3b82f6" name="Doanh thu" />
-            <Bar dataKey="profits" fill="#22c55e" name="Lợi nhuận" />
-          </BarChart>
-        </ResponsiveContainer>
-      </div>
+      {/* Biểu đồ */}
+      <StyledPaper sx={{ mb: 3, p: 3 }}>
+        <Typography variant="h6" fontWeight={600} sx={{ mb: 2 }}>
+          Biểu đồ doanh thu theo năm
+        </Typography>
+        <Box sx={{ width: "100%", height: 400 }}>
+          <ResponsiveContainer width="100%" height="100%">
+            <BarChart data={data}>
+              <CartesianGrid strokeDasharray="3 3" />
+              <XAxis dataKey="year" />
+              <YAxis />
+              <Tooltip />
+              <Legend />
+              <Bar dataKey="expenses" fill="#f97316" name="Chi phí" />
+              <Bar dataKey="revenues" fill="#3b82f6" name="Doanh thu" />
+              <Bar dataKey="profits" fill="#22c55e" name="Lợi nhuận" />
+            </BarChart>
+          </ResponsiveContainer>
+        </Box>
+      </StyledPaper>
 
       {/* Bảng chi tiết */}
-      <div className="bg-white rounded-2xl shadow-lg p-6 overflow-x-auto">
-        <table className="w-full text-sm text-left">
-          <thead className="bg-gray-100 text-gray-700 font-semibold">
-            <tr>
-              <th className="px-4 py-2">STT</th>
-              <th className="px-4 py-2">Năm</th>
-              <th className="px-4 py-2">Chi phí</th>
-              <th className="px-4 py-2">Doanh thu</th>
-              <th className="px-4 py-2">Lợi nhuận</th>
-            </tr>
-          </thead>
-          <tbody className="divide-y divide-gray-200">
-            {data.map((item, index) => (
-              <tr key={item.year} className="hover:bg-blue-50">
-                <td className="px-4 py-2">{index + 1}</td>
-                <td className="px-4 py-2">{item.year}</td>
-                <td className="px-4 py-2">{item.expenses.toLocaleString("vi-VN")}đ</td>
-                <td className="px-4 py-2">{item.revenues.toLocaleString("vi-VN")}đ</td>
-                <td className="px-4 py-2">{item.profits.toLocaleString("vi-VN")}đ</td>
-              </tr>
-            ))}
-            {data.length === 0 && (
-              <tr>
-                <td colSpan={5} className="text-center py-4 text-gray-500">
-                  Không có dữ liệu.
-                </td>
-              </tr>
-            )}
-          </tbody>
-        </table>
-      </div>
-    </div>
+      <StyledPaper>
+        <TableContainer>
+          <Table>
+            <StyledTableHead>
+              <TableRow>
+                <TableCell>STT</TableCell>
+                <TableCell>Năm</TableCell>
+                <TableCell>Chi phí</TableCell>
+                <TableCell>Doanh thu</TableCell>
+                <TableCell>Lợi nhuận</TableCell>
+              </TableRow>
+            </StyledTableHead>
+            <TableBody>
+              {paginatedData.length === 0 ? (
+                <TableRow>
+                  <TableCell colSpan={5} align="center" sx={{ py: 3, color: "gray" }}>
+                    Không có dữ liệu.
+                  </TableCell>
+                </TableRow>
+              ) : (
+                paginatedData.map((item, index) => (
+                  <StyledTableRow key={item.year}>
+                    <TableCell>{page * rowsPerPage + index + 1}</TableCell>
+                    <TableCell>{item.year}</TableCell>
+                    <TableCell>{item.expenses.toLocaleString("vi-VN")}đ</TableCell>
+                    <TableCell>{item.revenues.toLocaleString("vi-VN")}đ</TableCell>
+                    <TableCell>{item.profits.toLocaleString("vi-VN")}đ</TableCell>
+                  </StyledTableRow>
+                ))
+              )}
+            </TableBody>
+          </Table>
+        </TableContainer>
+
+        {/* Phân trang */}
+        <TablePagination
+          rowsPerPageOptions={[5, 10, 25]}
+          component="div"
+          count={data.length}
+          rowsPerPage={rowsPerPage}
+          page={page}
+          onPageChange={handleChangePage}
+          onRowsPerPageChange={handleChangeRowsPerPage}
+        />
+      </StyledPaper>
+    </Box>
   );
 };
 

@@ -1,97 +1,235 @@
+// SupplierStatistic.jsx
 import React, { useEffect, useState } from "react";
+import {
+  Box,
+  Typography,
+  Tooltip,
+  Paper,
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableRow,
+  TablePagination,
+  Skeleton,
+  TextField,
+  InputAdornment,
+} from "@mui/material";
+import { styled, alpha } from "@mui/material/styles";
+import SearchIcon from "@mui/icons-material/Search";
+import StoreIcon from "@mui/icons-material/Store";
+import HomeIcon from "@mui/icons-material/Home";
+import PhoneIcon from "@mui/icons-material/Phone";
+import ShoppingCartIcon from "@mui/icons-material/ShoppingCart";
+import MonetizationOnIcon from "@mui/icons-material/MonetizationOn";
 import { getSupplierStatistic } from "../../../../services/statisticService";
-import { FileDown, RefreshCw } from "lucide-react";
-import * as XLSX from "xlsx";
 
+// --- Styled Components ---
+const StyledPaper = styled(Paper)(({ theme }) => ({
+  background: "linear-gradient(145deg, #ffffff 0%, #f0f7ff 100%)",
+  borderRadius: 16,
+  boxShadow: "0 8px 32px rgba(33, 150, 243, 0.1)",
+  overflow: "hidden",
+  transition: "all 0.3s ease-in-out",
+  "&:hover": {
+    boxShadow: "0 12px 48px rgba(33, 150, 243, 0.2)",
+  },
+}));
 
+const StyledTableHead = styled(TableHead)(({ theme }) => ({
+  backgroundColor: "#2196f3",
+  "& .MuiTableCell-head": {
+    color: "white",
+    fontWeight: 600,
+    fontSize: "0.95rem",
+    borderBottom: "none",
+    padding: "16px",
+  },
+}));
+
+const StyledTableRow = styled(TableRow)(({ theme }) => ({
+  "&:nth-of-type(odd)": {
+    backgroundColor: alpha(theme.palette.primary.light, 0.05),
+  },
+  "&:hover": {
+    backgroundColor: alpha(theme.palette.primary.light, 0.1),
+    boxShadow: "0 4px 20px rgba(33, 150, 243, 0.1)",
+  },
+  transition: "all 0.3s ease",
+}));
+
+// --- Main Component ---
 const SupplierStatistic = () => {
   const [suppliers, setSuppliers] = useState([]);
+  const [search, setSearch] = useState("");
+  const [error, setError] = useState(null);
+  const [loading, setLoading] = useState(true);
 
-  const fetchData = async () => {
-    const res = await getSupplierStatistic();
-    if (res?.code === 1000) {
-      setSuppliers(res.result || []);
-    }
-  };
+  // Pagination
+  const [page, setPage] = useState(0);
+  const [rowsPerPage, setRowsPerPage] = useState(10);
 
   useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const res = await getSupplierStatistic();
+        if (res?.code === 1000) {
+          setSuppliers(res.result || []);
+          setError(null);
+        } else {
+          setSuppliers([]);
+          setError(res.message || "Không thể tải dữ liệu");
+        }
+      } catch (err) {
+        console.error("Lỗi:", err);
+        setError("Lỗi kết nối API");
+        setSuppliers([]);
+      } finally {
+        setLoading(false);
+      }
+    };
     fetchData();
   }, []);
 
-  const handleExportExcel = () => {
-    const data = suppliers.map((s, index) => ({
-      STT: index + 1,
-      "Mã nhà cung cấp": s.supplierId,
-      "Tên nhà cung cấp": s.supplierName,
-      "Số lượng nhập": s.amount,
-      "Tổng số tiền":
-        s.totalAmount !== null
-          ? s.totalAmount.toLocaleString("vi-VN") + "đ"
-          : "0đ",
-    }));
-    const worksheet = XLSX.utils.json_to_sheet(data);
-    const workbook = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(workbook, worksheet, "Thống kê NCC");
-    XLSX.writeFile(workbook, "thongke_nhacungcap.xlsx");
+  // Filter
+  const filtered = suppliers.filter((s) =>
+    s.supplierName?.toLowerCase().includes(search.toLowerCase())
+  );
+
+  const paginatedData = filtered.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage);
+
+  const handleChangePage = (event, newPage) => {
+    setPage(newPage);
+  };
+
+  const handleChangeRowsPerPage = (event) => {
+    setRowsPerPage(parseInt(event.target.value, 10));
+    setPage(0);
   };
 
   return (
-    <div className="min-h-screen w-full bg-gradient-to-br from-gray-50 to-blue-50 px-4 py-6">
-      
+    <Box sx={{ p: 3, background: "linear-gradient(to bottom right, #f9fbfd, #e3f2fd)", minHeight: "100vh" }}>
+      <StyledPaper sx={{ mb: 3, p: 3 }}>
+        <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+          <Typography variant="h6" fontWeight={600} color="primary">
+            <StoreIcon sx={{ mr: 1, verticalAlign: "middle" }} /> Thống kê nhà cung cấp
+          </Typography>
+          <TextField
+            variant="outlined"
+            size="small"
+            placeholder="Tìm nhà cung cấp..."
+            value={search}
+            onChange={(e) => {
+              setSearch(e.target.value);
+              setPage(0);
+            }}
+            InputProps={{
+              startAdornment: (
+                <InputAdornment position="start">
+                  <SearchIcon color="action" />
+                </InputAdornment>
+              ),
+            }}
+            sx={{
+              width: 300,
+              "& .MuiOutlinedInput-root": {
+                borderRadius: 8,
+                backgroundColor: "white",
+              },
+            }}
+          />
+        </Box>
+      </StyledPaper>
 
-      {/* Nút hành động */}
-      <div className="bg-white rounded-2xl shadow-lg p-6 mb-6 flex gap-3">
-        <button
-          onClick={handleExportExcel}
-          className="bg-green-600 text-white px-4 py-2 rounded-xl flex items-center gap-2"
-        >
-          <FileDown className="w-4 h-4" /> Xuất Excel
-        </button>
-        <button
-          onClick={fetchData}
-          className="bg-red-500 text-white px-4 py-2 rounded-xl flex items-center gap-2"
-        >
-          <RefreshCw className="w-4 h-4" /> Làm mới
-        </button>
-      </div>
+      {error && (
+        <Box sx={{ mb: 3, p: 2, borderRadius: 2, bgcolor: "#ffebee", color: "#c62828" }}>
+          {error}
+        </Box>
+      )}
 
-      {/* Bảng dữ liệu */}
-      <div className="bg-white rounded-2xl shadow-lg p-6 overflow-x-auto">
-        <table className="w-full text-sm text-left">
-          <thead className="bg-gray-100 text-gray-700 font-semibold">
-            <tr>
-              <th className="px-4 py-2">STT</th>
-              <th className="px-4 py-2">Mã nhà cung cấp</th>
-              <th className="px-4 py-2">Tên nhà cung cấp</th>
-              <th className="px-4 py-2">Số lượng nhập</th>
-              <th className="px-4 py-2">Tổng số tiền</th>
-            </tr>
-          </thead>
-          <tbody className="divide-y divide-gray-200">
-            {suppliers.map((s, index) => (
-              <tr key={s.supplierId} className="hover:bg-blue-50">
-                <td className="px-4 py-2">{index + 1}</td>
-                <td className="px-4 py-2">{s.supplierId.slice(0, 8)}</td>
-                <td className="px-4 py-2">{s.supplierName}</td>
-                <td className="px-4 py-2">{s.amount}</td>
-                <td className="px-4 py-2">
-                  {s.totalAmount
-                    ? s.totalAmount.toLocaleString("vi-VN") + "đ"
-                    : "0đ"}
-                </td>
-              </tr>
-            ))}
-            {suppliers.length === 0 && (
-              <tr>
-                <td colSpan={5} className="text-center py-4 text-gray-500">
-                  Không có dữ liệu.
-                </td>
-              </tr>
-            )}
-          </tbody>
-        </table>
-      </div>
-    </div>
+      <StyledPaper>
+        <TableContainer>
+          <Table>
+            <StyledTableHead>
+              <TableRow>
+                <TableCell>#</TableCell>
+                <TableCell>Nhà cung cấp</TableCell>
+                <TableCell>Địa chỉ</TableCell>
+                <TableCell>Số điện thoại</TableCell>
+                <TableCell>Tổng đơn hàng</TableCell>
+                <TableCell>Tổng số tiền</TableCell>
+              </TableRow>
+            </StyledTableHead>
+            <TableBody>
+              {loading
+                ? [...Array(5)].map((_, idx) => (
+                    <TableRow key={idx}>
+                      <TableCell colSpan={6}>
+                        <Skeleton animation="wave" height={60} />
+                      </TableCell>
+                    </TableRow>
+                  ))
+                : paginatedData.map((s, idx) => (
+                    <StyledTableRow key={s.supplierId}>
+                      <TableCell>{page * rowsPerPage + idx + 1}</TableCell>
+                      <TableCell>
+                        <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+                          <StoreIcon color="primary" fontSize="small" />
+                          <Typography variant="body2" fontWeight={500}>
+                            {s.supplierName}
+                          </Typography>
+                        </Box>
+                      </TableCell>
+                      <TableCell>
+                        <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+                          <HomeIcon fontSize="small" />
+                          {s.address || "N/A"}
+                        </Box>
+                      </TableCell>
+                      <TableCell>
+                        <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+                          <PhoneIcon fontSize="small" />
+                          {s.phoneNumber}
+                        </Box>
+                      </TableCell>
+                      <TableCell>
+                        <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+                          <ShoppingCartIcon fontSize="small" />
+                          {s.amount}
+                        </Box>
+                      </TableCell>
+                      <TableCell>
+                        <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+                          <MonetizationOnIcon fontSize="small" />
+                          {s.totalAmount}
+                        </Box>
+                      </TableCell>
+                    </StyledTableRow>
+                  ))}
+              {!loading && filtered.length === 0 && (
+                <TableRow>
+                  <TableCell colSpan={6} align="center" sx={{ py: 3, color: "gray" }}>
+                    Không có dữ liệu.
+                  </TableCell>
+                </TableRow>
+              )}
+            </TableBody>
+          </Table>
+        </TableContainer>
+        <TablePagination
+          rowsPerPageOptions={[5, 10, 25]}
+          component="div"
+          count={filtered.length}
+          rowsPerPage={rowsPerPage}
+          page={page}
+          onPageChange={handleChangePage}
+          onRowsPerPageChange={handleChangeRowsPerPage}
+          labelRowsPerPage="Số hàng mỗi trang:"
+          sx={{ borderTop: "1px solid #e0e0e0", backgroundColor: "#fafafa" }}
+        />
+      </StyledPaper>
+    </Box>
   );
 };
 

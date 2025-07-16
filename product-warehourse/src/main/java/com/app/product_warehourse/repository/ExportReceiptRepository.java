@@ -19,7 +19,8 @@ public interface ExportReceiptRepository extends JpaRepository<ExportReceipt, St
             "LEFT JOIN FETCH i.customer " +
             "LEFT JOIN FETCH i.staff " +
             "LEFT JOIN FETCH i.exportReceiptDetails d " +
-            "LEFT JOIN FETCH d.newExId.productVersionId")
+            "LEFT JOIN FETCH d.newExId.productVersionId " +
+            "ORDER BY i.exportTime DESC")
     Page<ExportReceipt> findAll(Pageable pageable);
 
 

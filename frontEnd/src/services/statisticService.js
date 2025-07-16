@@ -5,17 +5,20 @@ import axios from 'axios';
 /**
  * Thống kê tổng quan: tổng số đơn, doanh thu, sản phẩm, khách hàng
  */
-export const getInventoryStatistic = async () => {
-  const response = await BASE_URL[POST]("statistic/inventory-statistic");
+
+
+export const getInventoryStatistic = async (payload) => {
+  const response = await BASE_URL[POST]("statistic/inventory-statistic", payload);
   return response.data;
 };
+
 
 export const getOverviewCounts = async () => {
   const response = await BASE_URL[GET]("statistic/count");
   return response.data;
 };
 export const getOverviewRevenue7Days = async () => {
-  const response = await BASE_URL.get("statistic/overviews");
+  const response = await BASE_URL[GET]("statistic/overviews");
   return response.data;
 };
 
@@ -32,25 +35,11 @@ export const getRevenueByDay = async (year, month) => {
     "year": year,
     "month": month
 };
-  // try {
+ 
     const response = await BASE_URL[POST]("statistic/date", data);
-    // if (response.data?.code === 1000) {
-    //   return {
-    //     success: true,
-    //     result: response.data.result,
-    //   };
-    // } else {
-    //   return { success: false, message: response.data?.message || "Không thành công" };
-    // }
+
     return response;
-  // } catch (error) {
-  //   console.error("Lỗi gọi getRevenueByDay:", {
-  //     message: error.message,
-  //     code: error.code,
-  //     response: error.response ? error.response.data : null
-  //   });
-  //   return { success: false, message: "Lỗi kết nối API" };
-  // }
+
 };
 
 

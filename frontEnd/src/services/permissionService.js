@@ -79,3 +79,18 @@ export const takeUpdateRole = async (roleId ,data) => {
   const response = await BASE_URL[PUT](`role/update/${roleId}`, data); // URL thay theo API của bạn
   return response;
 };
+
+// lấy chức năng của tính năng
+// trả về
+// {
+//     "functionId": 1,
+//     "canView": false,
+//     "canCreate": false,
+//     "canUpdate": false,
+//     "canDelete": false
+// }
+export const takeFunctionOfFeature = async (idFunction) => {
+  const response = await BASE_URL[GET](`permission/${idFunction}`); // URL thay theo API của bạn
+  return response;
+};
+

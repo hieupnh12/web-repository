@@ -6,7 +6,10 @@ import com.app.product_warehourse.dto.request.AccountUpdateRequest;
 import com.app.product_warehourse.dto.request.ApiResponse;
 import com.app.product_warehourse.dto.request.ChangePasswordRequest;
 import com.app.product_warehourse.dto.response.AccountResponse;
+import com.app.product_warehourse.dto.response.StaffResponse;
+import com.app.product_warehourse.dto.response.StaffSelectResponse;
 import com.app.product_warehourse.service.AccountService;
+
 import jakarta.validation.Valid;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
@@ -25,9 +28,10 @@ public class AccountController {
     AccountService accountService;
 
     @PostMapping("/{staffId}")
-    public ApiResponse<AccountResponse> createAccount(@Valid  @PathVariable String staffId, @RequestBody AccountCreateRequest request) {
-        return ApiResponse.<AccountResponse>builder()
-                .result(accountService.createAccount(request,staffId))
+    public ApiResponse<Void> createAccount(@PathVariable String staffId, @Valid  @RequestBody AccountCreateRequest request) {
+        accountService.createAccount(request,staffId);
+        return ApiResponse.<Void>builder()
+                .message("Account created")
                 .build();
     }
 
@@ -53,5 +57,19 @@ public class AccountController {
                 .build();
     }
 
+    @GetMapping("/staff-account")
+    public ApiResponse<List<StaffSelectResponse>> getAllStaffNotAccounts() {
+        return ApiResponse.<List<StaffSelectResponse>>builder()
+                .result(accountService.getStaff())
+                .build();
+    }
+
+    @DeleteMapping("/{id}")
+    public ApiResponse<Void> deleteAccountByStaffId(@PathVariable String id) {
+        accountService.deleteAccountByStaffId(id);
+        return ApiResponse.<Void>builder()
+                .message("Account deleted successfully")
+                .build();
+    }
 
 }

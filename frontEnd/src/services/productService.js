@@ -160,7 +160,6 @@ export const updateStockProduct = async () => {
   }
 };
 
-
 export const takeProductById = (id) => {
   return BASE_URL[GET](`/products/${id}`);
 };
