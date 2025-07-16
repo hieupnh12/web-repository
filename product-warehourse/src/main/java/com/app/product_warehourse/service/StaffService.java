@@ -28,7 +28,7 @@ import java.util.stream.Collectors;
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true) //bo private final
 @Slf4j
 public class StaffService {
-    private final AccountRepository accountRepository;
+    AccountRepository accountRepository;
     StaffMapper staffMapper;
     StaffRepository staffRepository;
 
@@ -72,6 +72,8 @@ public class StaffService {
         var staff = staffRepository.findById(account.getStaffId()).orElseThrow(() -> new AppException(ErrorCode.STAFF_NOT_EXIST));
         return staffMapper.toStaffResponse(staff);
     }
+
+
 
 
 }

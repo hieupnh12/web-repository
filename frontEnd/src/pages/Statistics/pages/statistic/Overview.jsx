@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import {
   getOverviewRevenue7Days,
-  getOverviewCounts
+  getOverviewCounts,
 } from "../../../../services/statisticService";
 
 import {
@@ -11,35 +11,40 @@ import {
   YAxis,
   CartesianGrid,
   Tooltip,
-  ResponsiveContainer
+  ResponsiveContainer,
 } from "recharts";
 
 import { Package, Users, UserCheck } from "lucide-react";
-
+import { TablePagination } from "@mui/material";
 
 const Overview = () => {
   const [overviewData, setOverviewData] = useState({});
   const [revenueChart, setRevenueChart] = useState([]);
   const [error, setError] = useState(null);
 
+  const [page, setPage] = useState(0);
+  const [rowsPerPage, setRowsPerPage] = useState(5);
+
+  const handleChangePage = (event, newPage) => setPage(newPage);
+  const handleChangeRowsPerPage = (event) => {
+    setRowsPerPage(+event.target.value);
+    setPage(0);
+  };
+
   useEffect(() => {
     const fetchData = async () => {
       try {
         const [resCounts, resRevenue] = await Promise.all([
           getOverviewCounts(),
-          getOverviewRevenue7Days()
+          getOverviewRevenue7Days(),
         ]);
 
         if (resCounts?.code === 1000) {
           setOverviewData(resCounts.result || {});
-        } else {
-          setOverviewData({});
         }
 
         if (resRevenue?.code === 1000) {
           setRevenueChart(resRevenue.result || []);
-        } else {
-          setRevenueChart([]);
         }
 
         setError(null);
@@ -54,15 +59,13 @@ const Overview = () => {
 
   return (
     <div className="min-h-screen w-full bg-gradient-to-br from-gray-50 to-blue-50 px-4 py-6">
-     
-
       {error && (
         <div className="bg-red-100 text-red-700 p-4 mb-6 rounded-xl">
           Lỗi: {error}
         </div>
       )}
 
-      {/* Summary cards */}
+      {/* Thẻ thống kê tổng quan */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 mb-6 mt-4">
         <SummaryCard
           icon={<Package className="w-6 h-6" />}
@@ -87,7 +90,7 @@ const Overview = () => {
         />
       </div>
 
-      {/* Revenue Chart */}
+      {/* Biểu đồ doanh thu */}
       <div className="bg-white rounded-2xl shadow-lg p-6 mb-6">
         <h2 className="text-lg font-semibold mb-4">Thống kê doanh thu 7 ngày gần nhất</h2>
         <ResponsiveContainer width="100%" height={300}>
@@ -125,38 +128,77 @@ const Overview = () => {
         </ResponsiveContainer>
       </div>
 
-      {/* Revenue Table */}
+      {/* Bảng doanh thu */}
       <div className="bg-white rounded-2xl shadow-lg p-6">
-        <h2 className="text-lg font-semibold mb-4">Chi tiết doanh thu theo ngày</h2>
-        <div className="overflow-auto">
-          <table className="w-full text-sm text-left">
-            <thead className="bg-gray-100 text-gray-700 font-semibold">
-              <tr>
-                <th className="px-4 py-2">Ngày</th>
-                <th className="px-4 py-2">Vốn</th>
-                <th className="px-4 py-2">Doanh thu</th>
-                <th className="px-4 py-2">Lợi nhuận</th>
+        <div className="bg-white rounded-2xl shadow-lg p-6">
+  <h2 className="text-lg font-semibold mb-4">Chi tiết doanh thu theo ngày</h2>
+  <div className="overflow-auto rounded-xl">
+    <table className="w-full text-sm text-left rounded-xl overflow-hidden">
+      <thead className="bg-[#2196f3] text-white">
+        <tr>
+          <th className="px-4 py-2">STT</th>
+          <th className="px-4 py-2">Ngày</th>
+          <th className="px-4 py-2">Vốn</th>
+          <th className="px-4 py-2">Doanh thu</th>
+          <th className="px-4 py-2">Lợi nhuận</th>
+        </tr>
+      </thead>
+      <tbody>
+        {revenueChart.length === 0 ? (
+          <tr>
+            <td colSpan={5} className="text-center py-4 text-gray-500 bg-blue-50">
+              Không có dữ liệu.
+            </td>
+          </tr>
+        ) : (
+          revenueChart
+            .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
+            .map((item, idx) => (
+              <tr
+                key={idx}
+                className={`${
+                  idx % 2 === 0 ? "bg-blue-50" : "bg-white"
+                } hover:bg-blue-100 transition duration-200`}
+              >
+                <td className="px-4 py-2">{page * rowsPerPage + idx + 1}</td>
+                <td className="px-4 py-2">{item.date}</td>
+                <td className="px-4 py-2">{item.expenses?.toLocaleString("vi-VN")}đ</td>
+                <td className="px-4 py-2">{item.revenue?.toLocaleString("vi-VN")}đ</td>
+                <td className="px-4 py-2">{item.profit?.toLocaleString("vi-VN")}đ</td>
               </tr>
-            </thead>
-            <tbody>
-              {revenueChart.map((item, idx) => (
-                <tr key={idx} className="border-b">
-                  <td className="px-4 py-2">{item.date}</td>
-                  <td className="px-4 py-2">{item.expenses?.toLocaleString("vi-VN")}đ</td>
-                  <td className="px-4 py-2">{item.revenue?.toLocaleString("vi-VN")}đ</td>
-                  <td className="px-4 py-2">{item.profit?.toLocaleString("vi-VN")}đ</td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
+            ))
+        )}
+      </tbody>
+    </table>
+  </div>
+</div>
+
+
+        <div className="mt-4 bg-blue-50 rounded-b-xl">
+        <TablePagination
+          rowsPerPageOptions={[5, 10, 25]}
+          component="div"
+          count={revenueChart.length}
+          rowsPerPage={rowsPerPage}
+          page={page}
+          onPageChange={handleChangePage}
+          onRowsPerPageChange={handleChangeRowsPerPage}
+          labelRowsPerPage="Số hàng mỗi trang:"
+            sx={{
+              borderTop: "1px solid #e0e0e0",
+              backgroundColor: "#f0f9ff",
+              borderRadius: "0 0 12px 12px",
+            }}
+          />
         </div>
+
       </div>
     </div>
   );
 };
 
 const SummaryCard = ({ icon, title, value, bg, text }) => (
-  <div className="bg-white rounded-2xl shadow-lg p-6 flex items-center gap-4">
+  <div className="bg-white rounded-2xl shadow-lg p-6 flex items-center gap-4 hover:shadow-xl transition-all duration-200">
     <div className={`${bg} ${text} p-3 rounded-full`}>{icon}</div>
     <div>
       <p className="text-gray-500">{title}</p>

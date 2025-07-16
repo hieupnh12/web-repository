@@ -40,7 +40,6 @@ public class RoleService {
     FunctionRepository functionRepository;
     RoleMapper roleMapper;
     AccountRepository accountRepository;
-    private final StaffMapper staffMapper;
 
     @PreAuthorize("hasRole('ADMIN')")
     @Transactional

@@ -57,20 +57,20 @@ public class StatisticsController {
                 .build();
     }
 
-    @GetMapping("/date")
+    @PostMapping("/date")
     public ApiResponse<List<DayInMonthResponse>> dateStatistics(@RequestBody DayInMonthRequest request) {
         return ApiResponse.<List<DayInMonthResponse>>builder()
                 .result(statisticsService.getReportDayInMonth(request))
                 .build();
     }
-    @GetMapping("/year")
+    @PostMapping("/year")
     public ApiResponse<List<YearToYearResponse>> yearStatistics(@RequestBody YearToYearRequest request) {
         return ApiResponse.<List<YearToYearResponse>>builder()
                 .result(statisticsService.getReportYearToYear(request))
                 .build();
     }
 
-    @GetMapping("/date-to-date")
+    @PostMapping("/date-to-date")
     public ApiResponse<List<DateToDateResponse>> dateStatistics(@RequestBody DateToDateRequest request) {
         return ApiResponse.<List<DateToDateResponse>>builder()
                 .result(statisticsService.getReportDateToDate(request))
@@ -83,7 +83,7 @@ public class StatisticsController {
                 .build();
     }
 
-    @GetMapping("/inventory-statistic")
+    @PostMapping("/inventory-statistic")
     public ApiResponse<List<InventoryStatisticsResponse>> inventoryStatistics(@RequestBody InventoryStatisticsRequest request) {
         return ApiResponse.<List<InventoryStatisticsResponse>>builder()
                 .result(statisticsService.getReportInventory(request))

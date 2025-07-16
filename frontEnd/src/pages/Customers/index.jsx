@@ -84,15 +84,13 @@ const Customers = () => {
     try {
       let response;
       if (keyword) {
-        console.log(keyword);
-        
+        console.log(keyword); 
         response = await searchCustomers(keyword, pageNum, size); // Call search API
         console.log(response);
         
       } else {
         response = await takeCustomer(pageNum, size); // Call list API
                 // console.log(response);
-
       }
       if (response.status === 200) {
         setCustomers(response.data.result.content); // Set customer list

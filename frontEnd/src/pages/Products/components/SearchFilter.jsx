@@ -4,9 +4,9 @@ import { Search, ChevronDown, X, Loader2 } from "lucide-react";
 import {
   getAllBrands,
   getAllOrigins,
-  getAllOperatingSystems,
-  getAllWarehouseAreas,
-} from "../../../services/productService";
+  getAllOSs,
+} from "../../../services/attributeService";
+import {takeWarehouseArea,} from "../../../services/storage";
 import Button from "../../../components/ui/Button";
 import debounce from "lodash/debounce";
 
@@ -62,8 +62,8 @@ const SearchFilter = ({ onFilterChange }) => {
         const [brandRes, originRes, osRes, areaRes] = await Promise.all([
           getAllBrands(),
           getAllOrigins(),
-          getAllOperatingSystems(),
-          getAllWarehouseAreas(),
+          getAllOSs(),
+          takeWarehouseArea(),
         ]);
         const extractData = (res) =>
           Array.isArray(res.data) ? res.data : res.data?.content || res.data?.data || [];

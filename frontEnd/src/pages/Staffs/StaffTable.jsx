@@ -74,13 +74,13 @@ const StaffTable = ({
         <Table>
           <StyledTableHead>
             <TableRow>
-              <TableCell>No.</TableCell>
-              <TableCell>Staff Name</TableCell>
-              <TableCell>Sex</TableCell>
-              <TableCell>Date of birth</TableCell>
-              <TableCell>Phone number</TableCell>
+              <TableCell>STT</TableCell>
+              <TableCell>Họ & Tên</TableCell>
+              <TableCell>Giới Tính</TableCell>
+              <TableCell>Ngày Sinh</TableCell>
+              <TableCell>SDT</TableCell>
               <TableCell>Email</TableCell>
-              <TableCell align="center">Operation</TableCell>
+              <TableCell align="center">Chức Năng</TableCell>
             </TableRow>
           </StyledTableHead>
           <TableBody>
