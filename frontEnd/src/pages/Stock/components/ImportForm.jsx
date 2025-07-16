@@ -9,6 +9,7 @@ import Button from "../../../components/ui/Button";
 import { toast } from "react-toastify";
 import { takeDeleteImportReceipt } from "../../../services/importService";
 import DateRangeButton from "./DateRangeButton";
+import ImportDetailView from "./ImportDetailView";
 
 export default function ImportForm({
   tableData,
@@ -20,6 +21,7 @@ export default function ImportForm({
   onPageChange,
   isLoading,
   isError,
+  isPermission,
 }) {
   const [searchInput, setSearchInput] = useState("");
   const [selectField, setSelectField] = useState("all");
@@ -28,7 +30,7 @@ export default function ImportForm({
   const [selectProduct, setSelectProduct] = useState(null);
   const [showConfirm, setShowConfirm] = useState(false);
   const [showPreview, setShowPreview] = useState(false);
-
+  const [showDetail, setShowDetail] = useState(false);
   const handleDeleteImport = async () => {
     setShowConfirm(false);
     try {
@@ -50,7 +52,7 @@ export default function ImportForm({
       toast.error("Xóa phiếu nhập thất bại!");
     }
   };
-console.log("select", selectProduct);
+  console.log("select", selectProduct);
 
   const mapFilterToApi = useCallback(
     (searchQuery, searchField, startDate, endDate) => {
@@ -72,8 +74,13 @@ console.log("select", selectProduct);
   );
 
   const handleSearch = () => {
-    const newFilter = mapFilterToApi(searchInput, selectField, startDate, endDate);
-    console.log('Search filter:', newFilter); // Debug
+    const newFilter = mapFilterToApi(
+      searchInput,
+      selectField,
+      startDate,
+      endDate
+    );
+    console.log("Search filter:", newFilter); // Debug
     onFilterChange(newFilter);
   };
 
@@ -82,7 +89,13 @@ console.log("select", selectProduct);
     setSelectField("all");
     setStartDate(null);
     setEndDate(null);
-    onFilterChange({ supplierName: '', staffName: '', importId: '', startDate: null, endDate: null });
+    onFilterChange({
+      supplierName: "",
+      staffName: "",
+      importId: "",
+      startDate: null,
+      endDate: null,
+    });
   };
 
   const debouncedFilterChange = useCallback(
@@ -94,7 +107,12 @@ console.log("select", selectProduct);
   );
 
   useEffect(() => {
-    const newFilter = mapFilterToApi(searchInput, selectField, startDate, endDate);
+    const newFilter = mapFilterToApi(
+      searchInput,
+      selectField,
+      startDate,
+      endDate
+    );
     debouncedFilterChange(newFilter);
     return () => debouncedFilterChange.cancel();
   }, [searchInput, startDate, endDate, debouncedFilterChange, mapFilterToApi]);
@@ -129,7 +147,7 @@ console.log("select", selectProduct);
     totalPages,
     maxVisible: 3,
   });
-  
+
   // if (isLoading) {
   //   return (
   //     <div className="flex justify-center items-center h-[570px] bg-white rounded-2xl">
@@ -137,6 +155,7 @@ console.log("select", selectProduct);
   //     </div>
   //   );
   // }
+console.log("permmiss", isPermission);
 
   if (isError) {
     return (
@@ -165,31 +184,35 @@ console.log("select", selectProduct);
 
       <div className="flex items-center justify-between bg-white/60 p-3 rounded-2xl shadow-sm flex-wrap gap-4">
         <div className="flex items-center space-x-4">
-          <Link
-            to="addimport"
-            className="bg-teal-600 hover:bg-teal-700 text-white px-4 py-2 rounded-lg text-sm font-medium flex gap-1"
-          >
-            <Plus className="h-5 w-5" />
-            <span>Create</span>
-          </Link>
-
-          <button
-            className="bg-green-700 hover:bg-green-800 text-white px-4 py-2 rounded-lg text-sm font-medium flex items-center space-x-2"
-            onClick={() => setShowPreview(true)}
-            disabled={!selectProduct?.import_id}
-          >
-            <Download className="w-5 h-5" />
-            <span>Print</span>
-          </button>
-
-          <Button
-            onClick={() => setShowConfirm(true)}
-            className="group flex items-center gap-2 bg-red-600 text-white hover:bg-red-700 hover:scale-105 transform transition-all duration-300 shadow-lg hover:shadow-xl px-3 py-2 text-sm"
-            disabled={!selectProduct?.import_id}
-          >
-            <Trash className="w-4 h-4 group-hover:scale-110 transition-transform duration-300" />
-            <span className="hidden sm:inline">Delete</span>
-          </Button>
+          {isPermission?.canCreate && (
+            <Link
+              to="addimport"
+              className="bg-teal-600 hover:bg-teal-700 text-white px-4 py-2 rounded-lg text-sm font-medium flex gap-1"
+            >
+              <Plus className="h-5 w-5" />
+              <span>Tạo Phiếu</span>
+            </Link>
+          )}
+    
+            <button
+              className="bg-green-700 hover:bg-green-800 text-white px-4 py-2 rounded-lg text-sm font-medium flex items-center space-x-2"
+              onClick={() => setShowPreview(true)}
+              disabled={!selectProduct?.import_id}
+            >
+              <Download className="w-5 h-5" />
+              <span>In Phiếu</span>
+            </button>
+      
+          {isPermission?.canDelete && (
+            <Button
+              onClick={() => setShowConfirm(true)}
+              className="group flex items-center gap-2 bg-red-600 text-white hover:bg-red-700 hover:scale-105 transform transition-all duration-300 shadow-lg hover:shadow-xl px-3 py-2 text-sm"
+              disabled={!selectProduct?.import_id}
+            >
+              <Trash className="w-4 h-4 group-hover:scale-110 transition-transform duration-300" />
+              <span className="hidden sm:inline">Xóa Phiếu</span>
+            </Button>
+          )}
           <ConfirmDialog
             isOpen={showConfirm}
             title="Xóa phiếu nhập"
@@ -257,8 +280,14 @@ console.log("select", selectProduct);
                   >
                     <div className="w-[100px] h-[100px] rounded-2xl overflow-hidden flex items-center justify-center border border-gray-200">
                       <img
-                        src={value?.productVersion.product?.image || "/placeholder-image.jpg"}
-                        alt={value?.productVersion.product?.productName || "Sản phẩm"}
+                        src={
+                          value?.productVersion.product?.image ||
+                          "/placeholder-image.jpg"
+                        }
+                        alt={
+                          value?.productVersion.product?.productName ||
+                          "Sản phẩm"
+                        }
                         className="object-cover w-full h-full"
                       />
                     </div>
@@ -268,7 +297,9 @@ console.log("select", selectProduct);
                         {value?.productVersion.product?.productName || "N/A"}
                       </div>
                       <div className="w-full">
-                        Tổng: {(value.unitPrice * value.quantity).toLocaleString()} VND
+                        Tổng:{" "}
+                        {(value.unitPrice * value.quantity).toLocaleString()}{" "}
+                        VND
                       </div>
                       <div className="w-full">Quantity: {value.quantity}</div>
                     </div>
@@ -283,7 +314,7 @@ console.log("select", selectProduct);
 
             <div className="p-1 mt-2">
               <button
-                onClick={() => setShowPreview(true)} // Sửa để mở PDF thay vì ConfirmDialog
+                onClick={() => setShowDetail(true)} // Sửa để mở PDF thay vì ConfirmDialog
                 className="w-full bg-white border border-gray-400 py-2 rounded-lg hover:bg-blue-300 transition duration-200 text-sm font-medium text-gray-600"
                 disabled={!selectProduct?.import_id}
               >
@@ -310,17 +341,25 @@ console.log("select", selectProduct);
                     <tr
                       key={item.import_id}
                       className={`hover:bg-blue-50 transition ${
-                        selectProduct?.import_id === item.import_id ? "bg-blue-100" : ""
+                        selectProduct?.import_id === item.import_id
+                          ? "bg-blue-100"
+                          : ""
                       }`}
                       onClick={() =>
                         setSelectProduct(
-                          selectProduct?.import_id === item.import_id ? null : item
+                          selectProduct?.import_id === item.import_id
+                            ? null
+                            : item
                         )
                       }
                     >
-                      <td className="px-4 py-3">{currentPage * 7 + index + 1}</td>
+                      <td className="px-4 py-3">
+                        {currentPage * 7 + index + 1}
+                      </td>
                       <td className="px-4 py-3">{item.import_id}</td>
-                      <td className="px-4 py-3">{item.supplierName || "N/A"}</td>
+                      <td className="px-4 py-3">
+                        {item.supplierName || "N/A"}
+                      </td>
                       <td className="px-4 py-3">{item.staffName || "N/A"}</td>
                       <td className="px-4 py-3">
                         {item.totalAmount?.toLocaleString() || "0"} VND
