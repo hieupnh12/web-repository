@@ -68,7 +68,7 @@ public class SupplierService {
         return supplierRepo.findById(id).orElseThrow(() ->  new RuntimeException("Not Found Supplier by Id") );
     }
 
-
+    @PreAuthorize("hasRole('ADMIN') or hasAuthority('Suppliers_UPDATE')")
     public SupplierResponse updateSupplier(String id, SupplierRequest request){
          Suppliers supplier = supplierRepo.findById(id).orElseThrow(() ->  new RuntimeException("Not Found Supplier by Id") );
          supplierMap.updateSupplierFromRequest(request, supplier);
@@ -76,12 +76,13 @@ public class SupplierService {
       return   supplierMap.toSupplierResponse(supplierRepo.save(supplier));
     }
 
-
+    @PreAuthorize("hasRole('ADMIN') or hasAuthority('Suppliers_DELETE')")
     public void deleteSupplier(String id){
         supplierRepo.deleteById(id);
     }
 
 
+    @PreAuthorize("hasRole('ADMIN') or hasAuthority('Suppliers_VIEW')")
     public Page<SupplierResponse> getAllSupplierPage(int page, int size){
         Pageable pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "joinDate"));
         return supplierRepo.findAll(pageable)

@@ -34,7 +34,7 @@ public class CustomerService {
     CustomerRepository customerRepository;
     CustomerMapper customerMapper;
 
-    @PreAuthorize("hasRole('ADMIN') or hasAuthority('CREATE')")
+    @PreAuthorize("hasRole('ADMIN') or hasAuthority('Customer_CREATE')")
     public CustomerResponse createCustomer(CustomerCreateRequest request) {
         if (customerRepository.existsByPhone(request.getPhone())) {
             throw new AppException(ErrorCode.PHONE_NUMBER_AVAILABLE);
@@ -44,13 +44,13 @@ public class CustomerService {
        customerRepository.save(c);
        return customerMapper.toCustomerResponse(c);
     }
-    @PreAuthorize("hasRole('ADMIN') or hasAuthority('UPDATE')")
+    @PreAuthorize("hasRole('ADMIN') or hasAuthority('Customer_UPDATE')")
     public CustomerResponse updateCustomer(String customerId, CustomerUpdateRequest request) {
         var customer = customerRepository.findById(customerId).orElseThrow(() -> new AppException(ErrorCode.CUSTOMER_NOT_EXIST));
         customerMapper.updateCustomer(customer,request);
         return customerMapper.toCustomerResponse(customerRepository.save(customer));
     }
-    @PreAuthorize("hasRole('ADMIN') or hasAuthority('VIEW')")
+    @PreAuthorize("hasRole('ADMIN') or hasAuthority('Customer_VIEW')")
     public Page<CustomerResponse> getCustomers(int page, int size) {
         Pageable pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "joinDate"));
         return customerRepository.findAll(pageable)
@@ -88,7 +88,7 @@ public class CustomerService {
 
 
 
-    @PreAuthorize("hasRole('ADMIN') or hasAuthority('DELETE')")
+    @PreAuthorize("hasRole('ADMIN') or hasAuthority('Customer_DELETE')")
     public void deleteCustomer(String customerId) {
         customerRepository.deleteById(customerId);
     }

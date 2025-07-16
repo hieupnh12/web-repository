@@ -32,7 +32,7 @@ public class StaffService {
     StaffMapper staffMapper;
     StaffRepository staffRepository;
 
-    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasRole('ADMIN') or hasAuthority('Staff_CREATE')")
     public StaffResponse createStaff(StaffCreateRequest request) {
         if (staffRepository.existsByEmail(request.getEmail())) {
             throw new AppException(ErrorCode.EMAIL_EXITED);
@@ -42,17 +42,19 @@ public class StaffService {
       return  staffMapper.toStaffResponse(savedStaff);
 
     }
-    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasRole('ADMIN') or hasAuthority('Staff_DELETE')")
     public void deleteStaff(String userId) {
         staffRepository.deleteById(userId);
     }
-    @PreAuthorize("hasRole('ADMIN')")
-   @Cacheable("staffs")
+
+
+    @PreAuthorize("hasRole('ADMIN') or hasAuthority('Staff_VIEW')")
+    @Cacheable("staffs")
     public List<StaffResponse> getAllStaff() {
         List<StaffResponse> result = staffRepository.findAllStaffResponse();
         return result;
     }
-    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasRole('ADMIN') or hasAuthority('Staff_UPDATE')")
     public StaffResponse updateStaff(String staffId, StaffUpdateRequest request) {
         var staff = staffRepository.findById(staffId).orElseThrow(() ->
                 new AppException(ErrorCode.STAFF_NOT_EXIST));
@@ -62,6 +64,7 @@ public class StaffService {
             staffMapper.updateStaff(staff, request);
             return staffMapper.toStaffResponse(staffRepository.save(staff));
     }
+
 
     public StaffResponse getMyInfo() {
         var context =  SecurityContextHolder.getContext();
