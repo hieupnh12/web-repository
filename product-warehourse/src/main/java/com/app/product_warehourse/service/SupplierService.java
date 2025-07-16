@@ -20,6 +20,9 @@ import org.springframework.data.domain.Sort;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -85,13 +88,32 @@ public class SupplierService {
                 .map(supplierMap::toSupplierResponse);
     }
 
-    public Page<SupplierResponse> searchSuppliers(String keyword, int page, int size) {
+    public Page<SupplierResponse> searchSuppliers(
+            String keyword,
+            LocalDate fromDate,
+            LocalDate toDate,
+            int page,
+            int size) {
+
+        if (fromDate == null) {
+            LocalDateTime earliest = supplierRepo.findEarliestJoinDate();
+            fromDate = earliest != null ? earliest.toLocalDate() : LocalDate.of(2000, 1, 1); // fallback nếu bảng rỗng
+        }
+
+        if (toDate == null) {
+            toDate = LocalDate.now();
+        }
+
+        LocalDateTime from = fromDate.atStartOfDay();
+        LocalDateTime to = toDate.atTime(LocalTime.MAX);
+
         Pageable pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "joinDate"));
+
         return supplierRepo
-                .findByNameContainingIgnoreCaseOrAddressContainingIgnoreCaseOrEmailContainingIgnoreCaseOrPhoneContainingIgnoreCase(
-                        keyword, keyword, keyword, keyword, pageable)
+                .searchWithDateFilter(keyword, from, to, pageable)
                 .map(supplierMap::toSupplierResponse);
     }
+
 
 
 }

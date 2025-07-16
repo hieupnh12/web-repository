@@ -25,6 +25,6 @@ public class Account {
     Role role;
     @OneToOne(fetch = FetchType.LAZY)
     @MapsId
-    @JoinColumn(name = "staff_id")
+    @JoinColumn(name = "staff_id", referencedColumnName = "staffId")
     Staff staff;
 }

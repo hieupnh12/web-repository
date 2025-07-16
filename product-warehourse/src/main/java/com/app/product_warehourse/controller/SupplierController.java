@@ -13,9 +13,12 @@ import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.web.bind.annotation.*;
 
 
+import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
 
 @RestController
@@ -59,16 +62,17 @@ public class SupplierController {
             }
 
     @GetMapping("/search")
-    public ApiResponse<Page<SupplierResponse>> searchCustomers(
+    public ApiResponse<Page<SupplierResponse>> searchSuppliers(
             @RequestParam String keyword,
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate fromDate,
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate toDate,
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "10") int size) {
 
         return ApiResponse.<Page<SupplierResponse>>builder()
-                .result(supplierService.searchSuppliers(keyword, page, size))
+                .result(supplierService.searchSuppliers(keyword, fromDate, toDate, page, size))
                 .build();
     }
-
     @GetMapping
     public ApiResponse<Page<SupplierResponse>> getCustomers(
             @RequestParam(defaultValue = "0") int page,

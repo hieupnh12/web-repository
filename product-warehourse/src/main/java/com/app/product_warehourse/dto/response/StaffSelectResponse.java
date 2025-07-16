@@ -12,8 +12,4 @@ import java.util.Date;
 public class StaffSelectResponse {
     String staffId;
     String fullName;
-    Boolean gender;
-    Date birthDate;
-    String phoneNumber;
-    String email;
 }
