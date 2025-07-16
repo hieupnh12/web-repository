@@ -77,7 +77,7 @@ export default function Account() {
       const res = await fetchAccounts();
       setAccounts(res?.data?.result || []);
     } catch (err) {
-      setSnackbar({ open: true, message: "Failed to load accounts", severity: "error" });
+      setSnackbar({ open: true, message: "Không tải được tài khoản", severity: "lỗi" });
     } finally {
       setLoading(false);
     }
@@ -134,7 +134,7 @@ export default function Account() {
     <Container maxWidth="xl" sx={{ py: 4 }}>
       <Box sx={{ mb: 4, display: "flex", justifyContent: "space-between", flexWrap: "wrap", gap: 2 }}>
         <StyledButton variant="contained" startIcon={<AddIcon />} onClick={() => setOpenCreate(true)}>
-          Add Account
+          Thêm Tài Khoản
         </StyledButton>
         <Box sx={{ display: "flex", width: "40%", alignItems: "center", gap: 1 }}>
           <StyledTextField
