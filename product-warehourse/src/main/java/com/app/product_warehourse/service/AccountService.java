@@ -38,17 +38,20 @@ public class AccountService {
     StaffRepository staffRepository;
     RoleRepository roleRepository;
     PasswordEncoder passwordEncoder;
+    EmailService emailService;
 
 
     @PreAuthorize("hasRole('ADMIN')")
     @Transactional
-    public AccountResponse createAccount(AccountCreateRequest request, String staffId) {
+    public void createAccount(AccountCreateRequest request, String staffId) {
+
         try {
             Staff staff = staffRepository.findById(staffId)
                     .orElseThrow(() -> new RuntimeException("Staff not found with id: " + staffId));
             if (accountRepository.existsByUserName(request.getUserName())) {
                 throw new AppException(ErrorCode.ACCOUNT_EXITED);
             }
+
             Role role = roleRepository.findById(request.getRoleId())
                     .orElseThrow(() -> new RuntimeException("Role not found with id: " + request.getRoleId()));
 
@@ -59,7 +62,9 @@ public class AccountService {
             account.setRole(role);
 
             var ac = accountRepository.save(account);
-            return accountMapper.accountToAccountResponse(ac,role.getRoleId());
+            emailService.sendUserNamePassword(staff.getEmail(),request.getUserName(),request.getPassword());
+
+
 
         } catch (Exception e) {
             log.error("Error creating account", e);  // <- thêm dòng log này
@@ -70,7 +75,7 @@ public class AccountService {
     @Cacheable("account")
     public List<AccountResponse> getAllAccounts() {
         return accountRepository.findAll().stream()
-                .map(account -> accountMapper.accountToAccountResponse(account,account.getRole().getRoleId()))
+                .map(account -> accountMapper.accountToAccountResponse(account,account.getRole().getRoleId(), account.getRole().getRoleName()))
                 .collect(Collectors.toList());
     }
 
@@ -93,7 +98,7 @@ public class AccountService {
                 account.setStatus(request.getStatus());
                 account.setRole(roleRepository.findById(request.getRoleId()).orElseThrow(()-> new AppException(ErrorCode.ROLE_NOT_EXIT)));
                 accountRepository.save(account);
-                return accountMapper.accountToAccountResponse(account,account.getRole().getRoleId());
+                return accountMapper.accountToAccountResponse(account,account.getRole().getRoleId(),account.getRole().getRoleName());
         }
 
 
@@ -105,6 +110,10 @@ public class AccountService {
 
     public List<StaffSelectResponse> getStaff() {
         return accountRepository.getStaff();
+    }
+
+    public void deleteAccountByStaffId(String staffId) {
+        staffRepository.deleteById(staffId);
     }
 
 }

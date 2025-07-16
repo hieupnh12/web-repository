@@ -19,6 +19,9 @@ import org.springframework.data.domain.Sort;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -54,13 +57,31 @@ public class CustomerService {
                 .map(customerMapper::toCustomerResponse);
     }
 
-    public Page<CustomerResponse> searchCustomers(String keyword, int page, int size) {
-        Pageable pageable = PageRequest.of(page, size,Sort.by(Sort.Direction.DESC, "joinDate"));
+    public Page<CustomerResponse> searchCustomers(
+            String keyword,
+            LocalDate fromDate,
+            LocalDate toDate,
+            int page, int size) {
+
+        if (fromDate == null) {
+            LocalDateTime earliest = customerRepository.findEarliestJoinDate();
+            fromDate = earliest != null ? earliest.toLocalDate() : LocalDate.of(2000, 1, 1);
+        }
+
+        if (toDate == null) {
+            toDate = LocalDate.now();
+        }
+
+        LocalDateTime from = fromDate.atStartOfDay();
+        LocalDateTime to = toDate.atTime(LocalTime.MAX);
+
+        Pageable pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "joinDate"));
+
         return customerRepository
-                .findByCustomerNameContainingIgnoreCaseOrAddressContainingIgnoreCaseOrPhoneContainingIgnoreCase(
-                        keyword, keyword, keyword, pageable)
+                .searchWithDateFilter(keyword, from, to, pageable)
                 .map(customerMapper::toCustomerResponse);
     }
+
     public Customer getCustomer(String customerId) {
         return customerRepository.findById(customerId).orElseThrow(() -> new AppException(ErrorCode.CUSTOMER_NOT_EXIST));
     }

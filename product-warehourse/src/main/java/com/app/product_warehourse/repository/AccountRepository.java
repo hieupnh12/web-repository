@@ -21,11 +21,7 @@ public interface AccountRepository extends JpaRepository<Account, String> {
 
     @Query(value = """
     SELECT s.staff_id,
-           s.full_name,
-           s.gender,
-           s.birth_date,
-           s.phone_number,
-           s.email
+           s.full_name
     FROM staff s
     LEFT JOIN account a ON s.staff_id = a.staff_id
     WHERE a.staff_id IS NULL AND s.status = TRUE

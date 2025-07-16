@@ -74,7 +74,8 @@ public enum ErrorCode {
     FUNCTION_NOT_EXIST(1026, "Function not exist.",HttpStatus.BAD_REQUEST),
     CUSTOMER_NOT_EXIST(1027, "Customer not exist.",HttpStatus.BAD_REQUEST),
     INVENTORY_NOT_FOUND(1028, "Inventory not exist.",HttpStatus.BAD_REQUEST),
-    PHONE_NUMBER_AVAILABLE(1029, "Phone number available  .",HttpStatus.BAD_REQUEST)
+    PHONE_NUMBER_AVAILABLE(1029, "Phone number available  .",HttpStatus.BAD_REQUEST),
+    PASSWORD_WEAK(1030, "Mật khẩu phải có ít nhất 8 ký tự, gồm chữ in hoa, chữ thường, chữ số và ký tự đặc biệt.",HttpStatus.BAD_REQUEST),
     ;
 
     ErrorCode(int code, String message, HttpStatusCode statusCode) {
