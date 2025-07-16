@@ -175,6 +175,7 @@ public class ExportReceiptService {
             }
 
             productItemRepo.updateExportIdByImei(savedExportEntity.getExport_id(), imeiList);
+            updateStockOnExport(savedExportEntity);
         }
 
         ExportReceiptFULLResponse savedExportReceipt = exportMapper.toExportreceiptFULLResponse(savedExportEntity);
@@ -233,29 +234,79 @@ public class ExportReceiptService {
 
     @Transactional
     public void deleteExportReceipt(String exportId) {
-        log.info("Bắt đầu xóa ExportReceipt với exportId: {}", exportId);
-
+     ExportReceipt exportReceipt = repo.findById(exportId).orElseThrow(()-> new AppException(ErrorCode.EXPORT_RECEIPT_NOT_FOUND));
         if (repo.existsById(exportId)) {
-            log.info("Tìm thấy ExportReceipt với exportId: {}, tiến hành xóa", exportId);
 
             // Đặt export_id trong ProductItem thành null
-            log.info("Đặt export_id thành null trong ProductItem cho exportId: {}", exportId);
             repo.resetExportIdByExportId(exportId);
 
             // Xóa các ExportReceiptDetail liên quan
-            log.info("Xóa ExportReceiptDetail liên quan đến exportId: {}", exportId);
              repo.deleteDetailsByExportId(exportId);
 
             // Xóa ExportReceipt
-            log.info("Xóa ExportReceipt với exportId: {}", exportId);
             repo.deleteByExportId(exportId);
-
-            log.info("Hoàn tất xóa ExportReceipt với exportId: {}", exportId);
+           rollbackStockOnExportDelete(exportReceipt);
         } else {
-            log.warn("Không tìm thấy ExportReceipt với exportId: {}", exportId);
             throw new AppException(ErrorCode.EXPORT_RECEIPT_NOT_FOUND);
         }
     }
+
+
+
+
+
+
+
+    // Cập nhật stockQuantity khi thêm phiếu xuất
+    @Transactional
+    public void updateStockOnExport(ExportReceipt exportReceipt) {
+        try {
+            List<ExportReceiptDetail> details = exportReceipt.getExportReceiptDetails();
+            for (ExportReceiptDetail detail : details) {
+                ProductVersion productVersion = detail.getNewExId().getProductVersionId().getVersionId();
+                if (productVersion != null) {
+                    Integer quantity = detail.getQuantity();
+                    if (quantity != null && quantity > 0) {
+                        if (productVersion.getStockQuantity() == null || productVersion.getStockQuantity() < quantity) {
+                            throw new AppException(ErrorCode.PRODUCT_VERSION_QUANTITY_NOT_ENOUGH_TO_EXPORT);
+                        }
+                        productVersion.setStockQuantity(productVersion.getStockQuantity() - quantity);
+                        productVersionRepo.save(productVersion);
+                    }
+                }
+            }
+        } catch (Exception e) {
+            throw new AppException(ErrorCode.ERROR_UPDATE_QUANTITY);
+        }
+    }
+
+    // Cập nhật stockQuantity khi xóa phiếu xuất
+    @Transactional()
+    public void rollbackStockOnExportDelete(ExportReceipt exportReceipt) {
+        try {
+            List<ExportReceiptDetail> details = exportReceipt.getExportReceiptDetails();
+            for (ExportReceiptDetail detail : details) {
+                ProductVersion productVersion = detail.getNewExId().getProductVersionId().getVersionId();
+                if (productVersion != null) {
+                    Integer quantity = detail.getQuantity();
+                    if (quantity != null && quantity > 0) {
+                        productVersion.setStockQuantity(
+                                productVersion.getStockQuantity() != null
+                                        ? productVersion.getStockQuantity() + quantity
+                                        : quantity
+                        );
+                        productVersionRepo.save(productVersion);
+                    }
+                }
+            }
+        } catch (Exception e) {
+            throw new AppException(ErrorCode.ERROR_UPDATE_QUANTITY);
+        }
+    }
+
+
+
+
 
 
 }

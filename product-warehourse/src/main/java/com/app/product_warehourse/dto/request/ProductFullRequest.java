@@ -12,31 +12,10 @@ import java.util.List;
 @AllArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class ProductFullRequest {
-    String productName;
 
-    Long originId;
+    Long ProductId;
 
-    String processor;
-
-    Integer battery;
-
-    Double screenSize;
-
-    Long operatingSystemId;
-
-    Integer chipset;
-
-    String rearCamera;
-
-    String frontCamera;
-
-    Integer warrantyPeriod;
-
-    Long  brandId;
-
-    Long  warehouseAreaId;
-
-    Boolean status;
+    ProductsRequest products ;
 
     //them danh sach cac phien ban san pham
      List<ProductVersionRequest> versions;

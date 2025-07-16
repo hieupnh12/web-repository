@@ -18,10 +18,22 @@ public interface ProductItemMapper {
     ProductItemResponse toProductItemResponse(ProductItem productItem);
 
     default ProductItem ToProducItemcreate(ProductItemRequest request, ProductVersion version, ImportReceipt imports, ExportReceipt exports) {
-        ProductItem item = toProductItem(request);
+        ProductItem item = new ProductItem();
+        item.setImei(request.getImei());
         item.setVersionId(version);
         item.setImport_id(imports);
         item.setExport_id(exports);
+        item.setStatus(request.isStatus()); // Nếu có
+        return item;
+    }
+
+    default ProductItem ToProducItemcreateFULL(String imei, ProductVersion version, ImportReceipt imports, ExportReceipt exports) {
+        ProductItem item = new ProductItem();
+        item.setImei(imei);
+        item.setVersionId(version);
+        item.setImport_id(imports);
+        item.setExport_id(exports);
+        item.setStatus(false); // Nếu có
         return item;
     }
 

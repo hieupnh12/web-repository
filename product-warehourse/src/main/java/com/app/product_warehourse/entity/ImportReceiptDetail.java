@@ -59,10 +59,6 @@ public class ImportReceiptDetail  {
         @JoinColumn(name = "product_version_id")
         ProductVersion productVersionId;
 
-        // Constructor bổ sung
-        public ImportReceiptDetailId(ImportReceipt import_id, ProductVersion productVersionId) {
-            this.import_id = import_id;
-            this.productVersionId = productVersionId;
-        }
+
     }
 }
