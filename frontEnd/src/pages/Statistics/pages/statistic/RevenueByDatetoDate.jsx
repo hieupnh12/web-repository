@@ -1,5 +1,22 @@
 import React, { useEffect, useState } from "react";
-import { getRevenueByDateRange } from "../../../../services/statisticService";
+import {
+  Box,
+  Typography,
+  Button,
+  Paper,
+  TextField,
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableRow,
+  TablePagination,
+  Skeleton,
+  InputAdornment,
+} from "@mui/material";
+import { styled, alpha } from "@mui/material/styles";
+import { FileDown, RefreshCw, Search } from "lucide-react";
 import {
   AreaChart,
   Area,
@@ -7,57 +24,92 @@ import {
   YAxis,
   CartesianGrid,
   Tooltip,
-  ResponsiveContainer
+  ResponsiveContainer,
 } from "recharts";
+import { getRevenueByDateRange } from "../../../../services/statisticService";
 import * as XLSX from "xlsx";
-import { FileDown, RefreshCw } from "lucide-react";
 
+// Styled Components
+const StyledPaper = styled(Paper)(({ theme }) => ({
+  background: "linear-gradient(145deg, #ffffff 0%, #f0f7ff 100%)",
+  borderRadius: 16,
+  boxShadow: "0 8px 32px rgba(33, 150, 243, 0.1)",
+  overflow: "hidden",
+  transition: "all 0.3s ease-in-out",
+  "&:hover": {
+    boxShadow: "0 12px 48px rgba(33, 150, 243, 0.2)",
+  },
+}));
+
+const StyledTableHead = styled(TableHead)(({ theme }) => ({
+  backgroundColor: "#2196f3",
+  "& .MuiTableCell-head": {
+    color: "white",
+    fontWeight: 600,
+    fontSize: "0.95rem",
+    borderBottom: "none",
+    padding: "16px",
+  },
+}));
+
+const StyledTableRow = styled(TableRow)(({ theme }) => ({
+  "&:nth-of-type(odd)": {
+    backgroundColor: alpha(theme.palette.primary.light, 0.05),
+  },
+  "&:hover": {
+    backgroundColor: alpha(theme.palette.primary.light, 0.1),
+  },
+  transition: "all 0.3s ease",
+}));
 
 const RevenueDatetoDate = () => {
   const today = new Date().toISOString().split("T")[0];
-  const weekAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000)
-    .toISOString()
-    .split("T")[0];
+  const weekAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString().split("T")[0];
 
   const [startDate, setStartDate] = useState(weekAgo);
   const [endDate, setEndDate] = useState(today);
   const [data, setData] = useState([]);
   const [error, setError] = useState(null);
 
-  const fetchData = async () => {
-    if (!startDate || !endDate) {
-      setError("Vui lòng chọn ngày bắt đầu và kết thúc");
-      return;
-    }
-    try {
-      const res = await getRevenueByDateRange(startDate, endDate);
-      if (res.status === 200) {
-        setData(res.result || []);
-        setError(null);
-      } else {
-        setData([]);
-        setError(res.message || "Lỗi tải dữ liệu");
-      }
-    } catch (err) {
-      console.error("Error:", err);
-      setData([]);
-      setError("Lỗi kết nối tới API");
-    }
-  };
+  // Pagination
+  const [page, setPage] = useState(0);
+  const [rowsPerPage, setRowsPerPage] = useState(10);
 
   useEffect(() => {
     fetchData();
   }, []);
 
+  const fetchData = async () => {
+    if (!startDate || !endDate) {
+      setError("Hãy nhập ngày bắt đầu và kết thúc.");
+      setData([]);
+      return;
+    }
+
+    try {
+      const res = await getRevenueByDateRange(startDate, endDate);
+      if (res.status === 200 && res.data?.code === 1000) {
+        setData(res.data.result || []);
+        setError(null);
+      } else {
+        setData([]);
+        setError(res.data?.message || "Không tải được dữ liệu doanh thu.");
+      }
+    } catch (err) {
+      console.error(err);
+      setData([]);
+      setError("Lỗi kết nối API.");
+    }
+  };
+
   const handleExportExcel = () => {
     const exportData = data.map((item, index) => ({
       STT: index + 1,
-      Ngày: item.date,
+      Ngày: formatDate(item.date),
       "Chi phí": item.expenses.toLocaleString("vi-VN") + "đ",
       "Doanh thu": item.revenues.toLocaleString("vi-VN") + "đ",
       "Lợi nhuận": item.profits.toLocaleString("vi-VN") + "đ",
     }));
-
     const worksheet = XLSX.utils.json_to_sheet(exportData);
     const workbook = XLSX.utils.book_new();
     XLSX.utils.book_append_sheet(workbook, worksheet, "Doanh thu từ ngày tới ngày");
@@ -71,130 +123,144 @@ const RevenueDatetoDate = () => {
     fetchData();
   };
 
-  return (
-    <div className="min-h-screen w-full bg-gradient-to-br from-gray-50 to-blue-50 px-4 py-6">
-      
-      <div className="bg-white rounded-2xl shadow-lg p-6 mb-6">
-        <h2 className="text-lg font-semibold mb-4">Thống kê doanh thu từ ngày tới ngày</h2>
+  const formatDate = (dateStr) => {
+    const d = new Date(dateStr);
+    if (isNaN(d)) return dateStr;
+    return d.toISOString().split("T")[0];
+  };
 
-        <div className="flex flex-wrap gap-4 items-center mb-4">
-          <input
+  const paginatedData = data.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage);
+
+  return (
+    <Box sx={{ p: 3, background: "linear-gradient(to bottom right, #f9fbfd, #e3f2fd)", minHeight: "100vh" }}>
+      <StyledPaper sx={{ mb: 3, p: 3 }}>
+        <Typography variant="h6" fontWeight={600} color="primary" sx={{ mb: 2 }}>
+          Doanh thu từ ngày tới ngày
+        </Typography>
+        <Box sx={{ display: "flex", flexWrap: "wrap", gap: 2 }}>
+          <TextField
+            label="Từ ngày"
             type="date"
+            size="small"
             value={startDate}
             onChange={(e) => setStartDate(e.target.value)}
-            className="px-4 py-2 border border-gray-300 rounded-xl"
+            InputLabelProps={{ shrink: true }}
           />
-          <span className="text-gray-600">đến</span>
-          <input
+          <TextField
+            label="Đến ngày"
             type="date"
+            size="small"
             value={endDate}
             onChange={(e) => setEndDate(e.target.value)}
-            className="px-4 py-2 border border-gray-300 rounded-xl"
+            InputLabelProps={{ shrink: true }}
           />
-          <button
-            onClick={fetchData}
-            className="bg-blue-600 text-white px-4 py-2 rounded-xl text-sm"
-          >
+          <Button variant="contained" onClick={fetchData} sx={{ borderRadius: 2 }}>
             Lọc
-          </button>
-          <button
+          </Button>
+          <Button
+            variant="contained"
+            color="error"
             onClick={handleReset}
-            className="bg-red-500 text-white px-4 py-2 rounded-xl flex items-center gap-2 text-sm"
+            startIcon={<RefreshCw size={18} />}
+            sx={{ borderRadius: 2 }}
           >
-            <RefreshCw className="w-4 h-4" /> Làm mới
-          </button>
-          <button
+            Làm mới
+          </Button>
+          <Button
+            variant="contained"
+            color="success"
             onClick={handleExportExcel}
-            className="bg-green-600 text-white px-4 py-2 rounded-xl flex items-center gap-2 text-sm"
+            startIcon={<FileDown size={18} />}
+            sx={{ borderRadius: 2 }}
           >
-            <FileDown className="w-4 h-4" /> Xuất Excel
-          </button>
-        </div>
+            Excel
+          </Button>
+        </Box>
+        {error && <Typography color="error" sx={{ mt: 2 }}>{error}</Typography>}
+      </StyledPaper>
 
-        {error && (
-          <div className="bg-red-100 text-red-700 p-4 mb-4 rounded-xl">
-            Lỗi: {error}
-          </div>
-        )}
+      <StyledPaper sx={{ mb: 3, p: 3 }}>
+        <Typography variant="h6" fontWeight={600} sx={{ mb: 2 }}>
+          Biểu đồ doanh thu
+        </Typography>
+        <Box sx={{ width: "100%", height: 400 }}>
+          <ResponsiveContainer width="100%" height="100%">
+            <AreaChart data={data}>
+              <defs>
+                <linearGradient id="rev" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="5%" stopColor="#3b82f6" stopOpacity={0.8} />
+                  <stop offset="95%" stopColor="#3b82f6" stopOpacity={0} />
+                </linearGradient>
+                <linearGradient id="cost" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="5%" stopColor="#f97316" stopOpacity={0.8} />
+                  <stop offset="95%" stopColor="#f97316" stopOpacity={0} />
+                </linearGradient>
+                <linearGradient id="profit" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="5%" stopColor="#10b981" stopOpacity={0.8} />
+                  <stop offset="95%" stopColor="#10b981" stopOpacity={0} />
+                </linearGradient>
+              </defs>
+              <CartesianGrid strokeDasharray="3 3" />
+              <XAxis dataKey="date" />
+              <YAxis />
+              <Tooltip />
+              <Area type="monotone" dataKey="revenues" stroke="#3b82f6" fill="url(#rev)" name="Doanh thu" />
+              <Area type="monotone" dataKey="expenses" stroke="#f97316" fill="url(#cost)" name="Chi phí" />
+              <Area type="monotone" dataKey="profits" stroke="#10b981" fill="url(#profit)" name="Lợi nhuận" />
+            </AreaChart>
+          </ResponsiveContainer>
+        </Box>
+      </StyledPaper>
 
-        <ResponsiveContainer width="100%" height={350}>
-          <AreaChart data={data}>
-            <defs>
-              <linearGradient id="revenueColor" x1="0" y1="0" x2="0" y2="1">
-                <stop offset="5%" stopColor="#3b82f6" stopOpacity={0.8} />
-                <stop offset="95%" stopColor="#3b82f6" stopOpacity={0} />
-              </linearGradient>
-              <linearGradient id="costColor" x1="0" y1="0" x2="0" y2="1">
-                <stop offset="5%" stopColor="#f97316" stopOpacity={0.8} />
-                <stop offset="95%" stopColor="#f97316" stopOpacity={0} />
-              </linearGradient>
-              <linearGradient id="profitColor" x1="0" y1="0" x2="0" y2="1">
-                <stop offset="5%" stopColor="#10b981" stopOpacity={0.8} />
-                <stop offset="95%" stopColor="#10b981" stopOpacity={0} />
-              </linearGradient>
-            </defs>
-            <CartesianGrid strokeDasharray="3 3" />
-            <XAxis dataKey="date" />
-            <YAxis />
-            <Tooltip />
-            <Area
-              type="monotone"
-              dataKey="revenues"
-              stroke="#3b82f6"
-              fill="url(#revenueColor)"
-              name="Doanh thu"
-            />
-            <Area
-              type="monotone"
-              dataKey="expenses"
-              stroke="#f97316"
-              fill="url(#costColor)"
-              name="Chi phí"
-            />
-            <Area
-              type="monotone"
-              dataKey="profits"
-              stroke="#10b981"
-              fill="url(#profitColor)"
-              name="Lợi nhuận"
-            />
-          </AreaChart>
-        </ResponsiveContainer>
-      </div>
-
-      <div className="bg-white rounded-2xl shadow-lg p-6 overflow-x-auto">
-        <h2 className="text-lg font-semibold mb-4">Chi tiết doanh thu theo ngày</h2>
-        <table className="w-full text-sm text-left">
-          <thead className="bg-gray-100 text-gray-700 font-semibold">
-            <tr>
-              <th className="px-4 py-2">STT</th>
-              <th className="px-4 py-2">Ngày</th>
-              <th className="px-4 py-2">Chi phí</th>
-              <th className="px-4 py-2">Doanh thu</th>
-              <th className="px-4 py-2">Lợi nhuận</th>
-            </tr>
-          </thead>
-          <tbody>
-            {data.map((item, index) => (
-              <tr key={item.date} className="hover:bg-blue-50 border-b">
-                <td className="px-4 py-2">{index + 1}</td>
-                <td className="px-4 py-2">{item.date}</td>
-                <td className="px-4 py-2">{item.expenses?.toLocaleString("vi-VN")}đ</td>
-                <td className="px-4 py-2">{item.revenues?.toLocaleString("vi-VN")}đ</td>
-                <td className="px-4 py-2">{item.profits?.toLocaleString("vi-VN")}đ</td>
-              </tr>
-            ))}
-            {data.length === 0 && (
-              <tr>
-                <td colSpan={5} className="text-center py-4 text-gray-500">
-                  Không có dữ liệu.
-                </td>
-              </tr>
-            )}
-          </tbody>
-        </table>
-      </div>
-    </div>
+      <StyledPaper>
+        <TableContainer>
+          <Table>
+            <StyledTableHead>
+              <TableRow>
+                <TableCell>STT</TableCell>
+                <TableCell>Ngày</TableCell>
+                <TableCell>Chi phí</TableCell>
+                <TableCell>Doanh thu</TableCell>
+                <TableCell>Lợi nhuận</TableCell>
+              </TableRow>
+            </StyledTableHead>
+            <TableBody>
+              {paginatedData.length === 0 ? (
+                <TableRow>
+                  <TableCell colSpan={5} align="center" sx={{ py: 3, color: "gray" }}>
+                    Không có dữ liệu.
+                  </TableCell>
+                </TableRow>
+              ) : (
+                paginatedData.map((item, idx) => (
+                  <StyledTableRow key={item.date}>
+                    <TableCell>{page * rowsPerPage + idx + 1}</TableCell>
+                    <TableCell>{formatDate(item.date)}</TableCell>
+                    <TableCell>{item.expenses?.toLocaleString("vi-VN")}đ</TableCell>
+                    <TableCell>{item.revenues?.toLocaleString("vi-VN")}đ</TableCell>
+                    <TableCell>{item.profits?.toLocaleString("vi-VN")}đ</TableCell>
+                  </StyledTableRow>
+                ))
+              )}
+            </TableBody>
+          </Table>
+        </TableContainer>
+        <TablePagination
+          component="div"
+          rowsPerPageOptions={[5, 10, 25]}
+          count={data.length}
+          page={page}
+          rowsPerPage={rowsPerPage}
+          onPageChange={(e, newPage) => setPage(newPage)}
+          onRowsPerPageChange={(e) => {
+            setRowsPerPage(parseInt(e.target.value, 10));
+            setPage(0);
+          }}
+          labelRowsPerPage="Số hàng mỗi trang:"
+          sx={{ borderTop: "1px solid #e0e0e0", backgroundColor: "#fafafa" }}
+        />
+      </StyledPaper>
+    </Box>
   );
 };
 

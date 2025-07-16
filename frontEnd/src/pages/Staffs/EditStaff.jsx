@@ -59,8 +59,8 @@ const EditStaff = ({ staff, onClose, onSave }) => {
               <User />
             </div>
             <div>
-              <h2 className="text-2xl font-bold">Edit Staff</h2>
-              <p className="text-sm opacity-90">Update staff details</p>
+              <h2 className="text-2xl font-bold">Chỉnh sửa nhân viên</h2>
+              <p className="text-sm opacity-90">Cập nhật thông tin nhân viên</p>
             </div>
           </div>
           <button
@@ -75,7 +75,7 @@ const EditStaff = ({ staff, onClose, onSave }) => {
           <input name="fullName" value={form.fullName} onChange={handleChange} className="w-full p-3 border rounded-lg" required />
           <div className="grid grid-cols-2 gap-4">
             <select name="gender" value={form.gender} onChange={handleChange} className="p-3 border rounded-lg" required>
-              <option value="">Select Gender</option>
+              <option value="">Chọn giới tính</option>
               <option value="Nam">Nam</option>
               <option value="Nữ">Nữ</option>
             </select>
@@ -86,12 +86,12 @@ const EditStaff = ({ staff, onClose, onSave }) => {
             <input type="email" name="email" value={form.email} onChange={handleChange} className="p-3 border rounded-lg" required />
           </div>
           <select name="status" value={form.status} onChange={handleChange} className="w-full p-3 border rounded-lg">
-            <option value="1">Active</option>
-            <option value="0">Inactive</option>
+            <option value="1">Hoạt động</option>
+            <option value="0">Không hoạt động</option>
           </select>
           <div className="flex justify-end gap-2 pt-4">
-            <button type="button" onClick={onClose} className="px-4 py-2 border rounded hover:bg-gray-100">Cancel</button>
-            <button type="submit" className="px-6 py-2 bg-yellow-500 text-white rounded hover:bg-yellow-600">Update</button>
+            <button type="button" onClick={onClose} className="px-4 py-2 border rounded hover:bg-gray-100">Hủy bỏ</button>
+            <button type="submit" className="px-6 py-2 bg-yellow-500 text-white rounded hover:bg-yellow-600">Cập nhật</button>
           </div>
         </form>
       </div>

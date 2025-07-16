@@ -1,11 +1,74 @@
+// CustomerStatistic.jsx
 import React, { useEffect, useState } from "react";
+import {
+  Box,
+  Typography,
+  Tooltip,
+  Paper,
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableRow,
+  TablePagination,
+  Skeleton,
+  TextField,
+  InputAdornment,
+} from "@mui/material";
+import { styled, alpha } from "@mui/material/styles";
+import SearchIcon from "@mui/icons-material/Search";
+import PersonIcon from "@mui/icons-material/Person";
+import HomeIcon from "@mui/icons-material/Home";
+import PhoneIcon from "@mui/icons-material/Phone";
+import ShoppingCartIcon from "@mui/icons-material/ShoppingCart";
+import MonetizationOnIcon from "@mui/icons-material/MonetizationOn";
 import { getCustomerStatistic } from "../../../../services/statisticService";
-import { Search, User2 } from "lucide-react";
 
+// --- Styled Components ---
+const StyledPaper = styled(Paper)(({ theme }) => ({
+  background: "linear-gradient(145deg, #ffffff 0%, #f0f7ff 100%)",
+  borderRadius: 16,
+  boxShadow: "0 8px 32px rgba(33, 150, 243, 0.1)",
+  overflow: "hidden",
+  transition: "all 0.3s ease-in-out",
+  "&:hover": {
+    boxShadow: "0 12px 48px rgba(33, 150, 243, 0.2)",
+  },
+}));
+
+const StyledTableHead = styled(TableHead)(({ theme }) => ({
+  backgroundColor: "#2196f3",
+  "& .MuiTableCell-head": {
+    color: "white",
+    fontWeight: 600,
+    fontSize: "0.95rem",
+    borderBottom: "none",
+    padding: "16px",
+  },
+}));
+
+const StyledTableRow = styled(TableRow)(({ theme }) => ({
+  "&:nth-of-type(odd)": {
+    backgroundColor: alpha(theme.palette.primary.light, 0.05),
+  },
+  "&:hover": {
+    backgroundColor: alpha(theme.palette.primary.light, 0.1),
+    boxShadow: "0 4px 20px rgba(33, 150, 243, 0.1)",
+  },
+  transition: "all 0.3s ease",
+}));
+
+// --- Main Component ---
 const CustomerStatistic = () => {
   const [customers, setCustomers] = useState([]);
   const [search, setSearch] = useState("");
   const [error, setError] = useState(null);
+  const [loading, setLoading] = useState(true);
+
+  // Pagination
+  const [page, setPage] = useState(0);
+  const [rowsPerPage, setRowsPerPage] = useState(10);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -22,73 +85,151 @@ const CustomerStatistic = () => {
         console.error("Lỗi:", err);
         setError("Lỗi kết nối API");
         setCustomers([]);
+      } finally {
+        setLoading(false);
       }
     };
     fetchData();
   }, []);
 
+  // Filter
   const filtered = customers.filter((c) =>
     c.customerName?.toLowerCase().includes(search.toLowerCase())
   );
 
+  const paginatedData = filtered.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage);
+
+  const handleChangePage = (event, newPage) => {
+    setPage(newPage);
+  };
+
+  const handleChangeRowsPerPage = (event) => {
+    setRowsPerPage(parseInt(event.target.value, 10));
+    setPage(0);
+  };
+
   return (
-    <div className="min-h-screen w-full bg-gradient-to-br from-gray-50 to-blue-50 px-4 py-6">
-      <div className="bg-white rounded-2xl shadow-lg p-6 mb-6">
-        <div className="flex justify-between items-center">
-          <h2 className="text-lg font-semibold flex items-center gap-2">
-            <User2 className="w-5 h-5 text-green-500" /> Thống kê khách hàng
-          </h2>
-          <div className="relative w-64">
-            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
-            <input
-              type="text"
-              placeholder="Tìm khách hàng..."
-              className="w-full pl-10 pr-4 py-2 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
-              value={search}
-              onChange={(e) => setSearch(e.target.value)}
-            />
-          </div>
-        </div>
-      </div>
+    <Box sx={{ p: 3, background: "linear-gradient(to bottom right, #f9fbfd, #e3f2fd)", minHeight: "100vh" }}>
+      <StyledPaper sx={{ mb: 3, p: 3 }}>
+        <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+          <Typography variant="h6" fontWeight={600} color="primary">
+            <PersonIcon sx={{ mr: 1, verticalAlign: "middle" }} /> Thống kê khách hàng
+          </Typography>
+          <TextField
+            variant="outlined"
+            size="small"
+            placeholder="Tìm khách hàng..."
+            value={search}
+            onChange={(e) => {
+              setSearch(e.target.value);
+              setPage(0);
+            }}
+            InputProps={{
+              startAdornment: (
+                <InputAdornment position="start">
+                  <SearchIcon color="action" />
+                </InputAdornment>
+              ),
+            }}
+            sx={{
+              width: 300,
+              "& .MuiOutlinedInput-root": {
+                borderRadius: 8,
+                backgroundColor: "white",
+              },
+            }}
+          />
+        </Box>
+      </StyledPaper>
 
       {error && (
-        <div className="bg-red-100 text-red-700 p-4 mb-6 rounded-xl">
+        <Box sx={{ mb: 3, p: 2, borderRadius: 2, bgcolor: "#ffebee", color: "#c62828" }}>
           {error}
-        </div>
+        </Box>
       )}
 
-      <div className="bg-white rounded-2xl shadow-lg p-6 overflow-x-auto">
-        <table className="w-full text-sm text-left">
-          <thead className="bg-gray-100">
-            <tr>
-              <th className="px-4 py-2">#</th>
-              <th className="px-4 py-2">Tên khách hàng</th>
-              <th className="px-4 py-2">Email</th>
-              <th className="px-4 py-2">Số điện thoại</th>
-              <th className="px-4 py-2">Tổng đơn hàng</th>
-            </tr>
-          </thead>
-          <tbody className="divide-y divide-gray-200">
-            {filtered.map((c, index) => (
-              <tr key={c.customerId} className="hover:bg-blue-50">
-                <td className="px-4 py-2">{index + 1}</td>
-                <td className="px-4 py-2 font-medium">{c.customerName}</td>
-                <td className="px-4 py-2">{c.email}</td>
-                <td className="px-4 py-2">{c.phone}</td>
-                <td className="px-4 py-2">{c.totalOrders}</td>
-              </tr>
-            ))}
-            {filtered.length === 0 && (
-              <tr>
-                <td colSpan={5} className="text-center py-4 text-gray-500">
-                  Không có dữ liệu.
-                </td>
-              </tr>
-            )}
-          </tbody>
-        </table>
-      </div>
-    </div>
+      <StyledPaper>
+        <TableContainer>
+          <Table>
+            <StyledTableHead>
+              <TableRow>
+                <TableCell>#</TableCell>
+                <TableCell>Khách hàng</TableCell>
+                <TableCell>Địa chỉ</TableCell>
+                <TableCell>Số điện thoại</TableCell>
+                <TableCell>Tổng đơn hàng</TableCell>
+                <TableCell>Tổng số tiền</TableCell>
+              </TableRow>
+            </StyledTableHead>
+            <TableBody>
+              {loading
+                ? [...Array(5)].map((_, idx) => (
+                    <TableRow key={idx}>
+                      <TableCell colSpan={6}>
+                        <Skeleton animation="wave" height={60} />
+                      </TableCell>
+                    </TableRow>
+                  ))
+                : paginatedData.map((c, idx) => (
+                    <StyledTableRow key={c.customerId}>
+                      <TableCell>{page * rowsPerPage + idx + 1}</TableCell>
+                      <TableCell>
+                        <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+                          <PersonIcon color="primary" fontSize="small" />
+                          <Typography variant="body2" fontWeight={500}>
+                            {c.customerName}
+                          </Typography>
+                        </Box>
+                      </TableCell>
+                      <TableCell>
+                        <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+                          <HomeIcon fontSize="small" />
+                          {c.address || "N/A"}
+                        </Box>
+                      </TableCell>
+                      <TableCell>
+                        <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+                          <PhoneIcon fontSize="small" />
+                          {c.phoneNumber}
+                        </Box>
+                      </TableCell>
+                      <TableCell>
+                        <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+                          <ShoppingCartIcon fontSize="small" />
+                          {c.amount}
+                        </Box>
+                      </TableCell>
+                      <TableCell>
+                        <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+                          <MonetizationOnIcon fontSize="small" />
+                          {c.totalAmount}
+                        </Box>
+                      </TableCell>
+                    </StyledTableRow>
+                  ))}
+              {!loading && filtered.length === 0 && (
+                <TableRow>
+                  <TableCell colSpan={6} align="center" sx={{ py: 3, color: "gray" }}>
+                    Không có dữ liệu.
+                  </TableCell>
+                </TableRow>
+              )}
+            </TableBody>
+          </Table>
+        </TableContainer>
+        <TablePagination
+          rowsPerPageOptions={[5, 10, 25]}
+          component="div"
+          count={filtered.length}
+          rowsPerPage={rowsPerPage}
+          page={page}
+          onPageChange={handleChangePage}
+          onRowsPerPageChange={handleChangeRowsPerPage}
+          labelRowsPerPage="Số hàng mỗi trang:"
+          sx={{ borderTop: "1px solid #e0e0e0", backgroundColor: "#fafafa" }}
+        />
+      </StyledPaper>
+    </Box>
   );
 };
 
