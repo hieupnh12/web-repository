@@ -35,4 +35,22 @@ public class EmailService   {
             throw new AppException(ErrorCode.TOKEN_STILL_VALID);
         }
     }
+//    public void sendUserNamePassword(String to, String userName, String password) {
+//        MimeMessage message = mailSender.createMimeMessage();
+//
+//        try {
+//            MimeMessageHelper helper = new MimeMessageHelper(message, true, "UTF-8");
+//            helper.setTo(to);
+//            helper.setSubject("Khôi phục mật khẩu");
+//
+//            String content = "<p><strong>Tên đăng nhập:</strong> " + userName + "</p>" +
+//                    "<p><strong>Mật khẩu:</strong> " + password + "</p>";
+//
+//            helper.setText(content, true); // true: gửi nội dung HTML
+//            mailSender.send(message);
+//        } catch (MessagingException e) {
+//            log.error("Lỗi khi gửi email cho {}: {}", to, e.getMessage());
+//            throw new AppException(ErrorCode.TOKEN_STILL_VALID);
+//        }
+//    }
 }

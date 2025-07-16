@@ -51,12 +51,12 @@ public class SupplierController {
            }
 
 
-//            @GetMapping
-//          public ApiResponse<List<SupplierResponse>> getSuppliers() {
-//                ApiResponse<List<SupplierResponse>> resp = new ApiResponse<>();
-//                resp.setResult(supplierService.getAllSupplier());
-//                return resp;
-//            }
+            @GetMapping("/status-true")
+          public ApiResponse<List<SupplierResponse>> getSuppliers() {
+                ApiResponse<List<SupplierResponse>> resp = new ApiResponse<>();
+                resp.setResult(supplierService.getAllSupplier());
+                return resp;
+            }
 
     @GetMapping("/search")
     public ApiResponse<Page<SupplierResponse>> searchCustomers(

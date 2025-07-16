@@ -11,4 +11,5 @@ public interface CustomerRepository extends JpaRepository<Customer, String> {
     long countByStatus(Boolean status);
     Page<Customer> findByCustomerNameContainingIgnoreCaseOrAddressContainingIgnoreCaseOrPhoneContainingIgnoreCase(
             String name, String email, String phone, Pageable pageable);
+    boolean existsByPhone(String phone);
 }

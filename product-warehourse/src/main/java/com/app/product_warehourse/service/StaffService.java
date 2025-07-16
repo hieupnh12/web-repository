@@ -28,7 +28,7 @@ import java.util.stream.Collectors;
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true) //bo private final
 @Slf4j
 public class StaffService {
-    private final AccountRepository accountRepository;
+    AccountRepository accountRepository;
     StaffMapper staffMapper;
     StaffRepository staffRepository;
 
