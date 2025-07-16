@@ -90,6 +90,7 @@ const SupplierTable = ({
   handleChangeRowsPerPage,
   handleEdit,
   handleDeleteSupplier,
+  isPermission,
 }) => {
   return (
     <StyledPaper>
@@ -107,128 +108,122 @@ const SupplierTable = ({
             </TableRow>
           </StyledTableHead>
           <TableBody>
-            {loading
-              ? [...Array(5)].map((_, index) => (
-                  <TableRow key={index}>
-                    <TableCell colSpan={7}>
-                      <Skeleton animation="wave" height={60} />
-                    </TableCell>
-                  </TableRow>
-                )): filteredSuppliers.length === 0 ? (
-                              <TableRow>
-                                <TableCell colSpan={7} align="center">
-                                  <Typography>Không tìm thấy nhà cung cấp</Typography>
-                                </TableCell>
-                              </TableRow>
-                            )
-              : filteredSuppliers.map((supplier, index) => (
-                  <StyledTableRow key={supplier.id}>
-                    <TableCell>{page * rowsPerPage + index + 1}</TableCell>
-                    <TableCell>
-                      <Box
-                        sx={{ display: "flex", alignItems: "center", gap: 1 }}
-                      >
-                        <BusinessIcon color="primary" fontSize="small" />
-                        <Typography variant="body2" fontWeight={500}>
-                          {supplier.name}
+            {loading ? (
+              [...Array(5)].map((_, index) => (
+                <TableRow key={index}>
+                  <TableCell colSpan={7}>
+                    <Skeleton animation="wave" height={60} />
+                  </TableCell>
+                </TableRow>
+              ))
+            ) : filteredSuppliers.length === 0 ? (
+              <TableRow>
+                <TableCell colSpan={7} align="center">
+                  <Typography>Không tìm thấy nhà cung cấp</Typography>
+                </TableCell>
+              </TableRow>
+            ) : (
+              filteredSuppliers.map((supplier, index) => (
+                <StyledTableRow key={supplier.id}>
+                  <TableCell>{page * rowsPerPage + index + 1}</TableCell>
+                  <TableCell>
+                    <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+                      <BusinessIcon color="primary" fontSize="small" />
+                      <Typography variant="body2" fontWeight={500}>
+                        {supplier.name}
+                      </Typography>
+                    </Box>
+                  </TableCell>
+                  <TableCell>
+                    <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+                      <EmailIcon color="action" fontSize="small" />
+                      {supplier.email}
+                    </Box>
+                  </TableCell>
+                  <TableCell>
+                    <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+                      <PhoneIcon color="action" fontSize="small" />
+                      {supplier.phone}
+                    </Box>
+                  </TableCell>
+                  <TableCell>
+                    <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+                      <LocationIcon color="action" fontSize="small" />
+                      <Tooltip title={supplier.address} placement="top">
+                        <Typography
+                          variant="body2"
+                          noWrap
+                          sx={{ maxWidth: 200 }}
+                        >
+                          {supplier.address}
                         </Typography>
-                      </Box>
-                    </TableCell>
-                    <TableCell>
-                      <Box
-                        sx={{ display: "flex", alignItems: "center", gap: 1 }}
-                      >
-                        <EmailIcon color="action" fontSize="small" />
-                        {supplier.email}
-                      </Box>
-                    </TableCell>
-                    <TableCell>
-                      <Box
-                        sx={{ display: "flex", alignItems: "center", gap: 1 }}
-                      >
-                        <PhoneIcon color="action" fontSize="small" />
-                        {supplier.phone}
-                      </Box>
-                    </TableCell>
-                    <TableCell>
-                      <Box
-                        sx={{ display: "flex", alignItems: "center", gap: 1 }}
-                      >
-                        <LocationIcon color="action" fontSize="small" />
-                        <Tooltip title={supplier.address} placement="top">
-                          <Typography
-                            variant="body2"
-                            noWrap
-                            sx={{ maxWidth: 200 }}
-                          >
-                            {supplier.address}
-                          </Typography>
-                        </Tooltip>
-                      </Box>
-                    </TableCell>
-                    <TableCell align="center">
-                      <Tooltip>
-                        <span>
-                          <Chip
-                            label={supplier.status ? "Hoạt động" : "Khóa"}
-                            color={supplier.status ? "success" : "error"}
-                            size="small"
-                            icon={
-                              supplier.status ? (
-                                <CheckCircleIcon />
-                              ) : (
-                                <CancelIcon />
-                              )
-                            }
-                            sx={{ fontWeight: 500, pointerEvents: "none" }}
-                          />
-                        </span>
                       </Tooltip>
-                    </TableCell>
-                    <TableCell align="center">
-                      <Box
-                        sx={{
-                          display: "flex",
-                          gap: 1,
-                          justifyContent: "center",
-                        }}
-                      >
-                        <Tooltip title="Xem chi tiết" placement="top">
-                          <IconButton
-                            size="small"
-                            onClick={() => handleEdit(supplier)}
-                            sx={{
-                              color: "#2196f3",
-                              "&:hover": {
-                                backgroundColor: "#e3f2fd",
-                                transform: "scale(1.1)",
-                              },
-                              transition: "all 0.3s ease",
-                            }}
-                          >
-                            <EditIcon fontSize="small" />
-                          </IconButton>
-                        </Tooltip>
-                        <Tooltip title="Xóa" placement="top">
-                          <IconButton
-                            size="small"
-                            onClick={() => handleDeleteSupplier(supplier.id)}
-                            sx={{
-                              color: "#f44336",
-                              "&:hover": {
-                                backgroundColor: "#ffebee",
-                                transform: "scale(1.1)",
-                              },
-                              transition: "all 0.3s ease",
-                            }}
-                          >
-                            <DeleteIcon fontSize="small" />
-                          </IconButton>
-                        </Tooltip>
-                      </Box>
-                    </TableCell>
-                  </StyledTableRow>
-                ))}
+                    </Box>
+                  </TableCell>
+                  <TableCell align="center">
+                    <Tooltip>
+                      <span>
+                        <Chip
+                          label={supplier.status ? "Hoạt động" : "Khóa"}
+                          color={supplier.status ? "success" : "error"}
+                          size="small"
+                          icon={
+                            supplier.status ? (
+                              <CheckCircleIcon />
+                            ) : (
+                              <CancelIcon />
+                            )
+                          }
+                          sx={{ fontWeight: 500, pointerEvents: "none" }}
+                        />
+                      </span>
+                    </Tooltip>
+                  </TableCell>
+                  <TableCell align="center">
+                    <Box
+                      sx={{
+                        display: "flex",
+                        gap: 1,
+                        justifyContent: "center",
+                      }}
+                    >
+                      <Tooltip title="Xem chi tiết" placement="top">
+                        <IconButton
+                          size="small"
+                          onClick={() => handleEdit(supplier)}
+                          sx={{
+                            color: "#2196f3",
+                            "&:hover": {
+                              backgroundColor: "#e3f2fd",
+                              transform: "scale(1.1)",
+                            },
+                            transition: "all 0.3s ease",
+                          }}
+                        >
+                          <EditIcon fontSize="small" />
+                        </IconButton>
+                      </Tooltip>
+                      <Tooltip title="Xóa" placement="top">
+                        <IconButton
+                          size="small"
+                          onClick={() => handleDeleteSupplier(supplier.id)}
+                          sx={{
+                            color: "#f44336",
+                            "&:hover": {
+                              backgroundColor: "#ffebee",
+                              transform: "scale(1.1)",
+                            },
+                            transition: "all 0.3s ease",
+                          }}
+                        >
+                          <DeleteIcon fontSize="small" />
+                        </IconButton>
+                      </Tooltip>
+                    </Box>
+                  </TableCell>
+                </StyledTableRow>
+              ))
+            )}
           </TableBody>
         </Table>
       </StyledTableContainer>

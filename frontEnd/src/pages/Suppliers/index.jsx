@@ -27,6 +27,8 @@ import SupplierDialog from "./modals/CreateSupplierDialog";
 import SupplierTable from "./SupplierTable";
 import EditSupplier from "./modals/EditSupplier";
 import ConfirmDialog from "../../components/ui/ConfirmDialog";
+import { takeFunctionOfFeature } from "../../services/permissionService";
+import { useSelector } from "react-redux";
 
 const StyledButton = styled(Button)(({ theme }) => ({
   borderRadius: 8,
@@ -88,7 +90,9 @@ const Suppliers = () => {
     } catch (error) {
       setSnackbar({
         open: true,
-        message: `Lỗi khi tải danh sách nhà cung cấp: ${error.response?.data?.message || error.message}`,
+        message: `Lỗi khi tải danh sách nhà cung cấp: ${
+          error.response?.data?.message || error.message
+        }`,
         severity: "error",
       });
     } finally {
@@ -97,7 +101,11 @@ const Suppliers = () => {
   };
 
   // Tìm kiếm nhà cung cấp với phân trang
-  const searchSuppliers = async (keyword, pageNum = page, size = rowsPerPage) => {
+  const searchSuppliers = async (
+    keyword,
+    pageNum = page,
+    size = rowsPerPage
+  ) => {
     setLoading(true);
     try {
       const supplierData = await takeSupplierSearch(keyword, pageNum, size);
@@ -108,7 +116,9 @@ const Suppliers = () => {
     } catch (error) {
       setSnackbar({
         open: true,
-        message: `Lỗi khi tải danh sách nhà cung cấp: ${error.response?.data?.message || error.message}`,
+        message: `Lỗi khi tải danh sách nhà cung cấp: ${
+          error.response?.data?.message || error.message
+        }`,
         severity: "error",
       });
     } finally {
@@ -139,11 +149,11 @@ const Suppliers = () => {
       fetchSuppliers(page, rowsPerPage);
     }
   }, [page, rowsPerPage]);
-  
+
   const handleCreateSupplier = async (newSupplier) => {
     try {
       const response = await takeCreateSupplier(newSupplier);
-        console.log("sup", newSupplier);
+      console.log("sup", newSupplier);
 
       if (response.status === 200) {
         if (isSearching) {
@@ -193,7 +203,10 @@ const Suppliers = () => {
 
   const handleSaveSupplier = async (updatedSupplier) => {
     try {
-      const response = await takeUpdateSupplier(selectedSupplier.id, updatedSupplier);
+      const response = await takeUpdateSupplier(
+        selectedSupplier.id,
+        updatedSupplier
+      );
       if (response.status === 200) {
         if (isSearching) {
           searchSuppliers(searchTerm, page, rowsPerPage);
@@ -237,6 +250,36 @@ const Suppliers = () => {
     setSelectedId(id);
     setConfirmOpen(true);
   };
+
+  const [permission, setPermission] = useState(null);
+
+  const fetchPermission = async () => {
+    try {
+      const result = await takeFunctionOfFeature(5);
+      console.log("Quyền", result);
+
+      setPermission(result.data.result[0]);
+    } catch (err) {
+      setPermission(null);
+    }
+  };
+
+  const staffInfo = useSelector((state) => state.auth.userInfo);
+  console.log("dd", staffInfo);
+  useEffect(() => {
+    if (staffInfo && staffInfo.roleName === "ADMIN") {
+      // Admin có toàn quyền, gán trực tiếp
+      setPermission(() => ({
+        functionId: 5,
+        canView: true,
+        canCreate: true,
+        canUpdate: true,
+        canDelete: true,
+      }));
+    } else {
+      fetchPermission();
+    }
+  }, []);
 
   return (
     <Container maxWidth="xl" sx={{ py: 4 }}>
@@ -319,6 +362,7 @@ const Suppliers = () => {
         handleChangeRowsPerPage={handleChangeRowsPerPage}
         handleEdit={handleEditClick}
         handleDeleteSupplier={handleDeleteRequest}
+        isPermission={permission}
       />
 
       <ConfirmDialog
