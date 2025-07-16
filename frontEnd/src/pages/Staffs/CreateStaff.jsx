@@ -70,10 +70,9 @@ const AddStaff = ({ open, onClose, onSave }) => {
               <AddIcon />
             </div>
             <div>
-              <h2 className="text-2xl font-bold">Add New Staff</h2>
+              <h2 className="text-2xl font-bold">Thêm nhân viên mới</h2>
               <p className="text-sm opacity-90">
-                Please fill in all the required fields
-              </p>
+              Vui lòng điền vào tất cả các trường bắt buộc</p>
             </div>
           </div>
           <button
@@ -90,7 +89,7 @@ const AddStaff = ({ open, onClose, onSave }) => {
           <div>
             <div className="flex items-center mb-2">
               <PersonIcon className="text-green-600 mr-2" />
-              <span className="text-sm text-gray-600">Full Name</span>
+              <span className="text-sm text-gray-600">Họ & Tên</span>
             </div>
             <input
               name="fullName"
@@ -115,14 +114,14 @@ const AddStaff = ({ open, onClose, onSave }) => {
                 required
                 className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500"
               >
-                <option value="">Select Gender</option>
+                <option value="">Chọn giới tính</option>
                 <option value="Nam">Nam</option>
                 <option value="Nữ">Nữ</option>
               </select>
             </div>
             <div>
               <label className="text-sm text-gray-600 mb-2 block flex items-center gap-1">
-                <CalendarIcon fontSize="small" /> Birth Date
+                <CalendarIcon fontSize="small" /> Ngày sinh
               </label>
               <input
                 type="date"
@@ -139,7 +138,7 @@ const AddStaff = ({ open, onClose, onSave }) => {
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
               <label className="text-sm text-gray-600 mb-2 block flex items-center gap-1">
-                <PhoneIcon fontSize="small" /> Phone Number
+                <PhoneIcon fontSize="small" /> Số điện thoại
               </label>
               <input
                 name="phoneNumber"
@@ -177,8 +176,8 @@ const AddStaff = ({ open, onClose, onSave }) => {
               onChange={handleChange}
               className="p-2 border border-gray-300 rounded-lg"
             >
-              <option value="1">Active</option>
-              <option value="0">Inactive</option>
+              <option value="1">Hoạt động</option>
+              <option value="0">Không hoạt động</option>
             </select>
           </div>
         </form>
@@ -194,7 +193,7 @@ const AddStaff = ({ open, onClose, onSave }) => {
             Cancel
           </button>
           <button
-            onClick={handleSubmit}
+            type="submit"
             className="px-8 py-2 bg-gradient-to-r from-green-600 to-green-400 text-white rounded-lg font-semibold hover:from-green-700 hover:to-green-500 transition"
           >
             Create

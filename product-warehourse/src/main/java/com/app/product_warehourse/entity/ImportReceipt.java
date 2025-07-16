@@ -26,6 +26,7 @@ public class ImportReceipt {
 
     @CreationTimestamp
     @Column(name ="import_time")
+            
     LocalDateTime time;
 
 
