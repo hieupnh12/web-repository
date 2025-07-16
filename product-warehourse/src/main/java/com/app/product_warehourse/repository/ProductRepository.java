@@ -11,6 +11,8 @@ import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.Optional;
+
 @Repository
 public interface ProductRepository extends JpaRepository<Product, Long> {
     //JPA tự động general code cho các interface trong này , trừ các yêu cầu đặt biệt ra thì các tạo mới , thêm , xóa, .... có code sẵn hết
@@ -29,7 +31,14 @@ public interface ProductRepository extends JpaRepository<Product, Long> {
             "LEFT JOIN FETCH p.operatingSystem " +
             "LEFT JOIN FETCH p.warehouseArea " +
             "LEFT JOIN FETCH p.productVersion")
-    List<Product> findAll();
+    Page<Product> findProductsWithRelations(Pageable pageable);
+
+
+
+
+
+
+
 
     @Query("SELECT COALESCE(SUM(pv.stockQuantity), 0) FROM ProductVersion pv WHERE pv.product = :product")
     int calculateStockQuantity(@Param("product") Product product);
@@ -85,5 +94,14 @@ public interface ProductRepository extends JpaRepository<Product, Long> {
     );
 
 
+    @Query("SELECT DISTINCT p FROM Product p " +
+            "LEFT JOIN FETCH p.origin " +
+            "LEFT JOIN FETCH p.brand " +
+            "LEFT JOIN FETCH p.operatingSystem " +
+            "LEFT JOIN FETCH p.warehouseArea " +
+            "LEFT JOIN FETCH p.productVersion pv " +
+            "WHERE EXISTS (SELECT pi FROM ProductItem pi " +
+            "WHERE pi.versionId = pv AND pi.imei = :imei AND pi.export_id IS NULL)")
+    Optional<Product> findByImei(String imei);
 
 }

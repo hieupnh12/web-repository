@@ -175,6 +175,7 @@ public class ExportReceiptService {
             }
 
             productItemRepo.updateExportIdByImei(savedExportEntity.getExport_id(), imeiList);
+            updateStockOnExport(savedExportEntity);
         }
 
         ExportReceiptFULLResponse savedExportReceipt = exportMapper.toExportreceiptFULLResponse(savedExportEntity);
@@ -233,7 +234,7 @@ public class ExportReceiptService {
 
     @Transactional
     public void deleteExportReceipt(String exportId) {
-
+     ExportReceipt exportReceipt = repo.findById(exportId).orElseThrow(()-> new AppException(ErrorCode.EXPORT_RECEIPT_NOT_FOUND));
         if (repo.existsById(exportId)) {
 
             // Đặt export_id trong ProductItem thành null
@@ -244,11 +245,68 @@ public class ExportReceiptService {
 
             // Xóa ExportReceipt
             repo.deleteByExportId(exportId);
-
+           rollbackStockOnExportDelete(exportReceipt);
         } else {
             throw new AppException(ErrorCode.EXPORT_RECEIPT_NOT_FOUND);
         }
     }
+
+
+
+
+
+
+
+    // Cập nhật stockQuantity khi thêm phiếu xuất
+    @Transactional
+    public void updateStockOnExport(ExportReceipt exportReceipt) {
+        try {
+            List<ExportReceiptDetail> details = exportReceipt.getExportReceiptDetails();
+            for (ExportReceiptDetail detail : details) {
+                ProductVersion productVersion = detail.getNewExId().getProductVersionId().getVersionId();
+                if (productVersion != null) {
+                    Integer quantity = detail.getQuantity();
+                    if (quantity != null && quantity > 0) {
+                        if (productVersion.getStockQuantity() == null || productVersion.getStockQuantity() < quantity) {
+                            throw new AppException(ErrorCode.PRODUCT_VERSION_QUANTITY_NOT_ENOUGH_TO_EXPORT);
+                        }
+                        productVersion.setStockQuantity(productVersion.getStockQuantity() - quantity);
+                        productVersionRepo.save(productVersion);
+                    }
+                }
+            }
+        } catch (Exception e) {
+            throw new AppException(ErrorCode.ERROR_UPDATE_QUANTITY);
+        }
+    }
+
+    // Cập nhật stockQuantity khi xóa phiếu xuất
+    @Transactional()
+    public void rollbackStockOnExportDelete(ExportReceipt exportReceipt) {
+        try {
+            List<ExportReceiptDetail> details = exportReceipt.getExportReceiptDetails();
+            for (ExportReceiptDetail detail : details) {
+                ProductVersion productVersion = detail.getNewExId().getProductVersionId().getVersionId();
+                if (productVersion != null) {
+                    Integer quantity = detail.getQuantity();
+                    if (quantity != null && quantity > 0) {
+                        productVersion.setStockQuantity(
+                                productVersion.getStockQuantity() != null
+                                        ? productVersion.getStockQuantity() + quantity
+                                        : quantity
+                        );
+                        productVersionRepo.save(productVersion);
+                    }
+                }
+            }
+        } catch (Exception e) {
+            throw new AppException(ErrorCode.ERROR_UPDATE_QUANTITY);
+        }
+    }
+
+
+
+
 
 
 }

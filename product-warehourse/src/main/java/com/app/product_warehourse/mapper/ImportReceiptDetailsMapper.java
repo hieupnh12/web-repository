@@ -3,18 +3,21 @@ package com.app.product_warehourse.mapper;
 import com.app.product_warehourse.dto.request.ImportReceiptDetailsRequest;
 import com.app.product_warehourse.dto.request.ImportReceiptDetailsUpdateRequest;
 import com.app.product_warehourse.dto.response.DetailsResponse;
+import com.app.product_warehourse.dto.response.ImeiResponse;
 import com.app.product_warehourse.dto.response.ImportReceiptDetailsResponse;
 import com.app.product_warehourse.entity.ImportReceipt;
 import com.app.product_warehourse.entity.ImportReceiptDetail;
+import com.app.product_warehourse.entity.ProductItem;
 import com.app.product_warehourse.entity.ProductVersion;
 import com.app.product_warehourse.repository.ImportReceiptRepository;
 import com.app.product_warehourse.repository.ProductVersionRepository;
 import com.app.product_warehourse.service.ImportReceiptService;
 import com.app.product_warehourse.service.ProductVersionService;
-import org.mapstruct.Context;
-import org.mapstruct.Mapper;
-import org.mapstruct.Mapping;
-import org.mapstruct.MappingTarget;
+import org.mapstruct.*;
+
+import java.util.Collections;
+import java.util.List;
+import java.util.stream.Collectors;
 
 
 @Mapper(componentModel = "spring" , uses = {ProductVersionMapper.class})
@@ -25,9 +28,9 @@ public interface ImportReceiptDetailsMapper {
     ImportReceiptDetail.ImportReceiptDetailId toImportIDDetails(ImportReceiptDetailsRequest request);
 
 
-    @Mapping(target = "import_id", source = "newid.import_id.import_id") // Ánh xạ import_id của ImportReceipt
-    @Mapping(target = "productVersionId", source = "newid.productVersionId.versionId") // Ánh xạ versionId của ProductVersion
-    @Mapping(target = "productVersion", source = "newid.productVersionId") // Ánh xạ trực tiếp từ productItems
+    @Mapping(target = "import_id", source = "newid.import_id.import_id")
+    @Mapping(target = "productVersionId", source = "newid.productVersionId.versionId")
+    @Mapping(target = "productVersion", source = "newid.productVersionId")
     ImportReceiptDetailsResponse toImportReceiptDetailsResponse (ImportReceiptDetail importReceiptDetail);
 
     @Mapping(target = "productVersionId", source = "newid.productVersionId.versionId") // Ánh xạ versionId của ProductVersion
@@ -51,8 +54,8 @@ public interface ImportReceiptDetailsMapper {
 
 
 
-//    ImportReceiptDetail toUpdateImportDetail(ImportReceiptDetailsUpdateRequest request);
-       void toUpdateImportDetail(ImportReceiptDetailsUpdateRequest request, @MappingTarget ImportReceiptDetail importReceiptDetail);
+    //    ImportReceiptDetail toUpdateImportDetail(ImportReceiptDetailsUpdateRequest request);
+    void toUpdateImportDetail(ImportReceiptDetailsUpdateRequest request, @MappingTarget ImportReceiptDetail importReceiptDetail);
 
 
     default ImportReceiptDetail.ImportReceiptDetailId getInforImportReceiptDetails(ImportReceiptDetailsRequest request, ImportReceipt im , ProductVersion version){
@@ -61,5 +64,6 @@ public interface ImportReceiptDetailsMapper {
         ird.setProductVersionId(version);
         return ird;
     }
+
 
 }

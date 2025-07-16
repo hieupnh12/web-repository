@@ -85,9 +85,9 @@ public class ProductController {
 
 
     @GetMapping("/All")
-     ApiResponse<List<ProductFULLResponse>> getAll() {
-        return ApiResponse.<List<ProductFULLResponse>>builder()
-                .result(productService.ListAllProducts())
+     ApiResponse<Page<ProductFULLResponse>> getAll(Pageable pageable) {
+        return ApiResponse.<Page<ProductFULLResponse>>builder()
+                .result(productService.listAllProducts(pageable))
                 .build();
     }
 
@@ -154,6 +154,24 @@ public class ProductController {
         Pageable pageable = PageRequest.of(page, size);
         return productService.SearchProduct(
                 brandName, warehouseAreaName, originName, operatingSystemName, productName, pageable);
+    }
+
+
+    @GetMapping("/imei/{imei}")
+    public ApiResponse<ProductFULLResponse> getProductByImei(@PathVariable("imei") String imei) {
+        return  ApiResponse.<ProductFULLResponse>builder()
+                .result(productService.GetProductByImei(imei))
+                .build();
+    }
+
+
+
+    @PutMapping("/update-stock")
+    public ApiResponse<Void> updateStockProduct() {
+        productService.fixStock();
+        return ApiResponse.<Void>builder()
+                .message("UPDATE STOCK PRODUCT SUCCESSFULLY")
+                .build();
     }
 
 }

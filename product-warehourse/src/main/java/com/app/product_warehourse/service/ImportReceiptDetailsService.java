@@ -80,14 +80,14 @@ public class ImportReceiptDetailsService {
     }
 
 
-
-    public List<ImportReceiptDetailsResponse> getAllImportReceiptDetails() {
-        List<ImportReceiptDetail> response = importDrepo.findAll();
-        return response
-                .stream()
-                .map(importDmapper ::toImportReceiptDetailsResponse)
-                .collect(Collectors.toList());
-    }
+//
+//    public List<ImportReceiptDetailsResponse> getAllImportReceiptDetails() {
+//        List<ImportReceiptDetail> response = importDrepo.findAll();
+//        return response
+//                .stream()
+//                .map(importDmapper ::toImportReceiptDetailsResponse)
+//                .collect(Collectors.toList());
+//    }
 
 
     public ImportReceiptDetail getImportReceiptDetails( String id , String productVersionId) {
@@ -103,15 +103,15 @@ public class ImportReceiptDetailsService {
     }
 
 
-    public ImportReceiptDetailsResponse  UpdateImportReceiptDetails(ImportReceiptDetailsUpdateRequest request, String id , String productVersionId) {
-        ImportReceiptDetail importDetails = getImportReceiptDetails(id,productVersionId);
-        if (importDetails == null) {
-            throw new AppException(ErrorCode.IMPORT_DETAIL_NOT_EXIST);
-        }
-        importDmapper.toUpdateImportDetail(request,importDetails);
-        ImportReceiptDetail savedDetail = importDrepo.save(importDetails);
-        return importDmapper.toImportReceiptDetailsResponse(savedDetail);
-    }
+//    public ImportReceiptDetailsResponse  UpdateImportReceiptDetails(ImportReceiptDetailsUpdateRequest request, String id , String productVersionId) {
+//        ImportReceiptDetail importDetails = getImportReceiptDetails(id,productVersionId);
+//        if (importDetails == null) {
+//            throw new AppException(ErrorCode.IMPORT_DETAIL_NOT_EXIST);
+//        }
+//        importDmapper.toUpdateImportDetail(request,importDetails);
+//        ImportReceiptDetail savedDetail = importDrepo.save(importDetails);
+//        return importDmapper.toImportReceiptDetailsResponse(savedDetail);
+//    }
 
 
     public void deleteImportReceiptDetails( String id , String productVersionId) {

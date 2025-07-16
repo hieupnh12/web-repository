@@ -1,12 +1,14 @@
 package com.app.product_warehourse.service;
 
 import com.app.product_warehourse.dto.request.*;
+import com.app.product_warehourse.dto.response.ImeiResponse;
 import com.app.product_warehourse.dto.response.ProductFULLResponse;
 import com.app.product_warehourse.dto.response.ProductResponse;
 import com.app.product_warehourse.dto.response.ProductVersionResponse;
 import com.app.product_warehourse.entity.*;
 import com.app.product_warehourse.exception.AppException;
 import com.app.product_warehourse.exception.ErrorCode;
+import com.app.product_warehourse.mapper.ProductItemMapper;
 import com.app.product_warehourse.mapper.ProductMapper;
 import com.app.product_warehourse.mapper.ProductVersionMapper;
 import com.app.product_warehourse.repository.*;
@@ -52,8 +54,12 @@ public class ProductService {
     RamRepository ramRepo;
     RomRepository romRepo;
     ColorRepository colorRepo;
-
-
+     ProductItemRepository productItemRepository;
+     ProductItemMapper productItemMapper;
+    ImportReceiptRepository importReceiptRepository;
+    ExportReceiptRepository exportReceiptRepository;
+    ImportReceiptDetailsRespository importReceiptDetailsRespository;
+    ExportReceiptDetailsRepository exportReceiptDetailsRepository;
 
 
     @Transactional
@@ -202,11 +208,20 @@ public class ProductService {
 
 
 
-    public List<ProductFULLResponse> ListAllProducts() {
-        List<Product> products = productRepository.findAll();
-        return products.stream()
-                .map(productMapper::toProductFULLResponse)
-                .collect(Collectors.toList());
+    public Page<ProductFULLResponse> listAllProducts(Pageable pageable) {
+        Page<Product> products = productRepository.findProductsWithRelations(pageable);
+        products.forEach(product -> {
+            product.getProductVersion().forEach(version -> {
+                // Lọc ProductItem với export_id IS NULL
+                version.setProductItems(
+                        version.getProductItems().stream()
+                                .filter(pi -> pi.getExport_id() == null)
+                                .collect(Collectors.toList())
+                );
+            });
+        });
+        return products
+                .map(productMapper::toProductFULLResponse);
     }
 
 
@@ -277,8 +292,30 @@ public class ProductService {
                 .map(productMapper::toProductFULLResponse);
     }
 
+   @Transactional
+    public void fixStock() {
+        fixStockQuantities();
+        updateAllProductStockQuantities();
+    }
 
 
+    public ProductFULLResponse GetProductByImei(String imei) {
+        Product products = productRepository.findByImei(imei)
+                .orElseThrow(() -> new AppException(ErrorCode.PRODUCT_NOT_EXIST));
+
+        // Lọc ProductItem với export_id IS NULL trong productVersion
+
+            products.getProductVersion().forEach(version -> {
+                // Lọc ProductItem với export_id IS NULL
+                version.setProductItems(
+                        version.getProductItems().stream()
+                                .filter(pi -> pi.getExport_id() == null)
+                                .collect(Collectors.toList())
+                );
+            });
+
+        return productMapper.toProductFULLResponse(products);
+    }
 
 
 
@@ -309,7 +346,8 @@ public class ProductService {
         log.info("Bắt đầu cập nhật stock_quantity cho {} sản phẩm", products.size());
         for (Product product : products) {
             int totalStock = calculateStockQuantity(product);
-            if (product.getStockQuantity() != totalStock) {
+            Integer currentStock = product.getStockQuantity();
+            if (currentStock == null || currentStock != totalStock) {
                 product.setStockQuantity(totalStock);
                 productRepository.save(product);
                 log.info("Đã cập nhật stock_quantity cho sản phẩm ID {} thành {}", product.getProductId(), totalStock);
@@ -317,7 +355,6 @@ public class ProductService {
         }
         log.info("Hoàn thành cập nhật stock_quantity cho tất cả sản phẩm");
     }
-
 
     public String uploadImage(Long id, MultipartFile file) throws IOException {
 
@@ -360,4 +397,35 @@ public class ProductService {
         return contentType != null && (contentType.equals("image/jpeg") || contentType.equals("image/png"));
     }
 
+
+
+
+
+
+    // Sửa dữ liệu sai trong ProductVersion
+    @Transactional
+    public void fixStockQuantities() {
+        try {
+            List<ProductVersion> productVersions = productVersionRepository.findAll();
+            for (ProductVersion productVersion : productVersions) {
+                // Tính tổng số lượng nhập
+                List<ImportReceiptDetail> importDetails = importReceiptDetailsRespository.findDetailsByProductVersionId(productVersion.getVersionId());
+                int totalImportQuantity = importDetails.stream()
+                        .mapToInt(detail -> detail.getQuantity() != null ? detail.getQuantity() : 0)
+                        .sum();
+
+                // Tính tổng số lượng xuất
+                List<ExportReceiptDetail> exportDetails = exportReceiptDetailsRepository.findDetailsByProductVersionId(productVersion.getVersionId());
+                int totalExportQuantity = exportDetails.stream()
+                        .mapToInt(detail -> detail.getQuantity() != null ? detail.getQuantity() : 0)
+                        .sum();
+
+                // Cập nhật stockQuantity
+                productVersion.setStockQuantity(totalImportQuantity - totalExportQuantity);
+                productVersionRepository.save(productVersion);
+            }
+        } catch (Exception e) {
+            throw new RuntimeException("Lỗi khi sửa dữ liệu số lượng tồn kho: " + e.getMessage(), e);
+        }
+    }
 }

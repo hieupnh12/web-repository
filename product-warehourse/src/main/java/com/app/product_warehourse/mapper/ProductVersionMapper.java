@@ -52,11 +52,11 @@ public interface ProductVersionMapper {
 
     default ProductVersion ToProducVersionMakeName (ProductVersionRequest request, Ram ram , Rom rom , Color color, Product product) {
         ProductVersion productVersion = ToProductVersion(request);
-         productVersion.setRam(ram);
-         productVersion.setRom(rom);
-         productVersion.setColor(color);
-         productVersion.setProduct(product);
-         return productVersion;
+        productVersion.setRam(ram);
+        productVersion.setRom(rom);
+        productVersion.setColor(color);
+        productVersion.setProduct(product);
+        return productVersion;
     }
 
 
@@ -92,6 +92,18 @@ public interface ProductVersionMapper {
                 .map(item -> ImeiResponse.builder().imei(item.getImei()).build())
                 .collect(Collectors.toList());
     }
+
+    @Named("mapProductItemsToImeiFiltered")
+    default List<ImeiResponse> mapProductItemsToImeiFiltered(List<ProductItem> productItems, @Context String importId) {
+        if (productItems == null) {
+            return Collections.emptyList();
+        }
+        return productItems.stream()
+                .filter(item -> item.getImport_id() != null && importId.equals(item.getImport_id().getImport_id()))
+                .map(item -> ImeiResponse.builder().imei(item.getImei()).build())
+                .collect(Collectors.toList());
+    }
+
 
 
 }

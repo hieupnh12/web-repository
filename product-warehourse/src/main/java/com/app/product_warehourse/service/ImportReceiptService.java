@@ -4,10 +4,7 @@ import com.app.product_warehourse.dto.request.ImportReceiptDetailsRequest;
 import com.app.product_warehourse.dto.request.ImportReceiptFullRequest;
 import com.app.product_warehourse.dto.request.ImportReceiptRequest;
 import com.app.product_warehourse.dto.request.ProductItemRequest;
-import com.app.product_warehourse.dto.response.ImportReceiptDetailsResponse;
-import com.app.product_warehourse.dto.response.ImportReceiptFULLResponse;
-import com.app.product_warehourse.dto.response.ImportReceiptResponse;
-import com.app.product_warehourse.dto.response.ProductItemResponse;
+import com.app.product_warehourse.dto.response.*;
 import com.app.product_warehourse.entity.*;
 import com.app.product_warehourse.exception.AppException;
 import com.app.product_warehourse.exception.ErrorCode;
@@ -240,6 +237,7 @@ public class ImportReceiptService {
             } else if (Boolean.TRUE.equals(detailRequest.getType()) && (detailRequest.getImei() == null || detailRequest.getImei().isEmpty())) {
                 throw new AppException(ErrorCode.IMEI_NOT_FOUND);
             }
+            updateStockOnImport(savedImportEntity);
         }
 
         ImportReceiptFULLResponse savedImportReceipt = importmapper.toImportReceiptFULLResponse(savedImportEntity);
@@ -269,7 +267,33 @@ public class ImportReceiptService {
 
     public Page<ImportReceiptFULLResponse> getAllImportReceipts(Pageable pageable) {
         return importrepo.findAll(pageable)
-                .map(importmapper::toImportReceiptFULLResponse);
+                .map(importReceipt -> {
+                    ImportReceiptFULLResponse response = importmapper.toImportReceiptFULLResponse(importReceipt);
+                    // Lọc danh sách imei cho mỗi ImportReceiptDetail
+                    response.getDetails().forEach(detail -> {
+                        if (detail.getProductVersion() != null && importReceipt.getImportReceiptDetails() != null) {
+                            // Lấy import_id của ImportReceiptDetail
+                            String importId = detail.getImport_id();
+                            // Lấy ImportReceiptDetail tương ứng từ importReceipt
+                            ImportReceiptDetail matchingDetail = importReceipt.getImportReceiptDetails().stream()
+                                    .filter(d -> d.getNewid().getImport_id().getImport_id().equals(importId)
+                                            && d.getNewid().getProductVersionId().getVersionId().equals(detail.getProductVersionId()))
+                                    .findFirst()
+                                    .orElse(null);
+                            if (matchingDetail != null && matchingDetail.getProductItems() != null) {
+                                // Lọc danh sách imei từ productItems của ImportReceiptDetail
+                                List<ImeiResponse> filteredImei = matchingDetail.getProductItems().stream()
+                                        .map(item -> ImeiResponse.builder().imei(item.getImei()).build())
+                                        .collect(Collectors.toList());
+                                detail.getProductVersion().setImei(filteredImei);
+                            } else {
+                                // Nếu không có productItems, đặt danh sách imei rỗng
+                                detail.getProductVersion().setImei(Collections.emptyList());
+                            }
+                        }
+                    });
+                    return response;
+                });
     }
 
 
@@ -280,6 +304,7 @@ public class ImportReceiptService {
 
     @Transactional
     public void deleteImportReceipt(String importId) {
+        ImportReceipt importReceipt = importrepo.findById(importId).orElseThrow(() -> new AppException(ErrorCode.IMPORT_RECEIPT_NOT_FOUND));
         if(importrepo.existsById(importId)) {
             // Kiểm tra điều kiện: có ProductItem nào với export_id không NULL hay không
             if (importrepo.hasProductItemsWithExportId(importId) ) {
@@ -294,6 +319,7 @@ public class ImportReceiptService {
 
             // Xóa ImportReceipt
             importrepo.deleteByImportId(importId);
+            rollbackStockOnImportDelete(importReceipt);
         }
         else {
             throw new AppException(ErrorCode.IMPORT_RECEIPT_NOT_FOUND);
@@ -313,8 +339,85 @@ public class ImportReceiptService {
             Pageable pageable) {
         return importrepo.searchImportReceipts(
                 supplierName, staffName, importId, startDate, endDate, pageable)
-                .map(importmapper::toImportReceiptFULLResponse);
+                .map(importReceipt -> {
+                    ImportReceiptFULLResponse response = importmapper.toImportReceiptFULLResponse(importReceipt);
+                    // Lọc danh sách imei cho mỗi ImportReceiptDetail
+                    response.getDetails().forEach(detail -> {
+                        if (detail.getProductVersion() != null && importReceipt.getImportReceiptDetails() != null) {
+                            // Lấy import_id của ImportReceiptDetail
+                            String import_id = detail.getImport_id();
+                            // Lấy ImportReceiptDetail tương ứng từ importReceipt
+                            ImportReceiptDetail matchingDetail = importReceipt.getImportReceiptDetails().stream()
+                                    .filter(d -> d.getNewid().getImport_id().getImport_id().equals(import_id)
+                                            && d.getNewid().getProductVersionId().getVersionId().equals(detail.getProductVersionId()))
+                                    .findFirst()
+                                    .orElse(null);
+                            if (matchingDetail != null && matchingDetail.getProductItems() != null) {
+                                // Lọc danh sách imei từ productItems của ImportReceiptDetail
+                                List<ImeiResponse> filteredImei = matchingDetail.getProductItems().stream()
+                                        .map(item -> ImeiResponse.builder().imei(item.getImei()).build())
+                                        .collect(Collectors.toList());
+                                detail.getProductVersion().setImei(filteredImei);
+                            } else {
+                                // Nếu không có productItems, đặt danh sách imei rỗng
+                                detail.getProductVersion().setImei(Collections.emptyList());
+                            }
+                        }
+                    });
+                    return response;
+                });
     }
+
+
+
+    // Cập nhật stockQuantity khi thêm phiếu nhập
+    @Transactional
+    public void updateStockOnImport(ImportReceipt importReceipt) {
+        try {
+            List<ImportReceiptDetail> details = importReceipt.getImportReceiptDetails();
+            for (ImportReceiptDetail detail : details) {
+                ProductVersion productVersion = detail.getNewid().getProductVersionId();
+                if (productVersion != null) {
+                    Integer quantity = detail.getQuantity();
+                    if (quantity != null && quantity > 0) {
+                        productVersion.setStockQuantity(
+                                productVersion.getStockQuantity() != null
+                                        ? productVersion.getStockQuantity() + quantity
+                                        : quantity
+                        );
+                        productVersionRepo.save(productVersion);
+                    }
+                }
+            }
+        } catch (Exception e) {
+            throw new AppException(ErrorCode.ERROR_UPDATE_QUANTITY);
+        }
+    }
+
+    // Cập nhật stockQuantity khi xóa phiếu nhập
+    @Transactional
+    public void rollbackStockOnImportDelete(ImportReceipt importReceipt) {
+        try {
+            List<ImportReceiptDetail> details = importReceipt.getImportReceiptDetails();
+            for (ImportReceiptDetail detail : details) {
+                ProductVersion productVersion = detail.getNewid().getProductVersionId();
+                if (productVersion != null) {
+                    Integer quantity = detail.getQuantity();
+                    if (quantity != null && quantity > 0) {
+                        productVersion.setStockQuantity(
+                                productVersion.getStockQuantity() != null
+                                        ? productVersion.getStockQuantity() - quantity
+                                        : 0
+                        );
+                        productVersionRepo.save(productVersion);
+                    }
+                }
+            }
+        } catch (Exception e) {
+            throw new AppException(ErrorCode.ERROR_UPDATE_QUANTITY);
+        }
+    }
+
 
 
 
