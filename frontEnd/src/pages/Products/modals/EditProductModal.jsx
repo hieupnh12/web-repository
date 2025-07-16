@@ -2,12 +2,11 @@ import React, { useState, useEffect, Fragment } from "react";
 import { Dialog, Transition } from "@headlessui/react";
 import Button from "../../../components/ui/Button";
 import { TrashIcon } from "@heroicons/react/24/outline";
-import {
-  getAllBrands,
+import {getAllBrands,
   getAllOrigins,
-  getAllOperatingSystems,
-  getAllWarehouseAreas,
-} from "../../../services/productService";
+  getAllOSs,
+} from "../../../services/attributeService";
+import {takeWarehouseArea,} from "../../../services/storage";
 import DeleteProductModal from "./DeleteProductModal";
 
 const FormInput = ({ label, name, type = "text", value, onChange, className, error }) => (
@@ -96,8 +95,8 @@ const EditProductModal = ({ product, onClose, onSave, onDelete }) => {
     Promise.all([
       getAllBrands(),
       getAllOrigins(),
-      getAllOperatingSystems(),
-      getAllWarehouseAreas(),
+      getAllOSs(),
+      takeWarehouseArea(),
     ])
       .then(([brandRes, originRes, osRes, areaRes]) => {
         const getData = (res) => {
