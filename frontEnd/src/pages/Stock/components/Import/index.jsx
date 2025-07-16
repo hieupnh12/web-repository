@@ -5,7 +5,7 @@ import ProductForm from "./ProductFormBet";
 import ImportTable from "./ImportTableBot";
 import { takeSupplier } from "../../../../services/supplierService";
 import { useSelector } from "react-redux";
-import { useQuery } from "@tanstack/react-query";
+import { QueryClient, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Plus, Trash2 } from "lucide-react";
 import { data, select } from "framer-motion";
 import {
@@ -260,21 +260,38 @@ export default function ImportPage() {
       setIsReloading(false); // đảm bảo luôn reset loading
     }
   };
-
+  useEffect(() => {
+    if (
+      Array.isArray(productData) &&
+      displayedProducts.length === 0 // chỉ set nếu chưa có dữ liệu hiển thị
+    ) {
+      setDisplayedProducts(productData);
+    }
+  }, [productData, displayedProducts.length]);
   console.log("product data", productData);
 
   const handleSearchProduct = async (keyword) => {
-    console.log("dấds",keyword);
-    
     setIsReloading(true);
     try {
-      const resp = await takeSearchProductByName(keyword); // giả sử API hỗ trợ search theo keyword
-      console.log("searcjh",resp);
-      
+      const resp = await takeSearchProductByName(keyword);
       const content = resp?.data?.content;
-      if (Array.isArray(content)) {
-        setDisplayedProducts(content); // thay vì setProd
-      }
+      console.log("Iphoneesas", content);
+
+      setDisplayedProducts((prev) => {
+        // Tạo danh sách versionId đã có
+        const existingVersionIds = new Set(
+          prev.flatMap((p) => p.productVersionResponses.map((v) => v.versionId))
+        );
+
+        // Lọc những product mới chưa có versionId nào bị trùng
+        const newProducts = content.filter((product) =>
+          product.productVersionResponses.some(
+            (v) => !existingVersionIds.has(v.versionId)
+          )
+        );
+
+        return [...prev, ...newProducts];
+      });
     } catch (error) {
       toast.error("Lỗi khi tìm kiếm sản phẩm");
     } finally {
@@ -282,11 +299,7 @@ export default function ImportPage() {
     }
   };
 
-  useEffect(() => {
-    if (Array.isArray(productData)) {
-      setDisplayedProducts(productData);
-    }
-  }, [productData]);
+  console.log("disss", displayedProducts);
 
   // Tự động lưu importInfo vào localStorage mỗi khi thay đổi
   useEffect(() => {
@@ -397,11 +410,13 @@ export default function ImportPage() {
       toast.error("Vui lòng nhập số lượng IMEI!");
       return;
     }
+    console.log("sadofff", productData);
 
     // Tìm importPrice từ productData
-    const selectedVersion = productData
+    const selectedVersion = displayedProducts
       ?.find((p) => p.productId === productId)
       ?.productVersionResponses.find((v) => v.versionId === versionId);
+    console.log("select", searchProduct);
 
     if (!selectedVersion) {
       toast.error("Không tìm thấy phiên bản sản phẩm!");
@@ -510,12 +525,16 @@ export default function ImportPage() {
       const res = await takeConfirmImport(payload);
 
       if (res.status === 200) {
-        toast.success("Nhập hàng thành công!");
         localStorage.removeItem("import_info");
         localStorage.removeItem("selected_products");
         dispatch({ type: "RESET" });
         setListProductSelected([]);
-        navigate("/manager/import");
+        if (staffInfo && staffInfo.roleName === "ADMIN") {
+          navigate("/manager/import");
+        } else {
+          navigate("/staff/import");
+        }
+        toast.success("Nhập hàng thành công!");
       } else {
         toast.error("Nhập hàng thất bại. Vui lòng thử lại!");
       }

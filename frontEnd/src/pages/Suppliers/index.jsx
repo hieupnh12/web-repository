@@ -294,13 +294,32 @@ const Suppliers = () => {
         }}
       >
         <Box sx={{ display: "flex", gap: 2 }}>
-          <StyledButton
-            variant="contained"
-            startIcon={<AddIcon />}
-            onClick={handleAddNew}
+          <Tooltip
+            title={
+              permission?.canCreate
+                ? "Tạo mới nhà cung cấp"
+                : "Tạo mới nhà cung cấp"
+            }
+            placement="top"
           >
-            Thêm Nhà Cung Cấp
-          </StyledButton>
+            <span>
+              <StyledButton
+                variant="contained"
+                startIcon={<AddIcon />}
+                onClick={handleAddNew}
+                disabled={!permission?.canCreate}
+                sx={{
+                  opacity: permission?.canCreate ? 1 : 0.5,
+                  cursor: permission?.canCreate ? "pointer" : "not-allowed",
+                  pointerEvents: permission?.canCreate ? "auto" : "none",
+                  transition: "all 0.3s ease",
+                }}
+              >
+                Thêm Nhà Cung Cấp
+              </StyledButton>
+            </span>
+          </Tooltip>
+
           <SupplierDialog
             open={openCreate}
             onClose={() => setOpenCreate(false)}

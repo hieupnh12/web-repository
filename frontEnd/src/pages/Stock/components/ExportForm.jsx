@@ -9,6 +9,7 @@ import { takeDeleteExportReceipt } from "../../../services/exportService";
 import { toast } from "react-toastify";
 import DateRangeButton from "./DateRangeButton";
 import Button from "../../../components/ui/Button";
+import TableSkeletonLoader from "../../../components/layout/TableSkeletonLoader";
 
 export default function ExportForm({
   tableData,
@@ -152,7 +153,7 @@ const debouncedFilterChange = useCallback(
       {/* Show pdf */}
       {showPreview && (
         <ContractPreviewModal
-          data={selectProduct}
+          data={selectProduct?.details}
           IOreceipt={false}
           onClose={() => setShowPreview(false)}
         />
@@ -167,7 +168,7 @@ const debouncedFilterChange = useCallback(
             className="bg-teal-600 hover:bg-teal-700 text-white px-4 py-2 rounded-lg text-sm font-medium flex gap-1"
           >
             <Plus className="h-5 w-5" />
-            <span>Create</span>
+            <span>Tạo Phiếu</span>
           </Link>
           )}
           {/* Button to download file pdf */}
@@ -178,7 +179,7 @@ const debouncedFilterChange = useCallback(
               disabled={!selectProduct?.export_id}
             >
               <Download className="w-5 h-5" />
-              <span>Print</span>
+              <span>In Phiếu</span>
             </button>
                       {isPermission?.canDelete && (
 
@@ -188,7 +189,7 @@ const debouncedFilterChange = useCallback(
             disabled={!selectProduct?.export_id}
           >
             <Trash className="w-4 h-4 group-hover:scale-110 transition-transform duration-300" />
-            <span className="hidden sm:inline">Delete</span>
+            <span className="hidden sm:inline">Xóa Phiếu</span>
           </Button>
                       )}
           <ConfirmDialog
@@ -219,10 +220,10 @@ const debouncedFilterChange = useCallback(
             onChange={handleFieldChange}
             className="border border-gray-300 rounded-lg px-3 py-2 text-sm text-gray-700 focus:ring-teal-500 focus:border-teal-500"
           >
-            <option value="all">All</option>
-            <option value="export_id">Code receipt</option>
-            <option value="customerName">Customer</option>
-            <option value="staffName">Staff</option>
+            <option value="all">Tất cả</option>
+            <option value="export_id">mã phiếu</option>
+            <option value="customerName">Khách hàng</option>
+            <option value="staffName">Nhân viên</option>
           </select>
           <input
             type="text"
@@ -236,7 +237,7 @@ const debouncedFilterChange = useCallback(
             onClick={onReload}
             className="bg-teal-500 hover:bg-teal-600 text-white px-4 py-2 rounded-lg text-sm font-medium"
           >
-            Reload
+            Tải lại
           </button>
         </div>
       </div>
@@ -247,7 +248,7 @@ const debouncedFilterChange = useCallback(
           {/* Cột trái: Chi tiết sản phẩm */}
           <div className="bg-gray-100 rounded-2xl border border-gray-200 shadow-lg flex flex-col md:w-1/4 w-full min-h-[570px]">
             <div className="text-xs font-medium uppercase text-gray-700 bg-gray-50 rounded-t-2xl p-2 text-center shadow">
-              Product details
+              Thông tin cơ bản
             </div>
 
             <div className="overflow-y-scroll custom-scroll flex-1 max-h-[475px] text-sm p-2 space-y-2">
@@ -269,9 +270,9 @@ const debouncedFilterChange = useCallback(
                        {value?.productVersion?.version.product?.productName || "N/A"}
                     </div>
                     <div className="w-full">
-                      Total: {(value.unitPrice * value.quantity).toLocaleString()} VND
+                      Tổng: {(value.unitPrice * value.quantity).toLocaleString()} VND
                     </div>
-                    <div className="w-full">Quantity: {value.quantity}</div>
+                    <div className="w-full">Số lượng: {value.quantity}</div>
                   </div>
                 </div>
               ))}
@@ -292,16 +293,19 @@ const debouncedFilterChange = useCallback(
           {/* Bảng và phân trang */}
           <div className="flex-1 bg-white rounded-2xl shadow-lg overflow-hidden flex flex-col">
             {/* Table content */}
+            {isLoading ? (
+  <TableSkeletonLoader />
+) : (
             <div className="overflow-x-auto flex-1">
               <table className="w-full text-gray-700 border border-gray-200">
                 <thead className="bg-gray-50 text-xs font-medium uppercase text-center">
                   <tr>
                     <th className="px-4 py-2">STT</th>
-                    <th className="px-4 py-2">Code</th>
-                    <th className="px-4 py-2">Customer</th>
-                    <th className="px-4 py-2">Input By Staff</th>
-                    <th className="px-4 py-2">Price Total</th>
-                    <th className="px-4 py-2">Time</th>
+                    <th className="px-4 py-2">Mã Phiếu</th>
+                    <th className="px-4 py-2">Khách Hàng</th>
+                    <th className="px-4 py-2">Nhân Viên Nhập</th>
+                    <th className="px-4 py-2">Tổng Tiền</th>
+                    <th className="px-4 py-2">Thời gian</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y text-center divide-gray-300 text-sm cursor-pointer">
@@ -348,7 +352,7 @@ const debouncedFilterChange = useCallback(
                 </tbody>
               </table>
             </div>
-
+)}
             {/* Pagination fixed at bottom */}
             <div
               id="search-pagination"
@@ -378,7 +382,7 @@ const debouncedFilterChange = useCallback(
 
               <button
                 onClick={() => onPageChange(currentPage + 1)}
-                disabled={!hasNext}
+                disabled={!hasNext || isLoading}
                 className="px-3 py-1 rounded-lg hover:bg-gray-200 disabled:opacity-50"
               >
                 Sau »
