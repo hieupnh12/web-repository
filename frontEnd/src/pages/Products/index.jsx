@@ -1,22 +1,24 @@
 import React, { useEffect, useState, useCallback, useMemo } from "react";
 import {
   getFullProducts,
-  getAllProductsWithoutPaging,
   updateProduct,
   uploadProductImage,
 } from "../../services/productService";
 import Button from "../../components/ui/Button";
 import ProductList from "./ProductList";
 import { Plus, Trash, Scan, Download } from "lucide-react";
-import AddProductModal from "./modals/AddProductModal";
+// import AddProductModal from "./modals/AddProductModal";
 import EditProductModal from "./modals/EditProductModal";
 import ProductDetailModal from "./modals/ProductDetailModal";
-import SearchFilter from "./components/SearchFilter";
+// import AddProductVersionModal from "./modals/AddProductVersionModal";
+import AddProductWithVersionsModal from "./modals/AddProductWithVersionsModal";
+
+// import SearchFilter from "./components/SearchFilter";
 import DeleteProductModal from "./modals/DeleteProductModal";
 
 const ProductsPage = () => {
   const [products, setProducts] = useState([]);
-  const [allProducts, setAllProducts] = useState([]); // ✅ New
+  const [allProducts, setAllProducts] = useState([]);
   const [pagination, setPagination] = useState({
     page: 1,
     limit: 10,
@@ -35,6 +37,8 @@ const ProductsPage = () => {
   const [showEditModal, setShowEditModal] = useState(false);
   const [showDetailModal, setShowDetailModal] = useState(false);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
+  // const [selectedProductId, setSelectedProductId] = useState(null);
+  // const [showAddVersionModal, setShowAddVersionModal] = useState(false);
 
   const loadData = useCallback(async () => {
     try {
@@ -42,22 +46,21 @@ const ProductsPage = () => {
       const { data, pagination: pageInfo } = await getFullProducts({
         page: pagination.page,
         limit: pagination.limit,
-        ...filters,
       });
       setProducts(data);
       setPagination((prev) => ({ ...prev, total: pageInfo.total }));
     } catch (error) {
       console.error("Error loading products:", error);
-      alert("Could not load product data.");
+      alert("Không thể tải danh sách sản phẩm.");
     } finally {
       setIsLoading(false);
     }
-  }, [pagination.page, pagination.limit, filters]);
+  }, [pagination.page, pagination.limit]);
 
   const loadAllProducts = useCallback(async () => {
     try {
-      const all = await getAllProductsWithoutPaging();
-      setAllProducts(all);
+      const { data } = await getFullProducts({ page: 1, limit: 1000 });
+      setAllProducts(data);
     } catch (error) {
       console.error("Error loading all products:", error);
     }
@@ -120,7 +123,9 @@ const ProductsPage = () => {
         originId: String(editedData.origin.id),
         processor: editedData.processor || "",
         battery: editedData.battery ? Number(editedData.battery) : null,
-        screenSize: editedData.screenSize ? Number(editedData.screenSize) : null,
+        screenSize: editedData.screenSize
+          ? Number(editedData.screenSize)
+          : null,
         operatingSystemId: String(editedData.operatingSystem.id),
         chipset: editedData.chipset || null,
         rearCamera: editedData.rearCamera || "",
@@ -201,7 +206,7 @@ const ProductsPage = () => {
                 </Button>
               </div>
             </div>
-            <SearchFilter onFilterChange={handleFilterChange} />
+            {/* <SearchFilter onFilterChange={handleFilterChange} /> */}
           </div>
         </div>
 
@@ -216,20 +221,22 @@ const ProductsPage = () => {
           onDetail={handleDetail}
           onDelete={handleDelete}
           onSelect={onSelectProduct}
-          stats={stats} 
+          stats={stats}
         />
       </div>
 
-      {showAddModal && (
+      {/* {showAddModal && (
         <AddProductModal
           onClose={() => setShowAddModal(false)}
-          onSuccess={() => {
+          onSuccess={(createdProductId) => {
             setShowAddModal(false);
+            setSelectedProductId(createdProductId);
+            setShowAddVersionModal(true);
             loadData();
             loadAllProducts();
           }}
         />
-      )}
+      )} */}
 
       {showEditModal && selectedProduct && (
         <EditProductModal
@@ -263,10 +270,37 @@ const ProductsPage = () => {
             setShowDeleteModal(false);
             setSelectedProduct(null);
             loadData();
-            loadAllProducts(); 
+            loadAllProducts();
           }}
         />
       )}
+
+      {/* {showAddVersionModal && selectedProductId && (
+        <AddProductVersionModal
+          productId={selectedProductId}
+          onClose={() => {
+            setShowAddVersionModal(false);
+            setSelectedProductId(null);
+          }}
+          onSuccess={() => {
+            setShowAddVersionModal(false);
+            setSelectedProductId(null);
+            loadData();
+            loadAllProducts();
+          }}
+        />
+      )} */}
+
+      {showAddModal && (
+  <AddProductWithVersionsModal
+    onClose={() => setShowAddModal(false)}
+    onSuccess={() => {
+      setShowAddModal(false);
+      loadData();
+      loadAllProducts();
+    }}
+  />
+)}
     </div>
   );
 };
