@@ -1,37 +1,83 @@
-import React, { useEffect, useState } from 'react';
-import { Plus, Edit, Trash, Info, Search, RefreshCw } from 'lucide-react';
-import CreateAcc from './CreateAcc';
-import Accdetails from './AccountDetails';
+import React, { useEffect, useState } from "react";
 import {
+  Box,
+  Container,
+  IconButton,
+  Button,
+  TextField,
+  InputAdornment,
+  Tooltip,
+  Snackbar,
+  Alert,
+} from "@mui/material";
+import {
+  Add as AddIcon,
+  Search as SearchIcon,
+  Refresh as RefreshIcon,
+} from "@mui/icons-material";
+import { styled } from "@mui/material/styles";
+import ConfirmDialog from "../../components/ui/ConfirmDialog";
+import CreateAcc from "./CreateAcc";
+import EditAcc from "./EditAcc";
+import AccountTable from "./AccountTable";
+import {
+  fetchAccounts,
   createAccount,
   updateAccount,
   deleteAccount,
-  fetchAccounts
-} from '../../services/accountService';
-import Button from '../../components/ui/Button';
+} from "../../services/accountService";
+
+const StyledButton = styled(Button)(() => ({
+  borderRadius: 8,
+  textTransform: "none",
+  fontWeight: 500,
+  padding: "10px 24px",
+  background: "linear-gradient(45deg, #1976d2 30%, #64b5f6 90%)",
+  boxShadow: "0 3px 15px rgba(25, 118, 210, 0.3)",
+  transition: "all 0.3s ease",
+  "&:hover": {
+    transform: "translateY(-2px)",
+    boxShadow: "0 6px 25px rgba(25, 118, 210, 0.4)",
+  },
+}));
+
+const StyledTextField = styled(TextField)(() => ({
+  "& .MuiOutlinedInput-root": {
+    borderRadius: 10,
+    backgroundColor: "white",
+    transition: "all 0.3s ease",
+    "&:hover": {
+      boxShadow: "0 4px 12px rgba(25, 118, 210, 0.1)",
+    },
+    "&.Mui-focused": {
+      boxShadow: "0 4px 20px rgba(25, 118, 210, 0.2)",
+    },
+  },
+}));
 
 export default function Account() {
   const [accounts, setAccounts] = useState([]);
-  const [showCreateAcc, setShowCreateAcc] = useState(false);
-  const [showDetails, setShowDetails] = useState(false);
-  const [selectedId, setSelectedId] = useState(null);
-  const [editMode, setEditMode] = useState(false);
-  const [employeeToCreate, setEmployeeToCreate] = useState(null);
-  const [search, setSearch] = useState('');
-  const [error, setError] = useState(null);
+  const [search, setSearch] = useState("");
   const [loading, setLoading] = useState(true);
-
-  const selectedAccount = accounts.find((acc) => acc.staffId === selectedId);
+  const [openCreate, setOpenCreate] = useState(false);
+  const [openEdit, setOpenEdit] = useState(false);
+  const [selectedAccount, setSelectedAccount] = useState(null);
+  const [selectedId, setSelectedId] = useState(null);
+  const [confirmOpen, setConfirmOpen] = useState(false);
+  const [deleting, setDeleting] = useState(false);
+  const [snackbar, setSnackbar] = useState({
+    open: false,
+    message: "",
+    severity: "success",
+  });
 
   const loadAccounts = async () => {
     setLoading(true);
     try {
-      setError(null);
-      const response = await fetchAccounts();
-      setAccounts(response.data.result || []);
+      const res = await fetchAccounts();
+      setAccounts(res?.data?.result || []);
     } catch (err) {
-      console.error('❌ Error fetching accounts:', err);
-      setError(err.message || 'Failed to load accounts.');
+      setSnackbar({ open: true, message: "Failed to load accounts", severity: "error" });
     } finally {
       setLoading(false);
     }
@@ -41,196 +87,126 @@ export default function Account() {
     loadAccounts();
   }, []);
 
-  const handleSaveAccount = async (formData) => {
+  const handleCreateAccount = async (accountData) => {
     try {
-      const payload = {
-        userName: formData.userName,
-        roleId: parseInt(formData.roleId),
-      };
-
-      if (!editMode && formData.password) {
-        payload.password = formData.password;
-      }
-
-      if (editMode) {
-        await updateAccount(formData.staffId, payload);
-      } else {
-        await createAccount(formData.staffId, payload);
-      }
-
-      await loadAccounts();
-      setShowCreateAcc(false);
-      setEditMode(false);
-      setSelectedId(null);
+      await createAccount(accountData.staffId, accountData);
+      setSnackbar({ open: true, message: "Account created successfully", severity: "success" });
+      loadAccounts();
     } catch (err) {
-      console.error('❌ Save failed:', err);
-      setError(err.message || 'Failed to save account.');
+      setSnackbar({ open: true, message: err.toString(), severity: "error" });
     }
   };
 
-  const handleDelete = async () => {
-    if (!selectedId) {
-      setError('Please select an account to delete!');
-      return;
-    }
-    if (window.confirm('Are you sure you want to delete this account?')) {
-
-      try {
-        await deleteAccount(selectedId);
-        await loadAccounts();
-        setSelectedId(null);
-      } catch (err) {
-        console.error('❌ Delete failed:', err);
-        setError(err.message || 'Failed to delete.');
-      }
+  const handleEditAccount = async (updatedData) => {
+    try {
+      await updateAccount(updatedData.staffId, updatedData);
+      setSnackbar({ open: true, message: "Account updated", severity: "success" });
+      loadAccounts();
+    } catch (err) {
+      setSnackbar({ open: true, message: err.toString(), severity: "error" });
+    } finally {
+      setOpenEdit(false);
+      setSelectedAccount(null);
     }
   };
 
-  const handleEdit = () => {
-    if (!selectedId) {
-      setError('Please select an account to edit!');
-      return;
+  const handleDeleteAccount = async () => {
+    try {
+      setDeleting(true);
+      await deleteAccount(selectedId);
+      setAccounts((prev) => prev.filter((acc) => acc.staffId !== selectedId));
+      setSnackbar({ open: true, message: "Deleted successfully", severity: "success" });
+    } catch (err) {
+      setSnackbar({ open: true, message: err.toString(), severity: "error" });
+    } finally {
+      setDeleting(false);
+      setConfirmOpen(false);
     }
-    setEditMode(true);
-    setShowCreateAcc(true);
   };
 
-  const filtered = accounts.filter((acc) =>
-    acc.userName?.toLowerCase().includes(search.toLowerCase())
+  const filteredAccounts = accounts.filter(
+    (acc) =>
+      acc.userName?.toLowerCase().includes(search.toLowerCase()) ||
+      acc.roleId?.toString().includes(search)
   );
 
   return (
-    <div className="min-h-screen w-full bg-gradient-to-br from-gray-50 to-blue-50 flex flex-col">
-      <div className="flex-grow w-full px-4 py-6">
-        <div className="bg-white rounded-2xl shadow-lg p-4 sm:p-6 mb-6">
-          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-            <div className="flex flex-wrap gap-2 sm:gap-3 items-center">
-              <Button
-                onClick={() => {
-                  setEditMode(false);
-                  setShowCreateAcc(true);
-                }}
-                className="group flex items-center gap-2 bg-blue-600 text-white hover:bg-blue-700 hover:scale-105 transition-all duration-300 shadow-lg px-3 py-2 text-sm"
-              >
-                <Plus className="w-4 h-4 group-hover:rotate-90 transition-transform" />
-                <span className="hidden sm:inline">Add</span>
-              </Button>
-
-              <Button
-                onClick={handleEdit}
-                className="group flex items-center gap-2 bg-yellow-500 text-white hover:bg-yellow-600 hover:scale-105 transition-all duration-300 shadow-lg px-3 py-2 text-sm"
-              >
-                <Edit className="w-4 h-4" />
-                <span className="hidden sm:inline">Edit</span>
-              </Button>
-
-              <Button
-                onClick={handleDelete}
-                className="group flex items-center gap-2 bg-red-600 text-white hover:bg-red-700 hover:scale-105 transition-all duration-300 shadow-lg px-3 py-2 text-sm"
-              >
-                <Trash className="w-4 h-4" />
-                <span className="hidden sm:inline">Delete</span>
-              </Button>
-
-              <Button
-                onClick={() => {
-                  if (!selectedId) {
-                    setError('Please select an account!');
-                    return;
-                  }
-                  setShowDetails(true);
-                }}
-                className="group flex items-center gap-2 bg-purple-600 text-white hover:bg-purple-700 hover:scale-105 transition-all duration-300 shadow-lg px-3 py-2 text-sm"
-              >
-                <Info className="w-4 h-4" />
-                <span className="hidden sm:inline">Details</span>
-              </Button>
-
-              <Button
-                onClick={loadAccounts}
-                className="group flex items-center gap-2 bg-gray-500 text-white hover:bg-gray-600 hover:scale-105 transition-all duration-300 shadow-lg px-3 py-2 text-sm"
-              >
-                <RefreshCw className="w-4 h-4" />
-                <span className="hidden sm:inline">Reload</span>
-              </Button>
-            </div>
-
-            {/* Search bar */}
-            <div className="relative w-full sm:w-72">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
-              <input
-                type="text"
-                placeholder="Search account..."
-                className="w-full pl-10 pr-4 py-2 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
-                value={search}
-                onChange={(e) => setSearch(e.target.value)}
-              />
-            </div>
-          </div>
-        </div>
-
-        {/* Error Message */}
-        {error && (
-          <div className="mb-4 p-2 bg-red-100 text-red-700 border border-red-400 rounded">
-            {error}
-          </div>
-        )}
-
-        {/* Table */}
-        <div className="bg-white rounded-xl shadow overflow-auto">
-          <table className="min-w-full text-sm text-center">
-            <thead className="bg-gray-100">
-              <tr>
-                <th className="px-4 py-2">#</th>
-                <th className="px-4 py-2">Username</th>
-                <th className="px-4 py-2">Role</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-gray-200">
-              {filtered.map((acc, index) => (
-                <tr
-                  key={acc.staffId}
-                  onClick={() => setSelectedId(acc.staffId)}
-                  className={`cursor-pointer hover:bg-blue-50 ${
-                    selectedId === acc.staffId ? 'bg-blue-100 font-semibold' : ''
-                  }`}
-                >
-                  <td className="px-4 py-2">{index + 1}</td>
-                  <td className="px-4 py-2">{acc.userName}</td>
-                  <td className="px-4 py-2">{acc.roleId}</td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-
-        {/* Modals */}
-        {showCreateAcc && (
-          <CreateAcc
-            account={editMode ? selectedAccount : employeeToCreate}
-            onClose={() => {
-              setShowCreateAcc(false);
-              setEditMode(false);
-              setEmployeeToCreate(null);
+    <Container maxWidth="xl" sx={{ py: 4 }}>
+      <Box sx={{ mb: 4, display: "flex", justifyContent: "space-between", flexWrap: "wrap", gap: 2 }}>
+        <StyledButton variant="contained" startIcon={<AddIcon />} onClick={() => setOpenCreate(true)}>
+          Add Account
+        </StyledButton>
+        <Box sx={{ display: "flex", width: "40%", alignItems: "center", gap: 1 }}>
+          <StyledTextField
+            fullWidth
+            placeholder="Search by username or role ID..."
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            InputProps={{
+              startAdornment: (
+                <InputAdornment position="start">
+                  <SearchIcon color="primary" />
+                </InputAdornment>
+              ),
             }}
-            onSave={handleSaveAccount}
           />
-        )}
-        {showDetails && (
-          <Accdetails
-            onSelect={(employee) => {
-              setEmployeeToCreate({
-                staffId: employee.id,
-                userName: '',
-                roleId: '2',
-              });
-              setShowDetails(false);
-              setShowCreateAcc(true);
-            }}
-            onClose={() => setShowDetails(false)}
-          />
-        )}
-      </div>
-    </div>
+          <Tooltip title="Reload">
+            <IconButton onClick={loadAccounts} disabled={loading}>
+              <RefreshIcon color="primary" />
+            </IconButton>
+          </Tooltip>
+        </Box>
+      </Box>
+
+      <AccountTable
+        accounts={filteredAccounts}
+        loading={loading}
+        onEdit={(acc) => {
+          setSelectedAccount(acc);
+          setOpenEdit(true);
+        }}
+        onDelete={(id) => {
+          setSelectedId(id);
+          setConfirmOpen(true);
+        }}
+      />
+
+      {/* Dialogs */}
+      {openCreate && (
+        <CreateAcc open={openCreate} onClose={() => setOpenCreate(false)} onSubmit={handleCreateAccount} />
+      )}
+
+      {openEdit && selectedAccount && (
+        <EditAcc
+          account={selectedAccount}
+          onClose={() => {
+            setOpenEdit(false);
+            setSelectedAccount(null);
+          }}
+          onSave={handleEditAccount}
+        />
+      )}
+
+      <ConfirmDialog
+        isOpen={confirmOpen}
+        title="Delete Account"
+        message="Are you sure you want to delete this account?"
+        onConfirm={handleDeleteAccount}
+        onCancel={() => setConfirmOpen(false)}
+        loading={deleting}
+        action="delete"
+      />
+
+      <Snackbar
+        open={snackbar.open}
+        autoHideDuration={3000}
+        onClose={() => setSnackbar({ ...snackbar, open: false })}
+        anchorOrigin={{ vertical: "top", horizontal: "right" }}
+      >
+        <Alert severity={snackbar.severity} sx={{ width: "100%" }}>
+          {snackbar.message}
+        </Alert>
+      </Snackbar>
+    </Container>
   );
 }

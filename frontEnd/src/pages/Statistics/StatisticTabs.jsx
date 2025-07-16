@@ -1,28 +1,34 @@
 import React from "react";
-import { NavLink } from "react-router-dom";
+import { NavLink, useLocation } from "react-router-dom";
 
+export default function StatisticTabs({ current }) {
+  const location = useLocation();
 
-const tabs = [
-  { label: "Tổng quan", path: "/statistics/overview" },
-  { label: "Tồn kho", path: "/statistics/inventory" },
-  { label: "Doanh thu", path: "/statistics/revenue" },
-  { label: "Nhà cung cấp", path: "/statistics/suppliers" },
-  { label: "Khách hàng", path: "/statistics/customers" },
-];
+  // Tự động xác định prefix: /manager hoặc /staff
+  const prefix = location.pathname.includes("/staff")
+    ? "/staff/statistics"
+    : "/manager/statistics";
 
-const StatisticTabs = () => {
+  const tabs = [
+    { label: "Tổng quan", path: `${prefix}/overview` },
+    { label: "Tồn kho", path: `${prefix}/inventory` },
+    { label: "Doanh thu", path: `${prefix}/revenue` },
+    { label: "Nhà cung cấp", path: `${prefix}/suppliers` },
+    { label: "Khách hàng", path: `${prefix}/customers` },
+  ];
+
   return (
-    <div className="bg-white px-6 pt-4">
-      <div className="border-b border-gray-200 flex gap-6">
+    <div className="w-full border-b border-gray-200">
+      <div className="flex flex-wrap gap-2">
         {tabs.map((tab) => (
           <NavLink
             key={tab.path}
             to={tab.path}
             className={({ isActive }) =>
-              `py-2 px-3 -mb-px text-sm font-medium border-b-2 ${
-                isActive
-                  ? "border-blue-600 text-blue-600"
-                  : "border-transparent text-gray-500 hover:text-blue-500"
+              `px-4 py-2 text-sm font-medium rounded-t-md border-b-2 ${
+                isActive || current === tab.path.split("/")[3]
+                  ? "text-blue-600 border-blue-600 bg-white"
+                  : "text-gray-500 border-transparent hover:text-blue-600 hover:border-blue-400"
               }`
             }
           >
@@ -32,6 +38,4 @@ const StatisticTabs = () => {
       </div>
     </div>
   );
-};
-
-export default StatisticTabs;
+}
