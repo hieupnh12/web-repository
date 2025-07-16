@@ -8,9 +8,15 @@ import { useSelector } from "react-redux";
 import { useQuery } from "@tanstack/react-query";
 import { Plus, Trash2 } from "lucide-react";
 import { data, select } from "framer-motion";
-import { takeConfirmImport, takeIdCreateImport } from "../../../../services/importService";
-import { useNavigate, useLocation } from 'react-router-dom';
-import { takeProduct } from "../../../../services/productService";
+import {
+  takeConfirmImport,
+  takeIdCreateImport,
+} from "../../../../services/importService";
+import { useNavigate, useLocation } from "react-router-dom";
+import {
+  takeProduct,
+  takeSearchProductByName,
+} from "../../../../services/productService";
 import { toast } from "react-toastify";
 
 function importReducer(state, action) {
@@ -98,7 +104,7 @@ function addOrUpdateProductList(productList, newProduct) {
     quantity,
     imeis,
     configuration = [],
-    startImei
+    startImei,
   } = newProduct;
 
   const existingIndex = productList.findIndex(
@@ -113,7 +119,7 @@ function addOrUpdateProductList(productList, newProduct) {
       ...existingItem,
       quantity: quantity,
       imeis: imeis,
-      startImei: startImei
+      startImei: startImei,
     };
 
     return updatedList;
@@ -157,7 +163,8 @@ export default function ImportPage() {
   const [productFormData, setProductFormData] = useState(null); // dữ liệu tạm để nhập
   const [listProductSelected, setListProductSelected] = useState([]);
   const navigate = useNavigate();
-const [isReloading, setIsReloading] = useState(false);
+  const [isReloading, setIsReloading] = useState(false);
+  const [displayedProducts, setDisplayedProducts] = useState([]);
 
   console.log("imp", importInfo);
 
@@ -212,55 +219,72 @@ const [isReloading, setIsReloading] = useState(false);
   //   queryFn: takeProduct,
   //   keepPreviousData: true,
   // });
- const {
-  data: productData,
-  isLoading,
-  isError,
-  refetch,
-} = useQuery({
-  queryKey: ["product"],
-  queryFn: async () => {
-    const resp = await takeProduct();
-    const content = resp?.data?.result?.content;
-    if (!Array.isArray(content)) {
-      throw new Error("Invalid response format");
+  const {
+    data: productData,
+    isLoading,
+    isError,
+    refetch,
+  } = useQuery({
+    queryKey: ["product"],
+    queryFn: async () => {
+      const resp = await takeProduct();
+      const content = resp?.data?.result?.content;
+      if (!Array.isArray(content)) {
+        throw new Error("Invalid response format");
+      }
+      return content;
+    },
+    onSuccess: () => {
+      toast.success("Tải danh sách sản phẩm thành công!");
+      setIsReloading(false); // ✅ đảm bảo gọi ở đây
+    },
+    onError: (error) => {
+      toast.error("Lỗi khi tải danh sách sản phẩm: " + error.message);
+      setIsReloading(false); // ✅ bắt buộc gọi ở đây luôn
+    },
+  });
+
+  const handleReload = async () => {
+    try {
+      setIsReloading(true);
+      const result = await refetch(); // gọi lại query
+
+      if (result?.data) {
+        toast.success("Tải danh sách sản phẩm thành công!"); // ✅ thông báo ở đây
+      } else if (result?.error) {
+        throw result.error;
+      }
+    } catch (err) {
+      toast.error("Lỗi khi tải danh sách sản phẩm: " + err.message);
+    } finally {
+      setIsReloading(false); // đảm bảo luôn reset loading
     }
-    return content;
-  },
-  onSuccess: () => {
-    toast.success("Tải danh sách sản phẩm thành công!");
-    setIsReloading(false); // ✅ đảm bảo gọi ở đây
-  },
-  onError: (error) => {
-    toast.error("Lỗi khi tải danh sách sản phẩm: " + error.message);
-    setIsReloading(false); // ✅ bắt buộc gọi ở đây luôn
-  },
-});
-
-
-const handleReload = async () => {
-  try {
-    setIsReloading(true);
-    const result = await refetch(); // gọi lại query
-
-    if (result?.data) {
-      toast.success("Tải danh sách sản phẩm thành công!"); // ✅ thông báo ở đây
-    } else if (result?.error) {
-      throw result.error;
-    }
-  } catch (err) {
-    toast.error("Lỗi khi tải danh sách sản phẩm: " + err.message);
-  } finally {
-    setIsReloading(false); // đảm bảo luôn reset loading
-  }
-};
+  };
 
   console.log("product data", productData);
 
-  const handleSearch = (searchText) => {
-    // setSearch(searchText);
-    // setPage(1);
+  const handleSearchProduct = async (keyword) => {
+    console.log("dấds",keyword);
+    
+    setIsReloading(true);
+    try {
+      const resp = await takeSearchProductByName(keyword); // giả sử API hỗ trợ search theo keyword
+      const content = resp?.data?.result?.content;
+      if (Array.isArray(content)) {
+        setDisplayedProducts(content); // thay vì setProd
+      }
+    } catch (error) {
+      toast.error("Lỗi khi tìm kiếm sản phẩm");
+    } finally {
+      setIsReloading(false);
+    }
   };
+
+  useEffect(() => {
+    if (Array.isArray(productData)) {
+      setDisplayedProducts(productData);
+    }
+  }, [productData]);
 
   // Tự động lưu importInfo vào localStorage mỗi khi thay đổi
   useEffect(() => {
@@ -270,29 +294,32 @@ const handleReload = async () => {
   //  Lưu listProductSelected vào localStorage mỗi khi thay đổi
   useEffect(() => {
     if (Array.isArray(listProductSelected) && listProductSelected.length > 0) {
-    localStorage.setItem("selected_products", JSON.stringify(listProductSelected));
-    console.log("Saved from session:", listProductSelected);
-  }
-  }, [listProductSelected]);
-const location = useLocation();
-
-// Load lại khi quay lại đúng route
-useEffect(() => {
-  if (location.pathname === "/manager/import/addimport") {
-    const saved = localStorage.getItem("selected_products");
-    if (saved) {
-      const parsed = JSON.parse(saved);
-      if (Array.isArray(parsed) && parsed.length > 0) {
-        setListProductSelected(parsed);
-        console.log("Quay lại /addimport, đã load từ localStorage:", parsed);
-      } else {
-        console.log("Dữ liệu localStorage là rỗng.");
-      }
-    } else {
-      console.log("Không tìm thấy selected_products trong localStorage.");
+      localStorage.setItem(
+        "selected_products",
+        JSON.stringify(listProductSelected)
+      );
+      console.log("Saved from session:", listProductSelected);
     }
-  }
-}, [location.pathname]);
+  }, [listProductSelected]);
+  const location = useLocation();
+
+  // Load lại khi quay lại đúng route
+  useEffect(() => {
+    if (location.pathname === "/manager/import/addimport") {
+      const saved = localStorage.getItem("selected_products");
+      if (saved) {
+        const parsed = JSON.parse(saved);
+        if (Array.isArray(parsed) && parsed.length > 0) {
+          setListProductSelected(parsed);
+          console.log("Quay lại /addimport, đã load từ localStorage:", parsed);
+        } else {
+          console.log("Dữ liệu localStorage là rỗng.");
+        }
+      } else {
+        console.log("Không tìm thấy selected_products trong localStorage.");
+      }
+    }
+  }, [location.pathname]);
 
   //Load listProductSelected nếu bạn vẫn muốn lưu riêng
   useEffect(() => {
@@ -335,15 +362,15 @@ useEffect(() => {
 
     // Validate dữ liệu
     const formattedStartImei = startImei?.toString().slice(0, 15) || "";
-if (importMethod === "1" && formattedStartImei.length < 15) {
-  toast.error("Vui lòng nhập đúng IMEI!");
-  return;
-}
+    if (importMethod === "1" && formattedStartImei.length < 15) {
+      toast.error("Vui lòng nhập đúng IMEI!");
+      return;
+    }
 
-if (importMethod === "2" && formattedStartImei.length < 15) {
-  toast.error("Vui lòng quét đúng IMEI!");
-  return;
-}
+    if (importMethod === "2" && formattedStartImei.length < 15) {
+      toast.error("Vui lòng quét đúng IMEI!");
+      return;
+    }
     if (!productId || !versionId) {
       toast.error("Vui lòng chọn sản phẩm và phiên bản!");
       return;
@@ -380,7 +407,7 @@ if (importMethod === "2" && formattedStartImei.length < 15) {
     }
 
     console.log("productData", productFormData);
-    
+
     setListProductSelected((prev) =>
       addOrUpdateSelectedProduct(prev, {
         select: selectedProduct,
@@ -495,7 +522,6 @@ if (importMethod === "2" && formattedStartImei.length < 15) {
       toast.error("Lỗi khi nhập hàng: " + err.message);
     }
   };
-  
 
   return (
     <div className="flex-1 bg-[#EFF6FF] rounded-2xl p-2 text-sm font-medium text-gray-700">
@@ -515,8 +541,8 @@ if (importMethod === "2" && formattedStartImei.length < 15) {
         <div className="w-full lg:w-4/4 space-y-2">
           <div className="flex flex-col md:flex-row gap-2">
             <ProductList
-              products={productData || []}
-              onSearch={handleSearch}
+              products={displayedProducts}
+              onSearch={handleSearchProduct}
               onSelect={setSelectedProduct}
               selectProduct={selectedProduct}
               editProduct={editProduct}

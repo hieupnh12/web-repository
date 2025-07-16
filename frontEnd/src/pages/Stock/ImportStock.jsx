@@ -16,7 +16,6 @@ export default function ImportStock() {
     startDate: null,
     endDate: null,
   });
-  const [permission, setPermission] = useState(null);
 
   const {
     data: importData,
@@ -53,6 +52,7 @@ export default function ImportStock() {
       toast.error("Không thể tải danh sách phiếu nhập!");
     },
   });
+  const [permission, setPermission] = useState(null);
 
   const fetchPermission = async () => {
     try {
@@ -68,19 +68,19 @@ export default function ImportStock() {
   const staffInfo = useSelector((state) => state.auth.userInfo);
   console.log("dd", staffInfo);
   useEffect(() => {
-  if (staffInfo && staffInfo.roleName === "ADMIN") {
-    // Admin có toàn quyền, gán trực tiếp
-    setPermission(() => ({
-  "functionId": 6,
-  "canView": true,
-  "canCreate": true,
-  "canUpdate": true,
-  "canDelete": true
-}));
-  } else {
-    fetchPermission();
-  }
-}, []);
+    if (staffInfo && staffInfo.roleName === "ADMIN") {
+      // Admin có toàn quyền, gán trực tiếp
+      setPermission(() => ({
+        functionId: 6,
+        canView: true,
+        canCreate: true,
+        canUpdate: true,
+        canDelete: true,
+      }));
+    } else {
+      fetchPermission();
+    }
+  }, []);
 
   useEffect(() => {
     if (importData?.totalPages) {

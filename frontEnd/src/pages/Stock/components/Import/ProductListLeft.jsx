@@ -12,10 +12,20 @@ const ProductList = ({
 }) => {
   const [searchText, setSearchText] = useState("");
 
-  const handleSearchChange = (e) => {
-    const value = e.target.value;
-    setSearchText(value);
-  };
+  const handleSearchChange = async (e) => {
+  const value = e.target.value;
+  setSearchText(value);
+
+  // Tìm local trước
+  const localResults = products.filter((product) =>
+    product.productName.toLowerCase().includes(value.toLowerCase())
+  );
+
+  // Nếu không có kết quả local và value đủ dài thì gọi API tìm
+  if (localResults.length === 0 && value.length >= 2) {
+    onSearch(value); // → Hàm này do component cha truyền vào, sẽ gọi API
+  }
+};
 
   const filteredProducts = products.filter((product) =>
     product.productName.toLowerCase().includes(searchText.toLowerCase())
