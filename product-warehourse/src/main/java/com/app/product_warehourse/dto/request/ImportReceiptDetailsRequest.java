@@ -24,6 +24,7 @@ public class ImportReceiptDetailsRequest {
     @Min(value = 0, message = "Số lượng phải không âm")
     Integer quantity;
 
+    @Min(value = 0, message = "Số lượng phải không âm")
     Integer unitPrice;
 
     Boolean type;

@@ -1,6 +1,7 @@
 package com.app.product_warehourse.dto.request;
 
 import jakarta.persistence.Column;
+import jakarta.validation.constraints.Min;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
 
@@ -15,6 +16,7 @@ public class ImportReceiptRequest {
 
     String supplierId;
 
+    @Min(value = 0, message = "Số lượng phải không âm")
     Long totalAmount;
 
     Integer status;
