@@ -24,11 +24,29 @@ public class EmailService   {
         try {
             MimeMessageHelper helper = new MimeMessageHelper(message, true);
             helper.setTo(to);
-            helper.setSubject("Khôi phục mật khẩu");
-            helper.setText(
-                    "Nhấn vào liên kết sau để đặt lại mật khẩu: <a href=\"" + resetLink + "\">Đặt lại mật khẩu</a>",
-                    true
-            );
+            helper.setSubject("KHÔI PHỤC MẬT KHẨU");
+            String content = """
+            <div style="font-family: Arial, sans-serif; font-size: 14px; color: #333;">
+                <p>Xin chào,</p>
+                               
+                <p>Vui lòng nhấn vào nút bên dưới để đặt lại mật khẩu:</p>
+                
+                <p style="text-align: center; margin: 20px;">
+                                <a href="%s" style="color: #007BFF; text-decoration: underline;">
+                                    Đặt lại mật khẩu
+                                </a>
+                            </p>
+
+                <p><b>Lưu ý:</b> Liên kết này sẽ hết hạn sau <b>5 phút</b> kể từ khi email được gửi.</p>
+
+                <p>Nếu bạn không thực hiện yêu cầu này, vui lòng bỏ qua email.</p>
+                <hr/>
+                <p>Nếu có bất kỳ thắc mắc hoặc cần hỗ trợ, xin vui lòng liên hệ bộ phận Hỗ trợ Kỹ thuật qua email: <a href=\"mailto:sinhnnde180169@gmail.com\">sinhnnde180169@gmail.com</a></p>
+                <p>Trân trọng,<br/>Đội ngũ Hỗ trợ Kỹ thuật</p>
+            </div>
+        """.formatted(resetLink);
+
+            helper.setText(content, true);
             mailSender.send(message);
         } catch (MessagingException e) {
             log.error("Lỗi khi gửi email đặt lại mật khẩu cho {}: {}", to, e.getMessage());
@@ -61,7 +79,7 @@ public class EmailService   {
                             "</table>" +
 
                             "<p><strong>Lưu ý:</strong> Vì lý do bảo mật, quý khách vui lòng thay đổi mật khẩu ngay sau lần đăng nhập đầu tiên.</p>" +
-
+                            "<hr/>" +
                             "<p>Nếu có bất kỳ thắc mắc hoặc cần hỗ trợ, xin vui lòng liên hệ bộ phận Hỗ trợ Kỹ thuật qua email: <a href=\"mailto:sinhnnde180169@gmail.com\">sinhnnde180169@gmail.com</a></p>" +
 
                             "<p>Trân trọng,<br/>Đội ngũ Hỗ trợ Kỹ thuật</p>" +
