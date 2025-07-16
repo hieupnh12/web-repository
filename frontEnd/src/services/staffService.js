@@ -28,7 +28,7 @@ export const createStaff = async (staff) => {
     const res = await BASE_URL.post('/staff', payload, {
       headers: getHeaders(),
     });
-    return res.data.result;
+    return res;
   } catch (error) {
     throw error.response?.data?.message || "Failed to create staff";
   }

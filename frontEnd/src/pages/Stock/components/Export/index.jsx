@@ -272,8 +272,7 @@ const ExportPage = () => {
         localStorage.removeItem("import_info");
         localStorage.removeItem("selected_products");
         navigate("/manager/import");
-        toast.success("Nhập hàng thành công!");
-        
+        toast.success("Nhập hàng thành công!");     
       }
     } catch (err) {
       console.log("Submit lỗi", err);
