@@ -15,9 +15,9 @@ import {
 import CloseIcon from "@mui/icons-material/Close";
 import PersonAddIcon from "@mui/icons-material/PersonAdd";
 import { fetchStaffList } from "../../services/staffService";
-import { fetchRoles, createAccount } from "../../services/accountService";
+import { createAccount } from "../../services/accountService";
 
-export default function CreateAcc({ open, onClose, onSuccess }) {
+export default function CreateAcc({ open, onClose, onSuccess, accounts = [], roles = [] }) {
   const [form, setForm] = useState({
     staffId: "",
     userName: "",
@@ -26,7 +26,6 @@ export default function CreateAcc({ open, onClose, onSuccess }) {
   });
 
   const [staffs, setStaffs] = useState([]);
-  const [roles, setRoles] = useState([]);
 
   useEffect(() => {
     if (open) {
@@ -44,13 +43,6 @@ export default function CreateAcc({ open, onClose, onSuccess }) {
         } catch (err) {
           console.error("Lỗi tải danh sách nhân viên:", err);
         }
-
-        try {
-          const roleRes = await fetchRoles();
-          setRoles(roleRes.data.result || []);
-        } catch (err) {
-          console.error("Lỗi tải danh sách role:", err);
-        }
       };
 
       loadData();
@@ -62,29 +54,35 @@ export default function CreateAcc({ open, onClose, onSuccess }) {
   };
 
   const handleSubmit = async () => {
-    const { staffId, userName, password, roleId } = form;
-    if (!staffId || !userName || !password || !roleId) {
-      alert("Vui lòng điền đầy đủ thông tin.");
-      return;
-    }
+  const { staffId, userName, password, roleId } = form;
+  if (!staffId || !userName || !password || !roleId) {
+    alert("Vui lòng điền đầy đủ thông tin.");
+    return;
+  }
 
-    try {
-      const res = await createAccount(staffId, {
-        userName,
-        password,
-        roleId: parseInt(roleId, 10),
-      });
+  try {
+    const res = await createAccount(form.staffId, {
+  userName: form.userName,
+  password: form.password,
+  roleId: parseInt(form.roleId, 10),
+})
 
-      if (res.status === 200) {
-        onSuccess?.();
-        onClose();
-        setForm({ staffId: "", userName: "", password: "", roleId: "" });
-      }
-    } catch (err) {
-      alert("Tạo tài khoản thất bại.");
-      console.error(err);
+    if (res.status === 200) {
+      onSuccess?.();
+      onClose();
+      setForm({ staffId: "", userName: "", password: "", roleId: "" });
     }
-  };
+  } catch (err) {
+    console.error("Tạo tài khoản thất bại:", err.response?.data || err);
+    alert("Tạo tài khoản thất bại: " + (err.response?.data?.message || ""));
+  }
+};
+
+
+  // Lọc nhân viên chưa có account
+  const availableStaffs = staffs.filter(
+    (staff) => !accounts.some((acc) => acc.staffId === staff.staffId)
+  );
 
   return (
     <Dialog open={open} onClose={onClose} maxWidth="sm" fullWidth>
@@ -143,7 +141,7 @@ export default function CreateAcc({ open, onClose, onSuccess }) {
             fullWidth
             required
           >
-            {staffs.map((staff) => (
+            {availableStaffs.map((staff) => (
               <MenuItem key={staff.staffId} value={staff.staffId}>
                 {staff.fullName}
               </MenuItem>
@@ -171,7 +169,7 @@ export default function CreateAcc({ open, onClose, onSuccess }) {
 
           <TextField
             select
-            label="Role ID"
+            label="Vai trò"
             name="roleId"
             value={form.roleId}
             onChange={handleChange}
@@ -180,7 +178,7 @@ export default function CreateAcc({ open, onClose, onSuccess }) {
           >
             {roles.map((role) => (
               <MenuItem key={role.roleId} value={role.roleId}>
-                {role.roleId}
+                {role.roleName}
               </MenuItem>
             ))}
           </TextField>
