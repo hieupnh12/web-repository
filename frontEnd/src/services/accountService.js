@@ -17,14 +17,13 @@ export const fetchAccounts = async () => {
 
 // Tạo tài khoản mới cho nhân viên
 export const createAccount = async (staffId, payload) => {
-  return await BASE_URL[POST](`account/${staffId}`, payload, { headers: getHeaders() });
+  return await BASE_URL[POST](`account/${staffId}`, payload);
 };
 
 // Cập nhật thông tin tài khoản
-export const updateAccount = async (accountId, payload) => {
-  return await BASE_URL[PUT](`account/${accountId}`, payload, { headers: getHeaders() });
+export const updateAccount = async (staffId, payload) => {
+  return await BASE_URL[PUT](`account/update/${staffId}`, payload, { headers: getHeaders() });
 };
-
 // Xoá tài khoản
 export const deleteAccount = async (accountId) => {
   return await BASE_URL[DELETE](`account/${accountId}`, { headers: getHeaders() });

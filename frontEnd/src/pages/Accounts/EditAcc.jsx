@@ -27,7 +27,7 @@ export default function EditAcc({ account, roles, onClose, onSave }) {
     e.preventDefault();
 
     if (!form.userName || !form.roleId) {
-      alert("Please fill in all required fields.");
+      alert("Vui lòng điền đầy đủ thông tin.");
       return;
     }
 
@@ -71,13 +71,13 @@ export default function EditAcc({ account, roles, onClose, onSave }) {
                 value={form.userName}
                 onChange={handleChange}
                 required
-                placeholder="Enter username"
+                placeholder="Nhập tên đăng nhập"
                 className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-yellow-500"
               />
             </div>
 
             <div>
-              <label className="text-sm text-gray-600 mb-1 block">Vai Trò</label>
+              <label className="text-sm text-gray-600 mb-1 block">Vai trò</label>
               <select
                 name="roleId"
                 value={form.roleId}
@@ -85,16 +85,15 @@ export default function EditAcc({ account, roles, onClose, onSave }) {
                 required
                 className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-yellow-500"
               >
-                <option value="">Chọn Vai Trò</option>
+                <option value="">Chọn vai trò</option>
                 {roles && roles.length > 0 ? (
                   roles.map((role) => (
                     <option key={role.roleId} value={role.roleId.toString()}>
-                        {role.roleId}  
-                        {/* truyền vào role id  */}
+                      {role.roleName}
                     </option>
                   ))
                 ) : (
-                  <option disabled>Không có vai trò nào có sẵn</option>
+                  <option disabled>Không có vai trò nào</option>
                 )}
               </select>
             </div>
@@ -109,14 +108,14 @@ export default function EditAcc({ account, roles, onClose, onSave }) {
             onClick={onClose}
             className="px-5 py-2 border border-gray-300 rounded-lg text-gray-700 font-semibold hover:bg-gray-100 transition"
           >
-            Cancel
+            Hủy
           </button>
           <button
             type="submit"
             onClick={handleSubmit}
             className="px-6 py-2 bg-gradient-to-r from-yellow-600 to-yellow-400 text-white rounded-lg font-semibold hover:from-yellow-700 hover:to-yellow-500 transition"
           >
-            Save
+            Lưu
           </button>
         </div>
       </div>

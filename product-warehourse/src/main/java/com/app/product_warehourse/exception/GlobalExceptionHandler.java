@@ -24,13 +24,13 @@ import java.util.Objects;
 public class GlobalExceptionHandler {
     private static final String MIN_ATTRIBUTE = "min";
 
-    @ExceptionHandler(value = Exception.class)
-    ResponseEntity<ApiResponse> handlingRuntimeException(RuntimeException exception) {
-        ApiResponse apiResponse = new ApiResponse();
-        apiResponse.setCode(ErrorCode.UNCATEGORIZE_EXCEPTION.getCode());
-        apiResponse.setMessage(ErrorCode.UNCATEGORIZE_EXCEPTION.getMessage());
-        return ResponseEntity.badRequest().body(apiResponse);
-    }
+//    @ExceptionHandler(value = Exception.class)
+//    ResponseEntity<ApiResponse> handlingRuntimeException(RuntimeException exception) {
+//        ApiResponse apiResponse = new ApiResponse();
+//        apiResponse.setCode(ErrorCode.UNCATEGORIZE_EXCEPTION.getCode());
+//        apiResponse.setMessage(ErrorCode.UNCATEGORIZE_EXCEPTION.getMessage());
+//        return ResponseEntity.badRequest().body(apiResponse);
+//    }
 
     // 1. Xử lý AppException (ngoại lệ tự định nghĩa)
     @ExceptionHandler(value = AppException.class)
@@ -45,18 +45,18 @@ public class GlobalExceptionHandler {
     }
 
 
-    // 4. Xử lý các RuntimeException chưa được phân loại
-    @ExceptionHandler(RuntimeException.class)
-    public ResponseEntity<ApiResponse> handleRuntimeException(RuntimeException e) {
-        log.error("Lỗi không xác định: ", e);
-        ErrorCode errorCode = ErrorCode.UNCATEGORIZE_EXCEPTION;
-        ApiResponse apiResponse = new ApiResponse();
-        apiResponse.setCode(errorCode.getCode());
-        apiResponse.setMessage(errorCode.getMessage());
-        return ResponseEntity
-                .status(errorCode.getStatusCode())
-                .body(apiResponse);
-    }
+//    // 4. Xử lý các RuntimeException chưa được phân loại
+//    @ExceptionHandler(RuntimeException.class)
+//    public ResponseEntity<ApiResponse> handleRuntimeException(RuntimeException e) {
+//        log.error("Lỗi không xác định: ", e);
+//        ErrorCode errorCode = ErrorCode.UNCATEGORIZE_EXCEPTION;
+//        ApiResponse apiResponse = new ApiResponse();
+//        apiResponse.setCode(errorCode.getCode());
+//        apiResponse.setMessage(errorCode.getMessage());
+//        return ResponseEntity
+//                .status(errorCode.getStatusCode())
+//                .body(apiResponse);
+//    }
 
 
 

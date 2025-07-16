@@ -85,7 +85,7 @@ export default function AccountTable({
             <TableRow>
               <TableCell>STT</TableCell>
               <TableCell>Tên đăng nhập</TableCell>
-              <TableCell>Quyền</TableCell>
+              <TableCell>Vai trò</TableCell>
               <TableCell align="center">Chức năng</TableCell>
             </TableRow>
           </StyledTableHead>
@@ -120,7 +120,7 @@ export default function AccountTable({
                         <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
                           <ShieldIcon fontSize="small" />
                           <Typography variant="body2">
-                            {acc.roleId}
+                            {acc.roleName}
                           </Typography>
                         </Box>
                       </TableCell>

@@ -25,6 +25,7 @@ import {
   createAccount,
   updateAccount,
   deleteAccount,
+  fetchRoles,
 } from "../../services/accountService";
 
 const StyledButton = styled(Button)(() => ({
@@ -57,6 +58,7 @@ const StyledTextField = styled(TextField)(() => ({
 
 export default function Account() {
   const [accounts, setAccounts] = useState([]);
+  const [roles, setRoles] = useState([]);
   const [search, setSearch] = useState("");
   const [loading, setLoading] = useState(true);
   const [openCreate, setOpenCreate] = useState(false);
@@ -77,7 +79,7 @@ export default function Account() {
       const res = await fetchAccounts();
       setAccounts(res?.data?.result || []);
     } catch (err) {
-      setSnackbar({ open: true, message: "Không tải được tài khoản", severity: "lỗi" });
+      setSnackbar({ open: true, message: "Không tải được tài khoản", severity: "error" });
     } finally {
       setLoading(false);
     }
@@ -85,37 +87,48 @@ export default function Account() {
 
   useEffect(() => {
     loadAccounts();
+    fetchRoles().then((res) => setRoles(res?.data?.result || []));
   }, []);
 
   const handleCreateAccount = async (accountData) => {
     try {
       await createAccount(accountData.staffId, accountData);
-      setSnackbar({ open: true, message: "Account created successfully", severity: "success" });
+      setSnackbar({ open: true, message: "Tạo tài khoản thành công", severity: "success" });
       loadAccounts();
     } catch (err) {
       setSnackbar({ open: true, message: err.toString(), severity: "error" });
     }
   };
 
-  const handleEditAccount = async (updatedData) => {
-    try {
-      await updateAccount(updatedData.staffId, updatedData);
-      setSnackbar({ open: true, message: "Account updated", severity: "success" });
-      loadAccounts();
-    } catch (err) {
-      setSnackbar({ open: true, message: err.toString(), severity: "error" });
-    } finally {
-      setOpenEdit(false);
-      setSelectedAccount(null);
-    }
-  };
+const handleEditAccount = async (updatedData) => {
+  try {
+    await updateAccount(selectedAccount.staffId, {
+      userName: updatedData.userName,
+      roleId: parseInt(updatedData.roleId, 10),
+      status: true, // cần thiết nếu backend yêu cầu
+    });
+
+    setSnackbar({ open: true, message: "Cập nhật tài khoản thành công", severity: "success" });
+    loadAccounts();
+  } catch (err) {
+    setSnackbar({
+      open: true,
+      message: err?.response?.data?.message || "Lỗi cập nhật tài khoản",
+      severity: "error",
+    });
+  } finally {
+    setOpenEdit(false);
+    setSelectedAccount(null);
+  }
+};
+
 
   const handleDeleteAccount = async () => {
     try {
       setDeleting(true);
       await deleteAccount(selectedId);
       setAccounts((prev) => prev.filter((acc) => acc.staffId !== selectedId));
-      setSnackbar({ open: true, message: "Deleted successfully", severity: "success" });
+      setSnackbar({ open: true, message: "Xóa tài khoản thành công", severity: "success" });
     } catch (err) {
       setSnackbar({ open: true, message: err.toString(), severity: "error" });
     } finally {
@@ -127,7 +140,7 @@ export default function Account() {
   const filteredAccounts = accounts.filter(
     (acc) =>
       acc.userName?.toLowerCase().includes(search.toLowerCase()) ||
-      acc.roleId?.toString().includes(search)
+      acc.roleName?.toLowerCase().includes(search.toLowerCase())
   );
 
   return (
@@ -139,7 +152,7 @@ export default function Account() {
         <Box sx={{ display: "flex", width: "40%", alignItems: "center", gap: 1 }}>
           <StyledTextField
             fullWidth
-            placeholder="Search by username or role ID..."
+            placeholder="Tìm kiếm theo tên đăng nhập hoặc vai trò..."
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             InputProps={{
@@ -150,7 +163,7 @@ export default function Account() {
               ),
             }}
           />
-          <Tooltip title="Reload">
+          <Tooltip title="Tải lại">
             <IconButton onClick={loadAccounts} disabled={loading}>
               <RefreshIcon color="primary" />
             </IconButton>
@@ -165,20 +178,26 @@ export default function Account() {
           setSelectedAccount(acc);
           setOpenEdit(true);
         }}
-        onDelete={(id) => {
+        onDeleteRequest={(id) => {
           setSelectedId(id);
           setConfirmOpen(true);
         }}
       />
 
-      {/* Dialogs */}
       {openCreate && (
-        <CreateAcc open={openCreate} onClose={() => setOpenCreate(false)} onSubmit={handleCreateAccount} />
+        <CreateAcc
+          open={openCreate}
+          onClose={() => setOpenCreate(false)}
+          onSuccess={loadAccounts}
+          accounts={accounts}
+          roles={roles}
+        />
       )}
 
       {openEdit && selectedAccount && (
         <EditAcc
           account={selectedAccount}
+          roles={roles}
           onClose={() => {
             setOpenEdit(false);
             setSelectedAccount(null);
@@ -189,8 +208,8 @@ export default function Account() {
 
       <ConfirmDialog
         isOpen={confirmOpen}
-        title="Delete Account"
-        message="Are you sure you want to delete this account?"
+        title="Xoá tài khoản"
+        message="Bạn có chắc muốn xoá tài khoản này không?"
         onConfirm={handleDeleteAccount}
         onCancel={() => setConfirmOpen(false)}
         loading={deleting}
