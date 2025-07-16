@@ -269,7 +269,9 @@ export default function ImportPage() {
     setIsReloading(true);
     try {
       const resp = await takeSearchProductByName(keyword); // giả sử API hỗ trợ search theo keyword
-      const content = resp?.data?.result?.content;
+      console.log("searcjh",resp);
+      
+      const content = resp?.data?.content;
       if (Array.isArray(content)) {
         setDisplayedProducts(content); // thay vì setProd
       }
