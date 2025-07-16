@@ -22,4 +22,7 @@ public interface ImportReceiptDetailsRespository extends JpaRepository<ImportRec
 
 //     @Query("SELECT d FROM ImportReceiptDetail d JOIN FETCH d.productItems WHERE d.newid.import_id.import_id = :importId")
 //    List<ImportReceiptDetail> findByNewidImportIdImportId(@Param("importId") String importId);
+@Query("SELECT d FROM ImportReceiptDetail d WHERE d.newid.productVersionId.versionId = :productVersionId")
+List<ImportReceiptDetail> findDetailsByProductVersionId(String productVersionId);
+
 }

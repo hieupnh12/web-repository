@@ -1,9 +1,6 @@
 package com.app.product_warehourse.mapper;
 
-import com.app.product_warehourse.dto.request.ImageRequest;
-import com.app.product_warehourse.dto.request.ProductFullRequest;
-import com.app.product_warehourse.dto.request.ProductRequest;
-import com.app.product_warehourse.dto.request.ProductUpdateRequest;
+import com.app.product_warehourse.dto.request.*;
 import com.app.product_warehourse.dto.response.ProductFULLResponse;
 import com.app.product_warehourse.dto.response.ProductResponse;
 import com.app.product_warehourse.entity.*;
@@ -14,10 +11,13 @@ import org.springframework.web.multipart.MultipartFile;
 import java.io.IOException;
 import java.util.Map;
 
+
+import java.util.List;
 @Mapper(componentModel = "spring", uses = {ProductVersionMapper.class})
 public interface ProductMapper {
 
-//    @Mapping(source = "firstname", target = "lastname")     cái này tức là cho dữ liệu của firstname giống với lastname
+
+    //    @Mapping(source = "firstname", target = "lastname")     cái này tức là cho dữ liệu của firstname giống với lastname
 //    @Mapping(target = "lastname", ignore = true)       không mapping đối với lastname (tức là không đụng tới nó luôn --> null)
     @Mapping(target = "image", ignore = true) // Bỏ qua ánh xạ image, xử lý thủ công
     Product toProduct (ProductRequest request);
@@ -42,7 +42,15 @@ public interface ProductMapper {
     @Mapping(target = "image", ignore = true)
     Product toImageProduct(ImageRequest request,@Context Cloudinary cloudinary) throws IOException;
 
-
+    // Phương thức mới để tạo Product với giá trị mặc định
+    default Product toDefaultProduct() {
+        Product product = new Product();
+        // Gán các giá trị mặc định (hoặc để null nếu không bắt buộc)
+        product.setStatus(false); // Trạng thái mặc định
+        // Các trường khác như origin, brand, operatingSystem, warehouseArea để null
+        // hoặc gán giá trị mặc định nếu cần
+        return product;
+    }
 
 
     @AfterMapping
@@ -96,16 +104,35 @@ public interface ProductMapper {
         return product;
     }
 
-//    // Gọi riêng để xử lý entity để update
-//    @Mapping(target = "image", ignore = true) // Bỏ qua ánh xạ image
-//    default Product toProductUpdate(ProductUpdateRequest request, Origin origin , OperatingSystem os , Brand br, WarehouseArea wa ) {
-//        Product product = toUpdateProduct(request);
-//        product.setOrigin(origin);
-//        product.setOperatingSystem(os);
-//        product.setBrand(br);
-//        product.setWarehouseArea(wa);
-//        return product;
-//    }
+
+
+
+    // Gọi riêng để xử lý full product luôn
+    @Mapping(target = "image", ignore = true) // Bỏ qua ánh xạ image
+    default Product toProductFull(ProductFullRequest request, Origin origin , OperatingSystem os , Brand br, WarehouseArea wa ) {
+        Product product = new Product();
+        ProductsRequest productRequest = request.getProducts();
+
+        // Ánh xạ các trường từ ProductsRequest
+        product.setProductId(request.getProductId());
+        product.setProductName(productRequest.getProductName());
+        product.setProcessor(productRequest.getProcessor());
+        product.setBattery(productRequest.getBattery());
+        product.setScreenSize(productRequest.getScreenSize());
+        product.setChipset(productRequest.getChipset());
+        product.setRearCamera(productRequest.getRearCamera());
+        product.setFrontCamera(productRequest.getFrontCamera());
+        product.setWarrantyPeriod(productRequest.getWarrantyPeriod());
+        product.setStatus(productRequest.getStatus());
+        product.setOrigin(origin);
+        product.setOperatingSystem(os);
+        product.setBrand(br);
+        product.setWarehouseArea(wa);
+        return product;
+    }
+
+
+
 
 
     // Phương thức mới để cập nhật đối tượng Product hiện có

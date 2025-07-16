@@ -30,4 +30,6 @@ public class ImportReceiptDetailsResponse {
     //importRequest3
 //    List<ImeiResponse> imei;
     ProductVerResponse productVersion;
+
+
 }

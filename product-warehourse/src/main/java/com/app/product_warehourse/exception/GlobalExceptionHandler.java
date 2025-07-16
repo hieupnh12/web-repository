@@ -191,7 +191,7 @@ public class GlobalExceptionHandler {
 
 
 
-
+// Xử lý lỗi truyền sai kiểu dữ liệu trong request (ví dụ: sai kiểu số, boolean, v.v.)
     @ExceptionHandler(HttpMessageNotReadableException.class)
     public ResponseEntity<ApiResponse> handleHttpMessageNotReadable(HttpMessageNotReadableException ex) {
         ErrorCode errorCode = ErrorCode.INVALID_JSON_FORMAT;
