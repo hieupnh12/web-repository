@@ -155,7 +155,7 @@ export default function ImportForm({
   //     </div>
   //   );
   // }
-console.log("permmiss", isPermission);
+  console.log("permmiss", isPermission);
 
   if (isError) {
     return (
@@ -193,16 +193,16 @@ console.log("permmiss", isPermission);
               <span>Tạo Phiếu</span>
             </Link>
           )}
-    
-            <button
-              className="bg-green-700 hover:bg-green-800 text-white px-4 py-2 rounded-lg text-sm font-medium flex items-center space-x-2"
-              onClick={() => setShowPreview(true)}
-              disabled={!selectProduct?.import_id}
-            >
-              <Download className="w-5 h-5" />
-              <span>In Phiếu</span>
-            </button>
-      
+
+          <button
+            className="bg-green-700 hover:bg-green-800 text-white px-4 py-2 rounded-lg text-sm font-medium flex items-center space-x-2"
+            onClick={() => setShowPreview(true)}
+            disabled={!selectProduct?.import_id}
+          >
+            <Download className="w-5 h-5" />
+            <span>In Phiếu</span>
+          </button>
+
           {isPermission?.canDelete && (
             <Button
               onClick={() => setShowConfirm(true)}

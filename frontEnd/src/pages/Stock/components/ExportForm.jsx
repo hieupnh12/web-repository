@@ -20,6 +20,7 @@ export default function ExportForm({
   onPageChange,
   isLoading,
   isError,
+  isPermission
 }) {
   // Search của thanh input
   const [searchInput, setSearchInput] = useState("");
@@ -160,6 +161,7 @@ const debouncedFilterChange = useCallback(
       {/* Thanh chức năng */}
       <div className="flex items-center justify-between bg-white/60 p-3 rounded-2xl shadow-sm flex-wrap gap-4">
         <div className="flex items-center space-x-4">
+          {isPermission?.canCreate && (
           <Link
             to="addexport"
             className="bg-teal-600 hover:bg-teal-700 text-white px-4 py-2 rounded-lg text-sm font-medium flex gap-1"
@@ -167,7 +169,7 @@ const debouncedFilterChange = useCallback(
             <Plus className="h-5 w-5" />
             <span>Create</span>
           </Link>
-
+          )}
           {/* Button to download file pdf */}
 
             <button
@@ -178,6 +180,8 @@ const debouncedFilterChange = useCallback(
               <Download className="w-5 h-5" />
               <span>Print</span>
             </button>
+                      {isPermission?.canDelete && (
+
           <Button
             onClick={() => setShowConfirm(true)}
             className="group flex items-center gap-2 bg-red-600 text-white hover:bg-red-700 hover:scale-105 transform transition-all duration-300 shadow-lg hover:shadow-xl px-3 py-2 text-sm"
@@ -186,6 +190,7 @@ const debouncedFilterChange = useCallback(
             <Trash className="w-4 h-4 group-hover:scale-110 transition-transform duration-300" />
             <span className="hidden sm:inline">Delete</span>
           </Button>
+                      )}
           <ConfirmDialog
             isOpen={showConfirm}
             title="Xóa phiếu nhập"

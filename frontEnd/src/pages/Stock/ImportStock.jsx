@@ -16,7 +16,6 @@ export default function ImportStock() {
     startDate: null,
     endDate: null,
   });
-  const [permission, setPermission] = useState(null);
 
   const {
     data: importData,
@@ -53,6 +52,7 @@ export default function ImportStock() {
       toast.error("Không thể tải danh sách phiếu nhập!");
     },
   });
+  const [permission, setPermission] = useState(null);
 
   const fetchPermission = async () => {
     try {

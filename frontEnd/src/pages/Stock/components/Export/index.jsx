@@ -14,6 +14,8 @@ import { pre } from "framer-motion";
 import { takeProduct } from "../../../../services/productService";
 import { takeCustomer, takeCustomerAll } from "../../../../services/customerService";
 import { useSelector } from "react-redux";
+import { useNavigate } from "react-router-dom";
+import { toast } from "react-toastify";
 
 const ExportPage = () => {
   const [form, setForm] = useState({
@@ -32,7 +34,8 @@ const ExportPage = () => {
   const productFormRef = useRef();
   const exportTableRef = useRef();
   const [editProduct, setEditProducts] = useState(null);
-
+    const navigate = useNavigate();
+  
   const {
     data: productData,
     isLoading,
@@ -268,6 +271,9 @@ const ExportPage = () => {
         localStorage.removeItem("pending_export_id");
         localStorage.removeItem("import_info");
         localStorage.removeItem("selected_products");
+        navigate("/manager/import");
+        toast.success("Nhập hàng thành công!");
+        
       }
     } catch (err) {
       console.log("Submit lỗi", err);
