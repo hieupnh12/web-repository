@@ -5,6 +5,8 @@ import com.app.product_warehourse.dto.request.SupplierRequest;
 import com.app.product_warehourse.dto.response.CustomerResponse;
 import com.app.product_warehourse.dto.response.SupplierResponse;
 import com.app.product_warehourse.entity.Suppliers;
+import com.app.product_warehourse.exception.AppException;
+import com.app.product_warehourse.exception.ErrorCode;
 import com.app.product_warehourse.mapper.SupplierMapper;
 import com.app.product_warehourse.repository.SuppliersRepository;
 import lombok.AccessLevel;
@@ -15,6 +17,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -30,8 +33,11 @@ public class SupplierService {
     SuppliersRepository supplierRepo;
     SupplierMapper supplierMap;
 
-
+    @PreAuthorize("hasRole('ADMIN') or hasAuthority('Suppliers_CREATE')")
     public Suppliers createSuppliers(SupplierRequest request){
+        if (supplierRepo.existsByPhone(request.getPhone())) {
+            throw new AppException(ErrorCode.PHONE_NUMBER_AVAILABLE);
+        }
              Suppliers suppliers = Suppliers.builder()
                      .name(request.getName())
                      .email(request.getEmail())
@@ -46,7 +52,7 @@ public class SupplierService {
 
 
     public List<SupplierResponse> getAllSupplier(){
-            List<Suppliers> suppliers = supplierRepo.findAll();
+            List<Suppliers> suppliers = supplierRepo.findByStatusTrue();
           return  suppliers.stream()
                   .map(supplierMap ::toSupplierResponse)
                   .collect(Collectors.toList());

@@ -5,7 +5,7 @@ import com.app.product_warehourse.dto.request.AccountCreateRequest;
 import com.app.product_warehourse.dto.request.AccountUpdateRequest;
 import com.app.product_warehourse.dto.request.ChangePasswordRequest;
 import com.app.product_warehourse.dto.response.AccountResponse;
-import com.app.product_warehourse.dto.response.RoleResponse;
+import com.app.product_warehourse.dto.response.StaffSelectResponse;
 import com.app.product_warehourse.entity.Account;
 import com.app.product_warehourse.entity.Role;
 import com.app.product_warehourse.entity.Staff;
@@ -43,7 +43,6 @@ public class AccountService {
     @PreAuthorize("hasRole('ADMIN')")
     @Transactional
     public AccountResponse createAccount(AccountCreateRequest request, String staffId) {
-        // Kiểm tra Staff tồn tại
         try {
             Staff staff = staffRepository.findById(staffId)
                     .orElseThrow(() -> new RuntimeException("Staff not found with id: " + staffId));
@@ -53,14 +52,6 @@ public class AccountService {
             Role role = roleRepository.findById(request.getRoleId())
                     .orElseThrow(() -> new RuntimeException("Role not found with id: " + request.getRoleId()));
 
-//            Account account = Account.builder()
-//                    .staffId(staffId)
-//                    .userName(request.getUserName())
-//                    .password(passwordEncoder.encode(request.getPassword()))
-//                    .role(role)
-//                    .status(1)
-//                    .otp(null)
-//                    .build();
             Account account = new Account();
             account.setStaff(staff);
             account.setUserName(request.getUserName());
@@ -110,6 +101,10 @@ public class AccountService {
     public Account getAccountEntity(String staffId) {
         return accountRepository.findById(staffId)
                 .orElseThrow(() -> new AppException(ErrorCode.ACCOUNT_NOT_EXIST));
+    }
+
+    public List<StaffSelectResponse> getStaff() {
+        return accountRepository.getStaff();
     }
 
 }

@@ -6,6 +6,8 @@ import com.app.product_warehourse.dto.request.AccountUpdateRequest;
 import com.app.product_warehourse.dto.request.ApiResponse;
 import com.app.product_warehourse.dto.request.ChangePasswordRequest;
 import com.app.product_warehourse.dto.response.AccountResponse;
+import com.app.product_warehourse.dto.response.StaffResponse;
+import com.app.product_warehourse.dto.response.StaffSelectResponse;
 import com.app.product_warehourse.service.AccountService;
 import jakarta.validation.Valid;
 import lombok.AccessLevel;
@@ -53,5 +55,11 @@ public class AccountController {
                 .build();
     }
 
+    @GetMapping("/staff-account")
+    public ApiResponse<List<StaffSelectResponse>> getAllStaffNotAccounts() {
+        return ApiResponse.<List<StaffSelectResponse>>builder()
+                .result(accountService.getStaff())
+                .build();
+    }
 
 }
