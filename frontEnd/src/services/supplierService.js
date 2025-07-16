@@ -3,10 +3,17 @@ import { DELETE, GET, POST, PUT } from "../constants/httpMethod";
 
 
 // lấy danh sách nhà cung cấp (trả về tất cả)
-export const takeSupplier = () => {
-    const responds = BASE_URL[GET]("supplier");
+export const takeSupplier = (page = 0, size = 10) => {
+    const responds = BASE_URL[GET](`supplier?page=${page}&size=${size}`);
     return responds;
 }
+
+// lấy danh sách nhà cung cấp (trả về tất cả)
+export const takeSupplierSearch = (keyword, page = 0, size = 5) => {
+    const responds = BASE_URL[GET](`supplier/search?keyword=${keyword}&page=${page}&size=${size}`);
+    return responds;
+}
+
 
 // Tạo 1 nhà cung cấp
 export const takeCreateSupplier = (data) => {

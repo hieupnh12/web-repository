@@ -245,6 +245,7 @@ const router = createBrowserRouter(
               </LazyLoader>
             }
           />
+
           <Route
             path="export"
             element={
@@ -254,10 +255,19 @@ const router = createBrowserRouter(
             }
           />
           <Route
-            path="attributes"
+            path="export/addexport"
             element={
               <LazyLoader>
-                <AttributesPage />
+                <Export />
+              </LazyLoader>
+            }
+          />
+
+          <Route
+            path="products"
+            element={
+              <LazyLoader>
+                <ProductsPage />
               </LazyLoader>
             }
           />
@@ -267,6 +277,81 @@ const router = createBrowserRouter(
             element={
               <LazyLoader>
                 <InventoryPage />
+              </LazyLoader>
+            }
+          />
+          <Route
+            path="storage"
+            element={
+              <LazyLoader>
+                <WarehouseAreas />
+              </LazyLoader>
+            }
+          />
+          <Route
+            path="suppliers"
+            element={
+              <LazyLoader>
+                <Suppliers />
+              </LazyLoader>
+            }
+          />
+          <Route
+            path="staff"
+            element={
+              <LazyLoader>
+                <Staff />
+              </LazyLoader>
+            }
+          />
+          <Route
+            path="account"
+            element={
+              <LazyLoader>
+                <Account />
+              </LazyLoader>
+            }
+          />
+          <Route
+            path="permissions"
+            element={
+              <LazyLoader>
+                <Permissions />
+              </LazyLoader>
+            }
+          />
+          <Route
+            path="Customers"
+            element={
+              <LazyLoader>
+                <Customers />
+              </LazyLoader>
+            }
+          />
+          <Route path="import">
+            <Route
+              index
+              element={
+                <LazyLoader>
+                  <ImportStock />
+                </LazyLoader>
+              }
+            />
+            <Route
+              path="addimport"
+              element={
+                <LazyLoader>
+                  <Import />
+                </LazyLoader>
+              }
+            />
+          </Route>
+
+          <Route
+            path="attributes"
+            element={
+              <LazyLoader>
+                <AttributesPage />
               </LazyLoader>
             }
           />

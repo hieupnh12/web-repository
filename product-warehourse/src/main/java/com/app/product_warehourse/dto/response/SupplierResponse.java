@@ -4,6 +4,8 @@ package com.app.product_warehourse.dto.response;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
 
+import java.time.LocalDateTime;
+
 @Builder                 // Tạo builder pattern giúp tạo đối tượng dễ dàng, linh hoạt
 // Đánh dấu class này là entity, ánh xạ tới bảng trong DB
 @Data                    // Tự sinh getter, setter, toString, equals, hashCode
@@ -23,4 +25,6 @@ public class SupplierResponse {
     String phone ;
 
     Boolean status ;
+
+    LocalDateTime joinDate;
 }

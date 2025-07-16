@@ -4,6 +4,9 @@ package com.app.product_warehourse.entity;
 import jakarta.persistence.*;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
+import org.hibernate.annotations.CreationTimestamp;
+
+import java.time.LocalDateTime;
 
 @Entity
 @Data
@@ -32,6 +35,9 @@ public class    Suppliers {
 
     @Column(name = "status")
     Boolean status ;
+
+    @CreationTimestamp
+    LocalDateTime joinDate;
 
 
 }

@@ -176,6 +176,7 @@ const CustomerDialog = ({ open, onClose, onSubmit, editData = null }) => {
                 placeholder="Full address"
                 className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition resize-y"
                 rows={1}
+                disabled
               />
             </div>
 
@@ -183,32 +184,6 @@ const CustomerDialog = ({ open, onClose, onSubmit, editData = null }) => {
             <div>
               <hr className="my-4 border-gray-200" />
               <AddressSelector onChange={handleAddressChange} />
-            </div>
-
-            {/* Status */}
-            <div
-              className={`p-4 rounded-lg border ${
-                formData.status
-                  ? "bg-green-50 border-green-200"
-                  : "bg-gray-50 border-gray-200"
-              }`}
-            >
-              <div className="flex items-center justify-between">
-                <div>
-                  <h3 className="text-base font-semibold">Active Status</h3>
-                </div>
-                <label className="flex items-center cursor-pointer">
-                  <input
-                    type="checkbox"
-                    checked={formData.status}
-                    onChange={handleStatusChange}
-                    className="w-5 h-5 accent-blue-500 text-green-600 rounded focus:ring-green-500"
-                  />
-                  <span className="ml-2 text-sm">
-                    {formData.status ? "Active" : "Inactive"}
-                  </span>
-                </label>
-              </div>
             </div>
           </div>
         </div>

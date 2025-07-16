@@ -23,6 +23,7 @@ import {
   Person as PersonIcon,
   CheckCircle as CheckCircleIcon,
   Cancel as CancelIcon,
+  QueryBuilder,
 } from "@mui/icons-material";
 import DeleteIcon from "@mui/icons-material/Delete";
 
@@ -102,7 +103,6 @@ const CustomerTable = ({
               <TableCell>Phone Number</TableCell>
               <TableCell>Address</TableCell>
               <TableCell>Join Date</TableCell>
-              <TableCell align="center">Status</TableCell>
               <TableCell align="center">Actions</TableCell>
             </TableRow>
           </StyledTableHead>
@@ -144,7 +144,11 @@ const CustomerTable = ({
                       <LocationIcon color="action" fontSize="small" />
                       <Tooltip title={customer.address} placement="top">
                         <span>
-                          <Typography variant="body2" noWrap sx={{ maxWidth: 200 }}>
+                          <Typography
+                            variant="body2"
+                            noWrap
+                            sx={{ maxWidth: 200 }}
+                          >
                             {customer.address}
                           </Typography>
                         </span>
@@ -152,29 +156,21 @@ const CustomerTable = ({
                     </Box>
                   </TableCell>
                   <TableCell>
-                    {new Date(customer.joinDate).toLocaleDateString("en-US")}
+                    <QueryBuilder style={{ marginRight: 8 }} />
+                    {new Date(customer.joinDate).toLocaleString("vi-VN", {
+                      year: "numeric",
+                      month: "2-digit",
+                      day: "2-digit",
+                      hour: "2-digit",
+                      minute: "2-digit",
+                      hour12: false,
+                      timeZone: "Asia/Ho_Chi_Minh",
+                    })}{" "}
                   </TableCell>
                   <TableCell align="center">
-                    <Tooltip title={customer.status ? "Active" : "Inactive"}>
-                      <span>
-                        <Chip
-                          label={customer.status ? "Active" : "Inactive"}
-                          color={customer.status ? "success" : "error"}
-                          size="small"
-                          icon={
-                            customer.status ? (
-                              <CheckCircleIcon />
-                            ) : (
-                              <CancelIcon />
-                            )
-                          }
-                          sx={{ fontWeight: 500, pointerEvents: "none" }}
-                        />
-                      </span>
-                    </Tooltip>
-                  </TableCell>
-                  <TableCell align="center">
-                    <Box sx={{ display: "flex", gap: 1, justifyContent: "center" }}>
+                    <Box
+                      sx={{ display: "flex", gap: 1, justifyContent: "center" }}
+                    >
                       <Tooltip title="Edit" placement="top">
                         <IconButton
                           size="small"
@@ -194,7 +190,9 @@ const CustomerTable = ({
                       <Tooltip title="Delete" placement="top">
                         <IconButton
                           size="small"
-                          onClick={() => handleDeleteCustomer(customer.customerId)}
+                          onClick={() =>
+                            handleDeleteCustomer(customer.customerId)
+                          }
                           sx={{
                             color: "#f44336",
                             "&:hover": {

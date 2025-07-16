@@ -11,6 +11,7 @@ import { data, select } from "framer-motion";
 import { takeConfirmImport, takeIdCreateImport } from "../../../../services/importService";
 import { useNavigate, useLocation } from 'react-router-dom';
 import { takeProduct } from "../../../../services/productService";
+import { toast } from "react-toastify";
 
 function importReducer(state, action) {
   switch (action.type) {
@@ -97,6 +98,7 @@ function addOrUpdateProductList(productList, newProduct) {
     quantity,
     imeis,
     configuration = [],
+    startImei
   } = newProduct;
 
   const existingIndex = productList.findIndex(
@@ -111,6 +113,7 @@ function addOrUpdateProductList(productList, newProduct) {
       ...existingItem,
       quantity: quantity,
       imeis: imeis,
+      startImei: startImei
     };
 
     return updatedList;
@@ -140,67 +143,6 @@ function addOrUpdateSelectedProduct(list, newItem) {
   }
 }
 
-const productDatas = [
-  {
-    productId: 20,
-    productName: "Nokia 1277",
-    status: "active",
-    stockQuantity: 200,
-    id: "0b1c2d3e-4f5a-6b7c-8d9e-0f1a2b3c4d5e",
-    options: [
-      {
-        productVersionId: "8eca73c3-925e-4bab-8c9b-b2f2afcc5210",
-        colorName: "Gray",
-        ramName: "64GB",
-        romName: "256GB",
-        importPrice: 3000000,
-        exportPrice: 3500000,
-        stockStatus: "available",
-        itemCount: 2,
-      },
-      {
-        productVersionId: "b5319337-02e6-49da-9cea-b994f224b30d",
-        colorName: "Red",
-        ramName: "8GB",
-        romName: "128GB",
-        importPrice: 2500000,
-        exportPrice: 3200000,
-        stockStatus: "available",
-        itemCount: 1,
-      },
-    ],
-  },
-  {
-    productId: 21,
-    productName: "Nokia 1277",
-    status: "active",
-    stockQuantity: 200,
-    id: "0b1c2d3e-4f5a-6b7c-8d9e-0f1a2b3c4d5e",
-    options: [
-      {
-        productVersionId: "8eca73c3-925e-4bab-8c9b-b2f2afcc5210",
-        colorName: "Gray",
-        ramName: "64GB",
-        romName: "256GB",
-        importPrice: 3000000,
-        exportPrice: 3500000,
-        stockStatus: "available",
-        itemCount: 2,
-      },
-      {
-        productVersionId: "b5319337-02e6-49da-9cea-b994f224b30d",
-        colorName: "Red",
-        ramName: "8GB",
-        romName: "128GB",
-        importPrice: 2500000,
-        exportPrice: 3200000,
-        stockStatus: "available",
-        itemCount: 1,
-      },
-    ],
-  },
-];
-
 export default function ImportPage() {
   // Tạo khuôn để gửi dữ liệu tạo phiếu nhập
   const [importInfo, dispatch] = useReducer(importReducer, initialState, () => {
@@ -215,6 +157,7 @@ export default function ImportPage() {
   const [productFormData, setProductFormData] = useState(null); // dữ liệu tạm để nhập
   const [listProductSelected, setListProductSelected] = useState([]);
   const navigate = useNavigate();
+const [isReloading, setIsReloading] = useState(false);
 
   console.log("imp", importInfo);
 
@@ -232,16 +175,19 @@ export default function ImportPage() {
       let importId = importInfo.import_id;
       if (!importId) {
         const idResp = await takeIdCreateImport(data);
-        console.log(idResp);
         if (idResp.status === 200) {
           dispatch({
             type: "SET_IMPORT_ID",
             payload: idResp.data.result.import_id,
           });
+          toast.success("Tạo ID phiếu nhập thành công!");
+        } else {
+          toast.error("Không thể tạo ID phiếu nhập.");
         }
       }
     } catch (error) {
       console.log("Lỗi tạo id phiếu", error);
+      toast.error("Lỗi khi tạo ID phiếu nhập: " + error.message);
     }
   };
 
@@ -250,10 +196,14 @@ export default function ImportPage() {
     try {
       const supplierResp = await takeSupplier();
       if (supplierResp.status === 200) {
-        setSuppliers(supplierResp.data.result);
+        setSuppliers(supplierResp.data.result.content);
+        toast.success("Tải danh sách nhà cung cấp thành công!");
+      } else {
+        toast.error("Không thể tải danh sách nhà cung cấp.");
       }
     } catch (error) {
       console.log("load supplier lỗi", error);
+      toast.error("Lỗi khi tải nhà cung cấp: " + error.message);
     }
   };
 
@@ -262,28 +212,48 @@ export default function ImportPage() {
   //   queryFn: takeProduct,
   //   keepPreviousData: true,
   // });
-  const {
-      data: productData,
-      isLoading,
-      isError,
-      refetch,
-    } = useQuery({
-      queryKey: ['product'],
-      queryFn: async () => {
-        const resp = await takeProduct();
-        if (!resp?.data?.result) {
-          throw new Error('Invalid response format');
-        }
-        console.log("dff",resp);
-        
-        return resp.data.result;
-      },
-      staleTime: 1000 * 60 * 5,
-      gcTime: 1000 * 60 * 10,
-      onError: (error) => {
-        console.error('Error fetching imports:', error);
-      },
-    });
+ const {
+  data: productData,
+  isLoading,
+  isError,
+  refetch,
+} = useQuery({
+  queryKey: ["product"],
+  queryFn: async () => {
+    const resp = await takeProduct();
+    const content = resp?.data?.result?.content;
+    if (!Array.isArray(content)) {
+      throw new Error("Invalid response format");
+    }
+    return content;
+  },
+  onSuccess: () => {
+    toast.success("Tải danh sách sản phẩm thành công!");
+    setIsReloading(false); // ✅ đảm bảo gọi ở đây
+  },
+  onError: (error) => {
+    toast.error("Lỗi khi tải danh sách sản phẩm: " + error.message);
+    setIsReloading(false); // ✅ bắt buộc gọi ở đây luôn
+  },
+});
+
+
+const handleReload = async () => {
+  try {
+    setIsReloading(true);
+    const result = await refetch(); // gọi lại query
+
+    if (result?.data) {
+      toast.success("Tải danh sách sản phẩm thành công!"); // ✅ thông báo ở đây
+    } else if (result?.error) {
+      throw result.error;
+    }
+  } catch (err) {
+    toast.error("Lỗi khi tải danh sách sản phẩm: " + err.message);
+  } finally {
+    setIsReloading(false); // đảm bảo luôn reset loading
+  }
+};
 
   console.log("product data", productData);
 
@@ -345,8 +315,12 @@ useEffect(() => {
     }
   }, [editProduct]);
 
+  //Add hoặc Update ProductVer
   const handleAddProduct = () => {
-    if (!productFormData) return;
+    if (!productFormData) {
+      toast.warn("Vui lòng nhập thông tin sản phẩm!");
+      return;
+    }
 
     const {
       productId,
@@ -360,27 +334,53 @@ useEffect(() => {
     } = productFormData;
 
     // Validate dữ liệu
-    if (
-      !productId ||
-      !versionId ||
-      quantity <= 0 ||
-      (importMethod === "2" && imeis.length < 1) ||
-      (importMethod === "1" && imeis.length < 1)
-    ) {
-      alert("Vui lòng điền đầy đủ thông tin và kiểm tra số lượng IMEI.");
+    const formattedStartImei = startImei?.toString().slice(0, 15) || "";
+if (importMethod === "1" && formattedStartImei.length < 15) {
+  toast.error("Vui lòng nhập đúng IMEI!");
+  return;
+}
+
+if (importMethod === "2" && formattedStartImei.length < 15) {
+  toast.error("Vui lòng quét đúng IMEI!");
+  return;
+}
+    if (!productId || !versionId) {
+      toast.error("Vui lòng chọn sản phẩm và phiên bản!");
+      return;
+    }
+    if (quantity <= 0) {
+      toast.error("Số lượng phải lớn hơn 0!");
+      return;
+    }
+    if (importMethod === "2" && quantity >= 99) {
+      toast.error("Số lượng phải nhỏ hơn 99!");
+      return;
+    }
+    if (importMethod === "2" && imeis.length < 1) {
+      toast.error("Vui lòng nhập IMEI cho phương thức nhập tay!");
+      return;
+    }
+    if (importMethod === "2" && imeis.startImei < 1) {
+      toast.error("Vui lòng nhập IMEI cho phương thức nhập tay!");
+      return;
+    }
+    if (importMethod === "1" && imeis.length < 1) {
+      toast.error("Vui lòng nhập số lượng IMEI!");
       return;
     }
 
     // Tìm importPrice từ productData
     const selectedVersion = productData
-      .find((p) => p.productId === productId)
+      ?.find((p) => p.productId === productId)
       ?.productVersionResponses.find((v) => v.versionId === versionId);
 
     if (!selectedVersion) {
-      alert("Không tìm thấy phiên bản sản phẩm.");
+      toast.error("Không tìm thấy phiên bản sản phẩm!");
       return;
     }
 
+    console.log("productData", productFormData);
+    
     setListProductSelected((prev) =>
       addOrUpdateSelectedProduct(prev, {
         select: selectedProduct,
@@ -399,7 +399,7 @@ useEffect(() => {
         importPrice: selectedVersion.importPrice,
         configuration,
         productName,
-        startImei,
+        startImei: formattedStartImei,
       },
     });
 
@@ -410,10 +410,19 @@ useEffect(() => {
     setEditProduct(null);
     setSelectedProduct(null);
     setProductFormData(null);
+
+    toast.success(
+      editProduct
+        ? "Cập nhật sản phẩm thành công!"
+        : "Thêm sản phẩm thành công!"
+    );
   };
 
   const handleDeleteProductVersion = () => {
-    if (!editProduct) return;
+    if (!editProduct) {
+      toast.warn("Vui lòng chọn sản phẩm để xóa!");
+      return;
+    }
 
     // Xoá sản phẩm theo productId và versionId
     setListProductSelected((prev) =>
@@ -437,9 +446,20 @@ useEffect(() => {
     setEditProduct(null);
     setSelectedProduct(null);
     setProductFormData(null);
+
+    toast.success("Xóa sản phẩm thành công!");
   };
 
   const handleSubmitImport = async () => {
+    if (!importInfo.supplierName) {
+      toast.error("Vui lòng chọn nhà cung cấp!");
+      return;
+    }
+    if (importInfo.product.length === 0) {
+      toast.error("Vui lòng thêm ít nhất một sản phẩm!");
+      return;
+    }
+
     try {
       const payload = {
         importId: importInfo.import_id,
@@ -450,29 +470,29 @@ useEffect(() => {
           status: 1,
         },
         product: importInfo.product.map((p) => ({
-      productVersionId: p.versionId,
-      quantity: p.quantity,
-      unitPrice: p.importPrice,
-      type: p.importMethod === "2", // "2" -> true, "1" -> false
-      imei: p.imeis.map((i) => ({ imei: i })),
-    })),
+          productVersionId: p.versionId,
+          quantity: p.quantity,
+          unitPrice: p.importPrice,
+          type: p.importMethod === "2", // "2" -> true, "1" -> false
+          imei: p.imeis.map((i) => ({ imei: i })),
+        })),
       };
-      console.log("data", payload);
 
       const res = await takeConfirmImport(payload);
 
       if (res.status === 200) {
-        alert("Nhập hàng thành công!");
+        toast.success("Nhập hàng thành công!");
         localStorage.removeItem("import_info");
         localStorage.removeItem("selected_products");
         dispatch({ type: "RESET" });
         setListProductSelected([]);
-        navigate('/manager/import');
+        navigate("/manager/import");
+      } else {
+        toast.error("Nhập hàng thất bại. Vui lòng thử lại!");
       }
     } catch (err) {
       console.log("Submit lỗi", err);
-      
-      alert("Gặp lỗi khi nhập hàng."+ err);
+      toast.error("Lỗi khi nhập hàng: " + err.message);
     }
   };
   
@@ -500,6 +520,8 @@ useEffect(() => {
               onSelect={setSelectedProduct}
               selectProduct={selectedProduct}
               editProduct={editProduct}
+              handleReload={handleReload}
+              isLoading={isLoading || isReloading}
             />
             <ProductForm
               selected={selectedProduct}

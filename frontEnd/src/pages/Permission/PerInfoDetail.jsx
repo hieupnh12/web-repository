@@ -82,6 +82,8 @@ const PerInfoDetail = ({ onClose, role, data }) => {
       description,
       permissions,
     };
+    console.log("payload", payload);
+    
     setShowConfirmUpdate(false);
     setLoadingV2(true);
     try {

@@ -12,7 +12,7 @@ import ExportTable from "./ExportTableBot";
 import ExportSummary from "./ExportSumary";
 import { pre } from "framer-motion";
 import { takeProduct } from "../../../../services/productService";
-import { takeCustomerAll } from "../../../../services/customerService";
+import { takeCustomer, takeCustomerAll } from "../../../../services/customerService";
 import { useSelector } from "react-redux";
 
 const ExportPage = () => {
@@ -42,12 +42,12 @@ const ExportPage = () => {
     queryKey: ["product"],
     queryFn: async () => {
       const resp = await takeProduct();
-      if (!resp?.data?.result) {
+      if (!resp?.data?.result.content) {
         throw new Error("Invalid response format");
       }
       console.log("dffđssd", resp);
 
-      return resp.data.result;
+      return resp.data.result.content;
     },
     staleTime: 1000 * 60 * 5,
     gcTime: 1000 * 60 * 10,
@@ -59,7 +59,7 @@ const ExportPage = () => {
   const { data: customers = { data: [] } } = useQuery({
     queryKey: ["customers"],
     queryFn: async () => {
-      const resp = await takeCustomerAll();
+      const resp = await takeCustomer(0, 20);
       if (!resp?.data?.result.content) {
         throw new Error("Invalid response format");
       }
