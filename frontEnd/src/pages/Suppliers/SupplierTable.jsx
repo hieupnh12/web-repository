@@ -104,7 +104,7 @@ const SupplierTable = ({
               <TableCell>Số Điện Thoại</TableCell>
               <TableCell>Địa Chỉ</TableCell>
               <TableCell align="center">Trạng Thái</TableCell>
-              <TableCell align="center">Hành Động</TableCell>
+              <TableCell align="center"></TableCell>
             </TableRow>
           </StyledTableHead>
           <TableBody>
@@ -188,36 +188,59 @@ const SupplierTable = ({
                       }}
                     >
                       <Tooltip title="Xem chi tiết" placement="top">
-                        <IconButton
-                          size="small"
-                          onClick={() => handleEdit(supplier)}
-                          sx={{
-                            color: "#2196f3",
-                            "&:hover": {
-                              backgroundColor: "#e3f2fd",
-                              transform: "scale(1.1)",
-                            },
-                            transition: "all 0.3s ease",
-                          }}
-                        >
-                          <EditIcon fontSize="small" />
-                        </IconButton>
+                        <span>
+                          <IconButton
+                            size="small"
+                            onClick={() => handleEdit(supplier)}
+                            disabled={!isPermission?.canUpdate}
+                            sx={{
+                              color: "#2196f3",
+                              opacity: isPermission?.canUpdate ? 1 : 0.4,
+                              cursor: isPermission?.canUpdate
+                                ? "pointer"
+                                : "not-allowed",
+                              "&:hover": {
+                                backgroundColor: isPermission?.canUpdate
+                                  ? "#e3f2fd"
+                                  : "transparent",
+                                transform: isPermission?.canUpdate
+                                  ? "scale(1.1)"
+                                  : "none",
+                              },
+                              transition: "all 0.3s ease",
+                            }}
+                          >
+                            <EditIcon fontSize="small" />
+                          </IconButton>
+                        </span>
                       </Tooltip>
+
                       <Tooltip title="Xóa" placement="top">
-                        <IconButton
-                          size="small"
-                          onClick={() => handleDeleteSupplier(supplier.id)}
-                          sx={{
-                            color: "#f44336",
-                            "&:hover": {
-                              backgroundColor: "#ffebee",
-                              transform: "scale(1.1)",
-                            },
-                            transition: "all 0.3s ease",
-                          }}
-                        >
-                          <DeleteIcon fontSize="small" />
-                        </IconButton>
+                        <span>
+                          <IconButton
+                            size="small"
+                            onClick={() => handleDeleteSupplier(supplier.id)}
+                            disabled={!isPermission?.canDelete}
+                            sx={{
+                              color: "#f44336",
+                              opacity: isPermission?.canDelete ? 1 : 0.4,
+                              cursor: isPermission?.canDelete
+                                ? "pointer"
+                                : "not-allowed",
+                              "&:hover": {
+                                backgroundColor: isPermission?.canDelete
+                                  ? "#ffebee"
+                                  : "transparent",
+                                transform: isPermission?.canDelete
+                                  ? "scale(1.1)"
+                                  : "none",
+                              },
+                              transition: "all 0.3s ease",
+                            }}
+                          >
+                            <DeleteIcon fontSize="small" />
+                          </IconButton>
+                        </span>
                       </Tooltip>
                     </Box>
                   </TableCell>

@@ -10,6 +10,7 @@ import { toast } from "react-toastify";
 import { takeDeleteImportReceipt } from "../../../services/importService";
 import DateRangeButton from "./DateRangeButton";
 import ImportDetailView from "./ImportDetailView";
+import TableSkeletonLoader from "../../../components/layout/TableSkeletonLoader";
 
 export default function ImportForm({
   tableData,
@@ -259,7 +260,7 @@ export default function ImportForm({
             onClick={onReload}
             className="bg-teal-500 hover:bg-teal-600 text-white px-4 py-2 rounded-lg text-sm font-medium"
           >
-            Reload
+            Tải lại
           </button>
         </div>
       </div>
@@ -268,7 +269,7 @@ export default function ImportForm({
         <div className="flex flex-col md:flex-row gap-4 p-2">
           <div className="bg-gray-100 rounded-2xl border border-gray-200 shadow-lg flex flex-col md:w-1/4 w-full min-h-[570px]">
             <div className="text-xs font-medium uppercase text-gray-700 bg-gray-50 rounded-t-2xl p-2 text-center shadow">
-              Chi tiết sản phẩm
+              Thông tin cơ bản
             </div>
 
             <div className="overflow-y-scroll custom-scroll flex-1 max-h-[475px] text-sm p-2 space-y-2">
@@ -324,6 +325,10 @@ export default function ImportForm({
           </div>
 
           <div className="flex-1 bg-white rounded-2xl shadow-lg overflow-hidden flex flex-col">
+             {/* Table content */}
+                        {isLoading ? (
+              <TableSkeletonLoader />
+            ) : (
             <div className="overflow-x-auto flex-1">
               <table className="w-full text-gray-700 border border-gray-200">
                 <thead className="bg-gray-50 text-xs font-medium uppercase text-center">
@@ -381,7 +386,7 @@ export default function ImportForm({
                 </tbody>
               </table>
             </div>
-
+            )}
             <div
               id="search-pagination"
               className="py-3 border-t bg-gray-50 text-sm text-gray-600 flex justify-center space-x-2"

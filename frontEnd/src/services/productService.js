@@ -171,3 +171,7 @@ export const takeProduct = () => {
 export const takeSearchProductByName = (keyWord) => {
   return BASE_URL[GET](`/product/search?productName=${keyWord}`);
 };
+
+export const takeAllProduct = (page = 0, size=1000) => {
+  return BASE_URL[GET](`/product?page=${page}&size=${size}`);
+};
