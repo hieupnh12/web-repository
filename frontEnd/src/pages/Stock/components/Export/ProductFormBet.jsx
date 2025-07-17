@@ -46,12 +46,12 @@ const ProductForm = forwardRef(
       );
       if (!matchedProduct) return;
       console.log("mssd", matchedProduct);
-      
+
       const option = matchedProduct.productVersionResponses.find(
         (opt) => opt.versionId === editProduct.versionId
       );
       console.log("eidit", editProduct);
-      
+
       const imeisFromOption = option?.imei.map((item) => item.imei) || [];
       const usedImeisForThisOption = editProduct.imeis.length
         ? editProduct.imeis
@@ -68,15 +68,15 @@ const ProductForm = forwardRef(
       });
     }, [editProduct]);
     console.log("selected", selected);
-    
+
     // thay đổi cấu hình
     const handleOptionChange = (e) => {
-      const optionId = (e.target.value);
+      const optionId = e.target.value;
       const option = selected.productVersionResponses.find(
         (opt) => opt.versionId === optionId
       );
       console.log("option", option);
-      
+
       const imeisFromOption = option?.imei.map((item) => item.imei) || [];
       const usedImeisForThisOption = imeisFromOption.filter((imei) =>
         usedImeis?.includes(imei)
@@ -175,7 +175,7 @@ const ProductForm = forwardRef(
     useImperativeHandle(ref, () => ({
       handleAdd,
     }));
-console.log("formdata", formData);
+    console.log("formdata", formData);
 
     return (
       <div className="md:w-1/2 space-y-4">
@@ -232,16 +232,14 @@ console.log("formdata", formData);
                   Cấu hình
                 </label>
                 <select
-                  value={formData?.selectedOption?.versionId || ""}n
+                  value={formData?.selectedOption?.versionId || ""}
+                  n
                   onChange={handleOptionChange}
                   className="mt-1 block w-full border-gray-700 rounded-md shadow-sm p-1 border"
                 >
                   <option value="">Chọn cấu hình</option>
                   {selected?.productVersionResponses?.map((option) => (
-                    <option
-                      key={option.versionId}
-                      value={option.versionId}
-                    >
+                    <option key={option.versionId} value={option.versionId}>
                       {`${option.colorName} - ${option.ramName} - ${option.romName}`}
                     </option>
                   ))}
@@ -279,6 +277,7 @@ console.log("formdata", formData);
                       onClick={() => {
                         setShowScanner(true); // ✅ MỞ scanner lại
                       }}
+                      disabled={!formData.selectedOption}
                       className="bg-blue-500 text-white px-2 py-1 rounded-md hover:bg-blue-600 w-fit"
                     >
                       Quét IMEI
@@ -303,21 +302,18 @@ console.log("formdata", formData);
             <div className="bg-white rounded-lg p-4 w-96 max-h-[80vh] overflow-y-auto">
               <h2 className="text-lg font-medium mb-4">Chọn IMEI</h2>
               <div className="space-y-2">
-                {formData.selectedOption?.imei
-                  .map((item) => (
-                    <div key={item.imei} className="flex items-center">
-                      <input
-                        id={`imei-${item.imei}`}
-                        type="checkbox"
-                        checked={formData?.selectedImeis.includes(item.imei)}
-                        onChange={() => handleImeiChange(item.imei)}
-                        className="mr-2"
-                      />
-                      <label htmlFor={`imei-${item.imei}`}>
-                        {item.imei}
-                      </label>
-                    </div>
-                  ))}
+                {formData.selectedOption?.imei.map((item) => (
+                  <div key={item.imei} className="flex items-center">
+                    <input
+                      id={`imei-${item.imei}`}
+                      type="checkbox"
+                      checked={formData?.selectedImeis.includes(item.imei)}
+                      onChange={() => handleImeiChange(item.imei)}
+                      className="mr-2"
+                    />
+                    <label htmlFor={`imei-${item.imei}`}>{item.imei}</label>
+                  </div>
+                ))}
               </div>
               <div className="flex justify-end mt-4 gap-2">
                 <button
