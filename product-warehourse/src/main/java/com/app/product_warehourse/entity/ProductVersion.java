@@ -6,6 +6,7 @@ import lombok.experimental.FieldDefaults;
 
 import java.math.BigDecimal;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 @Builder                 // Tạo builder pattern giúp tạo đối tượng dễ dàng, linh hoạt
@@ -17,6 +18,7 @@ import java.util.Map;
 @FieldDefaults(level = AccessLevel.PRIVATE) // Mặc định các biến thành private, không cần khai báo riêng
 public class ProductVersion {
     @Id
+//    @GeneratedValue(strategy = GenerationType.UUID)
     @Column(name="version_id")
     String versionId;
 
@@ -55,7 +57,11 @@ public class ProductVersion {
     Boolean status;
 
 
-     static final Map<String, String> PRODUCT_CODE_MAPPING = new HashMap<>();
+    @OneToMany(mappedBy = "versionId", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+     List<ProductItem> productItems;
+
+
+    static final Map<String, String> PRODUCT_CODE_MAPPING = new HashMap<>();
 
     static {
         PRODUCT_CODE_MAPPING.put("IPHONE", "IP");
@@ -105,6 +111,7 @@ public class ProductVersion {
 
     @PrePersist
     public void generateVersionId() {
+
         if (versionId == null) {
             String productCode = generateProductCode();
             String ramValue = ram != null ? ram.getName() : "0";
@@ -138,7 +145,6 @@ public class ProductVersion {
         String result = code.toString().toUpperCase();
         return result.length() > 10 ? result.substring(0, 10) : result;
     }
-
 
 
 }

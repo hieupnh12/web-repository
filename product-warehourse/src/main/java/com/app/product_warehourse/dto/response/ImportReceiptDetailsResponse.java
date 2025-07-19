@@ -27,6 +27,9 @@ public class ImportReceiptDetailsResponse {
 
     Boolean type;
 
-    List<ImeiResponse> imei;   //importRequest3
+    //importRequest3
+//    List<ImeiResponse> imei;
+    ProductVerResponse productVersion;
+
 
 }

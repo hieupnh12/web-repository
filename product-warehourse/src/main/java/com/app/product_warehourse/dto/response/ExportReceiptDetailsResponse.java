@@ -20,6 +20,12 @@ public class ExportReceiptDetailsResponse {
     Integer unitPrice;
 
 
-    List<ImeiResponse> imei;   //importRequest3
+//    List<ImeiResponse> productVersion;
+    //importRequest3
 
+//    ImeiResponse productVersion;
+
+//    VersionResponse productVersion;
+
+      ItemsResponse productVersion;
 }

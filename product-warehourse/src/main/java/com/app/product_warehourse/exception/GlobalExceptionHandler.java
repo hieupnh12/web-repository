@@ -47,7 +47,7 @@ public class GlobalExceptionHandler {
 
 //    // 4. Xử lý các RuntimeException chưa được phân loại
 //    @ExceptionHandler(RuntimeException.class)
-//    public ResponseEntity<com.app.product_warehourse.dto.response.ApiResponse> handleRuntimeException(RuntimeException e) {
+//    public ResponseEntity<ApiResponse> handleRuntimeException(RuntimeException e) {
 //        log.error("Lỗi không xác định: ", e);
 //        ErrorCode errorCode = ErrorCode.UNCATEGORIZE_EXCEPTION;
 //        ApiResponse apiResponse = new ApiResponse();
@@ -57,7 +57,7 @@ public class GlobalExceptionHandler {
 //                .status(errorCode.getStatusCode())
 //                .body(apiResponse);
 //    }
-//
+
 
 
     // 3. Xử lý quyền truy cập bị từ chối
@@ -191,7 +191,7 @@ public class GlobalExceptionHandler {
 
 
 
-
+// Xử lý lỗi truyền sai kiểu dữ liệu trong request (ví dụ: sai kiểu số, boolean, v.v.)
     @ExceptionHandler(HttpMessageNotReadableException.class)
     public ResponseEntity<ApiResponse> handleHttpMessageNotReadable(HttpMessageNotReadableException ex) {
         ErrorCode errorCode = ErrorCode.INVALID_JSON_FORMAT;

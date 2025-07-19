@@ -1,6 +1,7 @@
 package com.app.product_warehourse.entity;
 
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.Min;
 import lombok.*;
@@ -11,7 +12,8 @@ import java.util.List;
 
 @Builder                 // Tạo builder pattern giúp tạo đối tượng dễ dàng, linh hoạt
 @Entity                  // Đánh dấu class này là entity, ánh xạ tới bảng trong DB
-@Data                    // Tự sinh getter, setter, toString, equals, hashCode
+@Getter
+@Setter// Tự sinh getter, setter, toString, equals, hashCode
 @NoArgsConstructor       // Tạo constructor không tham số (mặc định)
 @AllArgsConstructor      // Tạo constructor với tất cả các tham số
 @Table(name = "import_details") // Đặt tên bảng trong DB là "product"
@@ -41,6 +43,8 @@ public class ImportReceiptDetail  {
     })
     List<ProductItem> productItems;
 
+
+
     // Định nghĩa lớp Embeddable bên trong entity
     @Embeddable
     @Data
@@ -49,16 +53,13 @@ public class ImportReceiptDetail  {
     public static class ImportReceiptDetailId implements Serializable {
         @ManyToOne(fetch = FetchType.LAZY)
         @JoinColumn(name = "import_id")
+        @JsonBackReference
         ImportReceipt import_id;
 
         @ManyToOne(fetch = FetchType.LAZY)
         @JoinColumn(name = "product_version_id")
         ProductVersion productVersionId;
 
-        // Constructor bổ sung
-        public ImportReceiptDetailId(ImportReceipt import_id, ProductVersion productVersionId) {
-            this.import_id = import_id;
-            this.productVersionId = productVersionId;
-        }
+
     }
 }

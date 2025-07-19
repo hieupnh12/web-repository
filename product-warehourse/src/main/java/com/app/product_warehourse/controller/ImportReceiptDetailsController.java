@@ -26,31 +26,31 @@ public class ImportReceiptDetailsController {
 
     ImportReceiptDetailsService importDservice;
 
-//    @PostMapping
-//    public ApiResponse<ImportReceiptDetailsResponse> addImportReceiptDetails(@RequestBody ImportReceiptDetailsRequest request) {
-//        log.info("Nhận được ImportReceiptDetailsRequest: {}", request);
-//        ApiResponse<ImportReceiptDetailsResponse> apiResponse = new ApiResponse<>();
-//        apiResponse.setResult(importDservice.createImportReceiptDetails(request));
+    @PostMapping
+    public ApiResponse<ImportReceiptDetailsResponse> addImportReceiptDetails(@RequestBody ImportReceiptDetailsRequest request) {
+        log.info("Nhận được ImportReceiptDetailsRequest: {}", request);
+        ApiResponse<ImportReceiptDetailsResponse> apiResponse = new ApiResponse<>();
+        apiResponse.setResult(importDservice.createImportReceiptDetails(request));
+        return apiResponse;
+    }
+
+
+//    @GetMapping
+//    public ApiResponse<List<ImportReceiptDetailsResponse>> getImportReceiptDetails() {
+//        ApiResponse<List<ImportReceiptDetailsResponse>> apiResponse = new ApiResponse<>();
+//        apiResponse.setResult(importDservice.getAllImportReceiptDetails());
 //        return apiResponse;
 //    }
-
-
-    @GetMapping
-    public ApiResponse<List<ImportReceiptDetailsResponse>> getImportReceiptDetails() {
-        ApiResponse<List<ImportReceiptDetailsResponse>> apiResponse = new ApiResponse<>();
-        apiResponse.setResult(importDservice.getAllImportReceiptDetails());
-        return apiResponse;
-    }
-
-
-    @PutMapping("/{import_id}/{productVersion_id}")
-    public ApiResponse<ImportReceiptDetailsResponse> updateImportReceiptDetails(@RequestBody @Valid ImportReceiptDetailsUpdateRequest request,
-                                                                                @PathVariable String import_id,
-                                                                                @PathVariable String productVersion_id) {
-        ApiResponse<ImportReceiptDetailsResponse> apiResponse = new ApiResponse<>();
-        apiResponse.setResult(importDservice.UpdateImportReceiptDetails(request,import_id,productVersion_id));
-        return apiResponse;
-    }
+//
+//
+//    @PutMapping("/{import_id}/{productVersion_id}")
+//    public ApiResponse<ImportReceiptDetailsResponse> updateImportReceiptDetails(@RequestBody @Valid ImportReceiptDetailsUpdateRequest request,
+//                                                                                @PathVariable String import_id,
+//                                                                                @PathVariable String productVersion_id) {
+//        ApiResponse<ImportReceiptDetailsResponse> apiResponse = new ApiResponse<>();
+//        apiResponse.setResult(importDservice.UpdateImportReceiptDetails(request,import_id,productVersion_id));
+//        return apiResponse;
+//    }
 
 
     @DeleteMapping("/{import_id}/{productVersion_id}")

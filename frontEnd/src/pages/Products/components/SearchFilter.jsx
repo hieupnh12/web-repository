@@ -1,7 +1,12 @@
-import React, { useState, useEffect, useMemo } from "react";
+import React, { useState, useEffect, useCallback, useMemo } from "react";
 import { Combobox, Transition } from "@headlessui/react";
 import { Search, ChevronDown, X, Loader2 } from "lucide-react";
-import { getAllBrands, getAllOrigins, getAllOperatingSystems, getAllWarehouseAreas } from "../../../services/productService";
+import {
+  getAllBrands,
+  getAllOrigins,
+  getAllOSs,
+} from "../../../services/attributeService";
+import {takeWarehouseArea,} from "../../../services/storage";
 import Button from "../../../components/ui/Button";
 import debounce from "lodash/debounce";
 
@@ -11,28 +16,45 @@ const SearchFilter = ({ onFilterChange }) => {
   const [origins, setOrigins] = useState([]);
   const [operatingSystems, setOperatingSystems] = useState([]);
   const [warehouseAreas, setWarehouseAreas] = useState([]);
+
   const [selectedBrand, setSelectedBrand] = useState(null);
   const [selectedOrigin, setSelectedOrigin] = useState(null);
   const [selectedOs, setSelectedOs] = useState(null);
   const [selectedArea, setSelectedArea] = useState(null);
+
   const [isLoading, setIsLoading] = useState(true);
 
-  // Debounce function with dependencies
-  const debouncedSearch = useMemo(
-    () => debounce((value) => {
+  // Hàm apply bộ lọc
+  const applyFilters = useCallback(
+    (searchValue) => {
       const newFilters = {
-        search: value,
+        search: searchValue,
         brandId: selectedBrand?.idBrand || null,
         originId: selectedOrigin?.id || null,
         operatingSystemId: selectedOs?.id || null,
         warehouseAreaId: selectedArea?.id || null,
       };
-      console.log("Applying filters:", newFilters);
+      console.log("Apply filters:", newFilters);
       onFilterChange(newFilters);
-    }, 300),
+    },
     [selectedBrand, selectedOrigin, selectedOs, selectedArea, onFilterChange]
   );
 
+  // Debounce chỉ cho input search
+  const debouncedApplyFilters = useMemo(() => debounce(applyFilters, 300), [applyFilters]);
+
+  // Khi searchTerm thay đổi → debounce
+  useEffect(() => {
+    debouncedApplyFilters(searchTerm);
+    return () => debouncedApplyFilters.cancel();
+  }, [searchTerm, debouncedApplyFilters]);
+
+  // Khi thay đổi filter dropdown → gọi ngay
+  useEffect(() => {
+    applyFilters(searchTerm);
+  }, [selectedBrand, selectedOrigin, selectedOs, selectedArea]);
+
+  // Load dữ liệu cho dropdown
   useEffect(() => {
     const fetchFilterOptions = async () => {
       try {
@@ -40,19 +62,19 @@ const SearchFilter = ({ onFilterChange }) => {
         const [brandRes, originRes, osRes, areaRes] = await Promise.all([
           getAllBrands(),
           getAllOrigins(),
-          getAllOperatingSystems(),
-          getAllWarehouseAreas(),
+          getAllOSs(),
+          takeWarehouseArea(),
         ]);
+        const extractData = (res) =>
+          Array.isArray(res.data) ? res.data : res.data?.content || res.data?.data || [];
 
-        const getData = (res) => Array.isArray(res.data) ? res.data : res.data?.content || res.data?.data || [];
-
-        setBrands(getData(brandRes));
-        setOrigins(getData(originRes));
-        setOperatingSystems(getData(osRes));
-        setWarehouseAreas(getData(areaRes));
+        setBrands(extractData(brandRes));
+        setOrigins(extractData(originRes));
+        setOperatingSystems(extractData(osRes));
+        setWarehouseAreas(extractData(areaRes));
       } catch (error) {
-        console.error("Error loading filter data:", error);
-        alert("Could not load filter options.");
+        console.error("Error loading filters:", error);
+        alert("Không thể tải dữ liệu bộ lọc.");
       } finally {
         setIsLoading(false);
       }
@@ -60,17 +82,6 @@ const SearchFilter = ({ onFilterChange }) => {
 
     fetchFilterOptions();
   }, []);
-
-  // Apply debounced search when search term changes
-  useEffect(() => {
-    debouncedSearch(searchTerm);
-    return () => debouncedSearch.cancel();
-  }, [searchTerm, debouncedSearch]);
-
-  // Update filters immediately when dropdown selections change
-  useEffect(() => {
-    debouncedSearch(searchTerm);
-  }, [selectedBrand, selectedOrigin, selectedOs, selectedArea, debouncedSearch, searchTerm]);
 
   const handleSearchChange = (e) => {
     setSearchTerm(e.target.value);
@@ -82,12 +93,12 @@ const SearchFilter = ({ onFilterChange }) => {
     setSelectedOrigin(null);
     setSelectedOs(null);
     setSelectedArea(null);
-    onFilterChange({ 
-      search: "", 
-      brandId: null, 
-      originId: null, 
-      operatingSystemId: null, 
-      warehouseAreaId: null 
+    onFilterChange({
+      search: "",
+      brandId: null,
+      originId: null,
+      operatingSystemId: null,
+      warehouseAreaId: null,
     });
   };
 
@@ -97,11 +108,11 @@ const SearchFilter = ({ onFilterChange }) => {
         <div className="relative">
           <Combobox.Input
             className="w-full pl-3 pr-10 py-2.5 bg-gray-50 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm text-gray-900 transition-all duration-200 hover:border-blue-400"
-            displayValue={(option) => option ? getName(option) : ""}
+            displayValue={(option) => (option ? getName(option) : "")}
             placeholder={label}
           />
           <Combobox.Button className="absolute inset-y-0 right-0 flex items-center pr-3">
-            <ChevronDown className="h-4 w-4 text-gray-500 transition-transform duration-200 group-hover:rotate-180" aria-hidden="true" />
+            <ChevronDown className="h-4 w-4 text-gray-500 transition-transform duration-200 group-hover:rotate-180" />
           </Combobox.Button>
         </div>
         <Transition
@@ -146,40 +157,14 @@ const SearchFilter = ({ onFilterChange }) => {
             onChange={handleSearchChange}
           />
         </div>
+
         <div className="flex flex-wrap gap-3 w-full sm:w-auto">
-          {renderCombobox(
-            "Brand",
-            selectedBrand,
-            setSelectedBrand,
-            brands,
-            (b) => b.idBrand,
-            (b) => b.brandName
-          )}
-          {renderCombobox(
-            "Origin",
-            selectedOrigin,
-            setSelectedOrigin,
-            origins,
-            (o) => o.id,
-            (o) => o.name
-          )}
-          {renderCombobox(
-            "OS",
-            selectedOs,
-            setSelectedOs,
-            operatingSystems,
-            (os) => os.id,
-            (os) => os.name
-          )}
-          {renderCombobox(
-            "Warehouse Area",
-            selectedArea,
-            setSelectedArea,
-            warehouseAreas,
-            (a) => a.id,
-            (a) => a.name
-          )}
+          {renderCombobox("Brand", selectedBrand, setSelectedBrand, brands, (b) => b.idBrand, (b) => b.brandName)}
+          {renderCombobox("Origin", selectedOrigin, setSelectedOrigin, origins, (o) => o.id, (o) => o.name)}
+          {renderCombobox("OS", selectedOs, setSelectedOs, operatingSystems, (os) => os.id, (os) => os.name)}
+          {renderCombobox("Warehouse", selectedArea, setSelectedArea, warehouseAreas, (a) => a.id, (a) => a.name)}
         </div>
+
         {(searchTerm || selectedBrand || selectedOrigin || selectedOs || selectedArea) && (
           <Button
             onClick={clearFilters}
@@ -190,6 +175,7 @@ const SearchFilter = ({ onFilterChange }) => {
           </Button>
         )}
       </div>
+
       {isLoading && (
         <div className="flex items-center gap-2 text-gray-500 text-sm">
           <Loader2 className="w-4 h-4 animate-spin" />

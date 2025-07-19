@@ -35,4 +35,12 @@ public class PermissionController {
                 .result(permissionService.getAllPermissions())
                 .build();
     }
+
+    @GetMapping("/{id}")
+    public ApiResponse<List<PermissionResponse>> getPermissionByFunctionId(@PathVariable Long id) {
+        return ApiResponse.<List<PermissionResponse>>builder()
+                .result(permissionService.getPermissionByFunctionId(id))
+                .build();
+    }
+
 }

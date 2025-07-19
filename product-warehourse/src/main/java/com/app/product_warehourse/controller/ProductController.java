@@ -2,16 +2,19 @@ package com.app.product_warehourse.controller;
 
 
 import com.app.product_warehourse.dto.request.ImageRequest;
+import com.app.product_warehourse.dto.request.ProductFullRequest;
 import com.app.product_warehourse.dto.request.ProductRequest;
 import com.app.product_warehourse.dto.request.ProductUpdateRequest;
 import com.app.product_warehourse.dto.response.ApiResponse;
 import com.app.product_warehourse.dto.response.ImageResponse;
+import com.app.product_warehourse.dto.response.ProductFULLResponse;
 import com.app.product_warehourse.dto.response.ProductResponse;
 import com.app.product_warehourse.entity.Product;
 import com.app.product_warehourse.service.ProductService;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.http.MediaType;
@@ -27,15 +30,23 @@ public class ProductController {
     @Autowired
     private ProductService productService;
 
+    @PostMapping("/init")
+    public ApiResponse<ProductFULLResponse> InitProduct(){
+         return ApiResponse.<ProductFULLResponse>builder()
+                 .result(productService.initProduct())
+                 .build();
+    }
+
+
+
     // Tạo mới Product với ảnh, sử dụng multipart/form-data
-    @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    public ApiResponse<ProductResponse> addProduct(
-            @RequestPart(value = "product") @Valid ProductRequest request,
+    @PostMapping(value="/full/confirm",consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public ApiResponse<ProductFULLResponse> addProduct(
+            @RequestPart(value = "product") @Valid ProductFullRequest request,
             @RequestPart(value = "image", required = false) MultipartFile image) throws IOException {
-        ApiResponse<ProductResponse> api = new ApiResponse<>();
-        ProductResponse response = productService.createProduct(request, image);
-        api.setResult(response);
-        return api;
+        return ApiResponse.<ProductFULLResponse>builder()
+                          .result(productService.createProductFull(request,image))
+                          .build();
     }
 
 
@@ -63,13 +74,22 @@ public class ProductController {
 
 
     @GetMapping
-    ApiResponse<Page<ProductResponse>> getAll(@PageableDefault(size = 10) Pageable pageable) { //Thêm @PageableDefault để mặc định trả về 10 bản ghi mỗi trang. Người dùng có thể truyền
-        ApiResponse<Page<ProductResponse>> resp = new ApiResponse<>();
+    ApiResponse<Page<ProductFULLResponse>> getAll( @RequestParam(defaultValue = "0") int page,
+                                                   @RequestParam(defaultValue = "10") int size) { //Thêm @PageableDefault để mặc định trả về 10 bản ghi mỗi trang. Người dùng có thể truyền
+        ApiResponse<Page<ProductFULLResponse>> resp = new ApiResponse<>();
+        Pageable pageable = PageRequest.of(page, size);
         resp.setCode(1010);
         resp.setResult(productService.getAllProducts(pageable));
         return resp;
     }
 
+
+    @GetMapping("/All")
+     ApiResponse<Page<ProductFULLResponse>> getAll(Pageable pageable) {
+        return ApiResponse.<Page<ProductFULLResponse>>builder()
+                .result(productService.listAllProducts(pageable))
+                .build();
+    }
 
     @GetMapping("/{idproduct}")
     Product getProduct(@PathVariable("idproduct") Long idproduct) {
@@ -87,9 +107,11 @@ public class ProductController {
 
 
     @DeleteMapping("/{idproduct}")
-    public void deleteProduct(@PathVariable("idproduct") Long idproduct) {
+    public ApiResponse<Void> deleteProduct(@PathVariable("idproduct") Long idproduct) {
         productService.deleteProduct(idproduct);
-        System.out.println("Product deleted successfully");
+        return  ApiResponse.<Void>builder()
+                .message("DELETE PRODUCT SUCCESSFULLY")
+                .build();
     }
 
 
@@ -119,5 +141,37 @@ public class ProductController {
         return api;
     }
 
+
+    @GetMapping("/search")
+    public Page<ProductFULLResponse> searchProducts(
+            @RequestParam(required = false) String brandName,
+            @RequestParam(required = false) String warehouseAreaName,
+            @RequestParam(required = false) String originName,
+            @RequestParam(required = false) String operatingSystemName,
+            @RequestParam(required = false) String productName,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size) {
+        Pageable pageable = PageRequest.of(page, size);
+        return productService.SearchProduct(
+                brandName, warehouseAreaName, originName, operatingSystemName, productName, pageable);
+    }
+
+
+    @GetMapping("/imei/{imei}")
+    public ApiResponse<ProductFULLResponse> getProductByImei(@PathVariable("imei") String imei) {
+        return  ApiResponse.<ProductFULLResponse>builder()
+                .result(productService.GetProductByImei(imei))
+                .build();
+    }
+
+
+
+    @PutMapping("/update-stock")
+    public ApiResponse<Void> updateStockProduct() {
+        productService.fixStock();
+        return ApiResponse.<Void>builder()
+                .message("UPDATE STOCK PRODUCT SUCCESSFULLY")
+                .build();
+    }
 
 }

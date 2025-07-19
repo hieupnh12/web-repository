@@ -11,6 +11,7 @@ import lombok.experimental.FieldDefaults;
 public class AccountResponse {
      String staffId;
      String userName;
-    Boolean status;
-     Long roleId;
+     Boolean status;
+     String roleId;
+     String roleName;
 }

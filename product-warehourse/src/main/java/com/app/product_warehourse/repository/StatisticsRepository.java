@@ -23,9 +23,9 @@ public interface StatisticsRepository extends JpaRepository<ExportReceipt, Strin
             )
             SELECT 
                 CAST(d AS CHAR) AS NGAY,
-                COALESCE(SUM(ed.unit_price), 0) AS danh_thu,
-                COALESCE(SUM(id.unit_price), 0) AS chi_phi,
-                COALESCE(SUM(ed.unit_price), 0) - COALESCE(SUM(id.unit_price), 0) AS loi_nhuan
+                COALESCE(SUM(ed.unit_price * ed.quantity), 0) AS danh_thu,
+                COALESCE(SUM(id.unit_price * id.quantity), 0) AS chi_phi,
+                COALESCE(SUM(ed.unit_price * ed.quantity), 0) - COALESCE(SUM(id.unit_price * id.quantity), 0) AS loi_nhuan
             FROM dates dt
             LEFT JOIN export e ON DATE(e.export_time) = dt.d
             LEFT JOIN export_details ed ON ed.export_id = e.export_id
@@ -98,9 +98,9 @@ public interface StatisticsRepository extends JpaRepository<ExportReceipt, Strin
     @Query(value = """
     SELECT
         dates.date AS date,
-        COALESCE(SUM(id.unit_price), 0) AS expenses,
-        COALESCE(SUM(ed.unit_price), 0) AS revenue,
-        COALESCE(SUM(ed.unit_price), 0) - COALESCE(SUM(id.unit_price), 0) AS profits
+        COALESCE(SUM(id.unit_price * id.quantity), 0) AS expenses,
+        COALESCE(SUM(ed.unit_price * ed.quantity), 0) AS revenue,
+        COALESCE(SUM(ed.unit_price * ed.quantit), 0) - COALESCE(SUM(id.unit_price * id.quantity), 0) AS profits
     FROM (
         SELECT DATE(:dates) + INTERVAL c.number DAY AS date
         FROM (
@@ -182,9 +182,9 @@ public interface StatisticsRepository extends JpaRepository<ExportReceipt, Strin
     @Query(value = """
             SELECT
       dates.date AS Date,
-      COALESCE(SUM(id.unit_price), 0) AS expenses,
-      COALESCE(SUM(ed.unit_price), 0) AS revenues,
-      COALESCE(SUM(ed.unit_price), 0) - COALESCE(SUM(id.unit_price), 0)  AS profits
+      COALESCE(SUM(id.unit_price * id.quantit), 0) AS expenses,
+      COALESCE(SUM(ed.unit_price * ed.quantit), 0) AS revenues,
+      COALESCE(SUM(ed.unit_price * ed.quantit), 0) - COALESCE(SUM(id.unit_price * id.quantit), 0)  AS profits
     FROM (
       SELECT DATE_ADD(?1, INTERVAL c.number DAY) AS date
       FROM (

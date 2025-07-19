@@ -22,6 +22,7 @@ import {
   takeDeleteCustomer,
   takeCustomer,
   takeUpdateCustomer,
+  searchCustomers,
 } from "../../services/customerService";
 
 import CustomerTable from "./CustomerTable";
@@ -58,16 +59,18 @@ const StyledTextField = styled(TextField)(({ theme }) => ({
 }));
 
 const Customers = () => {
-  const [customers, setCustomers] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [page, setPage] = useState(0);
-  const [rowsPerPage, setRowsPerPage] = useState(10);
-  const [searchTerm, setSearchTerm] = useState("");
-  const [selectedCustomer, setSelectedCustomer] = useState(null);
-  const [openDialog, setOpenDialog] = useState(false);
-  const [openCreate, setOpenCreate] = useState(false);
-  const [confirmOpen, setConfirmOpen] = useState(false);
-  const [selectedId, setSelectedId] = useState(null);
+  const [customers, setCustomers] = useState([]); // List of customers
+  const [totalPages, setTotalPages] = useState(0); // Total pages
+  const [totalElements, setTotalElements] = useState(0); // Total customers
+  const [loading, setLoading] = useState(true); // Loading state
+  const [page, setPage] = useState(0); // Current page
+  const [rowsPerPage, setRowsPerPage] = useState(10); // Rows per page
+  const [searchTerm, setSearchTerm] = useState(""); // Search keyword
+  const [selectedCustomer, setSelectedCustomer] = useState(null); // Selected customer
+  const [openDialog, setOpenDialog] = useState(false); // Edit dialog
+  const [openCreate, setOpenCreate] = useState(false); // Create dialog
+  const [confirmOpen, setConfirmOpen] = useState(false); // Delete confirmation dialog
+  const [selectedId, setSelectedId] = useState(null); // ID of customer to delete
 
   const [snackbar, setSnackbar] = useState({
     open: false,
@@ -75,17 +78,29 @@ const Customers = () => {
     severity: "success",
   });
 
-  const fetchCustomers = async () => {
+  // Fetch customers or search results
+  const fetchCustomers = async (pageNum = page, size = rowsPerPage, keyword = searchTerm) => {
     setLoading(true);
     try {
-      const response = await takeCustomer();
-      if (response.status === 200) {
-        setCustomers(response.data.result);
+      let response;
+      if (keyword) {
+        console.log(keyword); 
+        response = await searchCustomers(keyword, pageNum, size); // Call search API
+        console.log(response);
+        
+      } else {
+        response = await takeCustomer(pageNum, size); // Call list API
+                // console.log(response);
       }
-    } catch {
+      if (response.status === 200) {
+        setCustomers(response.data.result.content); // Set customer list
+        setTotalPages(response.data.result.totalPages); // Set total pages
+        setTotalElements(response.data.result.totalElements); // Set total customers
+      }
+    } catch (error) {
       setSnackbar({
         open: true,
-        message: "Error loading customers",
+        message: `Error loading customers: ${error.response?.data?.message || error.message}`,
         severity: "error",
       });
     } finally {
@@ -93,47 +108,50 @@ const Customers = () => {
     }
   };
 
+  // Create new customer
   const handleCreateCustomer = async (newCustomer) => {
     try {
       const response = await takeCreateCustomer(newCustomer);
       if (response.status === 200) {
-        setCustomers([...customers, response.data.result]);
         setSnackbar({
           open: true,
           message: "Customer added successfully",
           severity: "success",
         });
+        fetchCustomers(); // Refresh list
       }
-    } catch {
+    } catch (error) {
       setSnackbar({
         open: true,
-        message: "Error adding customer",
+        message: `Error adding customer: ${error.response?.data?.message || error.message}`,
         severity: "error",
       });
     }
   };
 
+  // Delete customer
   const handleDeleteCustomer = async () => {
     try {
       const response = await takeDeleteCustomer(selectedId);
       setConfirmOpen(false);
       if (response.status === 200) {
-        setCustomers(customers.filter((c) => c.customerId !== selectedId));
         setSnackbar({
           open: true,
           message: "Customer deleted successfully",
           severity: "success",
         });
+        fetchCustomers(); // Refresh list
       }
-    } catch {
+    } catch (error) {
       setSnackbar({
         open: true,
-        message: "Customer is in use",
+        message: `Customer is in use: ${error.response?.data?.message || error.message}`,
         severity: "error",
       });
     }
   };
 
+  // Update customer
   const handleSaveCustomer = async (updatedCustomer) => {
     try {
       const response = await takeUpdateCustomer(
@@ -141,46 +159,50 @@ const Customers = () => {
         updatedCustomer
       );
       if (response.status === 200) {
-        setCustomers((prev) =>
-          prev.map((customer) =>
-            customer.customerId === response.data.result.customerId
-              ? response.data.result
-              : customer
-          )
-        );
         setSnackbar({
           open: true,
           message: "Customer updated successfully",
           severity: "success",
         });
+        fetchCustomers(); // Refresh list
       }
-    } catch {
+    } catch (error) {
       setSnackbar({
         open: true,
-        message: "Error updating customer",
+        message: `Error updating customer: ${error.response?.data?.message || error.message}`,
         severity: "error",
       });
     }
   };
 
+  // Load customers when page or rows per page changes
   useEffect(() => {
     fetchCustomers();
-  }, []);
+  }, [page, rowsPerPage]);
 
-  const handleChangePage = (event, newPage) => setPage(newPage);
+  // Debounced search
+  useEffect(() => {
+    const delayDebounceFn = setTimeout(() => {
+      if (searchTerm) {
+        fetchCustomers(0, rowsPerPage, searchTerm);
+      } else {
+        fetchCustomers(0, rowsPerPage, "");
+      }
+    }, 500);
+
+    return () => clearTimeout(delayDebounceFn);
+  }, [searchTerm]);
+
+  const handleChangePage = (event, newPage) => {
+    setPage(newPage);
+  };
+
   const handleChangeRowsPerPage = (event) => {
     setRowsPerPage(parseInt(event.target.value, 10));
     setPage(0);
   };
 
   const handleAddNew = () => setOpenCreate(true);
-
-  const filteredCustomers = customers.filter(
-    (customer) =>
-      customer.customerName?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      customer.phone?.includes(searchTerm) ||
-      customer.address?.toLowerCase().includes(searchTerm.toLowerCase())
-  );
 
   const handleEditClick = (customer) => {
     setSelectedCustomer(customer);
@@ -243,7 +265,7 @@ const Customers = () => {
           />
           <Tooltip title="Refresh" placement="top">
             <IconButton
-              onClick={fetchCustomers}
+              onClick={() => fetchCustomers(0, rowsPerPage, "")}
               disabled={loading}
               sx={{
                 backgroundColor: "#e3f2fd",
@@ -260,9 +282,11 @@ const Customers = () => {
 
       <CustomerTable
         loading={loading}
-        filteredCustomers={filteredCustomers}
+        filteredCustomers={customers}
         page={page}
         rowsPerPage={rowsPerPage}
+        totalElements={totalElements}
+        totalPages={totalPages}
         handleChangePage={handleChangePage}
         handleChangeRowsPerPage={handleChangeRowsPerPage}
         handleEdit={handleEditClick}

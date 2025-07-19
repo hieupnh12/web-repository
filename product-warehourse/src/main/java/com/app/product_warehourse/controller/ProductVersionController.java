@@ -52,6 +52,11 @@ public class ProductVersionController {
         return resp;
     }
 
+
+
+
+
+
     @PutMapping("/{id}")
       ApiResponse<ProductVersionResponse> update(@PathVariable String id, @RequestBody @Valid ProductVersionRequest request) {
           ApiResponse<ProductVersionResponse> resp = new ApiResponse<>();
@@ -72,6 +77,12 @@ public class ProductVersionController {
       }
 
 
-
+      @GetMapping
+      public ApiResponse<List<ProductVersionResponse>> getAllVersion() {
+          ApiResponse<List<ProductVersionResponse>> resp = new ApiResponse<>();
+          resp.setCode(1010);
+          resp.setResult(pvs.listAll());
+          return resp;
+      }
 
 }

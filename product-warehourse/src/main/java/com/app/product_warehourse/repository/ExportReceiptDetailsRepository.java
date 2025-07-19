@@ -6,18 +6,23 @@ import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
+import java.util.List;
+
 
 @Repository
 public interface ExportReceiptDetailsRepository extends JpaRepository<ExportReceiptDetail, ExportReceiptDetail.ExportReceiptDetailId> {
     // Tìm ExportReceiptDetail dựa trên export_id và productVersionId
-    @Query("SELECT erd FROM ExportReceiptDetail erd WHERE erd.newExId.export_id.export_id = :exportId AND erd.newExId.productVersionId.versionId.versionId = :productVersionId")
-    ExportReceiptDetail findByExportIdAndProductVersionId(@Param("exportId") String exportId, @Param("productVersionId") String productVersionId);
+    @Query("SELECT erd FROM ExportReceiptDetail erd WHERE erd.newExId.export_id.export_id = :exportId AND erd.newExId.productVersionId.imei= :productVersionId")
+    ExportReceiptDetail findByExportIdAndProductVersionId(@Param("exportId") String exportId, @Param("productVersionId") String imei);
 
 
     // Xóa ExportReceiptDetail dựa trên export_id và item_id
     @Modifying
-    @Query("DELETE FROM ExportReceiptDetail erd WHERE erd.newExId.export_id.export_id = :exportId AND erd.newExId.productVersionId.versionId = :productVersionId")
-    void deleteByExportIdAndItemId(@Param("exportId")String exportId,@Param("productVersionId") String productVersionId);
+    @Query("DELETE FROM ExportReceiptDetail erd WHERE erd.newExId.export_id.export_id = :exportId AND erd.newExId.productVersionId.imei = :productVersionId")
+    void deleteByExportIdAndItemId(@Param("exportId")String exportId,@Param("productVersionId") String imei);
 
+
+    @Query("SELECT d FROM ExportReceiptDetail d WHERE d.newExId.productVersionId.versionId.versionId = :productVersionId")
+    List<ExportReceiptDetail> findDetailsByProductVersionId(String productVersionId);
 
 }

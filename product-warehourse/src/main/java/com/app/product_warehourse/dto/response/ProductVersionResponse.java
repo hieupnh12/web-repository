@@ -1,10 +1,12 @@
 package com.app.product_warehourse.dto.response;
 
 
+import com.app.product_warehourse.entity.Product;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
 
 import java.math.BigDecimal;
+import java.util.List;
 
 @Builder                 // Tạo builder pattern giúp tạo đối tượng dễ dàng, linh hoạt
 // Đánh dấu class này là entity, ánh xạ tới bảng trong DB
@@ -30,5 +32,8 @@ public class ProductVersionResponse {
     Integer stockQuantity;
 
     Boolean status;
+
+    List<ImeiResponse> imei;   //importRequest3
+
 
 }

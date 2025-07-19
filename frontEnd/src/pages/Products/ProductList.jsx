@@ -10,18 +10,18 @@ const ProductList = ({
   itemsPerPage,
   totalItems,
   onPageChange,
-  onEdit,    
-  onDetail, 
+  onEdit,
+  onDetail,
   onDelete,
+  stats,
 }) => {
   const [sortBy, setSortBy] = useState("productName");
   const [sortOrder, setSortOrder] = useState("asc");
   const [viewMode, setViewMode] = useState("table");
 
   const filteredAndSortedProducts = useMemo(() => {
-    let filtered = [...products];
-
-    filtered.sort((a, b) => {
+    const sorted = [...products];
+    sorted.sort((a, b) => {
       let aValue = a[sortBy] || "";
       let bValue = b[sortBy] || "";
       if (typeof aValue === "string" && typeof bValue === "string") {
@@ -36,17 +36,10 @@ const ProductList = ({
         ? 1
         : -1;
     });
-
-    return filtered;
+    return sorted;
   }, [products, sortBy, sortOrder]);
 
-  const paginatedProducts = useMemo(() => {
-    const startIndex = (currentPage - 1) * itemsPerPage;
-    return filteredAndSortedProducts.slice(
-      startIndex,
-      startIndex + itemsPerPage
-    );
-  }, [filteredAndSortedProducts, currentPage, itemsPerPage]);
+  const paginatedProducts = filteredAndSortedProducts;
 
   const totalPages = Math.ceil(totalItems / itemsPerPage);
 
@@ -61,7 +54,15 @@ const ProductList = ({
 
   return (
     <div>
-      <StatsSection products={filteredAndSortedProducts} />
+      {/* ✅ Thống kê tổng toàn bộ sản phẩm */}
+      {stats && (
+        <StatsSection
+          totalProducts={stats.totalProducts}
+          inStock={stats.inStock}
+          lowStock={stats.lowStock}
+          outOfStock={stats.outOfStock}
+        />
+      )}
 
       <div className="flex items-center gap-3 mb-4">
         <button
@@ -85,16 +86,16 @@ const ProductList = ({
           onSort={handleSort}
           sortBy={sortBy}
           sortOrder={sortOrder}
-
-          onEdit={onEdit}       
-          onDetail={onDetail}  
+          onEdit={onEdit}
+          onDetail={onDetail}
           onDelete={onDelete}
         />
       ) : (
         <CardView
           products={paginatedProducts}
-
-          onEdit={onEdit}       
+          currentPage={currentPage}
+          itemsPerPage={itemsPerPage}
+          onEdit={onEdit}
           onDetail={onDetail}
           onDelete={onDelete}
         />

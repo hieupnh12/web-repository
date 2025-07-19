@@ -23,9 +23,9 @@ export default function Login() {
   const [isFormFocused, setIsFormFocused] = useState(false);
 
   const slides = [
-    { image: "/iphone16.png", title: "Warehouse Management", subtitle: "Efficient inventory control" },
-    { image: "/iphone16.png", title: "Real-time Tracking", subtitle: "Monitor your stock 24/7" },
-    { image: "/iphone16.png", title: "Advanced Analytics", subtitle: "Data-driven decisions" }
+    { image: "/ip16.png", title: "Warehouse Management", subtitle: "Efficient inventory control" },
+    { image: "/s25ultra.png", title: "Real-time Tracking", subtitle: "Monitor your stock 24/7" },
+    { image: "/ip16.png", title: "Advanced Analytics", subtitle: "Data-driven decisions" }
   ];
 
   // Slideshow effect
@@ -226,7 +226,7 @@ export default function Login() {
                   className={`w-full pl-12 pr-4 py-4 bg-white/5 border-2 ${
                     errors.username ? 'border-red-500' : 'border-white/20 focus:border-blue-500'
                   } rounded-xl text-white placeholder-gray-400 focus:outline-none focus:bg-white/10 transition-all duration-300`}
-                  placeholder="e.g., admin"
+                  placeholder="Username"
                   value={credentials.username}
                   onChange={(e) => handleInputChange("username", e.target.value)}
                   onFocus={() => setIsFormFocused(true)}
@@ -259,7 +259,7 @@ export default function Login() {
                   className={`w-full pl-12 pr-12 py-4 bg-white/5 border-2 ${
                     errors.password ? 'border-red-500' : 'border-white/20 focus:border-blue-500'
                   } rounded-xl text-white placeholder-gray-400 focus:outline-none focus:bg-white/10 transition-all duration-300`}
-                  placeholder="e.g., admin123"
+                  placeholder="Password"
                   value={credentials.password}
                   onChange={(e) => handleInputChange("password", e.target.value)}
                   onFocus={() => setIsFormFocused(true)}
