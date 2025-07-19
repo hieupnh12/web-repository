@@ -288,7 +288,7 @@ public class ProductService {
                                                    String productName,
                                                    Pageable pageable) {
         return productRepository.findProductsWithFilters(
-                brandName,warehouseAreaName,originName,operatingSystemName,productName,pageable)
+                        brandName,warehouseAreaName,originName,operatingSystemName,productName,pageable)
                 .map(productMapper::toProductFULLResponse);
     }
 

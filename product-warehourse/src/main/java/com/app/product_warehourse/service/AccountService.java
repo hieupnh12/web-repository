@@ -40,8 +40,7 @@ public class AccountService {
     PasswordEncoder passwordEncoder;
     EmailService emailService;
 
-
-    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasRole('ADMIN') or hasAuthority('Account_CREATE')")
     @Transactional
     public void createAccount(AccountCreateRequest request, String staffId) {
 
@@ -71,7 +70,7 @@ public class AccountService {
             throw e;
         }
     }
-     @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasRole('ADMIN') or hasAuthority('Account_VIEW')")
     @Cacheable("account")
     public List<AccountResponse> getAllAccounts() {
         return accountRepository.findAll().stream()
@@ -91,7 +90,7 @@ public class AccountService {
             throw new AppException(ErrorCode.PASSWORD_NOT_MATCH);
         }
     }
-        @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasRole('ADMIN') or hasAuthority('Account_UPDATE')")
         public AccountResponse updateAccount(String staffId, AccountUpdateRequest request) {
         var account = accountRepository.findById(staffId)
                 .orElseThrow(() -> new AppException(ErrorCode.ACCOUNT_NOT_EXIST));
@@ -112,6 +111,7 @@ public class AccountService {
         return accountRepository.getStaff();
     }
 
+    @PreAuthorize("hasRole('ADMIN') or hasAuthority('Account_DELETE')")
     public void deleteAccountByStaffId(String staffId) {
         staffRepository.deleteById(staffId);
     }

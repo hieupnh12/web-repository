@@ -77,7 +77,7 @@ public interface ProductRepository extends JpaRepository<Product, Long> {
             "LEFT JOIN FETCH p.operatingSystem os " +
             "LEFT JOIN FETCH p.warehouseArea  w " +
             "LEFT JOIN FETCH p.productVersion  pv " +
-            "WHERE (:brandName IS NULL OR LOWER( b.brandName) LIKE LOWER(CONCAT('%', :brandName, '%')))  " +
+           "WHERE (:brandName IS NULL OR LOWER( b.brandName) LIKE LOWER(CONCAT('%', :brandName, '%')))  " +
             "AND (:warehouseAreaName IS NULL OR LOWER(w.name) LIKE LOWER(CONCAT('%', :warehouseAreaName, '%'))) " +
             "AND (:originName IS NULL OR LOWER(o.name) LIKE LOWER(CONCAT('%', :originName, '%')))" +
             "AND (:operatingSystemName IS NULL OR LOWER(os.name) LIKE LOWER(CONCAT('%', :operatingSystemName, '%'))) " +
