@@ -100,7 +100,7 @@ public interface StatisticsRepository extends JpaRepository<ExportReceipt, Strin
         dates.date AS date,
         COALESCE(SUM(id.unit_price * id.quantity), 0) AS expenses,
         COALESCE(SUM(ed.unit_price * ed.quantity), 0) AS revenue,
-        COALESCE(SUM(ed.unit_price * ed.quantit), 0) - COALESCE(SUM(id.unit_price * id.quantity), 0) AS profits
+        COALESCE(SUM(ed.unit_price * ed.quantity), 0) - COALESCE(SUM(id.unit_price * id.quantity), 0) AS profits
     FROM (
         SELECT DATE(:dates) + INTERVAL c.number DAY AS date
         FROM (
@@ -182,9 +182,9 @@ public interface StatisticsRepository extends JpaRepository<ExportReceipt, Strin
     @Query(value = """
             SELECT
       dates.date AS Date,
-      COALESCE(SUM(id.unit_price * id.quantit), 0) AS expenses,
-      COALESCE(SUM(ed.unit_price * ed.quantit), 0) AS revenues,
-      COALESCE(SUM(ed.unit_price * ed.quantit), 0) - COALESCE(SUM(id.unit_price * id.quantit), 0)  AS profits
+      COALESCE(SUM(id.unit_price * id.quantity), 0) AS expenses,
+      COALESCE(SUM(ed.unit_price * ed.quantity), 0) AS revenues,
+      COALESCE(SUM(ed.unit_price * ed.quantity), 0) - COALESCE(SUM(id.unit_price * id.quantity), 0)  AS profits
     FROM (
       SELECT DATE_ADD(?1, INTERVAL c.number DAY) AS date
       FROM (

@@ -29,4 +29,7 @@ public interface AccountRepository extends JpaRepository<Account, String> {
     List<StaffSelectResponse> getStaff();
 
 
+    boolean existsByStaffId(String staffId);
+
+
 }

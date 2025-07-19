@@ -44,7 +44,7 @@ public class CustomerController {
     }
 
     @PutMapping("/{customerId}")
-    public ApiResponse<CustomerResponse> updateCustomer(@Valid @PathVariable String customerId, @RequestBody CustomerUpdateRequest request) {
+    public ApiResponse<CustomerResponse> updateCustomer(@PathVariable String customerId, @Valid @RequestBody CustomerUpdateRequest request) {
         return ApiResponse.<CustomerResponse>builder()
                 .result(customerService.updateCustomer(customerId,request))
                 .build();

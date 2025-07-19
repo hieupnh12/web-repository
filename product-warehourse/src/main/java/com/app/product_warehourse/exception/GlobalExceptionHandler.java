@@ -23,6 +23,7 @@ import java.util.Objects;
 @ControllerAdvice
 public class GlobalExceptionHandler {
     private static final String MIN_ATTRIBUTE = "min";
+    private static final String MAX_ATTRIBUTE = "max";
 
 //    @ExceptionHandler(value = Exception.class)
 //    ResponseEntity<ApiResponse> handlingRuntimeException(RuntimeException exception) {
@@ -127,10 +128,14 @@ public class GlobalExceptionHandler {
 
     private String mapAttribute(String message, Map<String,Object> attributes) {
         String minvalue = String.valueOf(attributes.get(MIN_ATTRIBUTE));
-
-        return message.replace("{"+ MIN_ATTRIBUTE +"}", minvalue);
+        String maxvalue = String.valueOf(attributes.get(MAX_ATTRIBUTE));
+        return message
+                    .replace("{"+ MIN_ATTRIBUTE +"}", minvalue)
+                    .replace("{"+ MAX_ATTRIBUTE +"}", maxvalue);
 
     }
+
+
 
 
 

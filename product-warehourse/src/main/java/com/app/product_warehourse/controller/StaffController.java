@@ -40,7 +40,7 @@ public class StaffController {
                 .build();
     }
     @PutMapping("/{staffId}")
-    public ApiResponse<StaffResponse> updateStaff(@Valid @PathVariable String staffId, @RequestBody StaffUpdateRequest request) {
+    public ApiResponse<StaffResponse> updateStaff(@PathVariable String staffId,@Valid  @RequestBody StaffUpdateRequest request) {
         return ApiResponse.<StaffResponse>builder()
                 .result(staffService.updateStaff(staffId,request))
                 .build();
