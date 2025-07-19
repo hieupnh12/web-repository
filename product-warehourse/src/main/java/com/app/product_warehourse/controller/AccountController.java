@@ -42,7 +42,7 @@ public class AccountController {
                 .build();
     }
     @PostMapping("/change/{staffId}")
-    public ApiResponse<String> changePassword(@Valid @PathVariable String staffId, @RequestBody ChangePasswordRequest request) {
+    public ApiResponse<String> changePassword( @PathVariable String staffId,@Valid @RequestBody ChangePasswordRequest request) {
         accountService.changePassword(request,staffId);
         String message = "Password changed successfully";
         return ApiResponse.<String>builder()
@@ -51,7 +51,7 @@ public class AccountController {
     }
 
     @PutMapping("/update/{staffId}")
-    public ApiResponse<AccountResponse> updateAccount(@Valid @PathVariable String staffId, @RequestBody AccountUpdateRequest request) {
+    public ApiResponse<AccountResponse> updateAccount(@PathVariable String staffId, @Valid @RequestBody AccountUpdateRequest request) {
         return ApiResponse.<AccountResponse>builder()
                 .result(accountService.updateAccount(staffId,request))
                 .build();

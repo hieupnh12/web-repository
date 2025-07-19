@@ -5,6 +5,7 @@ import com.fasterxml.jackson.annotation.JsonFormat;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Pattern;
+import jakarta.validation.constraints.Size;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
 
@@ -16,15 +17,16 @@ import java.time.LocalDate;
 @AllArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class StaffUpdateRequest {
+    @Size(max = 100,  message = "LONG_USER_NAME")
+    @NotBlank(message = "FULL_NAME_NOT_BLANK")
     String fullName;
     Boolean gender;
-    @DobConstraint(min = 10, message = "INVALID_DOB")
+    @DobConstraint(min = 18, max= 61, message = "INVALID_DOB")
     @JsonFormat(pattern = "dd-MM-yyyy")
     LocalDate birthDate;
-    @Pattern(regexp = "^(0)[0-9]{10}$")
+    @Pattern(regexp = "^(0)[0-9]{9}$", message = "PHONE_NUMBER_INVALID")
     String phoneNumber;
-    @NotBlank(message = "EMAIL_NOT_BLANK")
-    @Email(message = "EMAIL_INVALID")
+    @Pattern(regexp = "^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}$", message = "EMAIL_INVALID")
     String email;
     Boolean status;
 

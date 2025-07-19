@@ -47,12 +47,12 @@ public enum ErrorCode {
     UNCATEGORIZE_EXCEPTION(9999, "Uncategorized error", HttpStatus.INTERNAL_SERVER_ERROR),
     INVALID_KEY(1001, "Invalid message key", HttpStatus.BAD_REQUEST),
     ACCOUNT_NOT_EXIST(1002, "Wrong user name or password please try again !", HttpStatus.BAD_REQUEST),
-    USERNAME_INVALID(1003,  "Username must be at least {min} characters", HttpStatus.BAD_REQUEST),
+    USERNAME_INVALID(1003,  "Username must be at least {min} characters ", HttpStatus.BAD_REQUEST),
     INVALID_PASSWORD(1004,  "Password  must be at least {min} characters", HttpStatus.BAD_REQUEST),
     STAFF_NOT_EXIST(1005, "Staff not existed", HttpStatus.NOT_FOUND),
     UNAUTHENTICATED(1006, "UNAUTHENTICATED", HttpStatus.UNAUTHORIZED),
     UNAUTHORIZED(1007, "You do not have permission ", HttpStatus.FORBIDDEN),
-    INVALID_DOB(1008, "Staff birth date must be more than {min} age ", HttpStatus.BAD_REQUEST),
+    INVALID_DOB(1008, "Staff birth date must be from {min} age to {max}", HttpStatus.BAD_REQUEST),
     NOT_FOUND_EMAIL(1009, "Can not found email ", HttpStatus.NOT_FOUND),
     INVALID_TOKEN(1010, "Invalid token", HttpStatus.UNAUTHORIZED),
     EXPIRED_TOKEN(1011, "Time expired", HttpStatus.UNAUTHORIZED),
@@ -75,7 +75,8 @@ public enum ErrorCode {
     CUSTOMER_NOT_EXIST(1027, "Customer not exist.",HttpStatus.BAD_REQUEST),
     INVENTORY_NOT_FOUND(1028, "Inventory not exist.",HttpStatus.BAD_REQUEST),
     PHONE_NUMBER_AVAILABLE(1029, "Phone number available  .",HttpStatus.BAD_REQUEST),
-    PASSWORD_WEAK(1030, "Mật khẩu phải có ít nhất 8 ký tự, gồm chữ in hoa, chữ thường, chữ số và ký tự đặc biệt.",HttpStatus.BAD_REQUEST),
+    PASSWORD_WEAK(1030, "Mật khẩu phải có ít nhất 8 ký tự, gồm chữ in hoa, chữ thường, chữ số và ký tự đặc biệt @$!%*?&.",HttpStatus.BAD_REQUEST),
+    LONG_USER_NAME(1031, "Cảnh báo: họ và tên không được vượt quá {max} kí tự", HttpStatus.BAD_REQUEST),
     ;
 
     ErrorCode(int code, String message, HttpStatusCode statusCode) {
