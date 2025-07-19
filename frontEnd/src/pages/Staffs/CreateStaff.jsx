@@ -1,3 +1,4 @@
+// CreateStaff.jsx
 import React, { useState, useEffect } from "react";
 import { createStaff } from "../../services/staffService";
 import { useNavigate } from "react-router-dom";
@@ -10,6 +11,7 @@ import {
   X,
 } from "@mui/icons-material";
 import { toast } from "react-toastify";
+import { fetchRoles, createAccount } from "../../services/accountService";
 
 const AddStaff = ({ open, onClose, onSave }) => {
   const [form, setForm] = useState({
@@ -21,6 +23,13 @@ const AddStaff = ({ open, onClose, onSave }) => {
     status: "1",
   });
 
+  const [accountForm, setAccountForm] = useState({
+    userName: "",
+    password: "",
+    roleName: "",
+  });
+
+  const [roles, setRoles] = useState([]);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -33,6 +42,14 @@ const AddStaff = ({ open, onClose, onSave }) => {
         birthDate: "",
         status: "1",
       });
+      setAccountForm({
+        userName: "",
+        password: "",
+        roleName: "",
+      });
+      fetchRoles().then((res) => {
+        if (res.status === 200) setRoles(res.data.result);
+      });
     }
   }, [open]);
 
@@ -43,29 +60,53 @@ const AddStaff = ({ open, onClose, onSave }) => {
     setForm((prev) => ({ ...prev, [name]: value }));
   };
 
+  const handleAccountChange = (e) => {
+    const { name, value } = e.target;
+    setAccountForm((prev) => ({ ...prev, [name]: value }));
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
+
+    if (!accountForm.userName || !accountForm.password || !accountForm.roleName) {
+      toast.error("Vui lòng nhập đầy đủ thông tin tài khoản");
+      return;
+    }
+
     try {
       const formatted = {
         ...form,
-        gender: form.gender === "Nam" ? true : false,
+        gender: form.gender === "Nam",
         birthDate: form.birthDate.split("-").reverse().join("-"),
         status: parseInt(form.status),
       };
+
       const resp = await createStaff(formatted);
-      console.log(resp);
-      
+
       if (resp.status === 200) {
-        onSave?.(formatted);
-      onClose();
-      navigate("/manager/staff");
-                    toast.success("Tạo thành công!")
+        const createdStaff = resp.data.result;
+
+        const selectedRole = roles.find((r) => r.roleName === accountForm.roleName);
+        if (!selectedRole) {
+          toast.error("Vai trò không hợp lệ");
+          return;
+        }
+
+        await createAccount(createdStaff.staffId, {
+          userName: accountForm.userName,
+          password: accountForm.password,
+          roleId: selectedRole.roleId,
+        });
+
+        onSave?.(createdStaff);
+        onClose();
+        navigate("/manager/staff");
+        toast.success("Tạo nhân viên & tài khoản thành công!");
       } else {
-              toast.error(resp)
+        toast.error("Tạo nhân viên thất bại");
       }
-      
     } catch (err) {
-      toast.error(err)
+      toast.error("Lỗi khi tạo nhân viên hoặc tài khoản");
     }
   };
 
@@ -107,6 +148,7 @@ const AddStaff = ({ open, onClose, onSave }) => {
               onChange={handleChange}
               placeholder="Full name *"
               required
+              maxLength={100}
               className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500"
             />
           </div>
@@ -188,6 +230,46 @@ const AddStaff = ({ open, onClose, onSave }) => {
               <option value="0">Không hoạt động</option>
             </select>
           </div>
+
+          {/* Account Section */}
+          <hr className="border-gray-300 mt-6" />
+          <h3 className="text-lg font-bold">Thông tin tài khoản đăng nhập</h3>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <input
+              name="userName"
+              value={accountForm.userName}
+              onChange={handleAccountChange}
+              placeholder="Tên đăng nhập"
+              required
+              maxLength={30}
+              className="w-full p-3 border border-gray-300 rounded-lg"
+            />
+            <input
+              type="password"
+              name="password"
+              value={accountForm.password}
+              onChange={handleAccountChange}
+              placeholder="Mật khẩu"
+              required
+              maxLength={64}
+              className="w-full p-3 border border-gray-300 rounded-lg"
+            />
+            <select
+              name="roleName"
+              value={accountForm.roleName}
+              onChange={handleAccountChange}
+              required
+              className="w-full p-3 border border-gray-300 rounded-lg"
+            >
+              <option value="">Chọn vai trò</option>
+              {roles.map((role) => (
+                <option key={role.roleId} value={role.roleName}>
+                  {role.roleName}
+                </option>
+              ))}
+            </select>
+          </div>
+
           {/* Footer */}
           <hr className="border-gray-200 mt-6" />
           <div className="p-6 flex justify-end gap-4">

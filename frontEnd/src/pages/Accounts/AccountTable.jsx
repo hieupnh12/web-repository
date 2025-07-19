@@ -1,3 +1,4 @@
+// AccountTable.jsx
 import React, { useState } from "react";
 import {
   Table,
@@ -22,7 +23,6 @@ import {
 } from "@mui/icons-material";
 import { styled, alpha } from "@mui/material/styles";
 
-// Styled như StaffTable
 const StyledPaper = styled(Paper)(({ theme }) => ({
   background: "linear-gradient(145deg, #ffffff 0%, #f0f7ff 100%)",
   borderRadius: 16,
@@ -86,6 +86,7 @@ export default function AccountTable({
               <TableCell>STT</TableCell>
               <TableCell>Tên đăng nhập</TableCell>
               <TableCell>Vai trò</TableCell>
+              <TableCell>Trạng thái</TableCell>
               <TableCell align="center">Chức năng</TableCell>
             </TableRow>
           </StyledTableHead>
@@ -93,14 +94,14 @@ export default function AccountTable({
             {loading
               ? [...Array(5)].map((_, index) => (
                   <TableRow key={index}>
-                    <TableCell colSpan={4}>
+                    <TableCell colSpan={5}>
                       <Skeleton animation="wave" height={60} />
                     </TableCell>
                   </TableRow>
                 ))
               : pagedAccounts.length === 0 ? (
                   <TableRow>
-                    <TableCell colSpan={4} align="center">
+                    <TableCell colSpan={5} align="center">
                       Không có tài khoản nào.
                     </TableCell>
                   </TableRow>
@@ -123,6 +124,17 @@ export default function AccountTable({
                             {acc.roleName}
                           </Typography>
                         </Box>
+                      </TableCell>
+                      <TableCell>
+                        <Typography
+                          variant="body2"
+                          sx={{
+                            fontWeight: 600,
+                            color: acc.status === true || acc.status === 1 ? "green" : "red",
+                          }}
+                        >
+                          {acc.status === true || acc.status === 1 ? "Hoạt động" : "Ngừng"}
+                        </Typography>
                       </TableCell>
                       <TableCell align="center">
                         <Box sx={{ display: "flex", justifyContent: "center", gap: 1 }}>
