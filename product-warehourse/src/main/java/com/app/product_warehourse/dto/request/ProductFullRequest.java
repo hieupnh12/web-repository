@@ -13,7 +13,7 @@ import java.util.List;
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class ProductFullRequest {
 
-    Long ProductId;
+    Long productId;
 
     ProductsRequest products ;
 

@@ -30,24 +30,24 @@ public class ProductController {
     @Autowired
     private ProductService productService;
 
-    @PostMapping("/init")
-    public ApiResponse<ProductFULLResponse> InitProduct(){
-         return ApiResponse.<ProductFULLResponse>builder()
-                 .result(productService.initProduct())
-                 .build();
-    }
-
-
-
-    // Tạo mới Product với ảnh, sử dụng multipart/form-data
-    @PostMapping(value="/full/confirm",consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    public ApiResponse<ProductFULLResponse> addProduct(
-            @RequestPart(value = "product") @Valid ProductFullRequest request,
-            @RequestPart(value = "image", required = false) MultipartFile image) throws IOException {
-        return ApiResponse.<ProductFULLResponse>builder()
-                          .result(productService.createProductFull(request,image))
-                          .build();
-    }
+        @PostMapping("/init")
+        public ApiResponse<ProductFULLResponse> InitProduct(){
+             return ApiResponse.<ProductFULLResponse>builder()
+                     .result(productService.initProduct())
+                     .build();
+        }
+    
+    
+    
+        // Tạo mới Product với ảnh, sử dụng multipart/form-data
+        @PostMapping(value="/full/confirm",consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+        public ApiResponse<ProductFULLResponse> addProduct(
+                @RequestPart(value = "product") @Valid ProductFullRequest request,
+                @RequestPart(value = "image", required = false) MultipartFile image) throws IOException {
+            return ApiResponse.<ProductFULLResponse>builder()
+                              .result(productService.createProductFull(request,image))
+                              .build();
+        }
 
 
     @PutMapping(value = "/upload_image/{id}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
