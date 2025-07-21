@@ -14,6 +14,7 @@ import { pre } from "framer-motion";
 import {
   takeAllProduct,
   takeProduct,
+  takeSearchProductByName,
 } from "../../../../services/productService";
 import {
   takeCustomer,
@@ -36,11 +37,13 @@ const ExportPage = () => {
   const [selectedProduct, setSelectedProduct] = useState(null);
   const [search, setSearch] = useState("");
   const [page, setPage] = useState(1);
-
+  const [isReloading, setIsReloading] = useState(false);
   const productFormRef = useRef();
   const exportTableRef = useRef();
   const [editProduct, setEditProducts] = useState(null);
   const navigate = useNavigate();
+  const [displayedProducts, setDisplayedProducts] = useState([]);
+  const [itemScanTrue, setItemScanFalse] = useState(false);
 
   const {
     data: productData,
@@ -50,7 +53,7 @@ const ExportPage = () => {
   } = useQuery({
     queryKey: ["product"],
     queryFn: async () => {
-      const resp = await takeAllProduct();
+      const resp = await takeProduct(0, 1);
       if (!resp?.data?.result.content) {
         throw new Error("Invalid response format");
       }
@@ -58,10 +61,15 @@ const ExportPage = () => {
 
       return resp.data.result.content;
     },
-    staleTime: 1000 * 60 * 5,
+    staleTime: 0,
     gcTime: 1000 * 60 * 10,
+    onSuccess: () => {
+      toast.success("Tải danh sách sản phẩm thành công!");
+      setIsReloading(false); // ✅ đảm bảo gọi ở đây
+    },
     onError: (error) => {
-      console.error("Error fetching imports:", error);
+      toast.error("Lỗi khi tải danh sách sản phẩm: " + error.message);
+      setIsReloading(false); // ✅ bắt buộc gọi ở đây luôn
     },
   });
 
@@ -76,16 +84,70 @@ const ExportPage = () => {
 
       return resp.data.result.content;
     },
-    staleTime: 1000 * 60 * 5,
+    staleTime: 0,
     gcTime: 1000 * 60 * 10,
     onError: (error) => {
       console.error("Error fetching imports:", error);
+      toast.error("Error fetching imports:", error);
     },
   });
-  // const { data: customers = { data: [] } } = useQuery({
-  //   queryKey: ["customers"],
-  //   queryFn: takeCustomerAll,
-  // });
+
+  const handleReload = async () => {
+    try {
+      setIsReloading(true);
+      const result = await refetch(); // gọi lại query
+
+      if (result?.data) {
+        toast.success("Tải danh sách sản phẩm thành công!"); // ✅ thông báo ở đây
+      } else if (result?.error) {
+        throw result.error;
+      }
+    } catch (err) {
+      toast.error("Lỗi khi tải danh sách sản phẩm: " + err.message);
+    } finally {
+      setIsReloading(false); // đảm bảo luôn reset loading
+    }
+  };
+
+  useEffect(() => {
+    if (
+      Array.isArray(productData) &&
+      displayedProducts.length === 0 // chỉ set nếu chưa có dữ liệu hiển thị
+    ) {
+      setDisplayedProducts(productData);
+    }
+  }, [productData, displayedProducts.length]);
+
+  const handleSearchProduct = async (keyword) => {
+    setIsReloading(true);
+    try {
+      const resp = await takeSearchProductByName(keyword);
+      const content = resp?.data?.content;
+      console.log("Iphoneesas", content);
+
+      setDisplayedProducts((prev) => {
+        // Tạo danh sách versionId đã có
+        const existingVersionIds = new Set(
+          prev.flatMap((p) => p.productVersionResponses.map((v) => v.versionId))
+        );
+
+        // Lọc những product mới chưa có versionId nào bị trùng
+        const newProducts = content.filter((product) =>
+          product.productVersionResponses.some(
+            (v) => !existingVersionIds.has(v.versionId)
+          )
+        );
+
+        return [...prev, ...newProducts];
+      });
+    } catch (error) {
+      toast.error("Lỗi khi tìm kiếm sản phẩm");
+    } finally {
+      setIsReloading(false);
+    }
+  };
+
+  console.log("disss", displayedProducts);
 
   // Kiểm tra và lấy mã phiếu xuất từ localStorage
   const loadIdImport = async () => {
@@ -175,12 +237,51 @@ const ExportPage = () => {
 
       // Tạo danh sách sản phẩm mới
       let newList;
-      if (isEditing) {
+      if (itemScanTrue) {
+        console.log("prev.products", prev);
+        console.log("editProduct.productId", product);
+        const existingIndex = prev.products.findIndex(
+          (p) =>
+            p.productId === product.productId &&
+            p.versionId === product.versionId
+        );
+        console.log("existingIndex.productId", existingIndex);
+        if (existingIndex !== -1) {
+          // Đã có: gộp imei mới với imei cũ (tránh trùng)
+          const existingProduct = prev.products[existingIndex];
+
+          const mergedImeis = Array.from(
+            new Set([...(existingProduct.imeis || []), ...filteredImeis])
+          );
+
+          newList = [...prev.products];
+          newList[existingIndex] = {
+            ...existingProduct,
+            imeis: mergedImeis,
+            quantity: mergedImeis.length,
+          };
+          console.log("sasasas", newList);
+
+          setUsedImeis((prevImeis) => [...prevImeis, ...filteredImeis]);
+        } else {
+          // Chưa có: thêm sản phẩm mới
+          newList = [
+            ...prev.products,
+            {
+              ...product,
+              imeis: [...filteredImeis],
+              quantity: filteredImeis.length,
+            },
+          ];
+        }
+        setUsedImeis((prevImeis) => [...prevImeis, ...filteredImeis]);
+      } else if (isEditing) {
         // Nếu đang sửa → cập nhật lại sản phẩm
+
         newList = prev.products.map((p) => {
           if (
-            p.productId === editProduct.productId &&
-            p.versionId === editProduct.versionId
+            p?.productId === editProduct.productId &&
+            p?.versionId === editProduct.versionId
           ) {
             return {
               ...product,
@@ -248,7 +349,7 @@ const ExportPage = () => {
   };
 
   const handleSubmitExport = async () => {
-    if (!form.customer.customerId) {
+    if (!form.customer) {
       toast.error("Vui lòng chọn khách hàng!");
       return;
     }
@@ -293,11 +394,6 @@ const ExportPage = () => {
     }
   };
 
-  const handleSearch = (searchText) => {
-    setSearch(searchText);
-    setPage(1);
-  };
-
   const handleAddButtonClick = () => {
     if (productFormRef.current) {
       productFormRef.current.handleAdd();
@@ -339,11 +435,13 @@ const ExportPage = () => {
         <div className="w-full lg:w-4/4 space-y-2">
           <div className="flex flex-col md:flex-row gap-2">
             <ProductList
-              products={productData || []}
-              onSearch={handleSearch}
+              products={displayedProducts}
+              onSearch={handleSearchProduct}
               onSelect={setSelectedProduct}
               selectedProduct={selectedProduct}
               editProduct={editProduct}
+              handleReload={handleReload}
+              isLoading={isLoading || isReloading}
             />
             <ProductForm
               ref={productFormRef}
@@ -354,6 +452,12 @@ const ExportPage = () => {
               usedImeis={usedImeis}
               setEditProduct={setEditProducts}
               setImei={setUsedImeis}
+              handleAddButtonClick={handleAddButtonClick}
+              onSearch={handleSearchProduct}
+              setDisplayedProducts={setDisplayedProducts}
+              setSelectedProduct={setSelectedProduct}
+              itemScan={itemScanTrue}
+              setItemScanFalse={setItemScanFalse}
             />
           </div>
 
@@ -367,7 +471,7 @@ const ExportPage = () => {
             </button>
             <button
               disabled
-              className="flex-1 min-w-[150px] bg-white-500 text-white px-4 py-2 rounded"
+              className="flex-1 min-w-[150px] bg-white text-white px-4 py-2 rounded"
             >
               Nhập Excel
             </button>

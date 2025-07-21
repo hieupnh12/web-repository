@@ -24,11 +24,14 @@ import {
   takeUpdateCustomer,
   searchCustomers,
 } from "../../services/customerService";
+import { takeFunctionOfFeature } from "../../services/permissionService";
 
 import CustomerTable from "./CustomerTable";
 import EditCustomer from "./models/EditCustomer";
 import ConfirmDialog from "../../components/ui/ConfirmDialog";
 import CustomerDialog from "./models/AddCustomer";
+import { useSelector } from "react-redux";
+import { takeInfo, takeRoleVer1 } from "../../services/authService";
 
 const StyledButton = styled(Button)(({ theme }) => ({
   borderRadius: 8,
@@ -79,18 +82,21 @@ const Customers = () => {
   });
 
   // Fetch customers or search results
-  const fetchCustomers = async (pageNum = page, size = rowsPerPage, keyword = searchTerm) => {
+  const fetchCustomers = async (
+    pageNum = page,
+    size = rowsPerPage,
+    keyword = searchTerm
+  ) => {
     setLoading(true);
     try {
       let response;
       if (keyword) {
-        console.log(keyword); 
+        console.log(keyword);
         response = await searchCustomers(keyword, pageNum, size); // Call search API
         console.log(response);
-        
       } else {
         response = await takeCustomer(pageNum, size); // Call list API
-                // console.log(response);
+        // console.log(response);
       }
       if (response.status === 200) {
         setCustomers(response.data.result.content); // Set customer list
@@ -100,7 +106,9 @@ const Customers = () => {
     } catch (error) {
       setSnackbar({
         open: true,
-        message: `Error loading customers: ${error.response?.data?.message || error.message}`,
+        message: `Error loading customers: ${
+          error.response?.data?.message || error.message
+        }`,
         severity: "error",
       });
     } finally {
@@ -123,7 +131,9 @@ const Customers = () => {
     } catch (error) {
       setSnackbar({
         open: true,
-        message: `Error adding customer: ${error.response?.data?.message || error.message}`,
+        message: `Error adding customer: ${
+          error.response?.data?.message || error.message
+        }`,
         severity: "error",
       });
     }
@@ -145,7 +155,9 @@ const Customers = () => {
     } catch (error) {
       setSnackbar({
         open: true,
-        message: `Customer is in use: ${error.response?.data?.message || error.message}`,
+        message: `Customer is in use: ${
+          error.response?.data?.message || error.message
+        }`,
         severity: "error",
       });
     }
@@ -169,7 +181,9 @@ const Customers = () => {
     } catch (error) {
       setSnackbar({
         open: true,
-        message: `Error updating customer: ${error.response?.data?.message || error.message}`,
+        message: `Error updating customer: ${
+          error.response?.data?.message || error.message
+        }`,
         severity: "error",
       });
     }
@@ -214,6 +228,37 @@ const Customers = () => {
     setConfirmOpen(true);
   };
 
+  const [permission, setPermission] = useState(null);
+
+  const fetchPermission = async () => {
+    try {
+      const result = await takeFunctionOfFeature(8);
+      const info = await takeRoleVer1();
+      console.log("Quyền", info);
+
+      setPermission(result.data.result[0]);
+    } catch (err) {
+      setPermission(null);
+    }
+  };
+
+  const staffInfo = useSelector((state) => state.auth.userInfo);
+  console.log("dd", staffInfo);
+  useEffect(() => {
+    if (staffInfo && staffInfo.roleName === "ADMIN") {
+      // Admin có toàn quyền, gán trực tiếp
+      setPermission(() => ({
+        functionId: 8,
+        canView: true,
+        canCreate: true,
+        canUpdate: true,
+        canDelete: true,
+      }));
+    } else {
+      fetchPermission();
+    }
+  }, []);
+
   return (
     <Container maxWidth="xl" sx={{ py: 4 }}>
       <Box
@@ -227,13 +272,32 @@ const Customers = () => {
         }}
       >
         <Box sx={{ display: "flex", gap: 2 }}>
-          <StyledButton
-            variant="contained"
-            startIcon={<AddIcon />}
-            onClick={handleAddNew}
+          <Tooltip
+            title={
+              permission?.canCreate
+                ? "Tạo khách hàng mới"
+                : "Bạn không có quyền tạo khách hàng"
+            }
+            placement="top"
           >
-            Add Customer
-          </StyledButton>
+            <span>
+              <StyledButton
+                variant="contained"
+                startIcon={<AddIcon />}
+                onClick={handleAddNew}
+                disabled={!permission?.canCreate}
+                sx={{
+                  opacity: permission?.canCreate ? 1 : 0.5,
+                  cursor: permission?.canCreate ? "pointer" : "not-allowed",
+                  pointerEvents: permission?.canCreate ? "auto" : "none",
+                  transition: "all 0.3s ease",
+                }}
+              >
+                Tạo khách hàng
+              </StyledButton>
+            </span>
+          </Tooltip>
+
           <CustomerDialog
             open={openCreate}
             onClose={() => setOpenCreate(false)}
@@ -291,6 +355,7 @@ const Customers = () => {
         handleChangeRowsPerPage={handleChangeRowsPerPage}
         handleEdit={handleEditClick}
         handleDeleteCustomer={handleDeleteRequest}
+        permission={permission}
       />
 
       <ConfirmDialog

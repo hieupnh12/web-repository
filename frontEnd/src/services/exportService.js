@@ -18,6 +18,11 @@ export const takeDeleteExportReceipt = (id) => {
   return BASE_URL[DELETE](`exportReceipt/${id}`);
 };
 
+export const takeSearchByImei = (imei) => {
+  return BASE_URL[GET](`product/imei/${imei}`);
+};
+
+
 export const takeSearchExport= ({
   customerName = '',
   staffName = '',
@@ -107,6 +112,7 @@ export const loadCustomersV2 = () => {
     const response = axios.get("http://localhost:3004/customers");
     return response;
 }
+
 
 export const getFullProductVersions = async ({ page = 1, limit = 20, search = '' } = {}) => {
   try {
