@@ -1,10 +1,14 @@
+// EditAcc.jsx
 import React, { useState, useEffect } from "react";
 import { X, User } from "lucide-react";
+import { toast } from "react-toastify"; 
+
 
 export default function EditAcc({ account, roles, onClose, onSave }) {
   const [form, setForm] = useState({
     userName: "",
     roleId: "",
+    status: "1",
   });
 
   useEffect(() => {
@@ -12,6 +16,7 @@ export default function EditAcc({ account, roles, onClose, onSave }) {
       setForm({
         userName: account.userName || "",
         roleId: account.roleId ? account.roleId.toString() : "",
+        status: account.status === true || account.status === 1 ? "1" : "0",
       });
     }
   }, [account]);
@@ -34,6 +39,7 @@ export default function EditAcc({ account, roles, onClose, onSave }) {
     const payload = {
       userName: form.userName,
       roleId: parseInt(form.roleId, 10),
+      status: form.status === "1",
     };
 
     onSave?.(payload);
@@ -72,6 +78,7 @@ export default function EditAcc({ account, roles, onClose, onSave }) {
                 onChange={handleChange}
                 required
                 placeholder="Nhập tên đăng nhập"
+                maxLength={30}
                 className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-yellow-500"
               />
             </div>
@@ -97,27 +104,39 @@ export default function EditAcc({ account, roles, onClose, onSave }) {
                 )}
               </select>
             </div>
+
+            <div>
+              <label className="text-sm text-gray-600 mb-1 block">Trạng thái</label>
+              <select
+                name="status"
+                value={form.status}
+                onChange={handleChange}
+                className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-yellow-500"
+              >
+                <option value="1">Hoạt động</option>
+                <option value="0">Ngừng</option>
+              </select>
+            </div>
+          </div>
+
+          {/* Footer */}
+          <hr className="border-gray-200" />
+          <div className="p-4 flex justify-end gap-3">
+            <button
+              type="button"
+              onClick={onClose}
+              className="px-5 py-2 border border-gray-300 rounded-lg text-gray-700 font-semibold hover:bg-gray-100 transition"
+            >
+              Hủy
+            </button>
+            <button
+              type="submit"
+              className="px-6 py-2 bg-gradient-to-r from-yellow-600 to-yellow-400 text-white rounded-lg font-semibold hover:from-yellow-700 hover:to-yellow-500 transition"
+            >
+              Lưu
+            </button>
           </div>
         </form>
-
-        {/* Footer */}
-        <hr className="border-gray-200" />
-        <div className="p-4 flex justify-end gap-3">
-          <button
-            type="button"
-            onClick={onClose}
-            className="px-5 py-2 border border-gray-300 rounded-lg text-gray-700 font-semibold hover:bg-gray-100 transition"
-          >
-            Hủy
-          </button>
-          <button
-            type="submit"
-            onClick={handleSubmit}
-            className="px-6 py-2 bg-gradient-to-r from-yellow-600 to-yellow-400 text-white rounded-lg font-semibold hover:from-yellow-700 hover:to-yellow-500 transition"
-          >
-            Lưu
-          </button>
-        </div>
       </div>
     </div>
   );
