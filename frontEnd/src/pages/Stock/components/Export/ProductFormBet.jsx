@@ -1,10 +1,26 @@
 import { forwardRef, useImperativeHandle, useRef } from "react";
 import { useEffect, useState } from "react";
 import BarcodeScanner from "../../../../utils/useImeiCam";
-
+import { toast } from "react-toastify";
+import { Package, Search, X } from "lucide-react";
+import { takeSearchByImei } from "../../../../services/exportService";
+import BarcodeScannerVcont from "../../../../utils/UseImeiCamVcont";
 const ProductForm = forwardRef(
   (
-    { selected, onAdd, editProduct, usedImeis, setEditProduct, setImei },
+    {
+      selected,
+      onAdd,
+      editProduct,
+      usedImeis,
+      setEditProduct,
+      setImei,
+      handleAddButtonClick,
+      onSearch,
+      setDisplayedProducts,
+      setSelectedProduct,
+      itemScanTrue,
+      setItemScanFalse
+    },
     ref
   ) => {
     const [formData, setFormData] = useState({
@@ -21,6 +37,7 @@ const ProductForm = forwardRef(
     const [showScanner, setShowScanner] = useState(false);
     // Chặn quét trùng bằng biến flag tạm thời
     const [itemScan, setItemScan] = useState(null);
+    const [searchTerm, setSearchTerm] = useState("");
 
     useEffect(() => {
       if (selected) {
@@ -75,7 +92,6 @@ const ProductForm = forwardRef(
       const option = selected.productVersionResponses.find(
         (opt) => opt.versionId === optionId
       );
-      console.log("option", option);
 
       const imeisFromOption = option?.imei.map((item) => item.imei) || [];
       const usedImeisForThisOption = imeisFromOption.filter((imei) =>
@@ -99,30 +115,70 @@ const ProductForm = forwardRef(
         return { ...prev, selectedImeis };
       });
     };
-
+const playSuccessSound = () => {
+  const audio = new Audio('/bip.mp3');
+  audio.play().catch((err) => {
+    console.error("Audio play failed:", err);
+  });
+};
     useEffect(() => {
-      if (itemScan) {
-        handleScanSuccess(itemScan);
+      if (itemScan && !usedImeis.includes(itemScan)) {
+        handleAddButtonClick();
+        toast.success("Thêm sản phẩm thành công.");
+        setItemScanFalse(true);
+        setItemScan(null); // reset lại tránh lặp
       }
-    }, [itemScan]);
+    }, [formData]);
+    console.log("prodfuc", products);
 
-    const handleScanSuccess = () => {
+    const handleScanSuccess = async (imeiScan) => {
       setShowScanner(true);
-      const isValid = formData.selectedOption?.imeiList.some(
-        (item) => item.imei === itemScan
-      );
+      console.log("form Selection", formData.selectedOption);
 
-      if (isValid) {
-        setFormData((prev) => ({
-          ...prev,
-          selectedImeis: [...new Set([...prev.selectedImeis, itemScan])],
-        }));
-        setShowScanner(false); // ✅ chỉ đóng nếu đúng
-        handleAdd();
-      } else {
-        // ❌ chỉ báo lỗi duy nhất 1 lần cho mã sai này
-        alert("IMEI không hợp lệ hoặc không có trong kho!");
+      try {
+        const productScan = await takeSearchByImei(imeiScan);
+        console.log("valuead is", productScan);
+        onSearch(productScan?.data?.result.productName);
+        const optionScan =
+          productScan?.data?.result.productVersionResponses.find((version) =>
+            version.imei?.some((imeiObj) => imeiObj.imei === imeiScan)
+          );
+        console.log("option scan", optionScan);
+
+        if (productScan.status === 200 && optionScan) {
+          playSuccessSound();
+          setFormData((prev) => ({
+            ...prev,
+            productId: productScan?.data?.result.productId,
+            productName: productScan?.data?.result.productName,
+            selectedOption: optionScan,
+            exportPrice: optionScan.exportPrice,
+            stockQuantity: optionScan.stockQuantity,
+            selectedImeis: [...new Set([...prev.selectedImeis, imeiScan])],
+          }));
+          setSelectedProduct(productScan?.data?.result);
+          // setDisplayedProducts((prev) => [...prev, productScan?.data?.result])
+          // setProducts((prev) => [...prev,productScan?.data?.result])
+          setItemScan(imeiScan);
+        } else {
+          toast.warning("Không tìm thấy phiên bản phù hợp với IMEI.");
+        }
+      } catch (error) {
+        console.log("Không tìm thấy mã" + error);
+
+        toast.error("Không tìm thấy mã" + error);
       }
+
+      // if (isValid) {
+      //   setFormData((prev) => ({
+      //     ...prev,
+      //     selectedImeis: [...new Set([...prev.selectedImeis, itemScan])],
+      //   }));
+      //   setShowScanner(false); // ✅ chỉ đóng nếu đúng
+      // } else {
+      //   // ❌ chỉ báo lỗi duy nhất 1 lần cho mã sai này
+      //   alert("IMEI không hợp lệ hoặc không có trong kho!");
+      // }
     };
 
     // Thực hiên thêm sản phẩm
@@ -177,17 +233,31 @@ const ProductForm = forwardRef(
     }));
     console.log("formdata", formData);
 
+    const filteredImeis =
+      formData.selectedOption?.imei.filter((item) =>
+        item.imei.toLowerCase().includes(searchTerm.toLowerCase())
+      ) || [];
+
     return (
       <div className="md:w-1/2 space-y-4">
-        <BarcodeScanner
+        <BarcodeScannerVcont
           open={showScanner}
-          onResult={setItemScan}
+          onResult={handleScanSuccess}
           onClose={() => {
             setShowScanner(false);
+            setItemScanFalse(false);
           }}
         />
-        <div className="bg-white rounded shadow h-[350px] p-2">
+        <div className="bg-white rounded shadow h-[440px] p-2">
           <div className="container mx-auto p-4">
+            <div className="flex items-center gap-3 mb-6">
+              <div className="bg-blue-500 p-2 rounded-lg">
+                <Package className="w-5 h-5 text-white" />
+              </div>
+              <h2 className="text-xl font-semibold text-gray-800">
+                Thông tin sản phẩm
+              </h2>
+            </div>
             <div className="grid grid-cols-3 gap-4">
               <div className="col-span-1">
                 <label className="block text-sm font-medium text-gray-700">
@@ -277,7 +347,6 @@ const ProductForm = forwardRef(
                       onClick={() => {
                         setShowScanner(true); // ✅ MỞ scanner lại
                       }}
-                      disabled={!formData.selectedOption}
                       className="bg-blue-500 text-white px-2 py-1 rounded-md hover:bg-blue-600 w-fit"
                     >
                       Quét IMEI
@@ -298,36 +367,77 @@ const ProductForm = forwardRef(
         </div>
         {/* Modal chọn IMEI */}
         {isModalOpen && (
-          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center">
-            <div className="bg-white rounded-lg p-4 w-96 max-h-[80vh] overflow-y-auto">
-              <h2 className="text-lg font-medium mb-4">Chọn IMEI</h2>
-              <div className="space-y-2">
-                {formData.selectedOption?.imei.map((item) => (
-                  <div key={item.imei} className="flex items-center">
-                    <input
-                      id={`imei-${item.imei}`}
-                      type="checkbox"
-                      checked={formData?.selectedImeis.includes(item.imei)}
-                      onChange={() => handleImeiChange(item.imei)}
-                      className="mr-2"
+          <div className="fixed z-20 inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4">
+            <div className="bg-white rounded-xl shadow-2xl w-full max-w-2xl max-h-[90vh] overflow-hidden">
+              {/* Search and Controls */}
+              <div className="p-2 border-b border-gray-200">
+                <div className="flex gap-4 items-center">
+                  <div className="flex-1 relative">
+                    <Search
+                      className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"
+                      size={20}
                     />
-                    <label htmlFor={`imei-${item.imei}`}>{item.imei}</label>
+                    <input
+                      type="text"
+                      placeholder="Tìm kiếm IMEI..."
+                      value={searchTerm}
+                      onChange={(e) => setSearchTerm(e.target.value)}
+                      className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:border-transparent"
+                    />
                   </div>
-                ))}
+                </div>
               </div>
-              <div className="flex justify-end mt-4 gap-2">
-                <button
-                  onClick={() => setIsModalOpen(false)}
-                  className="bg-gray-300 text-black px-4 py-2 rounded-md"
-                >
-                  Hủy
-                </button>
-                <button
-                  onClick={() => setIsModalOpen(false)}
-                  className="bg-blue-500 text-white px-4 py-2 rounded-md"
-                >
-                  Xác nhận
-                </button>
+              {/* IMEI List */}
+              <div className="overflow-y-auto max-h-96">
+                {filteredImeis.length === 0 ? (
+                  <div className="text-center py-12 text-gray-500">
+                    <Package size={48} className="mx-auto mb-4 text-gray-300" />
+                    <p>Không tìm thấy IMEI nào</p>
+                  </div>
+                ) : (
+                  <div className="divide-y divide-gray-200">
+                    {filteredImeis.map((item) => (
+                      <div
+                        key={item.imei}
+                        className="p-4 hover:bg-gray-50 transition-colors"
+                      >
+                        <div className="flex items-center gap-4">
+                          <input
+                            id={`imei-${item.imei}`}
+                            type="checkbox"
+                            checked={formData?.selectedImeis.includes(
+                              item.imei
+                            )}
+                            onChange={() => handleImeiChange(item.imei)}
+                            className="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
+                          />
+                          <label
+                            htmlFor={`imei-${item.imei}`}
+                            className="font-mono text-lg font-medium text-gray-900 cursor-pointer"
+                          >
+                            {item.imei}
+                          </label>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+              <div className="flex justify-end items-center px-6 py-2 border-t border-gray-400">
+                <div className="flex gap-3">
+                  <button
+                    onClick={() => setIsModalOpen(false)}
+                    className="bg-gray-300 hover:bg-gray-400 text-gray-700 px-6 py-2 rounded-lg font-medium transition-colors"
+                  >
+                    Hủy
+                  </button>
+                  <button
+                    onClick={() => setIsModalOpen(false)}
+                    className="bg-blue-600 hover:bg-blue-700 disabled:bg-blue-300 disabled:cursor-not-allowed text-white px-6 py-2 rounded-lg font-medium transition-colors"
+                  >
+                    Xác nhận
+                  </button>
+                </div>
               </div>
             </div>
           </div>

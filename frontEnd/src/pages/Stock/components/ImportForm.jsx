@@ -3,7 +3,7 @@ import { Link } from "react-router-dom";
 import debounce from "lodash.debounce";
 import ConfirmDialog from "../../../components/ui/ConfirmDialog";
 import usePagination from "../../../hooks/usePagination";
-import { Download, Plus, Trash } from "lucide-react";
+import { Download, Info, Plus, Trash } from "lucide-react";
 import ContractPreviewModal from "../../../utils/exportTopdf";
 import Button from "../../../components/ui/Button";
 import { toast } from "react-toastify";
@@ -11,6 +11,7 @@ import { takeDeleteImportReceipt } from "../../../services/importService";
 import DateRangeButton from "./DateRangeButton";
 import ImportDetailView from "./ImportDetailView";
 import TableSkeletonLoader from "../../../components/layout/TableSkeletonLoader";
+import ImportDetailPopup from "./Details/ImportDetailPopup";
 
 export default function ImportForm({
   tableData,
@@ -32,6 +33,8 @@ export default function ImportForm({
   const [showConfirm, setShowConfirm] = useState(false);
   const [showPreview, setShowPreview] = useState(false);
   const [showDetail, setShowDetail] = useState(false);
+  const [selectedImport, setSelectedImport] = useState(null);
+
   const handleDeleteImport = async () => {
     setShowConfirm(false);
     try {
@@ -295,7 +298,11 @@ export default function ImportForm({
 
                     <div className="flex flex-col justify-around items-start text-left">
                       <div className="w-full text-sm font-medium">
-                        {value?.productVersion.product?.productName || "N/A"}
+                        {value?.productVersion.colorName +
+                          "-" +
+                          value?.productVersion.ramName +
+                          "-" +
+                          value?.productVersion.romName || "N/A"}
                       </div>
                       <div className="w-full">
                         Tổng:{" "}
@@ -313,7 +320,7 @@ export default function ImportForm({
               )}
             </div>
 
-            <div className="p-1 mt-2">
+            {/* <div className="p-1 mt-2">
               <button
                 onClick={() => setShowDetail(true)} // Sửa để mở PDF thay vì ConfirmDialog
                 className="w-full bg-white border border-gray-400 py-2 rounded-lg hover:bg-blue-300 transition duration-200 text-sm font-medium text-gray-600"
@@ -321,72 +328,96 @@ export default function ImportForm({
               >
                 Xem chi tiết
               </button>
-            </div>
+            </div> */}
           </div>
 
           <div className="flex-1 bg-white rounded-2xl shadow-lg overflow-hidden flex flex-col">
-             {/* Table content */}
-                        {isLoading ? (
+            {/* Table content */}
+            {isLoading ? (
               <TableSkeletonLoader />
             ) : (
-            <div className="overflow-x-auto flex-1">
-              <table className="w-full text-gray-700 border border-gray-200">
-                <thead className="bg-gray-50 text-xs font-medium uppercase text-center">
-                  <tr>
-                    <th className="px-4 py-2">STT</th>
-                    <th className="px-4 py-2">Mã phiếu</th>
-                    <th className="px-4 py-2">Nhà cung cấp</th>
-                    <th className="px-4 py-2">Nhân viên nhập</th>
-                    <th className="px-4 py-2">Tổng tiền</th>
-                    <th className="px-4 py-2">Thời gian</th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y text-center divide-gray-300 text-sm cursor-pointer">
-                  {tableData.map((item, index) => (
-                    <tr
-                      key={item.import_id}
-                      className={`hover:bg-blue-50 transition ${
-                        selectProduct?.import_id === item.import_id
-                          ? "bg-blue-100"
-                          : ""
-                      }`}
-                      onClick={() =>
-                        setSelectProduct(
-                          selectProduct?.import_id === item.import_id
-                            ? null
-                            : item
-                        )
-                      }
-                    >
-                      <td className="px-4 py-3">
-                        {currentPage * 7 + index + 1}
-                      </td>
-                      <td className="px-4 py-3">{item.import_id}</td>
-                      <td className="px-4 py-3">
-                        {item.supplierName || "N/A"}
-                      </td>
-                      <td className="px-4 py-3">{item.staffName || "N/A"}</td>
-                      <td className="px-4 py-3">
-                        {item.totalAmount?.toLocaleString() || "0"} VND
-                      </td>
-                      <td className="px-4 py-3">
-                        {item.time
-                          ? new Intl.DateTimeFormat("vi-VN", {
-                              day: "2-digit",
-                              month: "2-digit",
-                              year: "numeric",
-                              hour: "2-digit",
-                              minute: "2-digit",
-                              hour12: false,
-                            }).format(new Date(item.time))
-                          : "N/A"}
-                      </td>
+              <div className="overflow-x-auto flex-1">
+                <table className="w-full text-gray-700 border border-gray-200">
+                  <thead className="bg-gray-50 text-xs font-medium uppercase text-center">
+                    <tr>
+                      <th className="px-4 py-2">STT</th>
+                      <th className="px-4 py-2">Mã phiếu</th>
+                      <th className="px-4 py-2">Nhà cung cấp</th>
+                      <th className="px-4 py-2">Nhân viên nhập</th>
+                      <th className="px-4 py-2">Tổng tiền</th>
+                      <th className="px-4 py-2">Thời gian</th>
+                      <th className="px-2 py-2"></th>
                     </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
+                  </thead>
+                  <tbody className="divide-y text-center divide-gray-300 text-sm cursor-pointer py-3">
+                    {tableData.map((item, index) => (
+                      <tr
+                        key={item.import_id}
+                        className={`hover:bg-blue-50 transition ${
+                          selectProduct?.import_id === item.import_id
+                            ? "bg-blue-100"
+                            : ""
+                        }`}
+                        onClick={() =>
+                          setSelectProduct(
+                            selectProduct?.import_id === item.import_id
+                              ? null
+                              : item
+                          )
+                        }
+                      >
+                        <td className="px-4 py-3">
+                          {currentPage * 7 + index + 1}
+                        </td>
+                        <td className="px-4 py-3">{item.import_id}</td>
+                        <td className="px-4 py-3">
+                          {item.supplierName || "N/A"}
+                        </td>
+                        <td className="px-4 py-3">{item.staffName || "N/A"}</td>
+                        <td className="px-4 py-3">
+                          {item.totalAmount?.toLocaleString() || "0"} VND
+                        </td>
+                        <td className="px-4 py-3">
+                          {item.time
+                            ? new Intl.DateTimeFormat("vi-VN", {
+                                day: "2-digit",
+                                month: "2-digit",
+                                year: "numeric",
+                                hour: "2-digit",
+                                minute: "2-digit",
+                                hour12: false,
+                              }).format(new Date(item.time))
+                            : "N/A"}
+                        </td>
+                        <td className="px-2 py-3">
+                          <button
+                            onClick={(e) => {
+                              e.stopPropagation(); // 🔥 Ngăn click lan lên <tr>
+                              setShowDetail(true); // Hoặc toggle hiển thị popup tùy bạn
+                              setSelectedImport(item); // Gán phiếu nhập cần xem chi tiết
+                            }}
+                          >
+                            <Info
+                              size={20}
+                              strokeWidth={1.5}
+                              className="text-gray-500 hover:text-blue-500"
+                            />
+                          </button>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
             )}
+
+            {showDetail && (
+              <ImportDetailPopup
+                data={selectedImport}
+                onClose={() => setShowDetail(false)}
+              />
+            )}
+
             <div
               id="search-pagination"
               className="py-3 border-t bg-gray-50 text-sm text-gray-600 flex justify-center space-x-2"

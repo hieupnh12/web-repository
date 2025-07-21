@@ -50,6 +50,11 @@ export const takeRole = (token) => {
     return responds;
 }
 
+export const takeRoleVer1 = () => {
+    const responds = BASE_URL[GET]("role/myRole");
+    return responds;
+}
+
 export const takeInfo = () => {
     const responds = BASE_URL[GET]("staff/myInfo");
     return responds;

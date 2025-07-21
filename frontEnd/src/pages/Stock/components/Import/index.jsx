@@ -234,6 +234,7 @@ export default function ImportPage() {
       }
       return content;
     },
+    staleTime: 0,
     onSuccess: () => {
       toast.success("Tải danh sách sản phẩm thành công!");
       setIsReloading(false); // ✅ đảm bảo gọi ở đây
@@ -260,6 +261,7 @@ export default function ImportPage() {
       setIsReloading(false); // đảm bảo luôn reset loading
     }
   };
+
   useEffect(() => {
     if (
       Array.isArray(productData) &&
