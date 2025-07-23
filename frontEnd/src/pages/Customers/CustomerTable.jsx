@@ -91,6 +91,7 @@ const CustomerTable = ({
   handleChangeRowsPerPage,
   handleEdit,
   handleDeleteCustomer,
+  permission
 }) => {
   return (
     <StyledPaper>
@@ -167,46 +168,70 @@ const CustomerTable = ({
                       timeZone: "Asia/Ho_Chi_Minh",
                     })}{" "}
                   </TableCell>
-                  <TableCell align="center">
-                    <Box
-                      sx={{ display: "flex", gap: 1, justifyContent: "center" }}
-                    >
-                      <Tooltip title="Edit" placement="top">
-                        <IconButton
-                          size="small"
-                          onClick={() => handleEdit(customer)}
-                          sx={{
-                            color: "#2196f3",
-                            "&:hover": {
-                              backgroundColor: "#e3f2fd",
-                              transform: "scale(1.1)",
-                            },
-                            transition: "all 0.3s ease",
-                          }}
-                        >
-                          <EditIcon fontSize="small" />
-                        </IconButton>
-                      </Tooltip>
-                      <Tooltip title="Delete" placement="top">
-                        <IconButton
-                          size="small"
-                          onClick={() =>
-                            handleDeleteCustomer(customer.customerId)
-                          }
-                          sx={{
-                            color: "#f44336",
-                            "&:hover": {
-                              backgroundColor: "#ffebee",
-                              transform: "scale(1.1)",
-                            },
-                            transition: "all 0.3s ease",
-                          }}
-                        >
-                          <DeleteIcon fontSize="small" />
-                        </IconButton>
-                      </Tooltip>
-                    </Box>
-                  </TableCell>
+                 <TableCell align="center">
+  <Box sx={{ display: "flex", gap: 1, justifyContent: "center" }}>
+    {/* Edit Button */}
+    <Tooltip
+      title={
+        permission?.canUpdate
+          ? "Chỉnh sửa khách hàng"
+          : "Bạn không có quyền chỉnh sửa"
+      }
+      placement="top"
+    >
+      <span>
+        <IconButton
+          size="small"
+          onClick={() => handleEdit(customer)}
+          disabled={!permission?.canUpdate}
+          sx={{
+            color: "#2196f3",
+            opacity: permission?.canUpdate ? 1 : 0.4,
+            cursor: permission?.canUpdate ? "pointer" : "not-allowed",
+            "&:hover": {
+              backgroundColor: permission?.canUpdate ? "#e3f2fd" : "transparent",
+              transform: permission?.canUpdate ? "scale(1.1)" : "none",
+            },
+            transition: "all 0.3s ease",
+          }}
+        >
+          <EditIcon fontSize="small" />
+        </IconButton>
+      </span>
+    </Tooltip>
+
+    {/* Delete Button */}
+    <Tooltip
+      title={
+        permission?.canDelete
+          ? "Xóa khách hàng"
+          : "Bạn không có quyền xóa khách hàng"
+      }
+      placement="top"
+    >
+      <span>
+        <IconButton
+          size="small"
+          onClick={() => handleDeleteCustomer(customer.customerId)}
+          disabled={!permission?.canDelete}
+          sx={{
+            color: "#f44336",
+            opacity: permission?.canDelete ? 1 : 0.4,
+            cursor: permission?.canDelete ? "pointer" : "not-allowed",
+            "&:hover": {
+              backgroundColor: permission?.canDelete ? "#ffebee" : "transparent",
+              transform: permission?.canDelete ? "scale(1.1)" : "none",
+            },
+            transition: "all 0.3s ease",
+          }}
+        >
+          <DeleteIcon fontSize="small" />
+        </IconButton>
+      </span>
+    </Tooltip>
+  </Box>
+</TableCell>
+
                 </StyledTableRow>
               ))
             )}
