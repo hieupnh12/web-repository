@@ -3,6 +3,7 @@ package com.app.product_warehourse.dto.request;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Table;
+import jakarta.validation.constraints.Min;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
 
@@ -19,6 +20,7 @@ public class ExportReceiptRequest {
     String staffId;
 
     String customerId;
+    @Min(value = 0, message = "Số lượng phải không âm")
     Long totalAmount;
     Integer status;
 

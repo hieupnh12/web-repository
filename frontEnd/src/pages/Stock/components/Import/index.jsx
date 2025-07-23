@@ -234,6 +234,7 @@ export default function ImportPage() {
       }
       return content;
     },
+    staleTime: 0,
     onSuccess: () => {
       toast.success("Tải danh sách sản phẩm thành công!");
       setIsReloading(false); // ✅ đảm bảo gọi ở đây

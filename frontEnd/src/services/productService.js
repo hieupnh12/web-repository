@@ -164,8 +164,8 @@ export const takeProductById = (id) => {
   return BASE_URL[GET](`/products/${id}`);
 };
 
-export const takeProduct = () => {
-  return BASE_URL[GET](`/product/All`);
+export const takeProduct = (page = 0, size=10) => {
+  return BASE_URL[GET](`/product/All?page=${page}&size=${size}`);
 };
 
 export const takeSearchProductByName = (keyWord) => {

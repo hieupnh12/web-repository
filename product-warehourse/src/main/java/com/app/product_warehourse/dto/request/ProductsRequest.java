@@ -65,8 +65,8 @@ public class ProductsRequest {
     @Positive
     Long warehouseAreaId;
 
-    @NotNull
-    Boolean status;
+//    @NotNull
+//    Boolean status;
 
 
 }

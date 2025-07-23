@@ -50,7 +50,7 @@ const ExportPage = () => {
   } = useQuery({
     queryKey: ["product"],
     queryFn: async () => {
-      const resp = await takeAllProduct();
+      const resp = await takeProduct(page - 1, 20);
       if (!resp?.data?.result.content) {
         throw new Error("Invalid response format");
       }
@@ -58,7 +58,7 @@ const ExportPage = () => {
 
       return resp.data.result.content;
     },
-    staleTime: 1000 * 60 * 5,
+    staleTime: 0,
     gcTime: 1000 * 60 * 10,
     onError: (error) => {
       console.error("Error fetching imports:", error);
@@ -76,7 +76,7 @@ const ExportPage = () => {
 
       return resp.data.result.content;
     },
-    staleTime: 1000 * 60 * 5,
+    staleTime: 0,
     gcTime: 1000 * 60 * 10,
     onError: (error) => {
       console.error("Error fetching imports:", error);
@@ -248,7 +248,7 @@ const ExportPage = () => {
   };
 
   const handleSubmitExport = async () => {
-    if (!form.customer.customerId) {
+    if (!form.customer) {
       toast.error("Vui lòng chọn khách hàng!");
       return;
     }
