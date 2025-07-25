@@ -29,6 +29,58 @@ export const initProduct = async () => {
 };
 
 
+export const searchProducts = async ({
+  brandName,
+  warehouseAreaName,
+  originName,
+  operatingSystemName,
+  productName,
+  page = 1,
+  limit = 10,
+}) => {
+  try {
+    const rawParams = {
+      brandName,
+      warehouseAreaName,
+      originName,
+      operatingSystemName,
+      productName,
+      page: Math.max(0, page - 1),
+      size: limit,
+    };
+
+    const params = new URLSearchParams();
+    Object.entries(rawParams).forEach(([key, val]) => {
+      if (val != null && val !== "") {
+        params.append(key, val);
+      }
+    });
+
+    const response = await BASE_URL[GET](`/product/search?${params.toString()}`);
+
+    const pageData =
+      response.data?.result ??
+      response.data ??
+      {};
+
+    return {
+      data: pageData.content || [],
+      pagination: {
+        total: pageData.totalElements || 0,
+        page,
+        limit,
+        totalPages: Math.ceil((pageData.totalElements || 0) / limit),
+      },
+    };
+  } catch (error) {
+    handleApiError(error, "Không thể tìm sản phẩm");
+  }
+};
+
+
+
+
+
 
 export const createProductWithVersions = async (productData, versions, imageFile) => {
   try {
@@ -91,14 +143,22 @@ export const getFullProducts = async ({
 } = {}) => {
   try {
     const params = new URLSearchParams({
-      page: Math.max(0, page - 1), 
+      page: Math.max(0, page - 1),
       size: limit,
     });
 
     const response = await BASE_URL[GET](`product?${params.toString()}`);
     const pageData = response.data?.result || {};
+    const data = Array.isArray(pageData.content) ? pageData.content : [];
+
+    // Nếu stockQuantity null thì gán = 0
+    const normalizedData = data.map((p) => ({
+      ...p,
+      stockQuantity: p.stockQuantity ?? 0,
+    }));
+
     return {
-      data: pageData.content || [],
+      data: normalizedData,
       pagination: {
         total: pageData.totalElements || 0,
         page,
@@ -110,6 +170,7 @@ export const getFullProducts = async ({
     handleApiError(error, "Không thể lấy danh sách sản phẩm");
   }
 };
+
 
 
 export const getProductById = async (productId) => {

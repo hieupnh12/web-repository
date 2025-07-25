@@ -13,7 +13,7 @@ const TableView = ({
   onDelete,
 }) => {
   const getStockStatus = (quantity) => {
-    if (quantity === 0)
+    if (quantity == null || quantity === 0)
       return { status: "Hết hàng", color: "bg-red-100 text-red-800" };
     if (quantity < 10)
       return { status: "Sắp hết", color: "bg-yellow-100 text-yellow-800" };
@@ -128,7 +128,7 @@ const TableView = ({
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap">
                     <div className="text-sm font-semibold text-gray-900">
-                      {product.stockQuantity}
+                      {product.stockQuantity ?? 0}
                     </div>
                     <div className="text-xs text-gray-500">cái</div>
                   </td>

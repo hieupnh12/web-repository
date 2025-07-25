@@ -13,6 +13,12 @@ export const fetchStaffList = () => {
   return BASE_URL[GET]("staff");
 };
 
+export const fetchStaffListInven = async () => {
+  const response = await BASE_URL[GET]("staff");
+  return Array.isArray(response.data?.result) ? response.data.result : [];
+};
+
+
 export const createStaff = async (staff) => {
   try {
     const payload = {
