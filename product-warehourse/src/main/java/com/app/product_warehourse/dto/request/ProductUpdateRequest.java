@@ -34,5 +34,5 @@ public class ProductUpdateRequest {
 
     Long  warehouseAreaId;
 
-    Boolean status;
+//    Boolean status;
 }

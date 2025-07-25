@@ -63,17 +63,6 @@ public interface ProductVersionMapper {
 
 
     default ProductVersion ToUpdateProductVersion (ProductVersionRequest request, ProductVersion version ,Ram ram , Rom rom , Color color, Product product) {
-        // Cập nhật các trường từ request nếu có giá trị
-        if (request.getExportPrice() != null) {
-            version.setExportPrice(request.getExportPrice());
-        }
-        if (request.getImportPrice() != null) {
-            version.setImportPrice(request.getImportPrice());
-        }
-
-        if (request.getStatus() != null) {
-            version.setStatus(request.getStatus());
-        }
         // Cập nhật các trường liên quan
         version.setRam(ram);
         version.setRom(rom);

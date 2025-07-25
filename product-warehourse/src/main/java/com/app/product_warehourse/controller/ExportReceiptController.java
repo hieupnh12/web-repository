@@ -8,6 +8,7 @@ import com.app.product_warehourse.dto.response.ExportReceiptFULLResponse;
 import com.app.product_warehourse.dto.response.ExportReceiptResponse;
 import com.app.product_warehourse.dto.response.ImportReceiptFULLResponse;
 import com.app.product_warehourse.entity.ExportReceipt;
+import com.app.product_warehourse.service.CountQuantityOfAll;
 import com.app.product_warehourse.service.ExportReceiptService;
 import jakarta.validation.Valid;
 import lombok.AccessLevel;
@@ -24,6 +25,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Map;
 
 
 @Service
@@ -36,6 +38,7 @@ import java.util.List;
 public class ExportReceiptController {
 
        ExportReceiptService exportReceiptService;
+       CountQuantityOfAll countQuantityOfAll;
 
 //       @PostMapping
 //     public ApiResponse<ExportReceipt> addexportReceipt(@RequestBody @Valid ExportReceiptRequest request, BindingResult result) {
@@ -101,5 +104,12 @@ public class ExportReceiptController {
     }
 
 
+
+    @GetMapping("/countExport")
+    public ApiResponse<Map<String, Object>> countExportReceipts() {
+        return  ApiResponse.<Map<String, Object>>builder()
+                .result(countQuantityOfAll.getExportStats())
+                .build();
+    }
 
 }

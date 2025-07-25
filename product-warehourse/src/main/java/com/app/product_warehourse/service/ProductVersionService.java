@@ -67,8 +67,8 @@ public class ProductVersionService {
 
         ProductVersion productVersion = pvm.ToProducVersionMakeName(request, ram, rom, color,product);
 
-        // Cập nhật stock_quantity của Product
-        productService.updateProductStockQuantity(request.getProductId());
+//        // Cập nhật stock_quantity của Product
+//        productService.updateProductStockQuantity(request.getProductId());
 
         pvr.save(productVersion);
         return pvm.ToProductVersionResponse(productVersion);

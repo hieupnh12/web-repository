@@ -36,4 +36,15 @@ public interface CustomerRepository extends JpaRepository<Customer, String> {
     @Query("SELECT MIN(c.joinDate) FROM Customer c")
     LocalDateTime findEarliestJoinDate();
 
+
+
+    @Query("SELECT COUNT(c) FROM Customer c WHERE c.status = true")
+    Long countActiveCustomers();
+
+    @Query("SELECT COUNT(c) FROM Customer c WHERE c.status = true AND DATE(c.joinDate) = :date")
+    Long countNewCustomersByDate(LocalDate date);
+
+    @Query("SELECT COUNT(c) FROM Customer c WHERE c.status = true AND DATE(c.joinDate) <= :date")
+    Long countCustomersUpToDate(LocalDate date);
+
 }
