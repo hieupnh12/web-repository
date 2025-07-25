@@ -166,8 +166,8 @@ public class ProductService {
             savedVersions.add(versionResponse);
         }
 
-        // Cập nhật số lượng tồn kho
-        updateProductStockQuantity(savedProduct.getProductId());
+//        // Cập nhật số lượng tồn kho
+//        updateProductStockQuantity(savedProduct.getProductId());
 
         // Tạo và trả về response
         ProductFULLResponse response = productMapper.toProductFULLResponse(savedProduct);

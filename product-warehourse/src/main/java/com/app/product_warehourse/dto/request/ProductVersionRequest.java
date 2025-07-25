@@ -41,7 +41,7 @@ public class ProductVersionRequest {
 //    @DecimalMin("0.0")
 //    BigDecimal exportPrice;
 //
-//    @NotNull
-//    Boolean status;
+    @NotNull
+    Boolean status;
 
 }

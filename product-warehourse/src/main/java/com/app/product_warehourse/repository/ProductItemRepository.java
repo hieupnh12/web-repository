@@ -37,4 +37,13 @@ public interface ProductItemRepository extends JpaRepository<ProductItem, String
     Optional<ProductItem> getProductItemByImei(String imei);
 
 
+    @Query("SELECT COUNT(p) FROM ProductItem p WHERE p.export_id IS NOT NULL AND p.status = true")
+    long countVerifiedAndActive();
+
+
+    // Đếm tổng số sản phẩm
+    @Query("SELECT COUNT(p) FROM ProductItem p")
+    long countTotal();
+
+
 }
