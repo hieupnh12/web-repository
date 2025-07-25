@@ -238,6 +238,7 @@ public class ImportReceiptService {
                 throw new AppException(ErrorCode.IMEI_NOT_FOUND);
             }
             updateStockOnImport(savedImportEntity);
+            updatePrices(detailRequest);
         }
 
         ImportReceiptFULLResponse savedImportReceipt = importmapper.toImportReceiptFULLResponse(savedImportEntity);
@@ -423,9 +424,11 @@ public class ImportReceiptService {
 
 
     @Transactional
-    public void updatePrices(ImportReceiptDetail importReceiptDetail) {
+    public void updatePrices(ImportReceiptDetailsRequest importReceiptDetail) {
+        ImportReceiptDetail im = new ImportReceiptDetail();
+
         // Lấy product_version_id từ khóa composite
-        String productVersionId = importReceiptDetail.getNewid().getProductVersionId().getVersionId();
+        String productVersionId = im.getNewid().getProductVersionId().getVersionId();
 
         // Tìm ProductVersion tương ứng
         ProductVersion productVersion = productVersionRepository.findById(productVersionId)
