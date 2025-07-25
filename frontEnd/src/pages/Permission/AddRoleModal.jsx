@@ -2,8 +2,9 @@ import React, { useEffect, useState } from "react";
 import { X, Loader2 } from "lucide-react";
 import Button from "../../components/ui/Button";
 import { takeFunctions } from "../../services/permissionService";
+import { toast } from "react-toastify";
 
-const AddRoleModal = ({ onClose, onSubmit }) => {
+const AddRoleModal = ({ onClose, onSubmit, existingRoles }) => {
   const [functions, setFunctions] = useState([]);
   const [loading, setLoading] = useState(false);
   const [roleName, setRoleName] = useState("");
@@ -56,11 +57,25 @@ const AddRoleModal = ({ onClose, onSubmit }) => {
 
   const handleSubmit = () => {
     const permissions = getObjectsWithPermissions(permission);
+    const nameTrimmed = roleName.trim();
+    const isDuplicate = existingRoles.some(
+    (role) => role.roleName.toLowerCase() === nameTrimmed.toLowerCase()
+  );
+
+  if (isDuplicate) {
+    toast.error("Tên quyền đã tồn tại, vui lòng chọn tên khác!");
+    return;
+  }
+  if (!roleName) {
+    toast.error("Vui lòng nhập tên quyền!");
+    return;
+  }
+  
     const payload = {
       roleName,
       description,
       permissions,
-    };
+    }; 
     onSubmit(payload);
   };
 
@@ -75,7 +90,7 @@ const AddRoleModal = ({ onClose, onSubmit }) => {
         </button>
         <div className="flex justify-between gap-4">
           <div className="mb-4 w-2/4">
-            <label className="block font-medium mb-1">Role Name</label>
+            <label className="block mb-1">Tên quyền *</label>
             <input
               value={roleName}
               required={true}
@@ -86,7 +101,7 @@ const AddRoleModal = ({ onClose, onSubmit }) => {
           </div>
 
           <div className="mb-4 w-2/4">
-            <label className="block font-medium mb-1">Description</label>
+            <label className="block mb-1">Mô tả</label>
             <input
               value={description}
               onChange={(e) => setDescription(e.target.value)}

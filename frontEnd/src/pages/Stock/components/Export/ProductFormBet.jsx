@@ -123,6 +123,7 @@ const playSuccessSound = () => {
 };
     useEffect(() => {
       if (itemScan && !usedImeis.includes(itemScan)) {
+        playSuccessSound();
         handleAddButtonClick();
         toast.success("Thêm sản phẩm thành công.");
         setItemScanFalse(true);
@@ -146,7 +147,6 @@ const playSuccessSound = () => {
         console.log("option scan", optionScan);
 
         if (productScan.status === 200 && optionScan) {
-          playSuccessSound();
           setFormData((prev) => ({
             ...prev,
             productId: productScan?.data?.result.productId,

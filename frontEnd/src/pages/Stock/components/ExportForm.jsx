@@ -52,6 +52,10 @@ export default function ExportForm({
         toast.warning("Vui lòng chọn một phiếu nhập để xóa.");
         return;
       }
+      if (!selectProduct?.customerName || !selectProduct?.totalAmount) {
+        toast.warning("Vui lòng hoàn thành phiếu nhập để xóa.");
+        return;
+      }
 
       const resp = await takeDeleteExportReceipt(selectProduct.export_id);
       console.log("dsad", resp);
@@ -328,7 +332,7 @@ export default function ExportForm({
                       <th className="px-4 py-2">Nhân Viên Nhập</th>
                       <th className="px-4 py-2">Tổng Tiền</th>
                       <th className="px-4 py-2">Thời gian</th>
-                                            <th className="px-2 py-2"></th>
+                      <th className="px-2 py-2"></th>
                     </tr>
                   </thead>
                   <tbody className="divide-y text-center divide-gray-300 text-sm cursor-pointer">
@@ -389,12 +393,12 @@ export default function ExportForm({
               </div>
             )}
 
-              {showDetail && (
-                          <ExportDetailPopup
-                            data={selectedExport}
-                            onClose={() => setShowDetail(false)}
-                          />
-                        )}
+            {showDetail && (
+              <ExportDetailPopup
+                data={selectedExport}
+                onClose={() => setShowDetail(false)}
+              />
+            )}
 
             {/* Pagination fixed at bottom */}
             <div

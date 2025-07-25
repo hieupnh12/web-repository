@@ -53,7 +53,7 @@ const ExportPage = () => {
   } = useQuery({
     queryKey: ["product"],
     queryFn: async () => {
-      const resp = await takeProduct(0, 1);
+      const resp = await takeProduct(0, 20);
       if (!resp?.data?.result.content) {
         throw new Error("Invalid response format");
       }
@@ -62,7 +62,7 @@ const ExportPage = () => {
       return resp.data.result.content;
     },
     staleTime: 0,
-    gcTime: 1000 * 60 * 10,
+    gcTime: 0,
     onSuccess: () => {
       toast.success("Tải danh sách sản phẩm thành công!");
       setIsReloading(false); // ✅ đảm bảo gọi ở đây
@@ -85,7 +85,7 @@ const ExportPage = () => {
       return resp.data.result.content;
     },
     staleTime: 0,
-    gcTime: 1000 * 60 * 10,
+    gcTime: 0,
     onError: (error) => {
       console.error("Error fetching imports:", error);
       toast.error("Error fetching imports:", error);
@@ -349,8 +349,10 @@ const ExportPage = () => {
   };
 
   const handleSubmitExport = async () => {
+    setIsReloading(true);
     if (!form.customer) {
       toast.error("Vui lòng chọn khách hàng!");
+      setIsReloading(false);
       return;
     }
     try {
@@ -376,7 +378,6 @@ const ExportPage = () => {
       const res = await takeConfirmExport(payload);
 
       if (res.status === 200) {
-        alert("Xuất hàng thành công!");
         // Xóa mã phiếu và dữ liệu liên quan khỏi localStorage sau khi xuất thành công
         localStorage.removeItem("pending_export_id");
         localStorage.removeItem("import_info");
@@ -389,8 +390,11 @@ const ExportPage = () => {
         toast.success("Xuất hàng thành công!");
       }
     } catch (err) {
+      setIsReloading(false)
       console.log("Submit lỗi", err);
-      alert("Gặp lỗi khi xuất hàng: " + err);
+      toast.error("Gặp lỗi khi xuất hàng: " + err);
+    } finally {
+      setIsReloading(false);
     }
   };
 
@@ -427,6 +431,7 @@ const ExportPage = () => {
           total={form.total}
           onSubmit={handleSubmitExport}
           customers={customers}
+          isLoading={isReloading}
         />
       </div>
 
