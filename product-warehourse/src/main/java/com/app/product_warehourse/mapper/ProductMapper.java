@@ -123,7 +123,6 @@ public interface ProductMapper {
         product.setRearCamera(productRequest.getRearCamera());
         product.setFrontCamera(productRequest.getFrontCamera());
         product.setWarrantyPeriod(productRequest.getWarrantyPeriod());
-        product.setStatus(productRequest.getStatus());
         product.setOrigin(origin);
         product.setOperatingSystem(os);
         product.setBrand(br);
@@ -157,9 +156,6 @@ public interface ProductMapper {
         }
         if (request.getWarrantyPeriod() != null) {
             product.setWarrantyPeriod(request.getWarrantyPeriod());
-        }
-        if (request.getStatus() != null) {
-            product.setStatus(request.getStatus());
         }
         product.setOrigin(origin);
         product.setOperatingSystem(os);

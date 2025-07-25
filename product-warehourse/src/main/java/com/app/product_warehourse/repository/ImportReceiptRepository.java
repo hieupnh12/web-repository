@@ -12,6 +12,7 @@ import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 @Repository
@@ -77,7 +78,11 @@ public interface ImportReceiptRepository extends JpaRepository<ImportReceipt, St
 
 
 
+    @Query("SELECT SUM(ird.quantity) FROM ImportReceiptDetail ird JOIN ird.newid.import_id ir WHERE DATE(ir.time) = :date")
+    Long sumQuantityByImportDate(LocalDate date);
 
+    @Query("SELECT SUM(ird.quantity) FROM ImportReceiptDetail ird JOIN ird.newid.import_id ir WHERE DATE(ir.time) <= :date")
+    Long sumQuantityUpToDate(LocalDate date);
 
 }
 

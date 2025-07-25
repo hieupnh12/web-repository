@@ -33,14 +33,14 @@ public class ProductVersionRequest {
     @Positive
     Long colorId;
 
-    @NotNull
-    @DecimalMin("0.0")
-    BigDecimal importPrice;
-
-    @NotNull
-    @DecimalMin("0.0")
-    BigDecimal exportPrice;
-
+//    @NotNull
+//    @DecimalMin("0.0")
+//    BigDecimal importPrice;
+//
+//    @NotNull
+//    @DecimalMin("0.0")
+//    BigDecimal exportPrice;
+//
     @NotNull
     Boolean status;
 

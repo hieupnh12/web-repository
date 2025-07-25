@@ -21,7 +21,8 @@ public interface ProductRepository extends JpaRepository<Product, Long> {
             "LEFT JOIN FETCH p.brand " +
             "LEFT JOIN FETCH p.operatingSystem " +
             "LEFT JOIN FETCH p.warehouseArea " +
-            "LEFT JOIN FETCH p.productVersion")
+            "LEFT JOIN FETCH p.productVersion " +
+            " ORDER BY p.productId DESC" )
     Page<Product> findAllWithRelations(Pageable pageable);
 
 
@@ -30,7 +31,8 @@ public interface ProductRepository extends JpaRepository<Product, Long> {
             "LEFT JOIN FETCH p.brand " +
             "LEFT JOIN FETCH p.operatingSystem " +
             "LEFT JOIN FETCH p.warehouseArea " +
-            "LEFT JOIN FETCH p.productVersion")
+            "LEFT JOIN FETCH p.productVersion " +
+            " ORDER BY p.productId DESC" )
     Page<Product> findProductsWithRelations(Pageable pageable);
 
 

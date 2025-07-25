@@ -18,7 +18,7 @@ const CardView = ({
   onDelete,
 }) => {
   const getStockStatus = (quantity) => {
-    if (quantity === 0) return { status: "Hết hàng", color: "bg-red-100 text-red-800" };
+    if (quantity == null || quantity === 0) return { status: "Hết hàng", color: "bg-red-100 text-red-800" };
     if (quantity < 10) return { status: "Sắp hết", color: "bg-yellow-100 text-yellow-800" };
     if (quantity < 20) return { status: "Còn ít", color: "bg-orange-100 text-orange-800" };
     return { status: "Còn nhiều", color: "bg-green-100 text-green-800" };
