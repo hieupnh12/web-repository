@@ -9,6 +9,7 @@ import {
 } from "../../services/permissionService";
 import AddRoleModal from "./AddRoleModal";
 import PerInfoDetail from "./PerInfoDetail";
+import { toast } from "react-toastify";
 
 const Permissions = () => {
   const [role, setRole] = useState([]);
@@ -27,6 +28,7 @@ const Permissions = () => {
       }
     } catch (error) {
       console.error("Lỗi khi tải quyền:", error);
+      toast.error("Lỗi khi tải quyền:", error)
     } finally {
       setLoading(false); // kết thúc loading
     }
@@ -45,7 +47,7 @@ const Permissions = () => {
       const response = await takeCreateFunction(payload); // Gửi tới API
       
       if (response?.status === 200 || response?.status === 201) {
-      
+        toast.success("Tạo thành công 1 quyền.")
         const newRole = {
           roleId: response.data.result.roleId,
           roleName: payload.roleName,
@@ -57,6 +59,7 @@ const Permissions = () => {
       }
     } catch (err) {
       console.error("Create role failed", err);
+      toast.success("Create role failed", err)
     }
   };
 
@@ -89,7 +92,7 @@ const Permissions = () => {
 
                 {showModal && (
                   <AddRoleModal
-                    role={role}
+                    existingRoles={role}
                     onClose={() => setShowModal(false)}
                     onSubmit={handleCreateRole}
                   />
@@ -100,6 +103,7 @@ const Permissions = () => {
                   <PerInfoDetail
                     role={selectedRow}
                     data={setRole}
+                    existingRoles={role}
                     onClose={() => setShowInfoDetail(false)}
                   />
                 )}

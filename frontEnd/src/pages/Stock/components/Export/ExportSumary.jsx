@@ -8,6 +8,7 @@ const ExportSummary = ({
   customers,
   onCustomerChange,
   onSubmit,
+  isLoading,
 }) => {
   const [customerPopup, setCustomerPopup] = useState(false);
   const [searchText, setSearchText] = useState("");
@@ -74,8 +75,8 @@ const ExportSummary = ({
 
           {/* Popup chọn khách hàng */}
           {customerPopup && (
-            <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-40">
-              <div className="bg-white rounded-lg shadow-lg w-full max-w-md p-4">
+            <div className="fixed inset-0 z-50 flex  items-center justify-center bg-black bg-opacity-40">
+              <div className="bg-white rounded-lg shadow-lg w-full max-w-xl p-4">
                 <div className="flex justify-between items-center mb-3">
                   <h2 className="text-lg font-semibold">Chọn khách hàng</h2>
                   <button
@@ -94,25 +95,55 @@ const ExportSummary = ({
                 />
                 <div className="max-h-60 overflow-y-auto space-y-1">
                   {customers
-                    ?.filter((c) =>
-                      c.customerName
-                        .toLowerCase()
-                        .includes(searchText.toLowerCase())
-                    )
+                    ?.filter((c) => {
+                      const search = searchText.toLowerCase();
+                      return (
+                        c.customerName.toLowerCase().includes(search) ||
+                        c.address.toLowerCase().includes(search) ||
+                        c.phone.toLowerCase().includes(search)
+                      );
+                    })
                     .map((c) => (
                       <div
                         key={c.customerId}
                         onClick={() => handleSelectCustomer(c)}
-                        className="p-2 rounded hover:bg-gray-100 cursor-pointer"
+                        className="p-3 rounded hover:bg-gray-100 cursor-pointer border border-gray-200 bg-gray-50"
                       >
-                        {c.customerName}
+                        <div className="font-semibold text-blue-700">
+                          {c.customerName}
+                        </div>
+                        <div className="text-sm text-gray-700">
+                          <div>
+                            <strong>Địa chỉ:</strong> {c.address}
+                          </div>
+                          <div>
+                            <strong>SĐT:</strong> {c.phone}
+                          </div>
+                          <div>
+                            <strong>Tham gia:</strong>{" "}
+                            {new Date(c.joinDate).toLocaleDateString("vi-VN")}
+                          </div>
+                          <div>
+                            <strong>Trạng thái:</strong>{" "}
+                            <span
+                              className={
+                                c.status ? "text-green-600" : "text-red-500"
+                              }
+                            >
+                              {c.status ? "Hoạt động" : "Ngưng hoạt động"}
+                            </span>
+                          </div>
+                        </div>
                       </div>
                     ))}
-                  {customers.filter((c) =>
-                    c.customerName
-                      .toLowerCase()
-                      .includes(searchText.toLowerCase())
-                  ).length === 0 && (
+                  {customers?.filter((c) => {
+                    const search = searchText.toLowerCase();
+                    return (
+                      c.customerName.toLowerCase().includes(search) ||
+                      c.address.toLowerCase().includes(search) ||
+                      c.phone.toLowerCase().includes(search)
+                    );
+                  }).length === 0 && (
                     <div className="text-gray-400 text-sm italic">
                       Không tìm thấy
                     </div>
@@ -133,10 +164,30 @@ const ExportSummary = ({
           </span>
         </div>
         <button
-          className="w-full sm:w-1/3 bg-green-600 hover:bg-green-700 text-white py-2 px-4 rounded-lg transition duration-150 text-base font-medium"
+          className="w-full sm:w-1/3 bg-green-600 hover:bg-green-700 text-white py-2 px-4 rounded-lg transition duration-150 text-base font-medium flex justify-center items-center gap-2"
           onClick={onSubmit}
+          disabled={isLoading} // Ngăn người dùng bấm nhiều lần
         >
-          Nhập hàng
+          {isLoading ? (
+            <>
+              <svg
+                className="animate-spin h-5 w-5 text-white"
+                viewBox="0 0 24 24"
+              >
+                <circle
+                  cx="12"
+                  cy="12"
+                  r="10"
+                  stroke="currentColor"
+                  strokeWidth="4"
+                  fill="none"
+                />
+              </svg>
+              <span>Đang xuất...</span>
+            </>
+          ) : (
+            "Xuất hàng"
+          )}
         </button>
       </div>
     </div>

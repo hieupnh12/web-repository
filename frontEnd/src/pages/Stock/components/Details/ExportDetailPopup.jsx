@@ -27,7 +27,7 @@ const ExportDetailPopup = ({ data, onClose }) => {
 console.log("openIndex", openIndex);
 
   const displayData = data;
-  const productInfo = data?.details[openIndex? openIndex:0]?.productVersion?.product;
+  const productInfo = data?.details[openIndex? openIndex:0]?.productVersion?.version.product;
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-40 z-50 flex justify-center items-center">

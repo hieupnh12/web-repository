@@ -1,13 +1,12 @@
 import React, { useState } from "react";
-import {
-  X,
-} from "@mui/icons-material";
+import { X } from "@mui/icons-material";
 const ImportSummary = ({
   importInfo,
   suppliers,
   dispatch,
   onSubmit,
   chooseSupplier,
+  isLoading,
 }) => {
   const [customerPopup, setCustomerPopup] = useState(false);
   const [searchText, setSearchText] = useState("");
@@ -138,18 +137,40 @@ const ImportSummary = ({
       {/* Tổng tiền và nút gửi */}
       <div className="mt-auto border border-gray-200 lg:w-2/4 px-4 py-3 flex flex-col sm:flex-row justify-between items-center gap-4 bg-gradient-to-br from-white to-gray-50">
         <div className="w-full bg-red-50 rounded-lg p-4 border border-red-200">
-              <div className="text-center">
-                <div className="text-sm font-medium text-red-600 mb-1">TỔNG TIỀN</div>
-                <div className="text-2xl font-bold text-red-700">
-                  {importInfo?.totalAmount?.toLocaleString("vi-VN")}₫
-                </div>
-              </div>
+          <div className="text-center">
+            <div className="text-sm font-medium text-red-600 mb-1">
+              TỔNG TIỀN
             </div>
+            <div className="text-2xl font-bold text-red-700">
+              {importInfo?.totalAmount?.toLocaleString("vi-VN")}₫
+            </div>
+          </div>
+        </div>
         <button
-          className="w-full sm:w-1/3 bg-green-600 hover:bg-green-700 text-white py-2 px-4 rounded-lg transition duration-150 text-base font-medium"
+          className="w-full sm:w-1/3 bg-green-600 hover:bg-green-700 text-white py-2 px-4 rounded-lg transition duration-150 text-base font-medium flex justify-center items-center gap-2"
           onClick={onSubmit}
+          disabled={isLoading} // Ngăn người dùng bấm nhiều lần
         >
-          Nhập hàng
+          {isLoading ? (
+            <>
+            <svg
+              className="animate-spin h-5 w-5 text-white"
+              viewBox="0 0 24 24"
+            >
+              <circle
+                cx="12"
+                cy="12"
+                r="10"
+                stroke="currentColor"
+                strokeWidth="4"
+                fill="none"
+              />
+            </svg>
+            <span>Đang nhập...</span>
+            </>
+          ) : (
+            "Nhập hàng"
+          )}
         </button>
       </div>
     </div>
