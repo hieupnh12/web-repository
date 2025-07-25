@@ -7,5 +7,5 @@ import org.mapstruct.Mapper;
 @Mapper(componentModel = "spring")
 public interface AccountMapper {
 
-    AccountResponse accountToAccountResponse(Account account,Long roleId);
+    AccountResponse accountToAccountResponse(Account account,Long roleId,String roleName);
 }

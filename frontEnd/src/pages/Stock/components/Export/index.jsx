@@ -11,9 +11,17 @@ import ProductList from "./ProductListLeft";
 import ExportTable from "./ExportTableBot";
 import ExportSummary from "./ExportSumary";
 import { pre } from "framer-motion";
-import { takeProduct } from "../../../../services/productService";
-import { takeCustomerAll } from "../../../../services/customerService";
+import {
+  takeAllProduct,
+  takeProduct,
+} from "../../../../services/productService";
+import {
+  takeCustomer,
+  takeCustomerAll,
+} from "../../../../services/customerService";
 import { useSelector } from "react-redux";
+import { useNavigate } from "react-router-dom";
+import { toast } from "react-toastify";
 
 const ExportPage = () => {
   const [form, setForm] = useState({
@@ -32,6 +40,7 @@ const ExportPage = () => {
   const productFormRef = useRef();
   const exportTableRef = useRef();
   const [editProduct, setEditProducts] = useState(null);
+  const navigate = useNavigate();
 
   const {
     data: productData,
@@ -41,13 +50,13 @@ const ExportPage = () => {
   } = useQuery({
     queryKey: ["product"],
     queryFn: async () => {
-      const resp = await takeProduct();
-      if (!resp?.data?.result) {
+      const resp = await takeAllProduct();
+      if (!resp?.data?.result.content) {
         throw new Error("Invalid response format");
       }
       console.log("dffđssd", resp);
 
-      return resp.data.result;
+      return resp.data.result.content;
     },
     staleTime: 1000 * 60 * 5,
     gcTime: 1000 * 60 * 10,
@@ -59,7 +68,7 @@ const ExportPage = () => {
   const { data: customers = { data: [] } } = useQuery({
     queryKey: ["customers"],
     queryFn: async () => {
-      const resp = await takeCustomerAll();
+      const resp = await takeCustomer(0, 20);
       if (!resp?.data?.result.content) {
         throw new Error("Invalid response format");
       }
@@ -78,7 +87,7 @@ const ExportPage = () => {
   //   queryFn: takeCustomerAll,
   // });
 
-   // Kiểm tra và lấy mã phiếu xuất từ localStorage
+  // Kiểm tra và lấy mã phiếu xuất từ localStorage
   const loadIdImport = async () => {
     try {
       // Kiểm tra mã phiếu trong localStorage
@@ -100,8 +109,8 @@ const ExportPage = () => {
           product: [],
         };
         const idResp = await takeIdCreateExport(data);
-        console.log("Phieus trả về nhjap",idResp);
-        
+        console.log("Phieus trả về nhjap", idResp);
+
         if (idResp.status === 200) {
           const newExportId = idResp.data.result.export_id; // Giả sử API trả về exportId
           setForm((prev) => ({
@@ -119,16 +128,15 @@ const ExportPage = () => {
   const staffInfo = useSelector((state) => state.auth.userInfo);
 
   useEffect(() => {
-      setForm((prev) => ({
-            ...prev,
-            user: staffInfo?.fullName, // thay đổi mã code tại đây
-          }));
-      loadIdImport();
-    }, []);
+    setForm((prev) => ({
+      ...prev,
+      user: staffInfo?.fullName, // thay đổi mã code tại đây
+    }));
+    loadIdImport();
+  }, []);
 
   console.log("SelectPro", selectedProduct);
   console.log("customer", customers);
-
 
   const handleCustomerChange = (customer) => {
     setForm((prev) => ({ ...prev, customer }));
@@ -240,6 +248,10 @@ const ExportPage = () => {
   };
 
   const handleSubmitExport = async () => {
+    if (!form.customer.customerId) {
+      toast.error("Vui lòng chọn khách hàng!");
+      return;
+    }
     try {
       const payload = {
         exportId: form.code,
@@ -268,19 +280,23 @@ const ExportPage = () => {
         localStorage.removeItem("pending_export_id");
         localStorage.removeItem("import_info");
         localStorage.removeItem("selected_products");
+        if (staffInfo && staffInfo.roleName === "ADMIN") {
+          navigate("/manager/export");
+        } else {
+          navigate("/staff/export");
+        }
+        toast.success("Xuất hàng thành công!");
       }
     } catch (err) {
       console.log("Submit lỗi", err);
       alert("Gặp lỗi khi xuất hàng: " + err);
     }
-
   };
 
   const handleSearch = (searchText) => {
     setSearch(searchText);
     setPage(1);
   };
-
 
   const handleAddButtonClick = () => {
     if (productFormRef.current) {

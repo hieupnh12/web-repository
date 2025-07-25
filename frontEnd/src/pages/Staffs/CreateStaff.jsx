@@ -1,3 +1,4 @@
+// CreateStaff.jsx
 import React, { useState, useEffect } from "react";
 import { createStaff } from "../../services/staffService";
 import { useNavigate } from "react-router-dom";
@@ -9,6 +10,8 @@ import {
   Person as PersonIcon,
   X,
 } from "@mui/icons-material";
+import { toast } from "react-toastify";
+import { fetchRoles, createAccount } from "../../services/accountService";
 
 const AddStaff = ({ open, onClose, onSave }) => {
   const [form, setForm] = useState({
@@ -20,6 +23,13 @@ const AddStaff = ({ open, onClose, onSave }) => {
     status: "1",
   });
 
+  const [accountForm, setAccountForm] = useState({
+    userName: "",
+    password: "",
+    roleName: "",
+  });
+
+  const [roles, setRoles] = useState([]);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -32,6 +42,14 @@ const AddStaff = ({ open, onClose, onSave }) => {
         birthDate: "",
         status: "1",
       });
+      setAccountForm({
+        userName: "",
+        password: "",
+        roleName: "",
+      });
+      fetchRoles().then((res) => {
+        if (res.status === 200) setRoles(res.data.result);
+      });
     }
   }, [open]);
 
@@ -42,21 +60,53 @@ const AddStaff = ({ open, onClose, onSave }) => {
     setForm((prev) => ({ ...prev, [name]: value }));
   };
 
+  const handleAccountChange = (e) => {
+    const { name, value } = e.target;
+    setAccountForm((prev) => ({ ...prev, [name]: value }));
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
+
+    if (!accountForm.userName || !accountForm.password || !accountForm.roleName) {
+      toast.error("Vui lòng nhập đầy đủ thông tin tài khoản");
+      return;
+    }
+
     try {
       const formatted = {
         ...form,
-        gender: form.gender === "Nam" ? true : false,
+        gender: form.gender === "Nam",
         birthDate: form.birthDate.split("-").reverse().join("-"),
         status: parseInt(form.status),
       };
-      await createStaff(formatted);
-      onSave?.(formatted);
-      onClose();
-      navigate("/manager/staff");
+
+      const resp = await createStaff(formatted);
+
+      if (resp.status === 200) {
+        const createdStaff = resp.data.result;
+
+        const selectedRole = roles.find((r) => r.roleName === accountForm.roleName);
+        if (!selectedRole) {
+          toast.error("Vai trò không hợp lệ");
+          return;
+        }
+
+        await createAccount(createdStaff.staffId, {
+          userName: accountForm.userName,
+          password: accountForm.password,
+          roleId: selectedRole.roleId,
+        });
+
+        onSave?.(createdStaff);
+        onClose();
+        navigate("/manager/staff");
+        toast.success("Tạo nhân viên & tài khoản thành công!");
+      } else {
+        toast.error("Tạo nhân viên thất bại");
+      }
     } catch (err) {
-      alert("Lỗi khi thêm nhân viên");
+      toast.error("Lỗi khi tạo nhân viên hoặc tài khoản");
     }
   };
 
@@ -70,9 +120,9 @@ const AddStaff = ({ open, onClose, onSave }) => {
               <AddIcon />
             </div>
             <div>
-              <h2 className="text-2xl font-bold">Add New Staff</h2>
+              <h2 className="text-2xl font-bold">Thêm nhân viên mới</h2>
               <p className="text-sm opacity-90">
-                Please fill in all the required fields
+                Vui lòng điền vào tất cả các trường bắt buộc
               </p>
             </div>
           </div>
@@ -90,7 +140,7 @@ const AddStaff = ({ open, onClose, onSave }) => {
           <div>
             <div className="flex items-center mb-2">
               <PersonIcon className="text-green-600 mr-2" />
-              <span className="text-sm text-gray-600">Full Name</span>
+              <span className="text-sm text-gray-600">Họ & Tên</span>
             </div>
             <input
               name="fullName"
@@ -98,6 +148,7 @@ const AddStaff = ({ open, onClose, onSave }) => {
               onChange={handleChange}
               placeholder="Full name *"
               required
+              maxLength={100}
               className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500"
             />
           </div>
@@ -105,9 +156,7 @@ const AddStaff = ({ open, onClose, onSave }) => {
           {/* Gender + Birth Date */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
-              <label className="text-sm text-gray-600 mb-2 block">
-                Gender
-              </label>
+              <label className="text-sm text-gray-600 mb-2 block">Gender</label>
               <select
                 name="gender"
                 value={form.gender}
@@ -115,14 +164,14 @@ const AddStaff = ({ open, onClose, onSave }) => {
                 required
                 className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500"
               >
-                <option value="">Select Gender</option>
+                <option value="">Chọn giới tính</option>
                 <option value="Nam">Nam</option>
                 <option value="Nữ">Nữ</option>
               </select>
             </div>
             <div>
               <label className="text-sm text-gray-600 mb-2 block flex items-center gap-1">
-                <CalendarIcon fontSize="small" /> Birth Date
+                <CalendarIcon fontSize="small" /> Ngày sinh
               </label>
               <input
                 type="date"
@@ -139,7 +188,7 @@ const AddStaff = ({ open, onClose, onSave }) => {
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
               <label className="text-sm text-gray-600 mb-2 block flex items-center gap-1">
-                <PhoneIcon fontSize="small" /> Phone Number
+                <PhoneIcon fontSize="small" /> Số điện thoại
               </label>
               <input
                 name="phoneNumber"
@@ -177,29 +226,68 @@ const AddStaff = ({ open, onClose, onSave }) => {
               onChange={handleChange}
               className="p-2 border border-gray-300 rounded-lg"
             >
-              <option value="1">Active</option>
-              <option value="0">Inactive</option>
+              <option value="1">Hoạt động</option>
+              <option value="0">Không hoạt động</option>
             </select>
           </div>
-        </form>
 
-        {/* Footer */}
-        <hr className="border-gray-200 mt-6" />
-        <div className="p-6 flex justify-end gap-4">
-          <button
-            type="button"
-            onClick={onClose}
-            className="px-6 py-2 border border-gray-300 rounded-lg text-gray-700 font-semibold hover:bg-gray-100 transition"
-          >
-            Cancel
-          </button>
-          <button
-            onClick={handleSubmit}
-            className="px-8 py-2 bg-gradient-to-r from-green-600 to-green-400 text-white rounded-lg font-semibold hover:from-green-700 hover:to-green-500 transition"
-          >
-            Create
-          </button>
-        </div>
+          {/* Account Section */}
+          <hr className="border-gray-300 mt-6" />
+          <h3 className="text-lg font-bold">Thông tin tài khoản đăng nhập</h3>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <input
+              name="userName"
+              value={accountForm.userName}
+              onChange={handleAccountChange}
+              placeholder="Tên đăng nhập"
+              required
+              maxLength={30}
+              className="w-full p-3 border border-gray-300 rounded-lg"
+            />
+            <input
+              type="password"
+              name="password"
+              value={accountForm.password}
+              onChange={handleAccountChange}
+              placeholder="Mật khẩu"
+              required
+              maxLength={64}
+              className="w-full p-3 border border-gray-300 rounded-lg"
+            />
+            <select
+              name="roleName"
+              value={accountForm.roleName}
+              onChange={handleAccountChange}
+              required
+              className="w-full p-3 border border-gray-300 rounded-lg"
+            >
+              <option value="">Chọn vai trò</option>
+              {roles.map((role) => (
+                <option key={role.roleId} value={role.roleName}>
+                  {role.roleName}
+                </option>
+              ))}
+            </select>
+          </div>
+
+          {/* Footer */}
+          <hr className="border-gray-200 mt-6" />
+          <div className="p-6 flex justify-end gap-4">
+            <button
+              type="button"
+              onClick={onClose}
+              className="px-6 py-2 border border-gray-300 rounded-lg text-gray-700 font-semibold hover:bg-gray-100 transition"
+            >
+              Cancel
+            </button>
+            <button
+              type="submit"
+              className="px-8 py-2 bg-gradient-to-r from-green-600 to-green-400 text-white rounded-lg font-semibold hover:from-green-700 hover:to-green-500 transition"
+            >
+              Create
+            </button>
+          </div>
+        </form>
       </div>
     </div>
   );

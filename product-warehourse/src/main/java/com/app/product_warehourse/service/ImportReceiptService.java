@@ -123,11 +123,9 @@ public class ImportReceiptService {
                 .orElseThrow(() -> new AppException(ErrorCode.IMPORT_RECEIPT_NOT_FOUND));
 
         ImportReceiptRequest importRequest = request.getImportReceipt();
-        Suppliers suppliers = null;
-        if (importRequest.getSupplierId() != null) {
-            suppliers = suppliersRepository.findById(importRequest.getSupplierId())
+        Suppliers  suppliers = suppliersRepository.findById(importRequest.getSupplierId())
                     .orElseThrow(() -> new AppException(ErrorCode.SUPPLIER_NOT_EXIST));
-        }
+
 
         importEntity.setTotalAmount(importRequest.getTotalAmount());
         importEntity.setStatus(importRequest.getStatus());
@@ -243,7 +241,7 @@ public class ImportReceiptService {
         ImportReceiptFULLResponse savedImportReceipt = importmapper.toImportReceiptFULLResponse(savedImportEntity);
         savedImportReceipt.setDetails(savedDetails);
         savedImportReceipt.setStaffName(savedImportEntity.getStaff().getUserName());
-        savedImportReceipt.setSupplierName(suppliers != null ? suppliers.getName() : null);
+        savedImportReceipt.setSupplierName(suppliers.getName());
 
         return savedImportReceipt;
     }

@@ -176,6 +176,12 @@ const ProductForm = ({
         selectedImeis: [imei],
         startImei: imei,
       }));
+      // if (editProduct) {
+      //   setEditProduct((prev) => ({
+      //     ...prev,
+      //     startImei: imei
+      //   }))
+      // }
       // onAddProduct();
     }
   };

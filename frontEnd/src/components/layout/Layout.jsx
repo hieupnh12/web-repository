@@ -102,6 +102,14 @@ const pageConfig = {
       { label: "Theo ngày" },
     ],
   },
+  "/statistics/revenue/datetodate": {
+    title: "Doanh thu theo ngày",
+    breadcrumb: [
+      { label: "Thống kê", href: "/statistics/overview" },
+      { label: "Doanh thu", href: "/statistics/revenue" },
+      { label: "Theo ngày đến ngày" },
+    ],
+  },
 };
 
 const LayoutCommon = () => {

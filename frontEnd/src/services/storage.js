@@ -9,6 +9,19 @@ export const takeWarehouseArea = () => {
   return BASE_URL[GET]("warehouse_area");
 };
 
+export const takeWarehouseAreaInven = async () => {
+  const response = await BASE_URL[GET]("warehouse_area");
+  console.log("Warehouse Area API response:", response.data);
+
+  // Nếu response.data là array trực tiếp, return luôn
+  if (Array.isArray(response.data)) {
+    return response.data;
+  }
+  // Nếu vẫn dùng key result
+  return Array.isArray(response.data?.result) ? response.data.result : [];
+};
+
+
 /**
  * Lấy thông tin chi tiết khu vực kho theo ID
  * @param {string | number} idWare

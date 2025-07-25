@@ -9,6 +9,8 @@ import Button from "../../../components/ui/Button";
 import { toast } from "react-toastify";
 import { takeDeleteImportReceipt } from "../../../services/importService";
 import DateRangeButton from "./DateRangeButton";
+import ImportDetailView from "./ImportDetailView";
+import TableSkeletonLoader from "../../../components/layout/TableSkeletonLoader";
 
 export default function ImportForm({
   tableData,
@@ -20,6 +22,7 @@ export default function ImportForm({
   onPageChange,
   isLoading,
   isError,
+  isPermission,
 }) {
   const [searchInput, setSearchInput] = useState("");
   const [selectField, setSelectField] = useState("all");
@@ -28,7 +31,7 @@ export default function ImportForm({
   const [selectProduct, setSelectProduct] = useState(null);
   const [showConfirm, setShowConfirm] = useState(false);
   const [showPreview, setShowPreview] = useState(false);
-
+  const [showDetail, setShowDetail] = useState(false);
   const handleDeleteImport = async () => {
     setShowConfirm(false);
     try {
@@ -50,7 +53,7 @@ export default function ImportForm({
       toast.error("Xóa phiếu nhập thất bại!");
     }
   };
-console.log("select", selectProduct);
+  console.log("select", selectProduct);
 
   const mapFilterToApi = useCallback(
     (searchQuery, searchField, startDate, endDate) => {
@@ -72,8 +75,13 @@ console.log("select", selectProduct);
   );
 
   const handleSearch = () => {
-    const newFilter = mapFilterToApi(searchInput, selectField, startDate, endDate);
-    console.log('Search filter:', newFilter); // Debug
+    const newFilter = mapFilterToApi(
+      searchInput,
+      selectField,
+      startDate,
+      endDate
+    );
+    console.log("Search filter:", newFilter); // Debug
     onFilterChange(newFilter);
   };
 
@@ -82,7 +90,13 @@ console.log("select", selectProduct);
     setSelectField("all");
     setStartDate(null);
     setEndDate(null);
-    onFilterChange({ supplierName: '', staffName: '', importId: '', startDate: null, endDate: null });
+    onFilterChange({
+      supplierName: "",
+      staffName: "",
+      importId: "",
+      startDate: null,
+      endDate: null,
+    });
   };
 
   const debouncedFilterChange = useCallback(
@@ -94,7 +108,12 @@ console.log("select", selectProduct);
   );
 
   useEffect(() => {
-    const newFilter = mapFilterToApi(searchInput, selectField, startDate, endDate);
+    const newFilter = mapFilterToApi(
+      searchInput,
+      selectField,
+      startDate,
+      endDate
+    );
     debouncedFilterChange(newFilter);
     return () => debouncedFilterChange.cancel();
   }, [searchInput, startDate, endDate, debouncedFilterChange, mapFilterToApi]);
@@ -129,14 +148,15 @@ console.log("select", selectProduct);
     totalPages,
     maxVisible: 3,
   });
-  
-  if (isLoading) {
-    return (
-      <div className="flex justify-center items-center h-[570px] bg-white rounded-2xl">
-        <div className="text-gray-600 text-lg">Đang tải dữ liệu...</div>
-      </div>
-    );
-  }
+
+  // if (isLoading) {
+  //   return (
+  //     <div className="flex justify-center items-center h-[570px] bg-white rounded-2xl">
+  //       <div className="text-gray-600 text-lg">Đang tải dữ liệu...</div>
+  //     </div>
+  //   );
+  // }
+  console.log("permmiss", isPermission);
 
   if (isError) {
     return (
@@ -165,13 +185,15 @@ console.log("select", selectProduct);
 
       <div className="flex items-center justify-between bg-white/60 p-3 rounded-2xl shadow-sm flex-wrap gap-4">
         <div className="flex items-center space-x-4">
-          <Link
-            to="addimport"
-            className="bg-teal-600 hover:bg-teal-700 text-white px-4 py-2 rounded-lg text-sm font-medium flex gap-1"
-          >
-            <Plus className="h-5 w-5" />
-            <span>Create</span>
-          </Link>
+          {isPermission?.canCreate && (
+            <Link
+              to="addimport"
+              className="bg-teal-600 hover:bg-teal-700 text-white px-4 py-2 rounded-lg text-sm font-medium flex gap-1"
+            >
+              <Plus className="h-5 w-5" />
+              <span>Tạo Phiếu</span>
+            </Link>
+          )}
 
           <button
             className="bg-green-700 hover:bg-green-800 text-white px-4 py-2 rounded-lg text-sm font-medium flex items-center space-x-2"
@@ -179,17 +201,19 @@ console.log("select", selectProduct);
             disabled={!selectProduct?.import_id}
           >
             <Download className="w-5 h-5" />
-            <span>Print</span>
+            <span>In Phiếu</span>
           </button>
 
-          <Button
-            onClick={() => setShowConfirm(true)}
-            className="group flex items-center gap-2 bg-red-600 text-white hover:bg-red-700 hover:scale-105 transform transition-all duration-300 shadow-lg hover:shadow-xl px-3 py-2 text-sm"
-            disabled={!selectProduct?.import_id}
-          >
-            <Trash className="w-4 h-4 group-hover:scale-110 transition-transform duration-300" />
-            <span className="hidden sm:inline">Delete</span>
-          </Button>
+          {isPermission?.canDelete && (
+            <Button
+              onClick={() => setShowConfirm(true)}
+              className="group flex items-center gap-2 bg-red-600 text-white hover:bg-red-700 hover:scale-105 transform transition-all duration-300 shadow-lg hover:shadow-xl px-3 py-2 text-sm"
+              disabled={!selectProduct?.import_id}
+            >
+              <Trash className="w-4 h-4 group-hover:scale-110 transition-transform duration-300" />
+              <span className="hidden sm:inline">Xóa Phiếu</span>
+            </Button>
+          )}
           <ConfirmDialog
             isOpen={showConfirm}
             title="Xóa phiếu nhập"
@@ -233,10 +257,10 @@ console.log("select", selectProduct);
           />
 
           <button
-            onClick={() => handleReset()}
+            onClick={onReload}
             className="bg-teal-500 hover:bg-teal-600 text-white px-4 py-2 rounded-lg text-sm font-medium"
           >
-            Reload
+            Tải lại
           </button>
         </div>
       </div>
@@ -245,7 +269,7 @@ console.log("select", selectProduct);
         <div className="flex flex-col md:flex-row gap-4 p-2">
           <div className="bg-gray-100 rounded-2xl border border-gray-200 shadow-lg flex flex-col md:w-1/4 w-full min-h-[570px]">
             <div className="text-xs font-medium uppercase text-gray-700 bg-gray-50 rounded-t-2xl p-2 text-center shadow">
-              Chi tiết sản phẩm
+              Thông tin cơ bản
             </div>
 
             <div className="overflow-y-scroll custom-scroll flex-1 max-h-[475px] text-sm p-2 space-y-2">
@@ -257,8 +281,14 @@ console.log("select", selectProduct);
                   >
                     <div className="w-[100px] h-[100px] rounded-2xl overflow-hidden flex items-center justify-center border border-gray-200">
                       <img
-                        src={value?.productVersion.product?.image || "/placeholder-image.jpg"}
-                        alt={value?.productVersion.product?.productName || "Sản phẩm"}
+                        src={
+                          value?.productVersion.product?.image ||
+                          "/placeholder-image.jpg"
+                        }
+                        alt={
+                          value?.productVersion.product?.productName ||
+                          "Sản phẩm"
+                        }
                         className="object-cover w-full h-full"
                       />
                     </div>
@@ -268,7 +298,9 @@ console.log("select", selectProduct);
                         {value?.productVersion.product?.productName || "N/A"}
                       </div>
                       <div className="w-full">
-                        Tổng: {(value.unitPrice * value.quantity).toLocaleString()} VND
+                        Tổng:{" "}
+                        {(value.unitPrice * value.quantity).toLocaleString()}{" "}
+                        VND
                       </div>
                       <div className="w-full">Quantity: {value.quantity}</div>
                     </div>
@@ -283,7 +315,7 @@ console.log("select", selectProduct);
 
             <div className="p-1 mt-2">
               <button
-                onClick={() => setShowPreview(true)} // Sửa để mở PDF thay vì ConfirmDialog
+                onClick={() => setShowDetail(true)} // Sửa để mở PDF thay vì ConfirmDialog
                 className="w-full bg-white border border-gray-400 py-2 rounded-lg hover:bg-blue-300 transition duration-200 text-sm font-medium text-gray-600"
                 disabled={!selectProduct?.import_id}
               >
@@ -293,6 +325,10 @@ console.log("select", selectProduct);
           </div>
 
           <div className="flex-1 bg-white rounded-2xl shadow-lg overflow-hidden flex flex-col">
+             {/* Table content */}
+                        {isLoading ? (
+              <TableSkeletonLoader />
+            ) : (
             <div className="overflow-x-auto flex-1">
               <table className="w-full text-gray-700 border border-gray-200">
                 <thead className="bg-gray-50 text-xs font-medium uppercase text-center">
@@ -310,17 +346,25 @@ console.log("select", selectProduct);
                     <tr
                       key={item.import_id}
                       className={`hover:bg-blue-50 transition ${
-                        selectProduct?.import_id === item.import_id ? "bg-blue-100" : ""
+                        selectProduct?.import_id === item.import_id
+                          ? "bg-blue-100"
+                          : ""
                       }`}
                       onClick={() =>
                         setSelectProduct(
-                          selectProduct?.import_id === item.import_id ? null : item
+                          selectProduct?.import_id === item.import_id
+                            ? null
+                            : item
                         )
                       }
                     >
-                      <td className="px-4 py-3">{currentPage * 7 + index + 1}</td>
+                      <td className="px-4 py-3">
+                        {currentPage * 7 + index + 1}
+                      </td>
                       <td className="px-4 py-3">{item.import_id}</td>
-                      <td className="px-4 py-3">{item.supplierName || "N/A"}</td>
+                      <td className="px-4 py-3">
+                        {item.supplierName || "N/A"}
+                      </td>
                       <td className="px-4 py-3">{item.staffName || "N/A"}</td>
                       <td className="px-4 py-3">
                         {item.totalAmount?.toLocaleString() || "0"} VND
@@ -342,7 +386,7 @@ console.log("select", selectProduct);
                 </tbody>
               </table>
             </div>
-
+            )}
             <div
               id="search-pagination"
               className="py-3 border-t bg-gray-50 text-sm text-gray-600 flex justify-center space-x-2"

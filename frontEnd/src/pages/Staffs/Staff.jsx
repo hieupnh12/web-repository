@@ -151,7 +151,7 @@ export default function Staff() {
       {/* Header */}
       <Box sx={{ mb: 4, display: "flex", justifyContent: "space-between", gap: 2, flexWrap: "wrap" }}>
         <StyledButton variant="contained" startIcon={<AddIcon />} onClick={() => setOpenCreate(true)}>
-          Add Staff
+          Thêm
         </StyledButton>
         <Box sx={{ display: "flex", width: "40%", alignItems: "center", gap: 1 }}>
           <StyledTextField

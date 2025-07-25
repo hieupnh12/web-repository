@@ -279,7 +279,7 @@ public class ExportReceiptService {
             throw new AppException(ErrorCode.ERROR_UPDATE_QUANTITY);
         }
     }
-
+    
     // Cập nhật stockQuantity khi xóa phiếu xuất
     @Transactional()
     public void rollbackStockOnExportDelete(ExportReceipt exportReceipt) {

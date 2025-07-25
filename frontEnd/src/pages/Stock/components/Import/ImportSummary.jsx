@@ -15,8 +15,6 @@ const ImportSummary = ({
   const chooseCustomer = () => {
     setCustomerPopup(true);
     chooseSupplier();
-    console.log("s", suppliers);
-    console.log(importInfo);
   };
 
   const handleSelectCustomer = (c) => {

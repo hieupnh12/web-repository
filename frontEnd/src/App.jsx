@@ -46,6 +46,14 @@ const Account = lazy(() => import("./pages/Accounts/Account"));
 const InventoryPage = lazy(() => import("./pages/Inventory"));
 const AttributesPage = lazy(() => import("./pages/Attributes"));
 
+
+// cho Inventory
+const InventoryListPage = lazy(() => import("./pages/Inventory/InventoryListPage"));
+const InventoryCreatePage = lazy(() => import("./pages/Inventory/InventoryCreatePage"));
+const InventoryDetailsPage = lazy(() => import("./pages/Inventory/InventoryDetailsPage"));
+const IMEIScanPage = lazy(() => import("./pages/Inventory/IMEIScanPage"));
+const InventorySummaryPage = lazy(() => import("./pages/Inventory/InventorySummaryPage"));
+
 const ImportStock = lazy(() => import("./pages/Stock/ImportStock"));
 // const Products = lazy(() => import('./pages/Products/Products'));
 // const Inventory = lazy(() => import('./pages/Inventory/Inventory'));
@@ -123,14 +131,48 @@ const router = createBrowserRouter(
             }
           />
 
-          <Route
-            path="inventory"
-            element={
-              <LazyLoader>
-                <InventoryPage />
-              </LazyLoader>
-            }
-          />
+          <Route path="inventory">
+            <Route
+              index
+              element={
+                <LazyLoader>
+                  <InventoryListPage />
+                </LazyLoader>
+              }
+            />
+            <Route
+              path="create"
+              element={
+                <LazyLoader>
+                  <InventoryCreatePage />
+                </LazyLoader>
+              }
+            />
+            <Route
+              path="details/:inventoryId"
+              element={
+                <LazyLoader>
+                  <InventoryDetailsPage />
+                </LazyLoader>
+              }
+            />
+            <Route
+              path="scan/:inventoryId"
+              element={
+                <LazyLoader>
+                  <IMEIScanPage />
+                </LazyLoader>
+              }
+            />
+            <Route
+              path="summary/:inventoryId"
+              element={
+                <LazyLoader>
+                  <InventorySummaryPage />
+                </LazyLoader>
+              }
+            />
+          </Route>
           <Route
             path="storage"
             element={
@@ -245,6 +287,7 @@ const router = createBrowserRouter(
               </LazyLoader>
             }
           />
+
           <Route
             path="export"
             element={
@@ -254,19 +297,137 @@ const router = createBrowserRouter(
             }
           />
           <Route
-            path="attributes"
+            path="export/addexport"
             element={
               <LazyLoader>
-                <AttributesPage />
+                <Export />
               </LazyLoader>
             }
           />
 
           <Route
-            path="inventory"
+            path="products"
             element={
               <LazyLoader>
-                <InventoryPage />
+                <ProductsPage />
+              </LazyLoader>
+            }
+          />
+
+          <Route path="inventory">
+            <Route
+              index
+              element={
+                <LazyLoader>
+                  <InventoryListPage />
+                </LazyLoader>
+              }
+            />
+            <Route
+              path="create"
+              element={
+                <LazyLoader>
+                  <InventoryCreatePage />
+                </LazyLoader>
+              }
+            />
+            <Route
+              path="details/:inventoryId"
+              element={
+                <LazyLoader>
+                  <InventoryDetailsPage />
+                </LazyLoader>
+              }
+            />
+            <Route
+              path="scan/:inventoryId"
+              element={
+                <LazyLoader>
+                  <IMEIScanPage />
+                </LazyLoader>
+              }
+            />
+            <Route
+              path="summary/:inventoryId"
+              element={
+                <LazyLoader>
+                  <InventorySummaryPage />
+                </LazyLoader>
+              }
+            />
+          </Route>
+          <Route
+            path="storage"
+            element={
+              <LazyLoader>
+                <WarehouseAreas />
+              </LazyLoader>
+            }
+          />
+          <Route
+            path="suppliers"
+            element={
+              <LazyLoader>
+                <Suppliers />
+              </LazyLoader>
+            }
+          />
+          <Route
+            path="staff"
+            element={
+              <LazyLoader>
+                <Staff />
+              </LazyLoader>
+            }
+          />
+          <Route
+            path="account"
+            element={
+              <LazyLoader>
+                <Account />
+              </LazyLoader>
+            }
+          />
+          <Route
+            path="permissions"
+            element={
+              <LazyLoader>
+                <Permissions />
+              </LazyLoader>
+            }
+          />
+          <Route
+            path="Customers"
+            element={
+              <LazyLoader>
+                <Customers />
+              </LazyLoader>
+            }
+          />
+          <Route path="import">
+            <Route
+              index
+              element={
+                <LazyLoader>
+                  <ImportStock />
+                </LazyLoader>
+              }
+            />
+            <Route
+              path="addimport"
+              element={
+                <LazyLoader>
+                  <Import />
+                </LazyLoader>
+              }
+            />
+          </Route>
+
+          <Route
+            path="attributes"
+            element={
+              <LazyLoader>
+                <AttributesPage />
               </LazyLoader>
             }
           />

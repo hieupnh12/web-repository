@@ -85,7 +85,10 @@ public class ProductController {
 
 
     @GetMapping("/All")
-     ApiResponse<Page<ProductFULLResponse>> getAll(Pageable pageable) {
+     ApiResponse<Page<ProductFULLResponse>> getAllProduct(@RequestParam(defaultValue = "0") int page,
+                                                   @RequestParam(defaultValue = "10") int size) {
+
+        Pageable pageable = PageRequest.of(page, size);
         return ApiResponse.<Page<ProductFULLResponse>>builder()
                 .result(productService.listAllProducts(pageable))
                 .build();
