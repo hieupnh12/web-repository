@@ -1,81 +1,35 @@
 import BASE_URL from '../api';
-import { GET, POST } from '../constants/httpMethod';
+import { GET, POST, PUT, DELETE } from '../constants/httpMethod';
 
-// Hàm lấy token từ localStorage
-const getAuthToken = () => {
-  const token = localStorage.getItem('authToken');
-  if (!token) {
-    console.warn('⚠️ Không tìm thấy token trong localStorage.');
-  }
-  return token;
+// Lấy token từ localStorage
+const getAuthToken = () => localStorage.getItem('authToken') || '';
+
+// Header mặc định cho tất cả request
+const getHeaders = () => ({
+  'Content-Type': 'application/json',
+  'Authorization': `Bearer ${getAuthToken()}`
+});
+
+// Lấy danh sách tất cả tài khoản
+export const fetchAccounts = async () => {
+  return await BASE_URL[GET]('account', { headers: getHeaders() });
 };
 
-// Hàm chuẩn hóa headers
-const getHeaders = () => {
-  const token = getAuthToken();
-  return {
-    'Content-Type': 'application/json',
-    ...(token && { 'Authorization': `Bearer ${token}` }),
-  };
+// Tạo tài khoản mới cho nhân viên
+export const createAccount = async (staffId, payload) => {
+  return await BASE_URL[POST](`account/${staffId}`, payload);
 };
 
-export const takePermission = () => {
-  try {
-    const responds = BASE_URL[GET]('role', {
-      headers: getHeaders(),
-    });
-    return responds;
-  } catch (error) {
-    console.error('❌ Error fetching permissions:', error);
-    throw new Error(error?.message || 'Failed to fetch permissions.');
-  }
+// Cập nhật thông tin tài khoản
+export const updateAccount = async (staffId, payload) => {
+  return await BASE_URL[PUT](`account/update/${staffId}`, payload, { headers: getHeaders() });
+};
+// Xoá tài khoản
+export const deleteAccount = async (accountId) => {
+  return await BASE_URL[DELETE](`account/${accountId}`, { headers: getHeaders() });
 };
 
-export const fetchAccounts = () => {
-  try {
-    const responds = BASE_URL[GET]('account', {
-      headers: getHeaders(),
-    });
-    return responds;
-  } catch (error) {
-    console.error('❌ Failed to fetch accounts:', error);
-    throw new Error(error?.message || 'Failed to fetch accounts.');
-  }
-};
-
-export const createAccount = (id, data) => {
-  try {
-    const responds = BASE_URL[POST](`account/${id}`, data, {
-      headers: getHeaders(),
-    });
-    return responds;
-  } catch (error) {
-    console.error('❌ Error creating account:', error);
-    throw new Error(error?.message || 'Failed to create account.');
-  }
-};
-
-export const updateAccount = (staffId, data) => {
-  try {
-    const responds = BASE_URL.put(`account/update/${staffId}`, data, {
-      headers: getHeaders(),
-    });
-    return responds;
-  } catch (error) {
-    console.error('❌ Error updating account:', error);
-    throw new Error(error?.message || 'Failed to update account.');
-  }
-};
-
-
-export const deleteAccount = async (id) => {
-  try {
-    const res = await BASE_URL.delete(`account/${id}`, {
-      headers: getHeaders(),
-    });
-    return res.data;
-  } catch (error) {
-    console.error('Delete error:', error.response?.status, error.response?.data);
-    throw error.response?.data?.message || 'Failed to delete account. Server may not allow DELETE.';
-  }
+// Lấy danh sách Role từ BE
+export const fetchRoles = async () => {
+  return await BASE_URL[GET]('role', { headers: getHeaders() });
 };

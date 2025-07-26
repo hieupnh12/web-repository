@@ -9,7 +9,6 @@ import {
   Tooltip,
   Snackbar,
   Alert,
-  Card,
 } from "@mui/material";
 import {
   Add as AddIcon,
@@ -21,12 +20,15 @@ import {
   takeCreateSupplier,
   takeDeleteSupplier,
   takeSupplier,
+  takeSupplierSearch,
   takeUpdateSupplier,
 } from "../../services/supplierService";
-import SupplierDialog from "./modals/CreateSupplierDialog"; // Updated component name for consistency
+import SupplierDialog from "./modals/CreateSupplierDialog";
 import SupplierTable from "./SupplierTable";
 import EditSupplier from "./modals/EditSupplier";
 import ConfirmDialog from "../../components/ui/ConfirmDialog";
+import { takeFunctionOfFeature } from "../../services/permissionService";
+import { useSelector } from "react-redux";
 
 const StyledButton = styled(Button)(({ theme }) => ({
   borderRadius: 8,
@@ -58,6 +60,8 @@ const StyledTextField = styled(TextField)(({ theme }) => ({
 
 const Suppliers = () => {
   const [suppliers, setSuppliers] = useState([]);
+  const [totalPages, setTotalPages] = useState(0);
+  const [totalElements, setTotalElements] = useState(0);
   const [loading, setLoading] = useState(true);
   const [page, setPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(10);
@@ -67,6 +71,7 @@ const Suppliers = () => {
   const [openCreate, setOpenCreate] = useState(false);
   const [confirmOpen, setConfirmOpen] = useState(false);
   const [selectedId, setSelectedId] = useState(null);
+  const [isSearching, setIsSearching] = useState(false);
 
   const [snackbar, setSnackbar] = useState({
     open: false,
@@ -74,19 +79,20 @@ const Suppliers = () => {
     severity: "success",
   });
 
-  // Simulate API calls with sample data
-  const fetchSuppliers = async () => {
+  // Lấy danh sách nhà cung cấp với phân trang
+  const fetchSuppliers = async (pageNum = page, size = rowsPerPage) => {
     setLoading(true);
     try {
-      const supplierData = await takeSupplier();
-
-      if (supplierData.status === 200) {
-        setSuppliers(supplierData.data.result);
-      }
+      const supplierData = await takeSupplier(pageNum, size);
+      setSuppliers(supplierData.data.result.content);
+      setTotalPages(supplierData.data.result.totalPages);
+      setTotalElements(supplierData.data.result.totalElements);
     } catch (error) {
       setSnackbar({
         open: true,
-        message: "Error loading data",
+        message: `Lỗi khi tải danh sách nhà cung cấp: ${
+          error.response?.data?.message || error.message
+        }`,
         severity: "error",
       });
     } finally {
@@ -94,87 +100,135 @@ const Suppliers = () => {
     }
   };
 
+  // Tìm kiếm nhà cung cấp với phân trang
+  const searchSuppliers = async (
+    keyword,
+    pageNum = page,
+    size = rowsPerPage
+  ) => {
+    setLoading(true);
+    try {
+      const supplierData = await takeSupplierSearch(keyword, pageNum, size);
+      setSuppliers(supplierData.data.result.content);
+      setTotalPages(supplierData.data.result.totalPages);
+      setTotalElements(supplierData.data.result.totalElements);
+      setIsSearching(!!keyword);
+    } catch (error) {
+      setSnackbar({
+        open: true,
+        message: `Lỗi khi tải danh sách nhà cung cấp: ${
+          error.response?.data?.message || error.message
+        }`,
+        severity: "error",
+      });
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Xử lý tìm kiếm với debounce
+  useEffect(() => {
+    const delayDebounceFn = setTimeout(() => {
+      if (searchTerm) {
+        searchSuppliers(searchTerm, 0, rowsPerPage);
+        setPage(0);
+      } else {
+        fetchSuppliers(0, rowsPerPage);
+        setPage(0);
+      }
+    }, 500);
+
+    return () => clearTimeout(delayDebounceFn);
+  }, [searchTerm, rowsPerPage]);
+
+  // Lấy dữ liệu khi thay đổi trang hoặc số dòng mỗi trang
+  useEffect(() => {
+    if (isSearching) {
+      searchSuppliers(searchTerm, page, rowsPerPage);
+    } else {
+      fetchSuppliers(page, rowsPerPage);
+    }
+  }, [page, rowsPerPage]);
+
   const handleCreateSupplier = async (newSupplier) => {
     try {
       const response = await takeCreateSupplier(newSupplier);
+      // console.log("sup", newSupplier);
 
       if (response.status === 200) {
-        // create don't load api
-        setSuppliers([...suppliers, response.data.result]);
+        if (isSearching) {
+          searchSuppliers(searchTerm, page, rowsPerPage);
+        } else {
+          fetchSuppliers(page, rowsPerPage);
+        }
         setSnackbar({
           open: true,
-          message: "Supplier added successfully",
+          message: "Thêm nhà cung cấp thành công",
           severity: "success",
         });
       }
     } catch (error) {
       setSnackbar({
         open: true,
-        message: "Error adding supplier",
+        message: "Lỗi khi thêm nhà cung cấp",
         severity: "error",
       });
     }
   };
 
   const handleDeleteSupplier = async () => {
-    try {
-      const deleteSupplier = await takeDeleteSupplier(selectedId);
+    try {     
       setConfirmOpen(false);
+      const deleteSupplier = await takeDeleteSupplier(selectedId);
+      // console.log("xóa", deleteSupplier);
+      
       if (deleteSupplier.status === 200) {
-        // Delete don't load api
-        setSuppliers(
-          suppliers.filter((supplier) => supplier.id !== selectedId)
-        );
+        if (isSearching) {
+          searchSuppliers(searchTerm, page, rowsPerPage);
+        } else {
+          fetchSuppliers(page, rowsPerPage);
+        }
         setSnackbar({
           open: true,
-          message: "Supplier deleted successfully",
+          message: "Xóa nhà cung cấp thành công",
           severity: "success",
         });
       }
     } catch (error) {
       setSnackbar({
         open: true,
-        message: "Supplier is in use",
+        message: "Không thể xóa nhà cung cấp vì đang được sử dụng",
         severity: "error",
       });
     }
   };
 
-  // Callback khi lưu
   const handleSaveSupplier = async (updatedSupplier) => {
     try {
       const response = await takeUpdateSupplier(
         selectedSupplier.id,
         updatedSupplier
       );
-      console.log("data update", response);
       if (response.status === 200) {
-        // when update a supplier thì update data right away, don't load api
-        setSuppliers((prev) =>
-          prev.map((supplier) =>
-            supplier.id === response.data.result.id
-              ? response.data.result
-              : supplier
-          )
-        );
+        if (isSearching) {
+          searchSuppliers(searchTerm, page, rowsPerPage);
+        } else {
+          fetchSuppliers(page, rowsPerPage);
+        }
         setSnackbar({
           open: true,
-          message: "Supplier update successfully",
+          message: "Cập nhật nhà cung cấp thành công",
           severity: "success",
         });
       }
     } catch (error) {
       setSnackbar({
         open: true,
-        message: "Error update supplier",
+        message: "Lỗi khi cập nhật nhà cung cấp",
         severity: "error",
       });
     }
   };
-
-  useEffect(() => {
-    fetchSuppliers();
-  }, []);
 
   const handleChangePage = (event, newPage) => {
     setPage(newPage);
@@ -189,14 +243,6 @@ const Suppliers = () => {
     setOpenCreate(true);
   };
 
-  const filteredSuppliers = suppliers.filter(
-    (supplier) =>
-      supplier.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      supplier.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      supplier.phone.includes(searchTerm)
-  );
-
-  // Mở dialog
   const handleEditClick = (supplier) => {
     setSelectedSupplier(supplier);
     setOpenDialog(true);
@@ -207,9 +253,38 @@ const Suppliers = () => {
     setConfirmOpen(true);
   };
 
+  const [permission, setPermission] = useState(null);
+
+  const fetchPermission = async () => {
+    try {
+      const result = await takeFunctionOfFeature(5);
+      // console.log("Quyền", result);
+
+      setPermission(result.data.result[0]);
+    } catch (err) {
+      setPermission(null);
+    }
+  };
+
+  const staffInfo = useSelector((state) => state.auth.userInfo);
+  // console.log("dd", staffInfo);
+  useEffect(() => {
+    if (staffInfo && staffInfo.roleName === "ADMIN") {
+      // Admin có toàn quyền, gán trực tiếp
+      setPermission(() => ({
+        functionId: 5,
+        canView: true,
+        canCreate: true,
+        canUpdate: true,
+        canDelete: true,
+      }));
+    } else {
+      fetchPermission();
+    }
+  }, []);
+
   return (
     <Container maxWidth="xl" sx={{ py: 4 }}>
-      {/* Header */}
       <Box
         sx={{
           mb: 4,
@@ -221,13 +296,32 @@ const Suppliers = () => {
         }}
       >
         <Box sx={{ display: "flex", gap: 2 }}>
-          <StyledButton
-            variant="contained"
-            startIcon={<AddIcon />}
-            onClick={handleAddNew}
+          <Tooltip
+            title={
+              permission?.canCreate
+                ? "Tạo mới nhà cung cấp"
+                : "Tạo mới nhà cung cấp"
+            }
+            placement="top"
           >
-            Add Supplier
-          </StyledButton>
+            <span>
+              <StyledButton
+                variant="contained"
+                startIcon={<AddIcon />}
+                onClick={handleAddNew}
+                disabled={!permission?.canCreate}
+                sx={{
+                  opacity: permission?.canCreate ? 1 : 0.5,
+                  cursor: permission?.canCreate ? "pointer" : "not-allowed",
+                  pointerEvents: permission?.canCreate ? "auto" : "none",
+                  transition: "all 0.3s ease",
+                }}
+              >
+                Thêm Nhà Cung Cấp
+              </StyledButton>
+            </span>
+          </Tooltip>
+
           <SupplierDialog
             open={openCreate}
             onClose={() => setOpenCreate(false)}
@@ -235,7 +329,6 @@ const Suppliers = () => {
           />
         </Box>
 
-        {/* Search Bar */}
         <Box
           sx={{
             display: "flex",
@@ -247,7 +340,7 @@ const Suppliers = () => {
           <StyledTextField
             fullWidth
             variant="outlined"
-            placeholder="Search by name, email, or phone number..."
+            placeholder="Tìm kiếm theo tên, email hoặc số điện thoại..."
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
             InputProps={{
@@ -259,9 +352,13 @@ const Suppliers = () => {
             }}
           />
 
-          <Tooltip title="Refresh" placement="top">
+          <Tooltip title="Làm mới" placement="top">
             <IconButton
-              onClick={fetchSuppliers}
+              onClick={() => {
+                setSearchTerm("");
+                fetchSuppliers(0, rowsPerPage);
+                setPage(0);
+              }}
               disabled={loading}
               sx={{
                 backgroundColor: "#e3f2fd",
@@ -276,27 +373,27 @@ const Suppliers = () => {
         </Box>
       </Box>
 
-      {/* Table */}
       <SupplierTable
         loading={loading}
-        filteredSuppliers={filteredSuppliers}
+        filteredSuppliers={suppliers}
         page={page}
         rowsPerPage={rowsPerPage}
+        totalElements={totalElements}
         handleChangePage={handleChangePage}
         handleChangeRowsPerPage={handleChangeRowsPerPage}
         handleEdit={handleEditClick}
         handleDeleteSupplier={handleDeleteRequest}
+        isPermission={permission}
       />
 
       <ConfirmDialog
         isOpen={confirmOpen}
-        title="Delete Supplier"
-        message="Are you sure you want to delete this supplier?"
+        title="Xóa Nhà Cung Cấp"
+        message="Bạn có chắc chắn muốn xóa nhà cung cấp này không?"
         onConfirm={handleDeleteSupplier}
         onCancel={() => setConfirmOpen(false)}
       />
 
-      {/* Detail Dialog */}
       <EditSupplier
         open={openDialog}
         onClose={() => setOpenDialog(false)}
@@ -304,7 +401,6 @@ const Suppliers = () => {
         supplierData={selectedSupplier}
       />
 
-      {/* Snackbar */}
       <Snackbar
         open={snackbar.open}
         autoHideDuration={3000}

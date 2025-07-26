@@ -1,8 +1,10 @@
 package com.app.product_warehourse.entity;
 
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
+import java.util.List;
 
 @Builder                 // Tạo builder pattern giúp tạo đối tượng dễ dàng, linh hoạt
 @Entity                  // Đánh dấu class này là entity, ánh xạ tới bảng trong DB
@@ -24,9 +26,9 @@ public class Product {
     @Column(name = "image", length = 255)
     private String image;
 
-        @ManyToOne
-        @JoinColumn(name = "origin") // 👈 ánh xạ cột origin (kiểu String chứa ID)
-        private Origin origin;
+          @ManyToOne
+          @JoinColumn(name = "origin") // 👈 ánh xạ cột origin (kiểu String chứa ID)
+          private Origin origin;
 
     @Column(name = "processor", length = 255)
     private String processor;
@@ -37,9 +39,9 @@ public class Product {
     @Column(name = "screen_size")
     private Double screenSize;
 
-    @ManyToOne
-    @JoinColumn(name = "operating_system")
-    private OperatingSystem operatingSystem;
+          @ManyToOne(fetch = FetchType.LAZY)
+          @JoinColumn(name = "operating_system")
+          private OperatingSystem operatingSystem;
 
     @Column(name = "chipset")
     private Integer chipset;
@@ -53,17 +55,22 @@ public class Product {
     @Column(name = "warranty_period")
     private Integer warrantyPeriod;
 
-    @ManyToOne
-    @JoinColumn(name = "brand")
-    private Brand brand;
+          @ManyToOne(fetch = FetchType.LAZY)
+          @JoinColumn(name = "brand")
+          private Brand brand;
 
-    @ManyToOne
-    @JoinColumn(name = "warehouse_area")
-    private WarehouseArea warehouseArea;
+          @ManyToOne(fetch = FetchType.LAZY)
+          @JoinColumn(name = "warehouse_area")
+          private WarehouseArea warehouseArea;
 
     @Column(name = "stock_quantity")
     private Integer stockQuantity;
 
     @Column(name = "status")
     private Boolean status;
+
+
+          @OneToMany(mappedBy = "product", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+          @JsonManagedReference
+          List<ProductVersion> productVersion;
 }

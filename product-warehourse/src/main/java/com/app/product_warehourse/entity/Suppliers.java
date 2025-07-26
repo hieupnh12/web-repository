@@ -4,6 +4,9 @@ package com.app.product_warehourse.entity;
 import jakarta.persistence.*;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
+import org.hibernate.annotations.CreationTimestamp;
+
+import java.time.LocalDateTime;
 
 @Entity
 @Data
@@ -12,7 +15,7 @@ import lombok.experimental.FieldDefaults;
 @AllArgsConstructor
 @Table(name = "supplier" )
 @FieldDefaults(level = AccessLevel.PRIVATE)
-public class Suppliers {
+public class    Suppliers {
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
     @Column(name ="supplier_id")
@@ -32,6 +35,9 @@ public class Suppliers {
 
     @Column(name = "status")
     Boolean status ;
+
+    @CreationTimestamp
+    LocalDateTime joinDate;
 
 
 }

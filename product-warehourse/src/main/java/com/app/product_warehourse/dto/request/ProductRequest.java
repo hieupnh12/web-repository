@@ -18,7 +18,6 @@ public class ProductRequest {
     @UniqueName(entity = Product.class, fieldName = "productName")
     String productName;
 
-
     Long originId;
 
     String processor;
@@ -41,7 +40,7 @@ public class ProductRequest {
 
     Long  warehouseAreaId;
 
-    Boolean status;
+//    Boolean status;
 
 
 

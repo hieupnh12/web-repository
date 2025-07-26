@@ -1,4 +1,3 @@
-// src/components/SupplierTable.jsx
 import React from "react";
 import {
   Box,
@@ -16,7 +15,7 @@ import {
   TablePagination,
   Skeleton,
 } from "@mui/material";
-import { styled, alpha } from "@mui/material/styles";
+import { empf, alpha, styled } from "@mui/material/styles";
 import {
   Edit as EditIcon,
   Email as EmailIcon,
@@ -86,157 +85,183 @@ const SupplierTable = ({
   filteredSuppliers,
   page,
   rowsPerPage,
+  totalElements,
   handleChangePage,
   handleChangeRowsPerPage,
   handleEdit,
   handleDeleteSupplier,
+  isPermission,
 }) => {
   return (
     <StyledPaper>
-      <StyledTableContainer>
+      <StyledTableContainer className="min-h-[450px]">
         <Table>
           <StyledTableHead>
             <TableRow>
-              <TableCell>No.</TableCell>
-              <TableCell>Supplier Name</TableCell>
+              <TableCell>STT</TableCell>
+              <TableCell>Tên Nhà Cung Cấp</TableCell>
               <TableCell>Email</TableCell>
-              <TableCell>Phone Number</TableCell>
-              <TableCell>Address</TableCell>
-              <TableCell align="center">Status</TableCell>
-              <TableCell align="center">Actions</TableCell>
+              <TableCell>Số Điện Thoại</TableCell>
+              <TableCell>Địa Chỉ</TableCell>
+              <TableCell align="center">Trạng Thái</TableCell>
+              <TableCell align="center"></TableCell>
             </TableRow>
           </StyledTableHead>
           <TableBody>
-            {loading
-              ? [...Array(5)].map((_, index) => (
-                  <TableRow key={index}>
-                    <TableCell colSpan={7}>
-                      <Skeleton animation="wave" height={60} />
-                    </TableCell>
-                  </TableRow>
-                ))
-              : filteredSuppliers
-                  .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
-                  .map((supplier, index) => (
-                    <StyledTableRow key={index}>
-                      <TableCell>{page * rowsPerPage + index + 1}</TableCell>
-                      <TableCell>
-                        <Box
-                          sx={{ display: "flex", alignItems: "center", gap: 1 }}
+            {loading ? (
+              [...Array(5)].map((_, index) => (
+                <TableRow key={index}>
+                  <TableCell colSpan={7}>
+                    <Skeleton animation="wave" height={60} />
+                  </TableCell>
+                </TableRow>
+              ))
+            ) : filteredSuppliers.length === 0 ? (
+              <TableRow>
+                <TableCell colSpan={7} align="center">
+                  <Typography>Không tìm thấy nhà cung cấp</Typography>
+                </TableCell>
+              </TableRow>
+            ) : (
+              filteredSuppliers.map((supplier, index) => (
+                <StyledTableRow key={supplier.id}>
+                  <TableCell>{page * rowsPerPage + index + 1}</TableCell>
+                  <TableCell>
+                    <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+                      <BusinessIcon color="primary" fontSize="small" />
+                      <Typography variant="body2" fontWeight={500}>
+                        {supplier.name}
+                      </Typography>
+                    </Box>
+                  </TableCell>
+                  <TableCell>
+                    <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+                      <EmailIcon color="action" fontSize="small" />
+                      {supplier.email}
+                    </Box>
+                  </TableCell>
+                  <TableCell>
+                    <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+                      <PhoneIcon color="action" fontSize="small" />
+                      {supplier.phone}
+                    </Box>
+                  </TableCell>
+                  <TableCell>
+                    <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+                      <LocationIcon color="action" fontSize="small" />
+                      <Tooltip title={supplier.address} placement="top">
+                        <Typography
+                          variant="body2"
+                          noWrap
+                          sx={{ maxWidth: 200 }}
                         >
-                          <BusinessIcon color="primary" fontSize="small" />
-                          <Typography variant="body2" fontWeight={500}>
-                            {supplier.name}
-                          </Typography>
-                        </Box>
-                      </TableCell>
-                      <TableCell>
-                        <Box
-                          sx={{ display: "flex", alignItems: "center", gap: 1 }}
-                        >
-                          <EmailIcon color="action" fontSize="small" />
-                          {supplier.email}
-                        </Box>
-                      </TableCell>
-                      <TableCell>
-                        <Box
-                          sx={{ display: "flex", alignItems: "center", gap: 1 }}
-                        >
-                          <PhoneIcon color="action" fontSize="small" />
-                          {supplier.phone}
-                        </Box>
-                      </TableCell>
-                      <TableCell>
-                        <Box
-                          sx={{ display: "flex", alignItems: "center", gap: 1 }}
-                        >
-                          <LocationIcon color="action" fontSize="small" />
-                          <Tooltip title={supplier.address} placement="top">
-                            <Typography
-                              variant="body2"
-                              noWrap
-                              sx={{ maxWidth: 200 }}
-                            >
-                              {supplier.address}
-                            </Typography>
-                          </Tooltip>
-                        </Box>
-                      </TableCell>
-                      <TableCell align="center">
-                        <Tooltip>
-                          <span>
-                            <Chip
-                              label={supplier.status ? "Active" : "Inactive"}
-                              color={supplier.status ? "success" : "error"}
-                              size="small"
-                              icon={
-                                supplier.status ? (
-                                  <CheckCircleIcon />
-                                ) : (
-                                  <CancelIcon />
-                                )
-                              }
-                              sx={{ fontWeight: 500, pointerEvents: "none" }}
-                            />
-                          </span>
-                        </Tooltip>
-                      </TableCell>
-                      <TableCell align="center">
-                        <Box
-                          sx={{
-                            display: "flex",
-                            gap: 1,
-                            justifyContent: "center",
-                          }}
-                        >
-                          <Tooltip title="View Details" placement="top">
-                            <IconButton
-                              size="small"
-                              onClick={() => handleEdit(supplier)}
-                              sx={{
-                                color: "#2196f3",
-                                "&:hover": {
-                                  backgroundColor: "#e3f2fd",
-                                  transform: "scale(1.1)",
-                                },
-                                transition: "all 0.3s ease",
-                              }}
-                            >
-                              <EditIcon fontSize="small" />
-                            </IconButton>
-                          </Tooltip>
-                          <Tooltip title="Delete" placement="top">
-                            <IconButton
-                              size="small"
-                              onClick={() => handleDeleteSupplier(supplier.id)}
-                              sx={{
-                                color: "#f44336",
-                                "&:hover": {
-                                  backgroundColor: "#ffebee",
-                                  transform: "scale(1.1)",
-                                },
-                                transition: "all 0.3s ease",
-                              }}
-                            >
-                              <DeleteIcon fontSize="small" />
-                            </IconButton>
-                          </Tooltip>
-                        </Box>
-                      </TableCell>
-                    </StyledTableRow>
-                  ))}
+                          {supplier.address}
+                        </Typography>
+                      </Tooltip>
+                    </Box>
+                  </TableCell>
+                  <TableCell align="center">
+                    <Tooltip>
+                      <span>
+                        <Chip
+                          label={supplier.status ? "Hoạt động" : "Khóa"}
+                          color={supplier.status ? "success" : "error"}
+                          size="small"
+                          icon={
+                            supplier.status ? (
+                              <CheckCircleIcon />
+                            ) : (
+                              <CancelIcon />
+                            )
+                          }
+                          sx={{ fontWeight: 500, pointerEvents: "none" }}
+                        />
+                      </span>
+                    </Tooltip>
+                  </TableCell>
+                  <TableCell align="center">
+                    <Box
+                      sx={{
+                        display: "flex",
+                        gap: 1,
+                        justifyContent: "center",
+                      }}
+                    >
+                      <Tooltip title="Xem chi tiết" placement="top">
+                        <span>
+                          <IconButton
+                            size="small"
+                            onClick={() => handleEdit(supplier)}
+                            disabled={!isPermission?.canUpdate}
+                            sx={{
+                              color: "#2196f3",
+                              opacity: isPermission?.canUpdate ? 1 : 0.4,
+                              cursor: isPermission?.canUpdate
+                                ? "pointer"
+                                : "not-allowed",
+                              "&:hover": {
+                                backgroundColor: isPermission?.canUpdate
+                                  ? "#e3f2fd"
+                                  : "transparent",
+                                transform: isPermission?.canUpdate
+                                  ? "scale(1.1)"
+                                  : "none",
+                              },
+                              transition: "all 0.3s ease",
+                            }}
+                          >
+                            <EditIcon fontSize="small" />
+                          </IconButton>
+                        </span>
+                      </Tooltip>
+
+                      <Tooltip title="Xóa" placement="top">
+                        <span>
+                          <IconButton
+                            size="small"
+                            onClick={() => handleDeleteSupplier(supplier.id)}
+                            disabled={!isPermission?.canDelete}
+                            sx={{
+                              color: "#f44336",
+                              opacity: isPermission?.canDelete ? 1 : 0.4,
+                              cursor: isPermission?.canDelete
+                                ? "pointer"
+                                : "not-allowed",
+                              "&:hover": {
+                                backgroundColor: isPermission?.canDelete
+                                  ? "#ffebee"
+                                  : "transparent",
+                                transform: isPermission?.canDelete
+                                  ? "scale(1.1)"
+                                  : "none",
+                              },
+                              transition: "all 0.3s ease",
+                            }}
+                          >
+                            <DeleteIcon fontSize="small" />
+                          </IconButton>
+                        </span>
+                      </Tooltip>
+                    </Box>
+                  </TableCell>
+                </StyledTableRow>
+              ))
+            )}
           </TableBody>
         </Table>
       </StyledTableContainer>
       <TablePagination
         rowsPerPageOptions={[5, 10, 25]}
         component="div"
-        count={filteredSuppliers.length}
+        count={totalElements}
         rowsPerPage={rowsPerPage}
         page={page}
         onPageChange={handleChangePage}
         onRowsPerPageChange={handleChangeRowsPerPage}
-        labelRowsPerPage="Rows per page:"
+        labelRowsPerPage="Số dòng mỗi trang:"
+        labelDisplayedRows={({ from, to, count }) =>
+          `${from}–${to} trong số ${count !== -1 ? count : `hơn ${to}`}`
+        }
         sx={{
           borderTop: "1px solid #e0e0e0",
           backgroundColor: "#fafafa",

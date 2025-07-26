@@ -22,12 +22,16 @@ import {
   takeDeleteCustomer,
   takeCustomer,
   takeUpdateCustomer,
+  searchCustomers,
 } from "../../services/customerService";
+import { takeFunctionOfFeature } from "../../services/permissionService";
 
 import CustomerTable from "./CustomerTable";
 import EditCustomer from "./models/EditCustomer";
 import ConfirmDialog from "../../components/ui/ConfirmDialog";
 import CustomerDialog from "./models/AddCustomer";
+import { useSelector } from "react-redux";
+import { takeRoleVer1 } from "../../services/authService";
 
 const StyledButton = styled(Button)(({ theme }) => ({
   borderRadius: 8,
@@ -59,6 +63,8 @@ const StyledTextField = styled(TextField)(({ theme }) => ({
 
 const Customers = () => {
   const [customers, setCustomers] = useState([]);
+  const [totalPages, setTotalPages] = useState(0);
+  const [totalElements, setTotalElements] = useState(0);
   const [loading, setLoading] = useState(true);
   const [page, setPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(10);
@@ -75,17 +81,30 @@ const Customers = () => {
     severity: "success",
   });
 
-  const fetchCustomers = async () => {
+  const fetchCustomers = async (
+    pageNum = page,
+    size = rowsPerPage,
+    keyword = searchTerm
+  ) => {
     setLoading(true);
     try {
-      const response = await takeCustomer();
-      if (response.status === 200) {
-        setCustomers(response.data.result);
+      let response;
+      if (keyword) {
+        response = await searchCustomers(keyword, pageNum, size);
+      } else {
+        response = await takeCustomer(pageNum, size);
       }
-    } catch {
+      if (response.status === 200) {
+        setCustomers(response.data.result.content);
+        setTotalPages(response.data.result.totalPages);
+        setTotalElements(response.data.result.totalElements);
+      }
+    } catch (error) {
       setSnackbar({
         open: true,
-        message: "Error loading customers",
+        message: `Lỗi tải danh sách khách hàng: ${
+          error.response?.data?.message || error.message
+        }`,
         severity: "error",
       });
     } finally {
@@ -97,38 +116,44 @@ const Customers = () => {
     try {
       const response = await takeCreateCustomer(newCustomer);
       if (response.status === 200) {
-        setCustomers([...customers, response.data.result]);
         setSnackbar({
           open: true,
-          message: "Customer added successfully",
+          message: "Thêm khách hàng thành công",
           severity: "success",
         });
+        fetchCustomers();
       }
-    } catch {
+    } catch (error) {
       setSnackbar({
         open: true,
-        message: "Error adding customer",
+        message: `Lỗi thêm khách hàng: ${
+          error.response?.data?.message || error.message
+        }`,
         severity: "error",
       });
     }
   };
 
   const handleDeleteCustomer = async () => {
+    setConfirmOpen(false);
     try {
       const response = await takeDeleteCustomer(selectedId);
-      setConfirmOpen(false);
+      console.log("xóa", response);
+
       if (response.status === 200) {
-        setCustomers(customers.filter((c) => c.customerId !== selectedId));
         setSnackbar({
           open: true,
-          message: "Customer deleted successfully",
+          message: "Xóa khách hàng thành công",
           severity: "success",
         });
+        fetchCustomers();
       }
-    } catch {
+    } catch (error) {
       setSnackbar({
         open: true,
-        message: "Customer is in use",
+        message: `Không thể xóa khách hàng: ${
+          error.response?.data?.message || error.message
+        }`,
         severity: "error",
       });
     }
@@ -141,23 +166,19 @@ const Customers = () => {
         updatedCustomer
       );
       if (response.status === 200) {
-        setCustomers((prev) =>
-          prev.map((customer) =>
-            customer.customerId === response.data.result.customerId
-              ? response.data.result
-              : customer
-          )
-        );
         setSnackbar({
           open: true,
-          message: "Customer updated successfully",
+          message: "Cập nhật khách hàng thành công",
           severity: "success",
         });
+        fetchCustomers();
       }
-    } catch {
+    } catch (error) {
       setSnackbar({
         open: true,
-        message: "Error updating customer",
+        message: `Lỗi cập nhật khách hàng: ${
+          error.response?.data?.message || error.message
+        }`,
         severity: "error",
       });
     }
@@ -165,22 +186,25 @@ const Customers = () => {
 
   useEffect(() => {
     fetchCustomers();
-  }, []);
+  }, [page, rowsPerPage]);
 
-  const handleChangePage = (event, newPage) => setPage(newPage);
+  useEffect(() => {
+    const delayDebounceFn = setTimeout(() => {
+      fetchCustomers(0, rowsPerPage, searchTerm);
+    }, 500);
+    return () => clearTimeout(delayDebounceFn);
+  }, [searchTerm]);
+
+  const handleChangePage = (event, newPage) => {
+    setPage(newPage);
+  };
+
   const handleChangeRowsPerPage = (event) => {
     setRowsPerPage(parseInt(event.target.value, 10));
     setPage(0);
   };
 
   const handleAddNew = () => setOpenCreate(true);
-
-  const filteredCustomers = customers.filter(
-    (customer) =>
-      customer.customerName?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      customer.phone?.includes(searchTerm) ||
-      customer.address?.toLowerCase().includes(searchTerm.toLowerCase())
-  );
 
   const handleEditClick = (customer) => {
     setSelectedCustomer(customer);
@@ -191,6 +215,34 @@ const Customers = () => {
     setSelectedId(id);
     setConfirmOpen(true);
   };
+
+  const [permission, setPermission] = useState(null);
+
+  const fetchPermission = async () => {
+    try {
+      const result = await takeFunctionOfFeature(8);
+      const info = await takeRoleVer1();
+      setPermission(result.data.result[0]);
+    } catch (err) {
+      setPermission(null);
+    }
+  };
+
+  const staffInfo = useSelector((state) => state.auth.userInfo);
+
+  useEffect(() => {
+    if (staffInfo && staffInfo.roleName === "ADMIN") {
+      setPermission(() => ({
+        functionId: 8,
+        canView: true,
+        canCreate: true,
+        canUpdate: true,
+        canDelete: true,
+      }));
+    } else {
+      fetchPermission();
+    }
+  }, []);
 
   return (
     <Container maxWidth="xl" sx={{ py: 4 }}>
@@ -205,13 +257,32 @@ const Customers = () => {
         }}
       >
         <Box sx={{ display: "flex", gap: 2 }}>
-          <StyledButton
-            variant="contained"
-            startIcon={<AddIcon />}
-            onClick={handleAddNew}
+          <Tooltip
+            title={
+              permission?.canCreate
+                ? "Tạo khách hàng mới"
+                : "Bạn không có quyền tạo khách hàng"
+            }
+            placement="top"
           >
-            Add Customer
-          </StyledButton>
+            <span>
+              <StyledButton
+                variant="contained"
+                startIcon={<AddIcon />}
+                onClick={handleAddNew}
+                disabled={!permission?.canCreate}
+                sx={{
+                  opacity: permission?.canCreate ? 1 : 0.5,
+                  cursor: permission?.canCreate ? "pointer" : "not-allowed",
+                  pointerEvents: permission?.canCreate ? "auto" : "none",
+                  transition: "all 0.3s ease",
+                }}
+              >
+                Thêm khách hàng
+              </StyledButton>
+            </span>
+          </Tooltip>
+
           <CustomerDialog
             open={openCreate}
             onClose={() => setOpenCreate(false)}
@@ -230,7 +301,7 @@ const Customers = () => {
           <StyledTextField
             fullWidth
             variant="outlined"
-            placeholder="Search by name, phone, or address..."
+            placeholder="Tìm theo tên, số điện thoại hoặc địa chỉ..."
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
             InputProps={{
@@ -241,9 +312,9 @@ const Customers = () => {
               ),
             }}
           />
-          <Tooltip title="Refresh" placement="top">
+          <Tooltip title="Làm mới" placement="top">
             <IconButton
-              onClick={fetchCustomers}
+              onClick={() => fetchCustomers(0, rowsPerPage, "")}
               disabled={loading}
               sx={{
                 backgroundColor: "#e3f2fd",
@@ -260,19 +331,22 @@ const Customers = () => {
 
       <CustomerTable
         loading={loading}
-        filteredCustomers={filteredCustomers}
+        filteredCustomers={customers}
         page={page}
         rowsPerPage={rowsPerPage}
+        totalElements={totalElements}
+        totalPages={totalPages}
         handleChangePage={handleChangePage}
         handleChangeRowsPerPage={handleChangeRowsPerPage}
         handleEdit={handleEditClick}
         handleDeleteCustomer={handleDeleteRequest}
+        permission={permission}
       />
 
       <ConfirmDialog
         isOpen={confirmOpen}
-        title="Delete Customer"
-        message="Are you sure you want to delete this customer?"
+        title="Xóa khách hàng"
+        message="Bạn có chắc chắn muốn xóa khách hàng này không?"
         onConfirm={handleDeleteCustomer}
         onCancel={() => setConfirmOpen(false)}
       />

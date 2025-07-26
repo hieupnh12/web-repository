@@ -1,46 +1,60 @@
 import BASE_URL from "../api";
-import { GET, POST, PUT, DELETE } from "../constants/httpMethod"; // Add PUT and DELETE here
+import { GET, POST, PUT, DELETE } from "../constants/httpMethod";
 
 /**
- * lấy danh sách khu vực kho (trả về tất cả)
- * @returns (id name note status(t/f))
+ * Lấy danh sách khu vực kho
+ * @returns Array<{ id: string, name: string, note: string, status: boolean }>
  */
 export const takeWarehouseArea = () => {
-    const responds = BASE_URL[GET]("warehouse_area");
-    return responds;
-}
+  return BASE_URL[GET]("warehouse_area");
+};
+
+export const takeWarehouseAreaInven = async () => {
+  const response = await BASE_URL[GET]("warehouse_area");
+  console.log("Warehouse Area API response:", response.data);
+
+  // Nếu response.data là array trực tiếp, return luôn
+  if (Array.isArray(response.data)) {
+    return response.data;
+  }
+  // Nếu vẫn dùng key result
+  return Array.isArray(response.data?.result) ? response.data.result : [];
+};
+
 
 /**
- * Lấy khu vực bởi id
- * @returns khu vực kho
+ * Lấy thông tin chi tiết khu vực kho theo ID
+ * @param {string | number} idWare
+ * @returns WarehouseArea { id, name, location, capacity, description, ... }
  */
 export const takeWarehouseAreaById = (idWare) => {
-    const responds = BASE_URL[GET](`warehouse_area/${idWare}`); // Changed from PUT to GET since this seems to be a retrieval
-    return responds;
-}
+  return BASE_URL[GET](`warehouse_area/${idWare}`);
+};
 
 /**
- * Thêm danh sách sản phẩm đang có ở khu vực nữa
- * @returns (ảnh / tên / số lượng)
- */
-
-/**
- * Tạo 1 khu vực kho code 1000/result
- * @returns message và thông tin đã thêm
+ * Tạo mới khu vực kho
+ * @param {object} data - { name, description (optional), location (optional), capacity (optional) }
+ * @returns ApiResponse<WarehouseArea>
  */
 export const takeCreateWarehouseArea = (data) => {
-    const responds = BASE_URL[POST](`warehouse_area`, data);
-    return responds;
-}
+  return BASE_URL[POST]("warehouse_area", data);
+};
 
-// Update 1 nhà cung cấp
+/**
+ * Cập nhật khu vực kho
+ * @param {string | number} idWare
+ * @param {object} data - WarehouseUpdateRequest
+ * @returns WarehouseAreaResponse { id, name, note, status }
+ */
 export const takeUpdateWarehouseArea = (idWare, data) => {
-    const responds = BASE_URL[PUT](`warehouse_area/${idWare}`, data);
-    return responds;
-}
+  return BASE_URL[PUT](`warehouse_area/${idWare}`, data);
+};
 
-// Xóa 1 nhà cung cấp
+/**
+ * Xóa khu vực kho
+ * @param {string | number} idWare
+ * @returns void
+ */
 export const takeDeleteWarehouseArea = (idWare) => {
-    const responds = BASE_URL[DELETE](`warehouse_area/${idWare}`);
-    return responds;
-}
+  return BASE_URL[DELETE](`warehouse_area/${idWare}`);
+};

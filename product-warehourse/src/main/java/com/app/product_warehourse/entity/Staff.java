@@ -27,7 +27,7 @@ public class Staff {
     @Builder.Default
     Boolean status = true;
 
-    @OneToOne(mappedBy = "staff", cascade = CascadeType.ALL)
+    @OneToOne(mappedBy = "staff", cascade = CascadeType.ALL, fetch = FetchType.LAZY, optional = true)
     @PrimaryKeyJoinColumn
     Account account;
 }

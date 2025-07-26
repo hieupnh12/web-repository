@@ -36,7 +36,7 @@ export default function ConfirmDialog({
   const style = actionStyles[action] || actionStyles["delete"];
 
   return ReactDOM.createPortal(
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-[1400]">
       <div className="bg-white rounded-2xl shadow-2xl w-full max-w-sm overflow-hidden animate-fade-in">
         {/* Header */}
         <div className={`bg-gradient-to-r ${style.bg} text-white px-6 py-4`}>

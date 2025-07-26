@@ -8,6 +8,7 @@ spring:
     url: "jdbc:mysql://mysql-c9616c2-fpt-cfca.f.aivencloud.com:19031/warehouse_phone"
     username: avnadmin
     password: AVNS_q1b9SVJ1ojNK_sV6Ptj
+
   mail:
     host: smtp.gmail.com
     port: 587
@@ -28,12 +29,15 @@ spring:
       max-file-size: 10MB
       max-request-size: 10MB
 
+
+
 cloudinary:
   cloud:
     name: dpf4ph1qu
   api:
     key: 756234473817482
     secret: T5qQXodnthydHuSyQYrF-xk98Eo
+#  T5qQXodnthydHuSyQYrF-xk98Eo
 
 jwt:
   signerKey: "AHaGZCtFmdGkRWd2X0kdnE7GPkV9dFHP9i0qfSeOU+LkndFFegV9HR5Xdzoqq5T2"

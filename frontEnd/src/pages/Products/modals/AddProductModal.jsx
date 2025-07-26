@@ -1,78 +1,76 @@
 import React, { useState, useEffect, Fragment } from "react";
 import { Dialog, Transition } from "@headlessui/react";
+import { XMarkIcon, PhotoIcon } from "@heroicons/react/24/outline";
 import Button from "../../../components/ui/Button";
 import {
-  createProduct,
+  initProduct,
+  updateProduct,
   uploadProductImage,
-  getAllBrands,
-  getAllOrigins,
-  getAllOperatingSystems,
-  getAllWarehouseAreas,
 } from "../../../services/productService";
+import {getAllBrands,
+  getAllOrigins,
+  getAllOSs,
+} from "../../../services/attributeService";
+import {takeWarehouseArea,} from "../../../services/storage";
 
-// Reusable FormInput component
-const FormInput = ({ label, name, type = "text", value, onChange, error, className }) => (
-  <div>
-    <label htmlFor={name} className="block text-sm font-medium text-gray-700 mb-1">
+const FormInput = ({ label, name, type = "text", value, onChange, error, unit, placeholder }) => (
+  <div className="space-y-2">
+    <label className="block text-sm font-semibold text-gray-800">
       {label}
+      {unit && <span className="text-gray-500 font-normal ml-1">({unit})</span>}
     </label>
-    <input
-      id={name}
-      type={type}
-      name={name}
-      value={value ?? ""}
-      onChange={onChange}
-      className={`w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring ${
-        error ? "border-red-500" : "border-gray-300"
-      } ${className || ""}`}
-      aria-describedby={error ? `${name}-error` : undefined}
-    />
-    {error && (
-      <p id={`${name}-error`} className="text-red-500 text-sm mt-1">
-        {error}
-      </p>
-    )}
+    <div className="relative">
+      <input
+        type={type}
+        name={name}
+        value={value ?? ""}
+        onChange={onChange}
+        placeholder={placeholder}
+        className={`w-full px-4 py-3 border-2 rounded-xl transition-all duration-200 focus:outline-none focus:ring-2 ${
+          error 
+            ? "border-red-300 focus:border-red-500 focus:ring-red-200" 
+            : "border-gray-200 focus:border-blue-500 focus:ring-blue-200 hover:border-gray-300"
+        }`}
+      />
+      {unit && (
+        <span className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-500 text-sm">
+          {unit}
+        </span>
+      )}
+    </div>
+    {error && <p className="text-red-500 text-xs font-medium flex items-center gap-1">
+      <span className="w-1 h-1 bg-red-500 rounded-full"></span>
+      {error}
+    </p>}
   </div>
 );
 
-// Reusable FormSelect component
-const FormSelect = ({ label, name, value, onChange, options, getId, getName, error }) => {
-  if (process.env.NODE_ENV === "development") {
-    console.log(`Options for ${name}:`, options);
-    console.log(`Value for ${name}:`, value);
-  }
-  const validValue = options.some((opt) => String(getId(opt)) === String(value)) ? value : "";
-  return (
-    <div>
-      <label htmlFor={name} className="block text-sm font-medium text-gray-700 mb-1">
-        {label}
-      </label>
-      <select
-        id={name}
-        name={name}
-        value={validValue}
-        onChange={onChange}
-        className={`w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring ${
-          error ? "border-red-500" : "border-gray-300"
-        }`}
-        aria-describedby={error ? `${name}-error` : undefined}
-        disabled={options.length === 0}
-      >
-        <option value="">-- Chọn --</option>
-        {options.map((opt) => (
-          <option key={getId(opt)} value={getId(opt)}>
-            {getName(opt)}
-          </option>
-        ))}
-      </select>
-      {error && (
-        <p id={`${name}-error`} className="text-red-500 text-sm mt-1">
-          {error}
-        </p>
-      )}
-    </div>
-  );
-};
+const FormSelect = ({ label, name, value, onChange, options, getId, getName, error, placeholder }) => (
+  <div className="space-y-2">
+    <label className="block text-sm font-semibold text-gray-800">{label}</label>
+    <select
+      name={name}
+      value={value}
+      onChange={onChange}
+      className={`w-full px-4 py-3 border-2 rounded-xl transition-all duration-200 focus:outline-none focus:ring-2 appearance-none bg-white ${
+        error 
+          ? "border-red-300 focus:border-red-500 focus:ring-red-200" 
+          : "border-gray-200 focus:border-blue-500 focus:ring-blue-200 hover:border-gray-300"
+      }`}
+    >
+      <option value="">{placeholder || "-- Chọn --"}</option>
+      {options.map((opt) => (
+        <option key={getId(opt)} value={getId(opt)}>
+          {getName(opt)}
+        </option>
+      ))}
+    </select>
+    {error && <p className="text-red-500 text-xs font-medium flex items-center gap-1">
+      <span className="w-1 h-1 bg-red-500 rounded-full"></span>
+      {error}
+    </p>}
+  </div>
+);
 
 const AddProduct = ({ onSuccess, onClose }) => {
   const [formData, setFormData] = useState({
@@ -84,7 +82,6 @@ const AddProduct = ({ onSuccess, onClose }) => {
     rearCamera: "",
     frontCamera: "",
     warrantyPeriod: "",
-    status: false,
     image: null,
     imagePreview: "",
     origin: null,
@@ -92,52 +89,30 @@ const AddProduct = ({ onSuccess, onClose }) => {
     warehouseArea: null,
     brand: null,
   });
+
   const [brands, setBrands] = useState([]);
   const [origins, setOrigins] = useState([]);
   const [operatingSystems, setOperatingSystems] = useState([]);
   const [warehouseAreas, setWarehouseAreas] = useState([]);
-  const [isLoading, setIsLoading] = useState(true);
-  const [isSubmitting, setIsSubmitting] = useState(false);
+
   const [errors, setErrors] = useState({});
   const [apiError, setApiError] = useState(null);
   const [successMessage, setSuccessMessage] = useState(null);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   useEffect(() => {
-    setIsLoading(true);
     Promise.all([
       getAllBrands(),
       getAllOrigins(),
-      getAllOperatingSystems(),
-      getAllWarehouseAreas(),
-    ])
-      .then(([brandRes, originRes, osRes, areaRes]) => {
-        const getData = (res, name) => {
-          if (!res || !res.data) {
-            console.error(`Invalid response for ${name}:`, res);
-            return [];
-          }
-          return Array.isArray(res.data) ? res.data : res.data?.content || res.data?.data || [];
-        };
-        setBrands(getData(brandRes, "brands"));
-        setOrigins(getData(originRes, "origins"));
-        setOperatingSystems(getData(osRes, "operating systems"));
-        setWarehouseAreas(getData(areaRes, "warehouse areas"));
-        setIsLoading(false);
-      })
-      .catch((err) => {
-        console.error("Error fetching data:", err);
-        setApiError("Không thể tải dữ liệu. Vui lòng thử lại.");
-        setIsLoading(false);
-      });
+      getAllOSs(),
+      takeWarehouseArea(),
+    ]).then(([brands, origins, os, areas]) => {
+      setBrands(brands);
+      setOrigins(origins);
+      setOperatingSystems(os);
+      setWarehouseAreas(areas?.data || []);
+    });
   }, []);
-
-  useEffect(() => {
-    return () => {
-      if (formData.imagePreview && formData.imagePreview.startsWith("blob:")) {
-        URL.revokeObjectURL(formData.imagePreview);
-      }
-    };
-  }, [formData.imagePreview]);
 
   const handleChange = (e) => {
     const { name, value, type, checked } = e.target;
@@ -145,54 +120,36 @@ const AddProduct = ({ onSuccess, onClose }) => {
       ...prev,
       [name]: type === "checkbox" ? checked : value,
     }));
-    setErrors((prev) => ({ ...prev, [name]: "" }));
+    // Clear error when user starts typing
+    if (errors[name]) {
+      setErrors(prev => ({ ...prev, [name]: "" }));
+    }
   };
 
   const handleSelectChange = (e) => {
     const { name, value } = e.target;
-    const optionsMap = {
+    const map = {
       origin: origins,
       operatingSystem: operatingSystems,
-      brand: brands,
       warehouseArea: warehouseAreas,
+      brand: brands,
     };
-    const getIdMap = {
-      origin: (o) => o.id,
-      operatingSystem: (o) => o.id,
-      brand: (o) => o.idBrand,
-      warehouseArea: (o) => o.id,
-    };
-    const options = optionsMap[name] || [];
-    const getId = getIdMap[name] || ((o) => o.id);
-    const selected = options.find((o) => String(getId(o)) === String(value));
-    setFormData((prev) => {
-      const newState = { ...prev, [name]: selected || null };
-      if (process.env.NODE_ENV === "development") {
-        console.log(`Updated ${name} in formData:`, newState[name]);
-        console.log("Current formData:", newState);
-      }
-      return newState;
-    });
-    setErrors((prev) => ({ ...prev, [name]: "" }));
+    const item = map[name]?.find((o) => String(o.id || o.idBrand) === value);
+    setFormData((prev) => ({ ...prev, [name]: item || null }));
+    // Clear error when user selects
+    if (errors[name]) {
+      setErrors(prev => ({ ...prev, [name]: "" }));
+    }
   };
 
   const handleImageChange = (e) => {
     const file = e.target.files[0];
     if (file) {
-      if (!file.type.startsWith("image/")) {
-        setErrors((prev) => ({ ...prev, image: "Vui lòng chọn một tệp hình ảnh hợp lệ." }));
-        return;
-      }
-      if (file.size > 5 * 1024 * 1024) {
-        setErrors((prev) => ({ ...prev, image: "Kích thước tệp không được vượt quá 5MB." }));
-        return;
-      }
       setFormData((prev) => ({
         ...prev,
         image: file,
         imagePreview: URL.createObjectURL(file),
       }));
-      setErrors((prev) => ({ ...prev, image: "" }));
     }
   };
 
@@ -213,252 +170,321 @@ const AddProduct = ({ onSuccess, onClose }) => {
 
     setIsSubmitting(true);
     setApiError(null);
-    setSuccessMessage(null);
     try {
-      const dataToSubmit = {
+      const initRes = await initProduct();
+      const productId = initRes?.productId;
+      if (!productId) throw new Error("Không khởi tạo được sản phẩm");
+
+      const payload = {
         productName: formData.productName,
         processor: formData.processor,
-        battery: formData.battery ? Number(formData.battery) : null,
-        screenSize: formData.screenSize ? Number(formData.screenSize) : null,
-        chipset: formData.chipset || null,
-        rearCamera: formData.rearCamera || "",
-        frontCamera: formData.frontCamera || "",
-        warrantyPeriod: formData.warrantyPeriod ? Number(formData.warrantyPeriod) : null,
-        status: formData.status ?? true,
+        battery: Number(formData.battery) || null,
+        screenSize: Number(formData.screenSize) || null,
+        chipset: formData.chipset ? `${formData.chipset}Hz` : null, // Auto add Hz unit
+        rearCamera: formData.rearCamera,
+        frontCamera: formData.frontCamera,
+        warrantyPeriod: Number(formData.warrantyPeriod) || null,
         brandId: formData.brand?.idBrand,
         originId: formData.origin?.id,
         operatingSystemId: formData.operatingSystem?.id,
         warehouseAreaId: formData.warehouseArea?.id,
+        status: true, // Always active by default
       };
-      if (process.env.NODE_ENV === "development") {
-        console.log("Data to submit:", dataToSubmit);
-      }
 
-      // Simulate delay for testing loading in dev
-      if (process.env.NODE_ENV === "development") {
-        await new Promise((resolve) => setTimeout(resolve, 1000));
-      }
+      await updateProduct(productId, payload);
 
-      const response = await createProduct(dataToSubmit);
-      const productId = response.data?.idproduct;
-      if (!productId) {
-        throw new Error("Không nhận được productId từ phản hồi API");
-      }
       if (formData.image) {
         await uploadProductImage(productId, formData.image);
       }
+
       setSuccessMessage("Sản phẩm đã được thêm thành công!");
-      if (onSuccess) onSuccess();
-      // Wait 3 seconds before closing modal, similar to toast duration
-      setTimeout(() => {
-        if (onClose) onClose();
-      }, 3000);
-    } catch (error) {
-      console.error("Lỗi khi thêm sản phẩm:", error.response?.data, error.message);
-      const errorMessage =
-        error.response?.data?.message || error.message || "Không thể thêm sản phẩm. Vui lòng thử lại.";
-      setApiError(errorMessage);
+      if (onSuccess) onSuccess(productId);
+      setTimeout(() => onClose && onClose(), 2000);
+    } catch (err) {
+      setApiError(err.message || "Không thể thêm sản phẩm.");
     } finally {
       setIsSubmitting(false);
     }
   };
 
-  if (isLoading) {
-    return (
-      <div className="text-center">
-        <svg className="animate-spin h-8 w-8 mx-auto text-blue-600" viewBox="0 0 24 24">
-          <circle cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none" />
-        </svg>
-        <p>Đang tải...</p>
-      </div>
-    );
-  }
-
   return (
-    <>
-      <Transition appear show={true} as={Fragment}>
-        <Dialog as="div" className="relative z-50" onClose={onClose} aria-label="Thêm sản phẩm mới">
-          <Transition.Child as={Fragment}>
-            <div className="fixed inset-0 bg-black bg-opacity-50 backdrop-blur-sm" />
-          </Transition.Child>
+    <Transition appear show={true} as={Fragment}>
+      <Dialog as="div" className="relative z-50" onClose={onClose}>
+        <Transition.Child
+          as={Fragment}
+          enter="ease-out duration-300"
+          enterFrom="opacity-0"
+          enterTo="opacity-100"
+          leave="ease-in duration-200"
+          leaveFrom="opacity-100"
+          leaveTo="opacity-0"
+        >
+          <div className="fixed inset-0 bg-black/60 backdrop-blur-sm" />
+        </Transition.Child>
 
-          <div className="fixed inset-0 flex items-center justify-center p-0">
-            <Dialog.Panel className="bg-white rounded-2xl w-full max-w-4xl p-6 sm:p-8 sm:pt-20 shadow-2xl max-h-[90vh] overflow-y-auto">
-              {apiError && (
-                <div className="text-red-500 text-center mb-4">{apiError}</div>
-              )}
-              {successMessage && (
-                <div className="text-green-500 text-center mb-4">{successMessage}</div>
-              )}
-              <Dialog.Title className="text-2xl font-bold text-gray-800 mb-4">
-                Thêm sản phẩm mới
-              </Dialog.Title>
+        <div className="fixed inset-0 flex items-center justify-center p-4">
+          <Transition.Child
+            as={Fragment}
+            enter="ease-out duration-300"
+            enterFrom="opacity-0 scale-95"
+            enterTo="opacity-100 scale-100"
+            leave="ease-in duration-200"
+            leaveFrom="opacity-100 scale-100"
+            leaveTo="opacity-0 scale-95"
+          >
+            <Dialog.Panel className="bg-white rounded-2xl w-full max-w-4xl shadow-2xl overflow-hidden">
+              {/* Header */}
+              <div className="bg-gradient-to-r from-blue-600 to-purple-600 px-6 py-4 flex items-center justify-between">
+                <Dialog.Title className="text-xl font-bold text-white flex items-center gap-2">
+                  <div className="w-2 h-2 bg-white rounded-full"></div>
+                  Thêm sản phẩm mới
+                </Dialog.Title>
+                <button
+                  onClick={onClose}
+                  className="text-white hover:bg-white/20 rounded-full p-2 transition-colors"
+                >
+                  <XMarkIcon className="w-5 h-5" />
+                </button>
+              </div>
 
-              <form onSubmit={handleSubmit} className="space-y-6">
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  {[
-                    { label: "Tên sản phẩm", name: "productName", type: "text" },
-                    { label: "Vi xử lý sản phẩm", name: "processor", type: "text" },
-                    { label: "Pin sản phẩm", name: "battery", type: "number" },
-                    { label: "Kích thước màn hình", name: "screenSize", type: "number" },
-                    { label: "Chipset sản phẩm", name: "chipset", type: "text" },
-                    { label: "Camera sau", name: "rearCamera", type: "text" },
-                    { label: "Camera trước", name: "frontCamera", type: "text" },
-                    { label: "Bảo hành (tháng)", name: "warrantyPeriod", type: "number" },
-                  ].map(({ label, name, type }) => (
-                    <FormInput
-                      key={name}
-                      label={label}
-                      name={name}
-                      type={type}
-                      value={formData[name]}
-                      onChange={handleChange}
-                      error={errors[name]}
-                      className={name === "productName" ? "aria-label='Nhập tên sản phẩm'" : ""}
-                      disabled={isSubmitting}
-                    />
-                  ))}
+              {/* Body */}
+              <div className="p-6 max-h-[calc(90vh-80px)] overflow-y-auto">
+                {/* Alert Messages */}
+                {apiError && (
+                  <div className="mb-4 p-4 bg-red-50 border-l-4 border-red-500 rounded-r-lg">
+                    <p className="text-red-700 font-medium">{apiError}</p>
+                  </div>
+                )}
+                {successMessage && (
+                  <div className="mb-4 p-4 bg-green-50 border-l-4 border-green-500 rounded-r-lg">
+                    <p className="text-green-700 font-medium">{successMessage}</p>
+                  </div>
+                )}
 
-                  {[
-                    {
-                      label: "Xuất xứ sản phẩm",
-                      name: "origin",
-                      options: origins,
-                      getId: (o) => o.id,
-                      getName: (o) => o.name,
-                      value: formData.origin?.id ?? "",
-                    },
-                    {
-                      label: "Hệ điều hành",
-                      name: "operatingSystem",
-                      options: operatingSystems,
-                      getId: (o) => o.id,
-                      getName: (o) => o.name,
-                      value: formData.operatingSystem?.id ?? "",
-                    },
-                    {
-                      label: "Thương hiệu sản phẩm",
-                      name: "brand",
-                      options: brands,
-                      getId: (o) => o.idBrand,
-                      getName: (o) => o.brandName,
-                      value: formData.brand?.idBrand ?? "",
-                    },
-                    {
-                      label: "Khu vực kho",
-                      name: "warehouseArea",
-                      options: warehouseAreas,
-                      getId: (o) => o.id,
-                      getName: (o) => o.name,
-                      value: formData.warehouseArea?.id ?? "",
-                    },
-                  ].map(({ label, name, options, getId, getName, value }) => (
-                    <FormSelect
-                      key={name}
-                      label={label}
-                      name={name}
-                      value={value}
-                      onChange={handleSelectChange}
-                      options={options}
-                      getId={getId}
-                      getName={getName}
-                      error={errors[name]}
-                      disabled={isSubmitting}
-                    />
-                  ))}
+                <form onSubmit={handleSubmit} className="space-y-8">
+                  {/* Basic Information */}
+                  <div className="bg-gray-50 rounded-xl p-6">
+                    <h3 className="text-lg font-semibold text-gray-800 mb-4 flex items-center gap-2">
+                      <span className="w-2 h-2 bg-blue-500 rounded-full"></span>
+                      Thông tin cơ bản
+                    </h3>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                      <FormInput 
+                        label="Tên sản phẩm" 
+                        name="productName" 
+                        value={formData.productName} 
+                        onChange={handleChange} 
+                        error={errors.productName}
+                        placeholder="Nhập tên sản phẩm"
+                      />
+                      <FormInput 
+                        label="Vi xử lý" 
+                        name="processor" 
+                        value={formData.processor} 
+                        onChange={handleChange} 
+                        error={errors.processor}
+                        placeholder="Ví dụ: Snapdragon 8 Gen 2"
+                      />
+                    </div>
+                  </div>
 
-                  <div className="md:col-span-2">
-                    <label htmlFor="status" className="block text-sm font-medium text-gray-700 mb-1">
-                      Trạng thái
-                    </label>
-                    <label className="inline-flex items-center gap-2">
-                      <input
-                        id="status"
-                        type="checkbox"
-                        name="status"
-                        checked={formData.status ?? false}
+                  {/* Technical Specifications */}
+                  <div className="bg-gray-50 rounded-xl p-6">
+                    <h3 className="text-lg font-semibold text-gray-800 mb-4 flex items-center gap-2">
+                      <span className="w-2 h-2 bg-green-500 rounded-full"></span>
+                      Thông số kỹ thuật
+                    </h3>
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                      <FormInput 
+                        label="Pin" 
+                        name="battery" 
+                        value={formData.battery} 
+                        onChange={handleChange} 
+                        type="number"
+                        unit="mAh"
+                        placeholder="5000"
+                      />
+                      <FormInput 
+                        label="Màn hình" 
+                        name="screenSize" 
+                        value={formData.screenSize} 
+                        onChange={handleChange} 
+                        type="number"
+                        unit="inch"
+                        placeholder="6.7"
+                        step="0.1"
+                      />
+                      <FormInput 
+                        label="Tần số quét màn hình" 
+                        name="chipset" 
+                        value={formData.chipset} 
                         onChange={handleChange}
-                        disabled={isSubmitting}
+                        type="number"
+                        unit="Hz"
+                        placeholder="120"
                       />
-                      <span>{formData.status ? "Hoạt động" : "Không hoạt động"}</span>
-                    </label>
-                  </div>
-                </div>
-
-                <div className="mt-6">
-                  <label htmlFor="image" className="block text-sm font-medium text-gray-700 mb-2">
-                    Ảnh sản phẩm
-                  </label>
-                  <div className="flex items-center space-x-6">
-                    {formData.imagePreview ? (
-                      <img
-                        src={formData.imagePreview}
-                        alt="Ảnh sản phẩm"
-                        className="w-32 h-32 object-contain rounded-lg border"
+                      <FormInput 
+                        label="Camera sau" 
+                        name="rearCamera" 
+                        value={formData.rearCamera} 
+                        onChange={handleChange}
+                        unit="MP"
+                        placeholder="108MP + 12MP + 5MP"
                       />
-                    ) : (
-                      <div className="w-32 h-32 bg-gray-100 flex items-center justify-center rounded-lg border text-gray-400">
-                        Chưa có ảnh
-                      </div>
-                    )}
-                    <input
-                      id="image"
-                      type="file"
-                      accept="image/*"
-                      onChange={handleImageChange}
-                      className="px-4 py-2"
-                      disabled={isSubmitting}
-                    />
-                    {errors.image && (
-                      <p className="text-red-500 text-sm mt-1">{errors.image}</p>
-                    )}
+                      <FormInput 
+                        label="Camera trước" 
+                        name="frontCamera" 
+                        value={formData.frontCamera} 
+                        onChange={handleChange}
+                        unit="MP"
+                        placeholder="32MP"
+                      />
+                      <FormInput 
+                        label="Bảo hành" 
+                        name="warrantyPeriod" 
+                        value={formData.warrantyPeriod} 
+                        onChange={handleChange} 
+                        type="number"
+                        unit="tháng"
+                        placeholder="12"
+                      />
+                    </div>
                   </div>
-                </div>
 
-                <div className="flex justify-end gap-4 mt-8">
-                  <Button
-                    type="button"
-                    onClick={onClose}
-                    className="bg-gray-500 text-white px-4 py-2 rounded"
-                    disabled={isSubmitting}
-                    aria-label="Hủy thêm sản phẩm"
-                  >
-                    Hủy
-                  </Button>
-                  <Button
-                    type="submit"
-                    className="bg-blue-600 text-white px-4 py-2 rounded flex items-center gap-2"
-                    disabled={isSubmitting}
-                    aria-label={isSubmitting ? "Đang lưu sản phẩm" : "Lưu sản phẩm"}
-                  >
-                    {isSubmitting ? (
-                      <>
-                        <svg
-                          className="animate-spin h-5 w-5 text-white"
-                          viewBox="0 0 24 24"
+                  {/* Product Attributes */}
+                  <div className="bg-gray-50 rounded-xl p-6">
+                    <h3 className="text-lg font-semibold text-gray-800 mb-4 flex items-center gap-2">
+                      <span className="w-2 h-2 bg-purple-500 rounded-full"></span>
+                      Thuộc tính sản phẩm
+                    </h3>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                      <FormSelect 
+                        label="Thương hiệu" 
+                        name="brand" 
+                        value={formData.brand?.idBrand || ""} 
+                        onChange={handleSelectChange} 
+                        options={brands} 
+                        getId={(b) => b.idBrand} 
+                        getName={(b) => b.brandName} 
+                        error={errors.brand}
+                        placeholder="Chọn thương hiệu"
+                      />
+                      <FormSelect 
+                        label="Xuất xứ" 
+                        name="origin" 
+                        value={formData.origin?.id || ""} 
+                        onChange={handleSelectChange} 
+                        options={origins} 
+                        getId={(o) => o.id} 
+                        getName={(o) => o.name} 
+                        error={errors.origin}
+                        placeholder="Chọn xuất xứ"
+                      />
+                      <FormSelect 
+                        label="Hệ điều hành" 
+                        name="operatingSystem" 
+                        value={formData.operatingSystem?.id || ""} 
+                        onChange={handleSelectChange} 
+                        options={operatingSystems} 
+                        getId={(o) => o.id} 
+                        getName={(o) => o.name} 
+                        error={errors.operatingSystem}
+                        placeholder="Chọn hệ điều hành"
+                      />
+                      <FormSelect 
+                        label="Khu vực kho" 
+                        name="warehouseArea" 
+                        value={formData.warehouseArea?.id || ""} 
+                        onChange={handleSelectChange} 
+                        options={warehouseAreas} 
+                        getId={(w) => w.id} 
+                        getName={(w) => w.name} 
+                        error={errors.warehouseArea}
+                        placeholder="Chọn khu vực kho"
+                      />
+                    </div>
+                  </div>
+
+                  {/* Image Upload */}
+                  <div className="bg-gray-50 rounded-xl p-6">
+                    <h3 className="text-lg font-semibold text-gray-800 mb-4 flex items-center gap-2">
+                      <span className="w-2 h-2 bg-orange-500 rounded-full"></span>
+                      Hình ảnh sản phẩm
+                    </h3>
+                    <div className="flex items-center gap-6">
+                      <div className="relative">
+                        <input 
+                          type="file" 
+                          accept="image/*" 
+                          onChange={handleImageChange}
+                          className="hidden"
+                          id="image-upload"
+                        />
+                        <label 
+                          htmlFor="image-upload"
+                          className="flex flex-col items-center justify-center w-32 h-32 border-2 border-dashed border-gray-300 rounded-xl cursor-pointer hover:border-blue-500 hover:bg-blue-50 transition-colors"
                         >
-                          <circle
-                            cx="12"
-                            cy="12"
-                            r="10"
-                            stroke="currentColor"
-                            strokeWidth="4"
-                            fill="none"
-                          />
-                        </svg>
-                        Đang lưu...
-                      </>
-                    ) : (
-                      "Lưu sản phẩm"
-                    )}
-                  </Button>
-                </div>
-              </form>
+                          {formData.imagePreview ? (
+                            <img 
+                              src={formData.imagePreview} 
+                              alt="preview" 
+                              className="w-full h-full object-cover rounded-xl"
+                            />
+                          ) : (
+                            <>
+                              <PhotoIcon className="w-8 h-8 text-gray-400 mb-2" />
+                              <span className="text-sm text-gray-500 text-center">Tải ảnh lên</span>
+                            </>
+                          )}
+                        </label>
+                      </div>
+                      {formData.imagePreview && (
+                        <div className="flex-1">
+                          <p className="text-sm text-gray-600 mb-2">Ảnh đã chọn:</p>
+                          <p className="text-sm font-medium text-gray-800">{formData.image?.name}</p>
+                          <button
+                            type="button"
+                            onClick={() => setFormData(prev => ({ ...prev, image: null, imagePreview: "" }))}
+                            className="text-red-500 text-sm hover:text-red-700 mt-2"
+                          >
+                            Xóa ảnh
+                          </button>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+
+                  {/* Action Buttons */}
+                  <div className="flex justify-end gap-4 pt-6 border-t border-gray-200">
+                    <Button 
+                      onClick={onClose} 
+                      type="button" 
+                      className="px-6 py-3 bg-gray-100 text-gray-700 rounded-xl hover:bg-gray-200 transition-colors font-medium"
+                    >
+                      Hủy bỏ
+                    </Button>
+                    <Button 
+                      type="submit" 
+                      className="px-8 py-3 bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-xl hover:from-blue-700 hover:to-purple-700 transition-all duration-200 font-medium shadow-lg hover:shadow-xl disabled:opacity-50 disabled:cursor-not-allowed" 
+                      disabled={isSubmitting}
+                    >
+                      {isSubmitting ? (
+                        <div className="flex items-center gap-2">
+                          <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                          Đang lưu...
+                        </div>
+                      ) : (
+                        "Lưu sản phẩm"
+                      )}
+                    </Button>
+                  </div>
+                </form>
+              </div>
             </Dialog.Panel>
-          </div>
-        </Dialog>
-      </Transition>
-    </>
+          </Transition.Child>
+        </div>
+      </Dialog>
+    </Transition>
   );
 };
 

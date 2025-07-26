@@ -12,6 +12,11 @@ import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
+import org.hibernate.QueryTimeoutException;
+import org.springframework.cache.annotation.Cacheable;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -62,8 +67,8 @@ public class ProductVersionService {
 
         ProductVersion productVersion = pvm.ToProducVersionMakeName(request, ram, rom, color,product);
 
-        // Cập nhật stock_quantity của Product
-        productService.updateProductStockQuantity(request.getProductId());
+//        // Cập nhật stock_quantity của Product
+//        productService.updateProductStockQuantity(request.getProductId());
 
         pvr.save(productVersion);
         return pvm.ToProductVersionResponse(productVersion);
@@ -71,16 +76,24 @@ public class ProductVersionService {
     }
 
 
+    public List<ProductVersionResponse> listAll() {
+        return pvr.findAll()
+                .stream()
+                .map(pvm::ToProductVersionResponse)
+                .collect(Collectors.toList());
+    }
 
 
 
-
-       public List<ProductVersionResponse> ListProductVersion() {
-          List<ProductVersion> pr = pvr.findAll();
-           return  pr.stream()
-                   .map(pvm ::ToProductVersionResponse)
-                   .collect(Collectors.toList());
-       }
+    public List<ProductVersionResponse> ListProductVersion(Product product) {
+        long start = System.nanoTime();
+        List<ProductVersion> pr = pvr.findByProduct(product);
+        long end = System.nanoTime();
+        log.info("findByProduct took {} ms for productId={}", (end - start) / 1_000_000, product.getProductId());
+        return pr.stream()
+                .map(pvm::ToProductVersionResponse)
+                .collect(Collectors.toList());
+    }
 
 
 

@@ -1,27 +1,33 @@
-import React, { useEffect, useState, useCallback } from "react";
-import { getFullProducts, updateProduct, uploadProductImage } from "../../services/productService";
+import React, { useEffect, useState, useCallback, useMemo } from "react";
+import {
+  searchProducts,
+  getFullProducts,
+  updateProduct,
+  uploadProductImage,
+} from "../../services/productService";
 import Button from "../../components/ui/Button";
 import ProductList from "./ProductList";
-import { Plus, Trash, Scan, Download, Loader2 } from "lucide-react";
-import AddProductModal from "./modals/AddProductModal";
+import { Plus, Scan, Download } from "lucide-react";
 import EditProductModal from "./modals/EditProductModal";
 import ProductDetailModal from "./modals/ProductDetailModal";
+import AddProductWithVersionsModal from "./modals/AddProductWithVersionsModal";
 import SearchFilter from "./components/SearchFilter";
 import DeleteProductModal from "./modals/DeleteProductModal";
 
 const ProductsPage = () => {
   const [products, setProducts] = useState([]);
+  const [allProducts, setAllProducts] = useState([]);
   const [pagination, setPagination] = useState({
     page: 1,
     limit: 10,
     total: 0,
   });
   const [filters, setFilters] = useState({
-    search: "",
-    brandId: null,
-    originId: null,
-    operatingSystemId: null,
-    warehouseAreaId: null,
+    productName: "",
+    brandName: null,
+    originName: null,
+    operatingSystemName: null,
+    warehouseAreaName: null,
   });
   const [isLoading, setIsLoading] = useState(false);
   const [selectedProduct, setSelectedProduct] = useState(null);
@@ -33,27 +39,43 @@ const ProductsPage = () => {
   const loadData = useCallback(async () => {
     try {
       setIsLoading(true);
-      console.log("Loading data with filters:", { page: pagination.page, ...filters });
-      
-      const { data, pagination: pageInfo } = await getFullProducts({
+      console.log("▶️ Gọi searchProducts với filters:", {
+        ...filters,
         page: pagination.page,
         limit: pagination.limit,
-        ...filters,
       });
-      
+
+      const { data, pagination: pageInfo } = await searchProducts({
+        ...filters,
+        page: pagination.page,
+        limit: pagination.limit,
+      });
       setProducts(data);
-      setPagination(prev => ({ ...prev, total: pageInfo.total }));
+      setPagination((prev) => ({ ...prev, total: pageInfo.total }));
     } catch (error) {
       console.error("Error loading products:", error);
-      alert("Could not load product data.");
+      alert("Không thể tải danh sách sản phẩm.");
     } finally {
       setIsLoading(false);
     }
-  }, [pagination.page, pagination.limit, filters]);
+  }, [filters, pagination.page, pagination.limit]);
+
+  const loadAllProducts = useCallback(async () => {
+    try {
+      const { data } = await getFullProducts({ page: 1, limit: 1000 });
+      setAllProducts(data);
+    } catch (error) {
+      console.error("Error loading all products:", error);
+    }
+  }, []);
 
   useEffect(() => {
     loadData();
   }, [loadData]);
+
+  useEffect(() => {
+    loadAllProducts();
+  }, [loadAllProducts]);
 
   const handleEdit = (product) => {
     setSelectedProduct(product);
@@ -66,8 +88,8 @@ const ProductsPage = () => {
   };
 
   const handleDelete = (product) => {
-      setSelectedProduct(product);
-      setShowDeleteModal(true);
+    setSelectedProduct(product);
+    setShowDeleteModal(true);
   };
 
   const handleScanIMEI = () => {
@@ -84,17 +106,16 @@ const ProductsPage = () => {
 
   const handleSaveEdit = async (editedData) => {
     try {
-      console.log("Saving edited product:", editedData);
-
       if (!editedData.productId && !editedData.id) {
         throw new Error("Product ID is required");
       }
 
-      // Validation
       const errors = [];
       if (!editedData.origin?.id) errors.push("Product origin is required");
-      if (!editedData.operatingSystem?.id) errors.push("Operating system is required");
-      if (!editedData.warehouseArea?.id) errors.push("Warehouse area is required");
+      if (!editedData.operatingSystem?.id)
+        errors.push("Operating system is required");
+      if (!editedData.warehouseArea?.id)
+        errors.push("Warehouse area is required");
       if (!editedData.brand?.idBrand) errors.push("Product brand is required");
 
       if (errors.length > 0) {
@@ -120,13 +141,17 @@ const ProductsPage = () => {
       await updateProduct(editedData.productId || editedData.id, updateData);
 
       if (editedData.image) {
-        await uploadProductImage(editedData.productId || editedData.id, editedData.image);
+        await uploadProductImage(
+          editedData.productId || editedData.id,
+          editedData.image
+        );
       }
 
       alert("Product updated successfully!");
       setShowEditModal(false);
       setSelectedProduct(null);
       await loadData();
+      await loadAllProducts();
     } catch (error) {
       console.error("Error saving product:", error);
       alert(`Failed to update product: ${error.message || "Unknown error"}`);
@@ -134,10 +159,17 @@ const ProductsPage = () => {
   };
 
   const handleFilterChange = useCallback((newFilters) => {
-    console.log("Filters changed:", newFilters);
     setFilters(newFilters);
-    setPagination(prev => ({ ...prev, page: 1 }));
+    setPagination((prev) => ({ ...prev, page: 1 }));
   }, []);
+
+  const stats = useMemo(() => {
+    const totalProducts = allProducts.length;
+    const inStock = allProducts.filter((p) => p.stockQuantity >= 20).length;
+    const lowStock = allProducts.filter((p) => p.stockQuantity > 0 && p.stockQuantity < 10).length;
+    const outOfStock = allProducts.filter((p) => p.stockQuantity === 0).length;
+    return { totalProducts, inStock, lowStock, outOfStock };
+  }, [allProducts]);
 
   return (
     <div className="min-h-screen w-full bg-gradient-to-br from-gray-50 to-blue-100 flex flex-col">
@@ -146,38 +178,21 @@ const ProductsPage = () => {
           <div className="flex flex-col gap-4">
             <div className="flex flex-wrap sm:flex-row sm:items-center sm:justify-between gap-4">
               <div className="flex flex-wrap gap-3 items-center">
-                <Button
-                  onClick={() => setShowAddModal(true)}
-                  className="group flex items-center gap-2 bg-blue-600 text-white hover:bg-blue-700 hover:scale-105 transform transition-all duration-300 shadow-lg hover:shadow-xl px-4 py-2 text-sm"
-                >
+                <Button onClick={() => setShowAddModal(true)} className="group flex items-center gap-2 bg-blue-600 text-white hover:bg-blue-700 hover:scale-105 transform transition-all duration-300 shadow-lg hover:shadow-xl px-4 py-2 text-sm">
                   <Plus className="w-4 h-4 group-hover:rotate-90 transition-transform duration-300" />
                   <span className="hidden sm:inline">Add New</span>
                 </Button>
-                <Button
-                  onClick={handleScanIMEI}
-                  className="group flex items-center gap-2 bg-green-500 text-white hover:bg-green-600 hover:scale-105 transform transition-all duration-200 shadow-lg hover:shadow-xl px-4 py-2 text-sm"
-                >
+                <Button onClick={handleScanIMEI} className="group flex items-center gap-2 bg-green-500 text-white hover:bg-green-600 hover:scale-105 transform transition-all duration-200 shadow-lg hover:shadow-xl px-4 py-2 text-sm">
                   <Scan className="w-4 h-4 group-hover:scale-110 transition-all duration-200" />
                   <span className="hidden sm:inline">Scan IMEI</span>
                 </Button>
-                <Button
-                  onClick={handleExportExcel}
-                  className="group flex items-center gap-2 bg-gray-500 text-white hover:bg-gray-600 hover:scale-105 transform transition-all duration-200 shadow-lg hover:shadow-xl px-4 py-2 text-sm"
-                >
+                <Button onClick={handleExportExcel} className="group flex items-center gap-2 bg-gray-500 text-white hover:bg-gray-600 hover:scale-105 transform transition-all duration-200 shadow-lg hover:shadow-xl px-4 py-2 text-sm">
                   <Download className="w-4 h-4 group-hover:scale-110 transition-all duration-200" />
                   <span className="hidden sm:inline">Export Excel</span>
                 </Button>
               </div>
             </div>
-            
             <SearchFilter onFilterChange={handleFilterChange} />
-            
-            {/* {isLoading && (
-              <div className="flex justify-center items-center py-4">
-                <Loader2 className="w-6 h-6 text-blue-500 animate-spin" />
-                <span className="ml-2">Loading products...</span>
-              </div>
-            )} */}
           </div>
         </div>
 
@@ -186,23 +201,15 @@ const ProductsPage = () => {
           currentPage={pagination.page}
           itemsPerPage={pagination.limit}
           totalItems={pagination.total}
-          onPageChange={(p) => setPagination(prev => ({ ...prev, page: p }))}
+          isLoading={isLoading}
+          onPageChange={(p) => setPagination((prev) => ({ ...prev, page: p }))}
           onEdit={handleEdit}
           onDetail={handleDetail}
           onDelete={handleDelete}
           onSelect={onSelectProduct}
+          stats={stats}
         />
       </div>
-
-      {showAddModal && (
-        <AddProductModal
-          onClose={() => setShowAddModal(false)}
-          onSuccess={() => {
-            setShowAddModal(false);
-            loadData();
-          }}
-        />
-      )}
 
       {showEditModal && selectedProduct && (
         <EditProductModal
@@ -224,6 +231,7 @@ const ProductsPage = () => {
           }}
         />
       )}
+
       {showDeleteModal && selectedProduct && (
         <DeleteProductModal
           product={selectedProduct}
@@ -235,6 +243,18 @@ const ProductsPage = () => {
             setShowDeleteModal(false);
             setSelectedProduct(null);
             loadData();
+            loadAllProducts();
+          }}
+        />
+      )}
+
+      {showAddModal && (
+        <AddProductWithVersionsModal
+          onClose={() => setShowAddModal(false)}
+          onSuccess={() => {
+            setShowAddModal(false);
+            loadData();
+            loadAllProducts();
           }}
         />
       )}

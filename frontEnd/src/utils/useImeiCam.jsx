@@ -1,152 +1,137 @@
-
 import React, { useEffect, useRef, useState } from "react";
 import { BrowserMultiFormatReader } from "@zxing/browser";
 import {
-  QrCodeIcon,
-  CameraIcon,
   ArrowPathIcon,
   XMarkIcon,
   DevicePhoneMobileIcon,
 } from "@heroicons/react/24/outline";
-import {
-  CheckCircleIcon as CheckCircleIconSolid,
-  ExclamationTriangleIcon as ExclamationTriangleIconSolid,
-} from "@heroicons/react/24/solid";
 
 const BarcodeScanner = ({ open, onClose, onResult }) => {
   const videoRef = useRef(null);
   const codeReaderRef = useRef(null);
-  const scannedRef = useRef(new Set()); // ✅ lưu các mã đã quét
 
-  const [result, setResult] = useState("No barcode scanned yet");
   const [status, setStatus] = useState("waiting"); // waiting, success, error, scanning
   const [isLoading, setIsLoading] = useState(true);
   const [isScanning, setIsScanning] = useState(false);
 
   const stopScanner = () => {
-    if (codeReaderRef.current) {
-      if (typeof codeReaderRef.current.stopContinuousDecode === "function") {
-        codeReaderRef.current.stopContinuousDecode();
-      } else if (typeof codeReaderRef.current.reset === "function") {
-        codeReaderRef.current.reset();
+    try {
+      if (codeReaderRef.current) {
+        if (typeof codeReaderRef.current.stopContinuousDecode === "function") {
+          codeReaderRef.current.stopContinuousDecode();
+        }
+        if (typeof codeReaderRef.current.reset === "function") {
+          codeReaderRef.current.reset();
+        }
+        codeReaderRef.current = null;
       }
-    }
 
-    if (videoRef.current && videoRef.current.srcObject) {
-      const stream = videoRef.current.srcObject;
-      stream.getTracks().forEach((track) => track.stop());
-      videoRef.current.srcObject = null;
+      if (videoRef.current && videoRef.current.srcObject) {
+        const stream = videoRef.current.srcObject;
+        stream.getTracks().forEach((track) => {
+          console.log("Stopping track:", track.label, track.readyState);
+          track.stop();
+        });
+        videoRef.current.srcObject = null;
+      }
+      console.log("Scanner stopped successfully");
+    } catch (err) {
+      console.error("Error stopping scanner:", err);
     }
   };
 
   const startScanner = async () => {
     if (!open) return;
-
     setIsLoading(true);
     setStatus("scanning");
     setIsScanning(true);
-    scannedRef.current.clear(); // ✅ clear danh sách mã cũ khi khởi động mới
-
     codeReaderRef.current = new BrowserMultiFormatReader();
+
+    let isCancelled = false;
 
     try {
       await codeReaderRef.current.decodeFromVideoDevice(
         null,
         videoRef.current,
         (result, err) => {
+          // Ngăn callback xử lý nếu scanner đã dừng
+          if (isCancelled) return;
+
           if (result) {
             const scannedText = result.getText();
-
-            if (scannedRef.current.has(scannedText)) return; // ✅ bỏ qua mã trùng
-            scannedRef.current.add(scannedText); // ✅ lưu mã đã quét (dù đúng/sai)
-
-            setResult(scannedText);
-
             if (/^\d{15}$/.test(scannedText)) {
-  setStatus("success");
-  setIsScanning(false);
-  onResult && onResult(scannedText, true);
-  stopScanner(); 
-  setResult("");
-} else {
-  setStatus("error");
-
-  // ✅ chỉ gọi onResult với mã sai nếu đây là lần đầu gặp
-  onResult && onResult(scannedText, false);
-  setResult("");
-}
+              setIsScanning(false);
+              onResult && onResult(scannedText);
+              isCancelled = true; // Đặt cờ để ngăn callback tiếp theo
+              stopScanner();
+              onClose();
+            } else {
+              console.log("Mã không hợp lệ");
+              isCancelled = true;
+              stopScanner();
+            }
           }
 
           if (err && err.name !== "NotFoundException") {
             console.error("Scanning error:", err);
+            setStatus("error");
+            setIsScanning(false);
+            setIsLoading(false);
+            isCancelled = true;
+            stopScanner();
           }
         }
       );
+
       setIsLoading(false);
     } catch (err) {
       console.error("Cannot access camera:", err);
-      setResult("Cannot access camera");
       setStatus("error");
       setIsScanning(false);
       setIsLoading(false);
+      isCancelled = true;
+      stopScanner();
     }
+
+    // Cleanup khi component unmount hoặc dừng scanner
+    return () => {
+      isCancelled = true;
+      stopScanner();
+    };
   };
 
   const resetScanner = () => {
     stopScanner();
-    setResult("No barcode scanned yet");
     setStatus("waiting");
     setIsScanning(false);
     setIsLoading(true);
-    scannedRef.current.clear(); // ✅ reset danh sách quét khi reset
     setTimeout(() => startScanner(), 1000);
   };
 
   const handleClose = () => {
     stopScanner();
-    setResult("No barcode scanned yet");
+    console.log("out", stopScanner);
+
     setStatus("waiting");
     setIsScanning(false);
     setIsLoading(true);
-    scannedRef.current.clear();
     onClose && onClose();
   };
 
   useEffect(() => {
+    let cleanup = null;
     if (open) {
-      startScanner();
+      cleanup = startScanner();
     }
+
     return () => {
-      stopScanner();
+      if (typeof cleanup === "function") {
+        cleanup();
+      } else {
+        stopScanner();
+      }
     };
   }, [open]);
-
-  const getStatusIcon = () => {
-    switch (status) {
-      case "success":
-        return <CheckCircleIconSolid className="w-6 h-6 text-green-500" />;
-      case "error":
-        return <ExclamationTriangleIconSolid className="w-6 h-6 text-red-500" />;
-      case "scanning":
-        return <QrCodeIcon className="w-6 h-6 text-blue-500" />;
-      default:
-        return <CameraIcon className="w-6 h-6 text-gray-500" />;
-    }
-  };
-
-  const getStatusText = () => {
-    if (/^\d{15}$/.test(result) && status === "success") return "Valid IMEI";
-    if (status === "error" && result !== "Cannot access camera") return "Not a 15-digit IMEI";
-    if (status === "scanning") return "Scanning...";
-    return "Ready to scan";
-  };
-
-  const getStatusBadgeClasses = () => {
-    if (status === "success") return "bg-green-100 text-green-800 border-green-300";
-    if (status === "error") return "bg-red-100 text-red-800 border-red-300";
-    if (status === "scanning") return "bg-blue-100 text-blue-800 border-blue-300";
-    return "bg-gray-100 text-gray-800 border-gray-300";
-  };
 
   if (!open) return null;
 
@@ -218,43 +203,6 @@ const BarcodeScanner = ({ open, onClose, onResult }) => {
               </button>
             </div>
           </div>
-
-          {/* Status */}
-          <div className="flex justify-center">
-            <div className={`inline-flex items-center space-x-2 px-4 py-2 rounded-full border-2 font-medium ${getStatusBadgeClasses()}`}>
-              {getStatusIcon()}
-              <span>{getStatusText()}</span>
-            </div>
-          </div>
-
-          {/* Result */}
-          {result !== "No barcode scanned yet" && (
-            <div className="space-y-4 animate-fade-in">
-              <div className={`p-4 rounded-xl border-2 ${
-                status === "success"
-                  ? "bg-green-50 border-green-200"
-                  : status === "error"
-                  ? "bg-red-50 border-red-200"
-                  : "bg-blue-50 border-blue-200"
-              }`}>
-                <div className="flex items-center space-x-3 mb-3">
-                  {getStatusIcon()}
-                  <h3 className="text-lg font-semibold">Scan Result</h3>
-                </div>
-                <div className="bg-white bg-opacity-80 p-3 rounded-lg border border-dashed border-gray-400">
-                  <p className={`text-lg font-mono text-center ${
-                    status === "success"
-                      ? "text-green-600"
-                      : status === "error"
-                      ? "text-red-600"
-                      : "text-blue-600"
-                  }`}>
-                    {result}
-                  </p>
-                </div>
-              </div>
-            </div>
-          )}
         </div>
       </div>
 

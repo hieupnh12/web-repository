@@ -7,8 +7,9 @@ import {
   takeUpdateRole,
 } from "../../services/permissionService";
 import ConfirmDialog from "../../components/ui/ConfirmDialog";
+import { toast } from "react-toastify";
 
-const PerInfoDetail = ({ onClose, role, data }) => {
+const PerInfoDetail = ({ onClose, role, data, existingRoles }) => {
   const [functions, setFunctions] = useState([]);
   const [loading, setLoading] = useState(false);
   const [description, setDescription] = useState("");
@@ -59,12 +60,14 @@ const PerInfoDetail = ({ onClose, role, data }) => {
     try {
       const response = await takeDeleteRole(role.roleId);
       if (response.status === 200) {
+        toast.success("Xóa thành công " + role.roleName + ".")
         setLoadingV2(false);
         onClose();
         data((prev) => prev.filter((item) => item.roleId !== role.roleId));
       }
     } catch (error) {
       console.error("Error deleting role:", error);
+      toast.success("Error deleting role:", error)
     }
   };
 
@@ -82,11 +85,14 @@ const PerInfoDetail = ({ onClose, role, data }) => {
       description,
       permissions,
     };
+    console.log("payload", payload);
+    
     setShowConfirmUpdate(false);
     setLoadingV2(true);
     try {
       const response = await takeUpdateRole(role.roleId, payload);
       if (response.status === 200) {
+        toast.success("Sửa thành công " + role.roleName + ".")
         setLoadingV2(false);
         setIsEditing(false);
         data((prev) =>
@@ -100,6 +106,7 @@ const PerInfoDetail = ({ onClose, role, data }) => {
       }
     } catch (error) {
       console.error("Error updating role:", error);
+      toast.success("Error updating role:", error)
       setLoadingV2(false);
     }
   };

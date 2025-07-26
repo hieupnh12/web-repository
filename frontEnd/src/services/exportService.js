@@ -1,6 +1,53 @@
 import axios from 'axios';
 import BASE_URL from '../api';
-import { GET } from "../constants/httpMethod"
+import { DELETE, GET, POST } from "../constants/httpMethod"
+
+// lấy id Import khi tạo phiếu
+export const takeIdCreateExport = (data) => {
+    const responds = BASE_URL[POST]("exportReceipt/init", data);
+    return responds;
+}
+
+// xác nhận phiếu
+export const takeConfirmExport = (data) => {
+    const responds = BASE_URL[POST]("exportReceipt/full/confirm", data);
+    return responds;
+}
+
+export const takeDeleteExportReceipt = (id) => {
+  return BASE_URL[DELETE](`exportReceipt/${id}`);
+};
+
+export const takeSearchByImei = (imei) => {
+  return BASE_URL[GET](`product/imei/${imei}`);
+};
+
+
+export const takeSearchExport= ({
+  customerName = '',
+  staffName = '',
+  exportId = '',
+  startDate = null,
+  endDate = null,
+  page = 0,
+  size = 7,
+}) => {
+  // if (!customerName && !staffName && !exportId && !startDate && !endDate) { 
+  //   const responds = BASE_URL[GET](`exportReceipt?page=${page}&size=${size}`);
+  //   return responds;
+  // }
+  const params = new URLSearchParams({
+    ...(customerName && { customerName }),
+    ...(staffName && { staffName }),
+    ...(exportId && { exportId }),
+    ...(startDate && { startDate: startDate.toISOString() }),
+    ...(endDate && { endDate: `${endDate.toISOString().split('T')[0]}T23:59:59` }),
+    page,
+    size,
+  });
+  
+  return BASE_URL[GET](`exportReceipt/export-receipts?${params.toString()}`);
+};
 
 export const fetchProducts = () => axios.get(`http://localhost:3004/products`);
 export const fetchSuppliers = () => axios.get(`http://localhost:3004/suppliers`);
@@ -65,6 +112,7 @@ export const loadCustomersV2 = () => {
     const response = axios.get("http://localhost:3004/customers");
     return response;
 }
+
 
 export const getFullProductVersions = async ({ page = 1, limit = 20, search = '' } = {}) => {
   try {

@@ -1,7 +1,6 @@
 import React, { useState, useEffect, useCallback } from "react";
 import {
   Add as AddIcon,
-  Email as EmailIcon,
   Phone as PhoneIcon,
   LocationOn as LocationIcon,
   Person as PersonIcon,
@@ -12,7 +11,6 @@ import AddressSelector from "./AddressSelector";
 const CustomerDialog = ({ open, onClose, onSubmit, editData = null }) => {
   const [formData, setFormData] = useState({
     customerName: "",
-    email: "",
     phone: "",
     address: "",
     status: true,
@@ -27,7 +25,6 @@ const CustomerDialog = ({ open, onClose, onSubmit, editData = null }) => {
       } else {
         setFormData({
           customerName: "",
-          email: "",
           phone: "",
           address: "",
           status: true,
@@ -54,15 +51,13 @@ const CustomerDialog = ({ open, onClose, onSubmit, editData = null }) => {
     const newErrors = {};
 
     if (!formData.customerName.trim()) {
-      newErrors.customerName = "Customer name is required";
+      newErrors.customerName = "Tên khách hàng là bắt buộc";
     }
 
-    if (formData.email && !/\S+@\S+\.\S+/.test(formData.email)) {
-      newErrors.email = "Invalid email format";
-    }
-
-    if (formData.phone && !/^[\d\s()+-]+$/.test(formData.phone)) {
-      newErrors.phone = "Invalid phone number format";
+    if (!formData.phone) {
+      newErrors.phone = "Số điện thoại là bắt buộc";
+    } else if (!/^((\+84)|0)(3|5|7|8|9)\d{8}$/.test(formData.phone)) {
+      newErrors.phone = "Số điện thoại không hợp lệ (theo định dạng Việt Nam)";
     }
 
     setErrors(newErrors);
@@ -71,8 +66,8 @@ const CustomerDialog = ({ open, onClose, onSubmit, editData = null }) => {
 
   const handleSubmit = () => {
     if (validateForm()) {
-      onSubmit(formData);
       onClose();
+      onSubmit(formData);
     }
   };
 
@@ -98,12 +93,12 @@ const CustomerDialog = ({ open, onClose, onSubmit, editData = null }) => {
             </div>
             <div>
               <h2 className="text-2xl font-bold">
-                {isEditMode ? "Edit Customer" : "Add New Customer"}
+                {isEditMode ? "Chỉnh sửa khách hàng" : "Thêm khách hàng mới"}
               </h2>
               <p className="text-sm opacity-90">
                 {isEditMode
-                  ? "Update customer information"
-                  : "Fill in all required fields to add a new customer"}
+                  ? "Cập nhật thông tin khách hàng"
+                  : "Điền đầy đủ các trường bắt buộc để thêm khách hàng mới"}
               </p>
             </div>
           </div>
@@ -118,11 +113,11 @@ const CustomerDialog = ({ open, onClose, onSubmit, editData = null }) => {
         {/* Content */}
         <div className="p-6">
           <div className="space-y-6">
-            {/* Customer Name */}
+            {/* Tên khách hàng */}
             <div>
               <div className="flex items-center mb-2">
                 <PersonIcon className="text-blue-600 mr-2" size={20} />
-                <span className="text-sm text-gray-600">Basic Information</span>
+                <span className="text-sm text-gray-600">Thông tin cơ bản</span>
               </div>
               <div className="relative">
                 <input
@@ -130,7 +125,7 @@ const CustomerDialog = ({ open, onClose, onSubmit, editData = null }) => {
                   name="customerName"
                   value={formData.customerName}
                   onChange={handleChange}
-                  placeholder="Customer name *"
+                  placeholder="Tên khách hàng *"
                   className={`w-full p-3 border ${
                     errors.customerName ? "border-red-500" : "border-gray-300"
                   } rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition`}
@@ -144,38 +139,19 @@ const CustomerDialog = ({ open, onClose, onSubmit, editData = null }) => {
               </div>
             </div>
 
-            {/* Email and Phone */}
+            {/* Số điện thoại */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
                 <div className="flex items-center mb-2">
-                  <EmailIcon className="text-blue-600 mr-2" size={20} />
-                  <span className="text-sm text-gray-600">Contact Email</span>
-                </div>
-                <input
-                  type="email"
-                  name="email"
-                  value={formData.email}
-                  onChange={handleChange}
-                  placeholder="Email"
-                  className={`w-full p-3 border ${
-                    errors.email ? "border-red-500" : "border-gray-300"
-                  } rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition`}
-                />
-                {errors.email && (
-                  <p className="text-red-500 text-xs mt-1">{errors.email}</p>
-                )}
-              </div>
-              <div>
-                <div className="flex items-center mb-2">
                   <PhoneIcon className="text-blue-600 mr-2" size={20} />
-                  <span className="text-sm text-gray-600">Phone Number</span>
+                  <span className="text-sm text-gray-600">Số điện thoại</span>
                 </div>
                 <input
                   type="text"
                   name="phone"
                   value={formData.phone}
                   onChange={handleChange}
-                  placeholder="Phone number"
+                  placeholder="Số điện thoại"
                   className={`w-full p-3 border ${
                     errors.phone ? "border-red-500" : "border-gray-300"
                   } rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition`}
@@ -186,52 +162,27 @@ const CustomerDialog = ({ open, onClose, onSubmit, editData = null }) => {
               </div>
             </div>
 
-            {/* Address */}
+            {/* Địa chỉ */}
             <div>
               <div className="flex items-center mb-2">
                 <LocationIcon className="text-blue-600 mr-2" size={20} />
-                <span className="text-sm text-gray-600">Address</span>
+                <span className="text-sm text-gray-600">Địa chỉ</span>
               </div>
               <textarea
                 name="address"
                 value={formData.address}
                 onChange={handleChange}
-                placeholder="Full address"
+                placeholder="Địa chỉ đầy đủ"
                 className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition resize-y"
                 rows={1}
+                
               />
             </div>
 
-            {/* Address Selector */}
+            {/* Bộ chọn địa chỉ */}
             <div>
               <hr className="my-4 border-gray-200" />
               <AddressSelector onChange={handleAddressChange} />
-            </div>
-
-            {/* Status */}
-            <div
-              className={`p-4 rounded-lg border ${
-                formData.status
-                  ? "bg-green-50 border-green-200"
-                  : "bg-gray-50 border-gray-200"
-              }`}
-            >
-              <div className="flex items-center justify-between">
-                <div>
-                  <h3 className="text-base font-semibold">Active Status</h3>
-                </div>
-                <label className="flex items-center cursor-pointer">
-                  <input
-                    type="checkbox"
-                    checked={formData.status}
-                    onChange={handleStatusChange}
-                    className="w-5 h-5 accent-blue-500 text-green-600 rounded focus:ring-green-500"
-                  />
-                  <span className="ml-2 text-sm">
-                    {formData.status ? "Active" : "Inactive"}
-                  </span>
-                </label>
-              </div>
             </div>
           </div>
         </div>
@@ -243,13 +194,13 @@ const CustomerDialog = ({ open, onClose, onSubmit, editData = null }) => {
             onClick={onClose}
             className="px-6 py-2 border border-gray-300 rounded-lg text-gray-700 font-semibold hover:bg-gray-100 transition"
           >
-            Cancel
+            Hủy
           </button>
           <button
             onClick={handleSubmit}
             className="px-8 py-2 bg-gradient-to-r from-blue-600 to-blue-400 text-white rounded-lg font-semibold hover:from-blue-700 hover:to-blue-500 transition"
           >
-            {isEditMode ? "Update" : "Add"}
+            {isEditMode ? "Cập nhật" : "Thêm"}
           </button>
         </div>
       </div>
