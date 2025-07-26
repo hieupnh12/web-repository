@@ -2,7 +2,6 @@ import React from "react";
 import {
   Box,
   Typography,
-  Chip,
   Tooltip,
   IconButton,
   Paper,
@@ -21,8 +20,6 @@ import {
   Phone as PhoneIcon,
   LocationOn as LocationIcon,
   Person as PersonIcon,
-  CheckCircle as CheckCircleIcon,
-  Cancel as CancelIcon,
   QueryBuilder,
 } from "@mui/icons-material";
 import DeleteIcon from "@mui/icons-material/Delete";
@@ -91,6 +88,7 @@ const CustomerTable = ({
   handleChangeRowsPerPage,
   handleEdit,
   handleDeleteCustomer,
+  permission
 }) => {
   return (
     <StyledPaper>
@@ -98,12 +96,12 @@ const CustomerTable = ({
         <Table>
           <StyledTableHead>
             <TableRow>
-              <TableCell>No.</TableCell>
-              <TableCell>Customer Name</TableCell>
-              <TableCell>Phone Number</TableCell>
-              <TableCell>Address</TableCell>
-              <TableCell>Join Date</TableCell>
-              <TableCell align="center">Actions</TableCell>
+              <TableCell>STT</TableCell>
+              <TableCell>Tên khách hàng</TableCell>
+              <TableCell>Số điện thoại</TableCell>
+              <TableCell>Địa chỉ</TableCell>
+              <TableCell>Ngày tham gia</TableCell>
+              <TableCell align="center">Thao tác</TableCell>
             </TableRow>
           </StyledTableHead>
           <TableBody>
@@ -118,7 +116,7 @@ const CustomerTable = ({
             ) : filteredCustomers.length === 0 ? (
               <TableRow>
                 <TableCell colSpan={7} align="center">
-                  <Typography>No customers found</Typography>
+                  <Typography>Không tìm thấy khách hàng nào</Typography>
                 </TableCell>
               </TableRow>
             ) : (
@@ -165,45 +163,68 @@ const CustomerTable = ({
                       minute: "2-digit",
                       hour12: false,
                       timeZone: "Asia/Ho_Chi_Minh",
-                    })}{" "}
+                    })}
                   </TableCell>
                   <TableCell align="center">
-                    <Box
-                      sx={{ display: "flex", gap: 1, justifyContent: "center" }}
-                    >
-                      <Tooltip title="Edit" placement="top">
-                        <IconButton
-                          size="small"
-                          onClick={() => handleEdit(customer)}
-                          sx={{
-                            color: "#2196f3",
-                            "&:hover": {
-                              backgroundColor: "#e3f2fd",
-                              transform: "scale(1.1)",
-                            },
-                            transition: "all 0.3s ease",
-                          }}
-                        >
-                          <EditIcon fontSize="small" />
-                        </IconButton>
+                    <Box sx={{ display: "flex", gap: 1, justifyContent: "center" }}>
+                      {/* Nút sửa */}
+                      <Tooltip
+                        title={
+                          permission?.canUpdate
+                            ? "Chỉnh sửa khách hàng"
+                            : "Bạn không có quyền chỉnh sửa"
+                        }
+                        placement="top"
+                      >
+                        <span>
+                          <IconButton
+                            size="small"
+                            onClick={() => handleEdit(customer)}
+                            disabled={!permission?.canUpdate}
+                            sx={{
+                              color: "#2196f3",
+                              opacity: permission?.canUpdate ? 1 : 0.4,
+                              cursor: permission?.canUpdate ? "pointer" : "not-allowed",
+                              "&:hover": {
+                                backgroundColor: permission?.canUpdate ? "#e3f2fd" : "transparent",
+                                transform: permission?.canUpdate ? "scale(1.1)" : "none",
+                              },
+                              transition: "all 0.3s ease",
+                            }}
+                          >
+                            <EditIcon fontSize="small" />
+                          </IconButton>
+                        </span>
                       </Tooltip>
-                      <Tooltip title="Delete" placement="top">
-                        <IconButton
-                          size="small"
-                          onClick={() =>
-                            handleDeleteCustomer(customer.customerId)
-                          }
-                          sx={{
-                            color: "#f44336",
-                            "&:hover": {
-                              backgroundColor: "#ffebee",
-                              transform: "scale(1.1)",
-                            },
-                            transition: "all 0.3s ease",
-                          }}
-                        >
-                          <DeleteIcon fontSize="small" />
-                        </IconButton>
+
+                      {/* Nút xóa */}
+                      <Tooltip
+                        title={
+                          permission?.canDelete
+                            ? "Xóa khách hàng"
+                            : "Bạn không có quyền xóa khách hàng"
+                        }
+                        placement="top"
+                      >
+                        <span>
+                          <IconButton
+                            size="small"
+                            onClick={() => handleDeleteCustomer(customer.customerId)}
+                            disabled={!permission?.canDelete}
+                            sx={{
+                              color: "#f44336",
+                              opacity: permission?.canDelete ? 1 : 0.4,
+                              cursor: permission?.canDelete ? "pointer" : "not-allowed",
+                              "&:hover": {
+                                backgroundColor: permission?.canDelete ? "#ffebee" : "transparent",
+                                transform: permission?.canDelete ? "scale(1.1)" : "none",
+                              },
+                              transition: "all 0.3s ease",
+                            }}
+                          >
+                            <DeleteIcon fontSize="small" />
+                          </IconButton>
+                        </span>
                       </Tooltip>
                     </Box>
                   </TableCell>
@@ -221,9 +242,9 @@ const CustomerTable = ({
         page={page}
         onPageChange={handleChangePage}
         onRowsPerPageChange={handleChangeRowsPerPage}
-        labelRowsPerPage="Rows per page:"
+        labelRowsPerPage="Số hàng mỗi trang:"
         labelDisplayedRows={({ from, to, count }) =>
-          `${from}–${to} of ${count !== -1 ? count : `more than ${to}`}`
+          `${from}–${to} trong tổng ${count !== -1 ? count : `hơn ${to}`}`
         }
         sx={{
           borderTop: "1px solid #e0e0e0",

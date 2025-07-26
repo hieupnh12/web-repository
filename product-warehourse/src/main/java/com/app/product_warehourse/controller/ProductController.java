@@ -10,8 +10,13 @@ import com.app.product_warehourse.dto.response.ImageResponse;
 import com.app.product_warehourse.dto.response.ProductFULLResponse;
 import com.app.product_warehourse.dto.response.ProductResponse;
 import com.app.product_warehourse.entity.Product;
+import com.app.product_warehourse.service.CountQuantityOfAll;
 import com.app.product_warehourse.service.ProductService;
 import jakarta.validation.Valid;
+import lombok.AccessLevel;
+import lombok.RequiredArgsConstructor;
+import lombok.experimental.FieldDefaults;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -23,31 +28,36 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/product")
+@RequiredArgsConstructor
+@FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
+@Slf4j
 public class ProductController {
     @Autowired
     private ProductService productService;
+    CountQuantityOfAll countQuantityOfAll;
 
-    @PostMapping("/init")
-    public ApiResponse<ProductFULLResponse> InitProduct(){
-         return ApiResponse.<ProductFULLResponse>builder()
-                 .result(productService.initProduct())
-                 .build();
-    }
-
-
-
-    // Tạo mới Product với ảnh, sử dụng multipart/form-data
-    @PostMapping(value="/full/confirm",consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    public ApiResponse<ProductFULLResponse> addProduct(
-            @RequestPart(value = "product") @Valid ProductFullRequest request,
-            @RequestPart(value = "image", required = false) MultipartFile image) throws IOException {
-        return ApiResponse.<ProductFULLResponse>builder()
-                          .result(productService.createProductFull(request,image))
-                          .build();
-    }
+        @PostMapping("/init")
+        public ApiResponse<ProductFULLResponse> InitProduct(){
+             return ApiResponse.<ProductFULLResponse>builder()
+                     .result(productService.initProduct())
+                     .build();
+        }
+    
+    
+    
+        // Tạo mới Product với ảnh, sử dụng multipart/form-data
+        @PostMapping(value="/full/confirm",consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+        public ApiResponse<ProductFULLResponse> addProduct(
+                @RequestPart(value = "product") @Valid ProductFullRequest request,
+                @RequestPart(value = "image", required = false) MultipartFile image) throws IOException {
+            return ApiResponse.<ProductFULLResponse>builder()
+                              .result(productService.createProductFull(request,image))
+                              .build();
+        }
 
 
     @PutMapping(value = "/upload_image/{id}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
@@ -174,6 +184,14 @@ public class ProductController {
         productService.fixStock();
         return ApiResponse.<Void>builder()
                 .message("UPDATE STOCK PRODUCT SUCCESSFULLY")
+                .build();
+    }
+
+
+    @GetMapping("/countProduct")
+    public ApiResponse<Map<String, Object>> CountProduct() {
+        return  ApiResponse.<Map<String, Object>>builder()
+                .result(countQuantityOfAll.calculateProductStats())
                 .build();
     }
 

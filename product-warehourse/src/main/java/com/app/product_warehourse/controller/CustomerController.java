@@ -6,6 +6,7 @@ import com.app.product_warehourse.dto.request.CustomerUpdateRequest;
 import com.app.product_warehourse.dto.response.CustomerResponse;
 import com.app.product_warehourse.entity.Customer;
 import com.app.product_warehourse.repository.CustomerRepository;
+import com.app.product_warehourse.service.CountQuantityOfAll;
 import com.app.product_warehourse.service.CustomerService;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
@@ -20,6 +21,7 @@ import org.springframework.web.bind.annotation.*;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/customer")
@@ -28,7 +30,7 @@ import java.util.List;
 @Slf4j
 public class CustomerController {
     CustomerService customerService;
-
+    CountQuantityOfAll countQuantityOfAll;
 //    @GetMapping
 //    public ApiResponse<List<CustomerResponse>> getAllCustomers() {
 //        return ApiResponse.<List<CustomerResponse>>builder()
@@ -78,4 +80,15 @@ public class CustomerController {
         customerService.deleteCustomer(customerId);
         return new ApiResponse<>(1005, "Successfully deleted Customer", null);
     }
+
+
+    @GetMapping("/countCustomer")
+    public ApiResponse<Map<String, Object>> getCustomers() {
+
+        return ApiResponse.<Map<String, Object>>builder()
+                .result(countQuantityOfAll.calculateCustomerStats())
+                .build();
+    }
+
+
 }

@@ -66,4 +66,11 @@ public interface ExportReceiptRepository extends JpaRepository<ExportReceipt, St
     void resetExportIdByExportId(String exportId);
 
 
+
+
+        @Query("SELECT COUNT(e) FROM ExportReceipt e WHERE e.exportTime BETWEEN :startTime AND :endTime")
+        long countByExportTimeBetween(LocalDateTime startTime, LocalDateTime endTime);
+
+
+
 }

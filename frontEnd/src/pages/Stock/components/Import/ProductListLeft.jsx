@@ -13,22 +13,22 @@ const ProductList = ({
   const [searchText, setSearchText] = useState("");
 
   const handleSearchChange = async (e) => {
-  const value = e.target.value;
-  setSearchText(value);
+    const value = e.target.value;
+    setSearchText(value);
 
-  // Tìm local trước
-  const localResults = products.filter((product) =>
-    product.productName.toLowerCase().includes(value.toLowerCase())
-  );
+    // Tìm local trước
+    const localResults = products?.filter((product) =>
+      product?.productName?.toLowerCase().includes(value.toLowerCase())
+    );
 
-  // Nếu không có kết quả local và value đủ dài thì gọi API tìm
-  if (localResults.length === 0 && value.length >= 2) {
-    onSearch(value); // → Hàm này do component cha truyền vào, sẽ gọi API
-  }
-};
+    // Nếu không có kết quả local và value đủ dài thì gọi API tìm
+    if (localResults.length === 0 && value.length >= 2) {
+      onSearch(value); // → Hàm này do component cha truyền vào, sẽ gọi API
+    }
+  };
 
-  const filteredProducts = products.filter((product) =>
-    product.productName.toLowerCase().includes(searchText.toLowerCase())
+  const filteredProducts = products?.filter((product) =>
+    product?.productName?.toLowerCase().includes(searchText.toLowerCase())
   );
 
   // console.log("check product", onSelect);
@@ -55,7 +55,7 @@ const ProductList = ({
               className="w-full px-3 py-2 border border-gray-700 rounded"
             />
             <button
-              onClick={handleReload} // hàm reload bạn định nghĩa
+              onClick={() => {setSearchText(""); handleReload()}} // hàm reload bạn định nghĩa
               className="p-2 border border-gray-700 rounded hover:bg-gray-100"
               title="Reload"
             >

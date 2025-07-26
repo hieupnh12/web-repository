@@ -234,6 +234,8 @@ export default function ImportPage() {
       }
       return content;
     },
+    staleTime: 0,
+    gcTime: 0,
     onSuccess: () => {
       toast.success("Tải danh sách sản phẩm thành công!");
       setIsReloading(false); // ✅ đảm bảo gọi ở đây
@@ -260,6 +262,7 @@ export default function ImportPage() {
       setIsReloading(false); // đảm bảo luôn reset loading
     }
   };
+
   useEffect(() => {
     if (
       Array.isArray(productData) &&
@@ -505,6 +508,7 @@ export default function ImportPage() {
     }
 
     try {
+      setIsReloading(true);
       const payload = {
         importId: importInfo.import_id,
         importReceipt: {
@@ -541,6 +545,8 @@ export default function ImportPage() {
     } catch (err) {
       console.log("Submit lỗi", err);
       toast.error("Lỗi khi nhập hàng: " + err.message);
+    } finally {
+            setIsReloading(false);
     }
   };
 
@@ -554,6 +560,7 @@ export default function ImportPage() {
           suppliers={suppliers}
           importInfo={importInfo}
           onSubmit={handleSubmitImport}
+          isLoading={isReloading}
         />
       </div>
 

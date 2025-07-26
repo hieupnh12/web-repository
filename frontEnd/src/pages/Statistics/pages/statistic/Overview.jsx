@@ -12,6 +12,7 @@ import {
   CartesianGrid,
   Tooltip,
   ResponsiveContainer,
+  Legend,
 } from "recharts";
 
 import { Package, Users, UserCheck } from "lucide-react";
@@ -91,42 +92,64 @@ const Overview = () => {
       </div>
 
       {/* Biểu đồ doanh thu */}
-      <div className="bg-white rounded-2xl shadow-lg p-6 mb-6">
-        <h2 className="text-lg font-semibold mb-4">Thống kê doanh thu 7 ngày gần nhất</h2>
-        <ResponsiveContainer width="100%" height={300}>
-          <AreaChart data={revenueChart} margin={{ top: 10, right: 30, left: 0, bottom: 0 }}>
-            <defs>
-              <linearGradient id="colorRevenue" x1="0" y1="0" x2="0" y2="1">
-                <stop offset="5%" stopColor="#3b82f6" stopOpacity={0.8} />
-                <stop offset="95%" stopColor="#3b82f6" stopOpacity={0} />
-              </linearGradient>
-              <linearGradient id="colorCost" x1="0" y1="0" x2="0" y2="1">
-                <stop offset="5%" stopColor="#f97316" stopOpacity={0.8} />
-                <stop offset="95%" stopColor="#f97316" stopOpacity={0} />
-              </linearGradient>
-              <linearGradient id="colorProfit" x1="0" y1="0" x2="0" y2="1">
-                <stop offset="5%" stopColor="#10b981" stopOpacity={0.8} />
-                <stop offset="95%" stopColor="#10b981" stopOpacity={0} />
-              </linearGradient>
-            </defs>
-            <CartesianGrid strokeDasharray="3 3" />
-            <XAxis dataKey="date" />
-            <YAxis />
-            <Tooltip
-              formatter={(value) =>
-                new Intl.NumberFormat("vi-VN", {
-                  style: "currency",
-                  currency: "VND",
-                }).format(value)
-              }
-              labelFormatter={(label) => `Ngày: ${label}`}
-            />
-            <Area type="monotone" dataKey="revenue" stroke="#3b82f6" fill="url(#colorRevenue)" name="Doanh thu" />
-            <Area type="monotone" dataKey="expenses" stroke="#f97316" fill="url(#colorCost)" name="Vốn" />
-            <Area type="monotone" dataKey="profit" stroke="#10b981" fill="url(#colorProfit)" name="Lợi nhuận" />
-          </AreaChart>
-        </ResponsiveContainer>
-      </div>
+<div className="bg-white rounded-2xl shadow-lg p-6 mb-6">
+  <h2 className="text-lg font-semibold mb-4">Thống kê doanh thu 7 ngày gần nhất</h2>
+  <ResponsiveContainer width="100%" height={300}>
+    <AreaChart data={revenueChart} margin={{ top: 10, right: 30, left: 0, bottom: 0 }}>
+      <defs>
+        <linearGradient id="colorRevenue" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="5%" stopColor="#3b82f6" stopOpacity={0.8} />
+          <stop offset="95%" stopColor="#3b82f6" stopOpacity={0} />
+        </linearGradient>
+        <linearGradient id="colorCost" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="5%" stopColor="#f97316" stopOpacity={0.8} />
+          <stop offset="95%" stopColor="#f97316" stopOpacity={0} />
+        </linearGradient>
+        <linearGradient id="colorProfit" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="5%" stopColor="#10b981" stopOpacity={0.8} />
+          <stop offset="95%" stopColor="#10b981" stopOpacity={0} />
+        </linearGradient>
+      </defs>
+
+      <CartesianGrid strokeDasharray="3 3" />
+      <XAxis dataKey="date" />
+      <YAxis
+        width={80}
+        tickFormatter={(value) =>
+          new Intl.NumberFormat("vi-VN", {
+            notation: "compact",
+            compactDisplay: "short",
+          }).format(value)
+        }
+      />
+      {/* 👇 Thêm Tooltip và Legend tại đây */}
+      <Tooltip />
+      <Legend />
+
+      <Area
+        type="monotone"
+        dataKey="revenue"
+        stroke="#3b82f6"
+        fill="url(#colorRevenue)"
+        name="Doanh thu"
+      />
+      <Area
+        type="monotone"
+        dataKey="expenses"
+        stroke="#f97316"
+        fill="url(#colorCost)"
+        name="Vốn"
+      />
+      <Area
+        type="monotone"
+        dataKey="profit"
+        stroke="#10b981"
+        fill="url(#colorProfit)"
+        name="Lợi nhuận"
+      />
+    </AreaChart>
+  </ResponsiveContainer>
+</div>
 
       {/* Bảng doanh thu */}
       <div className="bg-white rounded-2xl shadow-lg p-6">

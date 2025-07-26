@@ -40,7 +40,7 @@ public class ProductRequest {
 
     Long  warehouseAreaId;
 
-    Boolean status;
+//    Boolean status;
 
 
 

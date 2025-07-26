@@ -28,6 +28,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -47,6 +48,7 @@ public class ImportReceiptService {
     ProductVersionRepository productVersionRepo;
     ProductItemMapper productItemMapper;
     SuppliersRepository suppliersRepository;
+    private final ProductVersionRepository productVersionRepository;
 
 
     @PreAuthorize("hasRole('ADMIN') or hasRole('STAFF')") // Giữ nếu vẫn sử dụng Spring Security, nếu không thì xóa
@@ -236,6 +238,7 @@ public class ImportReceiptService {
                 throw new AppException(ErrorCode.IMEI_NOT_FOUND);
             }
             updateStockOnImport(savedImportEntity);
+            updatePrices(detailRequest);
         }
 
         ImportReceiptFULLResponse savedImportReceipt = importmapper.toImportReceiptFULLResponse(savedImportEntity);
@@ -418,6 +421,36 @@ public class ImportReceiptService {
 
 
 
+
+
+    @Transactional
+    public void updatePrices(ImportReceiptDetailsRequest importReceiptDetail) {
+        ImportReceiptDetail im = new ImportReceiptDetail();
+
+        // Lấy product_version_id từ khóa composite
+        String productVersionId = im.getNewid().getProductVersionId().getVersionId();
+
+        // Tìm ProductVersion tương ứng
+        ProductVersion productVersion = productVersionRepository.findById(productVersionId)
+                .orElseThrow(() -> new IllegalArgumentException("ProductVersion not found with id: " + productVersionId));
+
+        // Cập nhật import_price từ unit_price
+        BigDecimal unitPrice = BigDecimal.valueOf(importReceiptDetail.getUnitPrice());
+        productVersion.setImportPrice(unitPrice);
+
+        // Tính toán export_price dựa trên import_price (ví dụ: thêm 20% lợi nhuận)
+        BigDecimal exportPrice = calculateExportPrice(unitPrice);
+        productVersion.setExportPrice(exportPrice);
+
+        // Lưu ProductVersion
+        productVersionRepository.save(productVersion);
+    }
+
+    // Công thức tính export_price (có thể tùy chỉnh)
+    private BigDecimal calculateExportPrice(BigDecimal importPrice) {
+        // Ví dụ: export_price = import_price * 1.2 (thêm 20% lợi nhuận)
+        return importPrice.multiply(BigDecimal.valueOf(1.2));
+    }
 
 
 

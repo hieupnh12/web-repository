@@ -21,7 +21,9 @@ public class ExportReceiptDetailsRequest {
 
     String export_id;
     String productVersionId; // Đổi tên từ productVersionId thành itemId để rõ ràng
+    @Min(value = 0, message = "Số lượng phải không âm")
     Integer quantity;
+    @Min(value = 0, message = "Số lượng phải không âm")
     Integer unitPrice;
 
     List<ProductItemRequest> imei;   //importRequest3

@@ -10,14 +10,14 @@ const AddressSelector = ({ onChange }) => {
   const [selectedDistrict, setSelectedDistrict] = useState("");
   const [selectedWard, setSelectedWard] = useState("");
 
-  // Load provinces
+  // Tải danh sách tỉnh/thành
   useEffect(() => {
     axios
       .get("https://provinces.open-api.vn/api/p/")
       .then((res) => setProvinces(res.data));
   }, []);
 
-  // Load districts when a province is selected
+  // Tải danh sách quận/huyện khi chọn tỉnh/thành
   useEffect(() => {
     if (selectedProvince) {
       axios
@@ -31,7 +31,7 @@ const AddressSelector = ({ onChange }) => {
     }
   }, [selectedProvince]);
 
-  // Load wards when a district is selected
+  // Tải danh sách phường/xã khi chọn quận/huyện
   useEffect(() => {
     if (selectedDistrict) {
       axios
@@ -43,7 +43,7 @@ const AddressSelector = ({ onChange }) => {
     }
   }, [selectedDistrict]);
 
-  // Pass selected address to parent
+  // Truyền dữ liệu địa chỉ về component cha
   useEffect(() => {
     if (!onChange) return;
 
@@ -65,7 +65,7 @@ const AddressSelector = ({ onChange }) => {
           htmlFor="province"
           className="block text-sm font-medium text-gray-700 mb-1"
         >
-          Province/City
+          Tỉnh / Thành phố
         </label>
         <select
           id="province"
@@ -73,7 +73,7 @@ const AddressSelector = ({ onChange }) => {
           onChange={(e) => setSelectedProvince(e.target.value)}
           className="w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 text-sm"
         >
-          <option value="">Select a province/city</option>
+          <option value="">Chọn tỉnh / thành phố</option>
           {provinces.map((prov) => (
             <option key={prov.code} value={prov.code}>
               {prov.name}
@@ -87,7 +87,7 @@ const AddressSelector = ({ onChange }) => {
           htmlFor="district"
           className="block text-sm font-medium text-gray-700 mb-1"
         >
-          District
+          Quận / Huyện
         </label>
         <select
           id="district"
@@ -96,7 +96,7 @@ const AddressSelector = ({ onChange }) => {
           disabled={!districts.length}
           className="w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 text-sm disabled:bg-gray-100 disabled:cursor-not-allowed"
         >
-          <option value="">Select a district</option>
+          <option value="">Chọn quận / huyện</option>
           {districts.map((dist) => (
             <option key={dist.code} value={dist.code}>
               {dist.name}
@@ -110,7 +110,7 @@ const AddressSelector = ({ onChange }) => {
           htmlFor="ward"
           className="block text-sm font-medium text-gray-700 mb-1"
         >
-          Ward/Commune
+          Phường / Xã
         </label>
         <select
           id="ward"
@@ -119,7 +119,7 @@ const AddressSelector = ({ onChange }) => {
           disabled={!wards.length}
           className="w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 text-sm disabled:bg-gray-100 disabled:cursor-not-allowed"
         >
-          <option value="">Select a ward/commune</option>
+          <option value="">Chọn phường / xã</option>
           {wards.map((ward) => (
             <option key={ward.code} value={ward.code}>
               {ward.name}

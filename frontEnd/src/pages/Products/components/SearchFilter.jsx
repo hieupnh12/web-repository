@@ -1,12 +1,12 @@
 import React, { useState, useEffect, useCallback, useMemo } from "react";
 import { Combobox, Transition } from "@headlessui/react";
-import { Search, ChevronDown, X, Loader2 } from "lucide-react";
+import { Search, ChevronDown, Loader2, X } from "lucide-react";
 import {
   getAllBrands,
   getAllOrigins,
   getAllOSs,
 } from "../../../services/attributeService";
-import {takeWarehouseArea,} from "../../../services/storage";
+import { takeWarehouseArea } from "../../../services/storage";
 import Button from "../../../components/ui/Button";
 import debounce from "lodash/debounce";
 
@@ -24,15 +24,15 @@ const SearchFilter = ({ onFilterChange }) => {
 
   const [isLoading, setIsLoading] = useState(true);
 
-  // Hàm apply bộ lọc
+  // 🧠 Apply filter
   const applyFilters = useCallback(
     (searchValue) => {
       const newFilters = {
-        search: searchValue,
-        brandId: selectedBrand?.idBrand || null,
-        originId: selectedOrigin?.id || null,
-        operatingSystemId: selectedOs?.id || null,
-        warehouseAreaId: selectedArea?.id || null,
+        productName: searchValue || null,
+        brandName: selectedBrand?.brandName || null,
+        originName: selectedOrigin?.name || null,
+        operatingSystemName: selectedOs?.name || null,
+        warehouseAreaName: selectedArea?.name || null,
       };
       console.log("Apply filters:", newFilters);
       onFilterChange(newFilters);
@@ -40,21 +40,17 @@ const SearchFilter = ({ onFilterChange }) => {
     [selectedBrand, selectedOrigin, selectedOs, selectedArea, onFilterChange]
   );
 
-  // Debounce chỉ cho input search
   const debouncedApplyFilters = useMemo(() => debounce(applyFilters, 300), [applyFilters]);
 
-  // Khi searchTerm thay đổi → debounce
   useEffect(() => {
     debouncedApplyFilters(searchTerm);
     return () => debouncedApplyFilters.cancel();
   }, [searchTerm, debouncedApplyFilters]);
 
-  // Khi thay đổi filter dropdown → gọi ngay
   useEffect(() => {
     applyFilters(searchTerm);
   }, [selectedBrand, selectedOrigin, selectedOs, selectedArea]);
 
-  // Load dữ liệu cho dropdown
   useEffect(() => {
     const fetchFilterOptions = async () => {
       try {
@@ -65,13 +61,13 @@ const SearchFilter = ({ onFilterChange }) => {
           getAllOSs(),
           takeWarehouseArea(),
         ]);
-        const extractData = (res) =>
-          Array.isArray(res.data) ? res.data : res.data?.content || res.data?.data || [];
 
-        setBrands(extractData(brandRes));
-        setOrigins(extractData(originRes));
-        setOperatingSystems(extractData(osRes));
-        setWarehouseAreas(extractData(areaRes));
+        // ✅ Gán trực tiếp vì đã trả về array
+        setBrands(Array.isArray(brandRes) ? brandRes : brandRes.data || []);
+        setOrigins(Array.isArray(originRes) ? originRes : originRes.data || []);
+        setOperatingSystems(Array.isArray(osRes) ? osRes : osRes.data || []);
+        setWarehouseAreas(Array.isArray(areaRes) ? areaRes : areaRes.data || []);
+
       } catch (error) {
         console.error("Error loading filters:", error);
         alert("Không thể tải dữ liệu bộ lọc.");
@@ -94,11 +90,11 @@ const SearchFilter = ({ onFilterChange }) => {
     setSelectedOs(null);
     setSelectedArea(null);
     onFilterChange({
-      search: "",
-      brandId: null,
-      originId: null,
-      operatingSystemId: null,
-      warehouseAreaId: null,
+      productName: "",
+      brandName: null,
+      originName: null,
+      operatingSystemName: null,
+      warehouseAreaName: null,
     });
   };
 
@@ -171,7 +167,7 @@ const SearchFilter = ({ onFilterChange }) => {
             className="flex items-center gap-2 bg-red-500 text-white hover:bg-red-600 px-4 py-2 text-sm rounded-lg shadow hover:shadow-md transition-all duration-200"
           >
             <X className="w-4 h-4" />
-            Clear Filters
+            Reload
           </Button>
         )}
       </div>

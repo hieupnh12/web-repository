@@ -3,13 +3,14 @@ import { Link } from "react-router-dom";
 import debounce from "lodash.debounce";
 import ConfirmDialog from "../../../components/ui/ConfirmDialog";
 import usePagination from "../../../hooks/usePagination";
-import { Download, Plus, Trash } from "lucide-react";
+import { Download, Info, Plus, Trash } from "lucide-react";
 import ContractPreviewModal from "../../../utils/exportTopdf";
 import { takeDeleteExportReceipt } from "../../../services/exportService";
 import { toast } from "react-toastify";
 import DateRangeButton from "./DateRangeButton";
 import Button from "../../../components/ui/Button";
 import TableSkeletonLoader from "../../../components/layout/TableSkeletonLoader";
+import ExportDetailPopup from "./Details/ExportDetailPopup";
 
 export default function ExportForm({
   tableData,
@@ -21,7 +22,7 @@ export default function ExportForm({
   onPageChange,
   isLoading,
   isError,
-  isPermission
+  isPermission,
 }) {
   // Search của thanh input
   const [searchInput, setSearchInput] = useState("");
@@ -29,65 +30,76 @@ export default function ExportForm({
   // Search của select
   const [selectField, setSelectField] = useState("all");
 
-   const [startDate, setStartDate] = useState(filter.startDate || null);
-    const [endDate, setEndDate] = useState(filter.endDate || null);
+  const [startDate, setStartDate] = useState(filter.startDate || null);
+  const [endDate, setEndDate] = useState(filter.endDate || null);
 
   // Hiển thị thông tin chi tiết của từng phiếu (thông tin từng version)
   const [selectProduct, setSelectProduct] = useState(null);
   console.log("select", selectProduct);
-  
+
   // Show confirm when click delete receipt
   const [showConfirm, setShowConfirm] = useState(false);
 
   // Show PDF
   const [showPreview, setShowPreview] = useState(false);
+  const [selectedExport, setSelectedExport] = useState(null);
+  const [showDetail, setShowDetail] = useState(false);
 
- const handleDeleteExport = async () => {
-     setShowConfirm(false);
-     try {
-       if (!selectProduct?.export_id) {
-         toast.warning("Vui lòng chọn một phiếu nhập để xóa.");
-         return;
-       }
- 
-       const resp = await takeDeleteExportReceipt(selectProduct.export_id);
-       console.log("dsad",resp);
-       
-       if (resp.status === 200) {
-         toast.success(resp.data.message || "Xóa phiếu nhập thành công!");
-         setSelectProduct(null);
-         onReload();
-       } else {
-         throw new Error("Xóa thất bại");
-       }
-     } catch (error) {
-       console.error("Lỗi khi xóa phiếu nhập:", error);
-       toast.error("Xóa phiếu nhập thất bại!");
-     }
-   };
+  const handleDeleteExport = async () => {
+    setShowConfirm(false);
+    try {
+      if (!selectProduct?.export_id) {
+        toast.warning("Vui lòng chọn một phiếu nhập để xóa.");
+        return;
+      }
+      if (!selectProduct?.customerName || !selectProduct?.totalAmount) {
+        toast.warning("Vui lòng hoàn thành phiếu nhập để xóa.");
+        return;
+      }
+
+      const resp = await takeDeleteExportReceipt(selectProduct.export_id);
+      console.log("dsad", resp);
+
+      if (resp.status === 200) {
+        toast.success(resp.data.message || "Xóa phiếu nhập thành công!");
+        setSelectProduct(null);
+        onReload();
+      } else {
+        throw new Error("Xóa thất bại");
+      }
+    } catch (error) {
+      console.error("Lỗi khi xóa phiếu nhập:", error);
+      toast.error("Xóa phiếu nhập thất bại!");
+    }
+  };
 
   const mapFilterToApi = useCallback(
-      (searchQuery, searchField, startDate, endDate) => {
-        const newFilter = { startDate, endDate };
-        if (searchField === "export_id") {
-          newFilter.exportId = searchQuery;
-        } else if (searchField === "customerName") {
-          newFilter.customerName = searchQuery;
-        } else if (searchField === "staffName") {
-          newFilter.staffName = searchQuery;
-        } else {
-          newFilter.customerName = searchQuery;
-          newFilter.staffName = searchQuery;
-          newFilter.exportId = searchQuery;
-        }
-        return newFilter;
-      },
-      []
-    );
+    (searchQuery, searchField, startDate, endDate) => {
+      const newFilter = { startDate, endDate };
+      if (searchField === "export_id") {
+        newFilter.exportId = searchQuery;
+      } else if (searchField === "customerName") {
+        newFilter.customerName = searchQuery;
+      } else if (searchField === "staffName") {
+        newFilter.staffName = searchQuery;
+      } else {
+        newFilter.customerName = searchQuery;
+        newFilter.staffName = searchQuery;
+        newFilter.exportId = searchQuery;
+      }
+      return newFilter;
+    },
+    []
+  );
 
-    const handleSearch = () => {
-    const newFilter = mapFilterToApi(searchInput, selectField, startDate, endDate);
-    console.log('Search filter:', newFilter); // Debug
+  const handleSearch = () => {
+    const newFilter = mapFilterToApi(
+      searchInput,
+      selectField,
+      startDate,
+      endDate
+    );
+    console.log("Search filter:", newFilter); // Debug
     onFilterChange(newFilter);
   };
 
@@ -96,10 +108,16 @@ export default function ExportForm({
     setSelectField("all");
     setStartDate(null);
     setEndDate(null);
-    onFilterChange({ customerName: '', staffName: '', exportId: '', startDate: null, endDate: null });
+    onFilterChange({
+      customerName: "",
+      staffName: "",
+      exportId: "",
+      startDate: null,
+      endDate: null,
+    });
   };
 
-const debouncedFilterChange = useCallback(
+  const debouncedFilterChange = useCallback(
     debounce((newFilter) => {
       onFilterChange(newFilter);
       onPageChange(0);
@@ -107,11 +125,16 @@ const debouncedFilterChange = useCallback(
     [onFilterChange]
   );
 
-   useEffect(() => {
-      const newFilter = mapFilterToApi(searchInput, selectField, startDate, endDate);
-      debouncedFilterChange(newFilter);
-      return () => debouncedFilterChange.cancel();
-    }, [searchInput, startDate, endDate, debouncedFilterChange, mapFilterToApi]);
+  useEffect(() => {
+    const newFilter = mapFilterToApi(
+      searchInput,
+      selectField,
+      startDate,
+      endDate
+    );
+    debouncedFilterChange(newFilter);
+    return () => debouncedFilterChange.cancel();
+  }, [searchInput, startDate, endDate, debouncedFilterChange, mapFilterToApi]);
 
   const handleSearchChange = (e) => setSearchInput(e.target.value);
   const handleFieldChange = (e) => setSelectField(e.target.value);
@@ -129,7 +152,6 @@ const debouncedFilterChange = useCallback(
         (searchSelect && searchSelect.contains(event.target)) ||
         (searchPag && searchPag.contains(event.target)) ||
         (searchDate && searchDate.contains(event.target))
-
       ) {
         setSelectProduct(null);
       }
@@ -163,35 +185,34 @@ const debouncedFilterChange = useCallback(
       <div className="flex items-center justify-between bg-white/60 p-3 rounded-2xl shadow-sm flex-wrap gap-4">
         <div className="flex items-center space-x-4">
           {isPermission?.canCreate && (
-          <Link
-            to="addexport"
-            className="bg-teal-600 hover:bg-teal-700 text-white px-4 py-2 rounded-lg text-sm font-medium flex gap-1"
-          >
-            <Plus className="h-5 w-5" />
-            <span>Tạo Phiếu</span>
-          </Link>
+            <Link
+              to="addexport"
+              className="bg-teal-600 hover:bg-teal-700 text-white px-4 py-2 rounded-lg text-sm font-medium flex gap-1"
+            >
+              <Plus className="h-5 w-5" />
+              <span>Tạo Phiếu</span>
+            </Link>
           )}
           {/* Button to download file pdf */}
 
-            <button
-              className="bg-green-700 hover:bg-green-800 text-white px-4 py-2 rounded-lg text-sm font-medium flex items-center space-x-2"
-              onClick={() => setShowPreview(true)}
-              disabled={!selectProduct?.export_id}
-            >
-              <Download className="w-5 h-5" />
-              <span>In Phiếu</span>
-            </button>
-                      {isPermission?.canDelete && (
-
-          <Button
-            onClick={() => setShowConfirm(true)}
-            className="group flex items-center gap-2 bg-red-600 text-white hover:bg-red-700 hover:scale-105 transform transition-all duration-300 shadow-lg hover:shadow-xl px-3 py-2 text-sm"
+          <button
+            className="bg-green-700 hover:bg-green-800 text-white px-4 py-2 rounded-lg text-sm font-medium flex items-center space-x-2"
+            onClick={() => setShowPreview(true)}
             disabled={!selectProduct?.export_id}
           >
-            <Trash className="w-4 h-4 group-hover:scale-110 transition-transform duration-300" />
-            <span className="hidden sm:inline">Xóa Phiếu</span>
-          </Button>
-                      )}
+            <Download className="w-5 h-5" />
+            <span>In Phiếu</span>
+          </button>
+          {isPermission?.canDelete && (
+            <Button
+              onClick={() => setShowConfirm(true)}
+              className="group flex items-center gap-2 bg-red-600 text-white hover:bg-red-700 hover:scale-105 transform transition-all duration-300 shadow-lg hover:shadow-xl px-3 py-2 text-sm"
+              disabled={!selectProduct?.export_id}
+            >
+              <Trash className="w-4 h-4 group-hover:scale-110 transition-transform duration-300" />
+              <span className="hidden sm:inline">Xóa Phiếu</span>
+            </Button>
+          )}
           <ConfirmDialog
             isOpen={showConfirm}
             title="Xóa phiếu nhập"
@@ -259,7 +280,10 @@ const debouncedFilterChange = useCallback(
                 >
                   <div className="w-[100px] h-[100px] rounded-2xl overflow-hidden flex items-center justify-center border border-gray-200">
                     <img
-                      src={value?.productVersion?.version.product?.image || "/placeholder-image.jpg"}
+                      src={
+                        value?.productVersion?.version.product?.image ||
+                        "/placeholder-image.jpg"
+                      }
                       alt="jj"
                       className="object-cover w-full h-full"
                     />
@@ -267,10 +291,12 @@ const debouncedFilterChange = useCallback(
 
                   <div className="flex flex-col justify-around items-center text-left">
                     <div className="w-full text-sm font-medium">
-                       {value?.productVersion?.version.product?.productName || "N/A"}
+                      {value?.productVersion?.version.product?.productName ||
+                        "N/A"}
                     </div>
                     <div className="w-full">
-                      Tổng: {(value.unitPrice * value.quantity).toLocaleString()} VND
+                      Tổng:{" "}
+                      {(value.unitPrice * value.quantity).toLocaleString()} VND
                     </div>
                     <div className="w-full">Số lượng: {value.quantity}</div>
                   </div>
@@ -278,15 +304,15 @@ const debouncedFilterChange = useCallback(
               ))}
             </div>
 
-            <div className="p-1 mt-2">
-             <button
+            {/* <div className="p-1 mt-2">
+              <button
                 onClick={() => setShowPreview(true)} // Sửa để mở PDF thay vì ConfirmDialog
                 className="w-full bg-white border border-gray-400 py-2 rounded-lg hover:bg-blue-300 transition duration-200 text-sm font-medium text-gray-600"
                 disabled={!selectProduct?.export_id}
               >
                 Xem chi tiết
               </button>
-            </div>
+            </div> */}
           </div>
 
           {/* Cột phải: Bảng phiếu và phân trang */}
@@ -294,65 +320,86 @@ const debouncedFilterChange = useCallback(
           <div className="flex-1 bg-white rounded-2xl shadow-lg overflow-hidden flex flex-col">
             {/* Table content */}
             {isLoading ? (
-  <TableSkeletonLoader />
-) : (
-            <div className="overflow-x-auto flex-1">
-              <table className="w-full text-gray-700 border border-gray-200">
-                <thead className="bg-gray-50 text-xs font-medium uppercase text-center">
-                  <tr>
-                    <th className="px-4 py-2">STT</th>
-                    <th className="px-4 py-2">Mã Phiếu</th>
-                    <th className="px-4 py-2">Khách Hàng</th>
-                    <th className="px-4 py-2">Nhân Viên Nhập</th>
-                    <th className="px-4 py-2">Tổng Tiền</th>
-                    <th className="px-4 py-2">Thời gian</th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y text-center divide-gray-300 text-sm cursor-pointer">
-                  {tableData.map((item, index) => (
-                    <tr
-                      key={index}
-                      className={`hover:bg-blue-50 transition ${
-                        selectProduct?.export_id === item.export_id
-                          ? "bg-blue-100"
-                          : ""
-                      }`}
-                      onClick={() =>
-                        setSelectProduct(
-                          selectProduct?.export_id ===
-                            item.export_id
-                            ? null
-                            : item
-                        )
-                      }
-                    >
-                      <td className="px-4 py-3">
-                        {currentPage * 7 + index + 1}
-                      </td>
-                      <td className="px-4 py-3">{item.export_id}</td>
-                      <td className="px-4 py-3">
-                        {item.customerName}
-                      </td>
-                      <td className="px-4 py-3">{item.staffName}</td>
-                      <td className="px-4 py-3">
-                        {item.totalAmount.toLocaleString()}
-                      </td>
-                      <td className="px-4 py-3">
-                        {new Intl.DateTimeFormat("vi-VN", {
-                          day: "2-digit",
-                          month: "2-digit",
-                          year: "numeric",
-                          hour: "2-digit",
-                          minute: "2-digit",
-                          hour12: false,
-                        }).format(new Date(item.exportTime))}
-                      </td>
+              <TableSkeletonLoader />
+            ) : (
+              <div className="overflow-x-auto flex-1">
+                <table className="w-full text-gray-700 border border-gray-200">
+                  <thead className="bg-gray-50 text-xs font-medium uppercase text-center">
+                    <tr>
+                      <th className="px-4 py-2">STT</th>
+                      <th className="px-4 py-2">Mã Phiếu</th>
+                      <th className="px-4 py-2">Khách Hàng</th>
+                      <th className="px-4 py-2">Nhân Viên Nhập</th>
+                      <th className="px-4 py-2">Tổng Tiền</th>
+                      <th className="px-4 py-2">Thời gian</th>
+                      <th className="px-2 py-2"></th>
                     </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-)}
+                  </thead>
+                  <tbody className="divide-y text-center divide-gray-300 text-sm cursor-pointer">
+                    {tableData.map((item, index) => (
+                      <tr
+                        key={index}
+                        className={`hover:bg-blue-50 transition ${
+                          selectProduct?.export_id === item.export_id
+                            ? "bg-blue-100"
+                            : ""
+                        }`}
+                        onClick={() =>
+                          setSelectProduct(
+                            selectProduct?.export_id === item.export_id
+                              ? null
+                              : item
+                          )
+                        }
+                      >
+                        <td className="px-4 py-3">
+                          {currentPage * 7 + index + 1}
+                        </td>
+                        <td className="px-4 py-3">{item.export_id}</td>
+                        <td className="px-4 py-3">{item.customerName}</td>
+                        <td className="px-4 py-3">{item.staffName}</td>
+                        <td className="px-4 py-3">
+                          {item.totalAmount.toLocaleString()}
+                        </td>
+                        <td className="px-4 py-3">
+                          {new Intl.DateTimeFormat("vi-VN", {
+                            day: "2-digit",
+                            month: "2-digit",
+                            year: "numeric",
+                            hour: "2-digit",
+                            minute: "2-digit",
+                            hour12: false,
+                          }).format(new Date(item.exportTime))}
+                        </td>
+                        <td className="px-2 py-3">
+                          <button
+                            onClick={(e) => {
+                              e.stopPropagation(); // 🔥 Ngăn click lan lên <tr>
+                              setShowDetail(true); // Hoặc toggle hiển thị popup tùy bạn
+                              setSelectedExport(item); // Gán phiếu nhập cần xem chi tiết
+                            }}
+                          >
+                            <Info
+                              size={20}
+                              strokeWidth={1.5}
+                              className="text-gray-500 hover:text-blue-500"
+                            />
+                          </button>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            )}
+
+            {showDetail && (
+              <ExportDetailPopup
+                data={selectedExport}
+                onClose={() => setShowDetail(false)}
+              />
+            )}
+
             {/* Pagination fixed at bottom */}
             <div
               id="search-pagination"
@@ -388,7 +435,6 @@ const debouncedFilterChange = useCallback(
                 Sau »
               </button>
             </div>
-            
           </div>
         </div>
       </div>
