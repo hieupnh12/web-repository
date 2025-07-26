@@ -77,6 +77,7 @@ public enum ErrorCode {
     PHONE_NUMBER_AVAILABLE(1029, "Phone number available  .",HttpStatus.BAD_REQUEST),
     PASSWORD_WEAK(1030, "Mật khẩu phải có ít nhất 8 ký tự, gồm chữ in hoa, chữ thường, chữ số và ký tự đặc biệt @$!%*?&.",HttpStatus.BAD_REQUEST),
     LONG_USER_NAME(1031, "Cảnh báo: họ và tên không được vượt quá {max} kí tự", HttpStatus.BAD_REQUEST),
+
     ;
 
     ErrorCode(int code, String message, HttpStatusCode statusCode) {

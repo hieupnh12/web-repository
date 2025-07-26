@@ -42,7 +42,7 @@ public class AccountController {
                 .build();
     }
     @PostMapping("/change/{staffId}")
-    public ApiResponse<String> changePassword( @PathVariable String staffId,@Valid @RequestBody ChangePasswordRequest request) {
+    public ApiResponse<String> changePassword( @PathVariable String staffId, @Valid @RequestBody ChangePasswordRequest request) {
         accountService.changePassword(request,staffId);
         String message = "Password changed successfully";
         return ApiResponse.<String>builder()

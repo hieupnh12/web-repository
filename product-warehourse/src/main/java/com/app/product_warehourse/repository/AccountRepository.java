@@ -31,5 +31,9 @@ public interface AccountRepository extends JpaRepository<Account, String> {
 
     boolean existsByStaffId(String staffId);
 
-
+    @Query(value = """
+    select a.staff_id, a.user_name, a.password, a.role_id, a.status from account a 
+            left join role r on a.role_id = r.role_id where a.role_id = ?
+    """, nativeQuery = true)
+    List<Account> findByRoleId(Long roleId);
 }

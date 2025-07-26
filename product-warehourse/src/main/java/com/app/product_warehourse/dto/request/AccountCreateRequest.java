@@ -2,6 +2,7 @@ package com.app.product_warehourse.dto.request;
 
 
 import com.app.product_warehourse.entity.Role;
+import com.app.product_warehourse.validation.StrongPassword;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Pattern;
@@ -23,10 +24,7 @@ public class AccountCreateRequest {
 //    @NotBlank(message = "AUTHENTICATED_PASSWORD_NOT_NULL")
 //    @Size(min = 8, message = "INVALID_PASSWORD"
 
-    @Pattern(
-            regexp = "^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d)(?=.*[@$!%*?&])[A-Za-z\\d@$!%*?&]{8,64}$",
-            message = "PASSWORD_WEAK"
-    )
+    @StrongPassword
     String password;
 
     @NotNull(message = "Role ID cannot be null")
