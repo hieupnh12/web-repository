@@ -1,193 +1,188 @@
-// AccountTable.jsx
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableRow,
-  IconButton,
-  TableContainer,
-  Tooltip,
   Box,
-  TablePagination,
-  Skeleton,
-  Paper,
-  Typography,
+  Container,
+  IconButton,
+  Button,
+  TextField,
+  InputAdornment,
+  Tooltip,
 } from "@mui/material";
 import {
-  Edit as EditIcon,
-  Delete as DeleteIcon,
-  Person as PersonIcon,
-  Shield as ShieldIcon,
+  Search as SearchIcon,
+  Refresh as RefreshIcon,
+  Add as AddIcon,
 } from "@mui/icons-material";
-import { styled, alpha } from "@mui/material/styles";
+import { styled } from "@mui/material/styles";
+import { toast } from "react-toastify";
 
-const StyledPaper = styled(Paper)(({ theme }) => ({
-  background: "linear-gradient(145deg, #ffffff 0%, #f0f7ff 100%)",
-  borderRadius: 16,
-  boxShadow: "0 8px 32px rgba(33, 150, 243, 0.1)",
-  overflow: "hidden",
-  transition: "all 0.3s ease-in-out",
-  "&:hover": {
-    boxShadow: "0 12px 48px rgba(33, 150, 243, 0.2)",
-  },
-}));
+import CreateAcc from "./CreateAcc";
+import EditAcc from "./EditAcc";
+import AccountTable from "./AccountTable";
+import {
+  fetchAccounts,
+  updateAccount,
+  fetchRoles,
+} from "../../services/accountService";
 
-const StyledTableHead = styled(TableHead)(({ theme }) => ({
-  backgroundColor: "#2196f3",
-  "& .MuiTableCell-head": {
-    color: "white",
-    fontWeight: 600,
-    fontSize: "0.95rem",
-    borderBottom: "none",
-    padding: "16px",
-  },
-}));
-
-const StyledTableRow = styled(TableRow)(({ theme }) => ({
-  "&:nth-of-type(odd)": {
-    backgroundColor: alpha(theme.palette.primary.light, 0.05),
-  },
-  "&:hover": {
-    backgroundColor: alpha(theme.palette.primary.light, 0.1),
-    boxShadow: "0 4px 20px rgba(33, 150, 243, 0.1)",
-  },
+const StyledButton = styled(Button)(() => ({
+  borderRadius: 8,
+  textTransform: "none",
+  fontWeight: 500,
+  padding: "10px 24px",
+  background: "linear-gradient(45deg, #1976d2 30%, #64b5f6 90%)",
+  boxShadow: "0 3px 15px rgba(25, 118, 210, 0.3)",
   transition: "all 0.3s ease",
+  "&:hover": {
+    transform: "translateY(-2px)",
+    boxShadow: "0 6px 25px rgba(25, 118, 210, 0.4)",
+  },
 }));
 
-export default function AccountTable({
-  accounts,
-  loading,
-  onEdit,
-  onDeleteRequest,
-}) {
-  const [page, setPage] = useState(0);
-  const [rowsPerPage, setRowsPerPage] = useState(5);
+const StyledTextField = styled(TextField)(() => ({
+  "& .MuiOutlinedInput-root": {
+    borderRadius: 10,
+    backgroundColor: "white",
+    transition: "all 0.3s ease",
+    "&:hover": {
+      boxShadow: "0 4px 12px rgba(25, 118, 210, 0.1)",
+    },
+    "&.Mui-focused": {
+      boxShadow: "0 4px 20px rgba(25, 118, 210, 0.2)",
+    },
+  },
+}));
 
-  const handleChangePage = (event, newPage) => setPage(newPage);
+export default function Account() {
+  const [accounts, setAccounts] = useState([]);
+  const [roles, setRoles] = useState([]);
+  const [search, setSearch] = useState("");
+  const [loading, setLoading] = useState(true);
+  const [openEdit, setOpenEdit] = useState(false);
+  const [openCreate, setOpenCreate] = useState(false);
+  const [selectedAccount, setSelectedAccount] = useState(null);
 
-  const handleChangeRowsPerPage = (event) => {
-    setRowsPerPage(parseInt(event.target.value, 10));
-    setPage(0);
+  const loadAccounts = async () => {
+    setLoading(true);
+    try {
+      const res = await fetchAccounts();
+      setAccounts(res?.data?.result || []);
+    } catch (err) {
+      toast.error("Không tải được danh sách tài khoản.");
+    } finally {
+      setLoading(false);
+    }
   };
 
-  const pagedAccounts = accounts.slice(
-    page * rowsPerPage,
-    page * rowsPerPage + rowsPerPage
+  useEffect(() => {
+    loadAccounts();
+    fetchRoles().then((res) => setRoles(res?.data?.result || []));
+  }, []);
+
+  const handleEditAccount = async (updatedData) => {
+    try {
+      await updateAccount(selectedAccount.staffId, {
+        userName: updatedData.userName,
+        roleId: parseInt(updatedData.roleId, 10),
+        status: updatedData.status,
+      });
+      toast.success("Cập nhật tài khoản thành công!");
+      loadAccounts();
+    } catch (err) {
+      toast.error(err?.response?.data?.message || "Lỗi cập nhật tài khoản.");
+    } finally {
+      setOpenEdit(false);
+      setSelectedAccount(null);
+    }
+  };
+
+  const filteredAccounts = accounts.filter(
+    (acc) =>
+      acc.userName?.toLowerCase().includes(search.toLowerCase()) ||
+      acc.roleName?.toLowerCase().includes(search.toLowerCase())
   );
 
   return (
-    <StyledPaper>
-      <TableContainer>
-        <Table>
-          <StyledTableHead>
-            <TableRow>
-              <TableCell>STT</TableCell>
-              <TableCell>Tên đăng nhập</TableCell>
-              <TableCell>Vai trò</TableCell>
-              <TableCell>Trạng thái</TableCell>
-              <TableCell align="center">Chức năng</TableCell>
-            </TableRow>
-          </StyledTableHead>
-          <TableBody>
-            {loading
-              ? [...Array(5)].map((_, index) => (
-                  <TableRow key={index}>
-                    <TableCell colSpan={5}>
-                      <Skeleton animation="wave" height={60} />
-                    </TableCell>
-                  </TableRow>
-                ))
-              : pagedAccounts.length === 0 ? (
-                  <TableRow>
-                    <TableCell colSpan={5} align="center">
-                      Không có tài khoản nào.
-                    </TableCell>
-                  </TableRow>
-                ) : (
-                  pagedAccounts.map((acc, index) => (
-                    <StyledTableRow key={acc.staffId}>
-                      <TableCell>{page * rowsPerPage + index + 1}</TableCell>
-                      <TableCell>
-                        <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
-                          <PersonIcon color="primary" fontSize="small" />
-                          <Typography variant="body2" fontWeight={500}>
-                            {acc.userName}
-                          </Typography>
-                        </Box>
-                      </TableCell>
-                      <TableCell>
-                        <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
-                          <ShieldIcon fontSize="small" />
-                          <Typography variant="body2">
-                            {acc.roleName}
-                          </Typography>
-                        </Box>
-                      </TableCell>
-                      <TableCell>
-                        <Typography
-                          variant="body2"
-                          sx={{
-                            fontWeight: 600,
-                            color: acc.status === true || acc.status === 1 ? "green" : "red",
-                          }}
-                        >
-                          {acc.status === true || acc.status === 1 ? "Hoạt động" : "Ngừng"}
-                        </Typography>
-                      </TableCell>
-                      <TableCell align="center">
-                        <Box sx={{ display: "flex", justifyContent: "center", gap: 1 }}>
-                          <Tooltip title="Sửa">
-                            <IconButton
-                              onClick={() => onEdit(acc)}
-                              sx={{
-                                color: "#2196f3",
-                                "&:hover": {
-                                  backgroundColor: "#e3f2fd",
-                                  transform: "scale(1.1)",
-                                },
-                                transition: "all 0.3s ease",
-                              }}
-                            >
-                              <EditIcon fontSize="small" />
-                            </IconButton>
-                          </Tooltip>
-                          <Tooltip title="Xoá">
-                            <IconButton
-                              onClick={() => onDeleteRequest(acc.staffId)}
-                              sx={{
-                                color: "#f44336",
-                                "&:hover": {
-                                  backgroundColor: "#ffebee",
-                                  transform: "scale(1.1)",
-                                },
-                                transition: "all 0.3s ease",
-                              }}
-                            >
-                              <DeleteIcon fontSize="small" />
-                            </IconButton>
-                          </Tooltip>
-                        </Box>
-                      </TableCell>
-                    </StyledTableRow>
-                  ))
-                )}
-          </TableBody>
-        </Table>
-      </TableContainer>
+    <Container maxWidth="xl" sx={{ py: 4 }}>
+      {/* Header Controls */}
+      <Box
+        sx={{
+          mb: 4,
+          display: "flex",
+          justifyContent: "space-between",
+          flexWrap: "wrap",
+          alignItems: "center",
+          gap: 2,
+        }}
+      >
+        {/* Nút Thêm Tài Khoản bên trái */}
+        <StyledButton
+          startIcon={<AddIcon />}
+          onClick={() => setOpenCreate(true)}
+        >
+          Thêm tài khoản
+        </StyledButton>
 
-      <TablePagination
-        component="div"
-        count={accounts.length}
-        page={page}
-        rowsPerPage={rowsPerPage}
-        onPageChange={handleChangePage}
-        onRowsPerPageChange={handleChangeRowsPerPage}
-        rowsPerPageOptions={[5, 10, 25]}
-        labelRowsPerPage="Số hàng mỗi trang:"
-        sx={{ borderTop: "1px solid #e0e0e0", backgroundColor: "#fafafa" }}
+        {/* Tìm kiếm bên phải */}
+        <Box
+          sx={{
+            display: "flex",
+            width: "40%",
+            alignItems: "center",
+            gap: 1,
+          }}
+        >
+          <StyledTextField
+            fullWidth
+            placeholder="Tìm kiếm theo tên đăng nhập hoặc vai trò..."
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            InputProps={{
+              startAdornment: (
+                <InputAdornment position="start">
+                  <SearchIcon color="primary" />
+                </InputAdornment>
+              ),
+            }}
+          />
+          <Tooltip title="Tải lại">
+            <IconButton onClick={loadAccounts} disabled={loading}>
+              <RefreshIcon color="primary" />
+            </IconButton>
+          </Tooltip>
+        </Box>
+      </Box>
+
+      {/* Bảng danh sách tài khoản */}
+      <AccountTable
+        accounts={filteredAccounts}
+        loading={loading}
+        onEdit={(acc) => {
+          setSelectedAccount(acc);
+          setOpenEdit(true);
+        }}
       />
-    </StyledPaper>
+
+      {/* Popup tạo tài khoản */}
+      {openCreate && (
+        <CreateAcc
+          onClose={() => setOpenCreate(false)}
+          onCreated={loadAccounts}
+        />
+      )}
+
+      {/* Popup chỉnh sửa tài khoản */}
+      {openEdit && selectedAccount && (
+        <EditAcc
+          account={selectedAccount}
+          roles={roles}
+          onClose={() => {
+            setOpenEdit(false);
+            setSelectedAccount(null);
+          }}
+          onSave={handleEditAccount}
+        />
+      )}
+    </Container>
   );
 }
