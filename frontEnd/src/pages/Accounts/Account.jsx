@@ -1,4 +1,3 @@
-// Account.jsx
 import React, { useEffect, useState } from "react";
 import {
   Box,
@@ -8,20 +7,22 @@ import {
   TextField,
   InputAdornment,
   Tooltip,
+  Snackbar,
+  Alert,
 } from "@mui/material";
 import {
+  Add as AddIcon,
   Search as SearchIcon,
   Refresh as RefreshIcon,
 } from "@mui/icons-material";
 import { styled } from "@mui/material/styles";
-import { toast } from "react-toastify"; // ✅ dùng toast thay Snackbar
-import ConfirmDialog from "../../components/ui/ConfirmDialog";
+import CreateAcc from "./CreateAcc";
 import EditAcc from "./EditAcc";
 import AccountTable from "./AccountTable";
 import {
   fetchAccounts,
+  createAccount,
   updateAccount,
-  deleteAccount,
   fetchRoles,
 } from "../../services/accountService";
 
@@ -58,11 +59,14 @@ export default function Account() {
   const [roles, setRoles] = useState([]);
   const [search, setSearch] = useState("");
   const [loading, setLoading] = useState(true);
+  const [openCreate, setOpenCreate] = useState(false);
   const [openEdit, setOpenEdit] = useState(false);
   const [selectedAccount, setSelectedAccount] = useState(null);
-  const [selectedId, setSelectedId] = useState(null);
-  const [confirmOpen, setConfirmOpen] = useState(false);
-  const [deleting, setDeleting] = useState(false);
+  const [snackbar, setSnackbar] = useState({
+    open: false,
+    message: "",
+    severity: "success",
+  });
 
   const loadAccounts = async () => {
     setLoading(true);
@@ -70,7 +74,7 @@ export default function Account() {
       const res = await fetchAccounts();
       setAccounts(res?.data?.result || []);
     } catch (err) {
-      toast.error("Không tải được danh sách tài khoản.");
+      setSnackbar({ open: true, message: "Không tải được tài khoản", severity: "error" });
     } finally {
       setLoading(false);
     }
@@ -81,34 +85,35 @@ export default function Account() {
     fetchRoles().then((res) => setRoles(res?.data?.result || []));
   }, []);
 
+  const handleCreateAccount = async (accountData) => {
+    try {
+      await createAccount(accountData.staffId, accountData);
+      setSnackbar({ open: true, message: "Tạo tài khoản thành công", severity: "success" });
+      loadAccounts();
+    } catch (err) {
+      setSnackbar({ open: true, message: err.toString(), severity: "error" });
+    }
+  };
+
   const handleEditAccount = async (updatedData) => {
     try {
       await updateAccount(selectedAccount.staffId, {
         userName: updatedData.userName,
         roleId: parseInt(updatedData.roleId, 10),
-        status: updatedData.status,
+        status: true,
       });
-      toast.success("Cập nhật tài khoản thành công!");
+
+      setSnackbar({ open: true, message: "Cập nhật tài khoản thành công", severity: "success" });
       loadAccounts();
     } catch (err) {
-      toast.error(err?.response?.data?.message || "Lỗi cập nhật tài khoản.");
+      setSnackbar({
+        open: true,
+        message: err?.response?.data?.message || "Lỗi cập nhật tài khoản",
+        severity: "error",
+      });
     } finally {
       setOpenEdit(false);
       setSelectedAccount(null);
-    }
-  };
-
-  const handleDeleteAccount = async () => {
-    try {
-      setDeleting(true);
-      await deleteAccount(selectedId);
-      setAccounts((prev) => prev.filter((acc) => acc.staffId !== selectedId));
-      toast.success("Xoá tài khoản thành công!");
-    } catch (err) {
-      toast.error("Lỗi khi xoá tài khoản: " + err.toString());
-    } finally {
-      setDeleting(false);
-      setConfirmOpen(false);
     }
   };
 
@@ -120,23 +125,11 @@ export default function Account() {
 
   return (
     <Container maxWidth="xl" sx={{ py: 4 }}>
-      <Box
-        sx={{
-          mb: 4,
-          display: "flex",
-          justifyContent: "space-between",
-          flexWrap: "wrap",
-          gap: 2,
-        }}
-      >
-        <Box
-          sx={{
-            display: "flex",
-            width: "40%",
-            alignItems: "center",
-            gap: 1,
-          }}
-        >
+      <Box sx={{ mb: 4, display: "flex", justifyContent: "space-between", flexWrap: "wrap", gap: 2 }}>
+        <StyledButton variant="contained" startIcon={<AddIcon />} onClick={() => setOpenCreate(true)}>
+          Thêm Tài Khoản
+        </StyledButton>
+        <Box sx={{ display: "flex", width: "40%", alignItems: "center", gap: 1 }}>
           <StyledTextField
             fullWidth
             placeholder="Tìm kiếm theo tên đăng nhập hoặc vai trò..."
@@ -165,11 +158,17 @@ export default function Account() {
           setSelectedAccount(acc);
           setOpenEdit(true);
         }}
-        onDeleteRequest={(id) => {
-          setSelectedId(id);
-          setConfirmOpen(true);
-        }}
       />
+
+      {openCreate && (
+        <CreateAcc
+          open={openCreate}
+          onClose={() => setOpenCreate(false)}
+          onSuccess={loadAccounts}
+          accounts={accounts}
+          roles={roles}
+        />
+      )}
 
       {openEdit && selectedAccount && (
         <EditAcc
@@ -183,15 +182,16 @@ export default function Account() {
         />
       )}
 
-      <ConfirmDialog
-        isOpen={confirmOpen}
-        title="Xoá tài khoản"
-        message="Bạn có chắc muốn xoá tài khoản này không?"
-        onConfirm={handleDeleteAccount}
-        onCancel={() => setConfirmOpen(false)}
-        loading={deleting}
-        action="delete"
-      />
+      <Snackbar
+        open={snackbar.open}
+        autoHideDuration={3000}
+        onClose={() => setSnackbar({ ...snackbar, open: false })}
+        anchorOrigin={{ vertical: "top", horizontal: "right" }}
+      >
+        <Alert severity={snackbar.severity} sx={{ width: "100%" }}>
+          {snackbar.message}
+        </Alert>
+      </Snackbar>
     </Container>
   );
 }
