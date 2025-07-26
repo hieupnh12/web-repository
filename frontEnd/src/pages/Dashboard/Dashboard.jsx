@@ -1,11 +1,16 @@
+// ... các import giữ nguyên như bạn đã viết
 import React, { useState, useEffect } from 'react';
-import { 
-  Package, 
-  ShoppingCart, 
-  Users, 
+import {
+  Package,
+  ShoppingCart,
+  Users,
   TrendingUp,
   BarChart3,
-  Shield
+  Shield,
+  Filter,
+  Sparkles,
+  Clock,
+  CircleDot
 } from 'lucide-react';
 import * as dashboardService from '../../services/dashboardService';
 
@@ -32,7 +37,7 @@ const Dashboard = () => {
       setStats([
         {
           title: 'Tổng sản phẩm',
-          value: productData.totalProducts,
+          value: productData.totalProducts.toLocaleString(),
           change: `${productData.percentageIncrease.toFixed(1)}%`,
           isPositive: productData.percentageIncrease >= 0,
           icon: Package,
@@ -58,7 +63,7 @@ const Dashboard = () => {
         },
         {
           title: 'Khách hàng',
-          value: customerData.totalCustomers,
+          value: customerData.totalCustomers.toLocaleString(),
           change: `${customerData.percentageIncrease.toFixed(1)}%`,
           isPositive: customerData.percentageIncrease >= 0,
           icon: Users,
@@ -71,7 +76,7 @@ const Dashboard = () => {
         },
         {
           title: 'Doanh thu tháng',
-          value: `₫${(latestRevenue.revenues / 1000000).toFixed(1)}M`,
+          value: `₫${(latestRevenue.revenues / 1_000_000).toFixed(1)}M`,
           change: '+0%',
           isPositive: true,
           icon: TrendingUp,
@@ -111,58 +116,173 @@ const Dashboard = () => {
     }
   };
 
+  if (isLoading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center text-xl text-gray-500">Đang tải dữ liệu...</div>
+    );
+  }
+
   return (
-    <div className="min-h-screen p-4">
-      {isLoading ? (
-        <div className="text-center mt-32 text-gray-500 text-xl">Đang tải dữ liệu...</div>
-      ) : (
-        <div>
-          <h2 className="text-3xl font-bold mb-6">Tổng quan hệ thống</h2>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-            {stats.map((stat, index) => {
-              const Icon = stat.icon;
-              return (
-                <div key={index} className={`rounded-xl p-6 border ${stat.borderColor} ${stat.bgColor} shadow`}>
-                  <div className="flex justify-between items-center mb-4">
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-gray-50 to-blue-50 relative overflow-hidden">
+      {/* Background float effects */}
+      <div className="absolute -top-40 -right-40 w-80 h-80 bg-blue-100/30 rounded-full blur-3xl animate-float"></div>
+      <div className="absolute -bottom-40 -left-40 w-96 h-96 bg-indigo-100/30 rounded-full blur-3xl animate-float-delayed"></div>
+      <div className="absolute top-1/3 left-1/4 w-60 h-60 bg-purple-100/20 rounded-full blur-3xl animate-float-slow"></div>
+
+      {/* Header intro section */}
+      <div className="relative z-10 bg-white/80 backdrop-blur-lg border-b border-gray-200/50 px-6 py-4 shadow-sm">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center space-x-4">
+            <div className="flex items-center space-x-3">
+              <div className="w-12 h-12 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-xl flex items-center justify-center shadow-lg shadow-blue-500/25">
+                <Package className="w-7 h-7 text-white" />
+              </div>
+              <div>
+                <h1 className="text-2xl font-bold bg-gradient-to-r from-gray-800 via-blue-700 to-indigo-700 bg-clip-text text-transparent">
+                  QUẢN LÝ KHO
+                </h1>
+                <p className="text-sm text-gray-600">Hệ thống IMEI</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Main content */}
+      <div className="relative z-10 p-6 space-y-8">
+        {/* Hero banner */}
+        <div className="bg-gradient-to-r from-blue-600 via-indigo-600 to-purple-600 text-white rounded-3xl p-8 relative overflow-hidden border border-blue-200 shadow-2xl">
+          <div className="absolute top-1/2 right-1/4 w-32 h-32 bg-gradient-to-br from-blue-400/20 to-purple-400/20 rounded-full blur-xl animate-pulse"></div>
+          <div className="relative z-10 flex items-center justify-between">
+            <div>
+              <div className="flex items-center space-x-4 mb-6">
+                <div className="flex items-center space-x-3 bg-white/10 backdrop-blur-sm px-4 py-2 rounded-full border border-white/20">
+                  <CircleDot className="w-4 h-4 text-green-400 animate-pulse" />
+                  <span className="text-sm font-medium">Hệ thống đang hoạt động</span>
+                </div>
+                <div className="flex items-center space-x-2 bg-white/10 backdrop-blur-sm px-4 py-2 rounded-full border border-white/20">
+                  <Clock className="w-4 h-4 text-blue-200" />
+                  <span className="text-sm">Cập nhật: {new Date().toLocaleTimeString('vi-VN')}</span>
+                </div>
+              </div>
+              <h1 className="text-4xl font-bold mb-4 leading-tight">
+                HỆ THỐNG QUẢN LÝ KHO <br />
+                <span className="bg-gradient-to-r from-blue-200 to-purple-200 bg-clip-text text-transparent">
+                  ĐIỆN THOẠI THEO MÃ IMEI
+                </span>
+              </h1>
+              <p className="text-blue-100 text-lg leading-relaxed mb-3 max-w-2xl">
+                Hãy hướng về phía mặt trời, nơi mà bóng tối luôn ở phía sau lưng bạn.
+                <br />
+                Điều mà hoa hướng dương vẫn làm mỗi ngày.
+              </p>
+            </div>
+          </div>
+        </div>
+
+        {/* Section: Tổng quan hệ thống */}
+        <div className="flex items-center justify-between">
+          <h2 className="text-3xl font-bold bg-gradient-to-r from-gray-800 via-blue-700 to-indigo-700 bg-clip-text text-transparent flex items-center">
+            <Sparkles className="w-8 h-8 mr-3 text-blue-500 animate-pulse" />
+            Tổng quan hệ thống
+          </h2>
+          <div className="flex items-center space-x-4">
+            <select
+              value={selectedPeriod}
+              onChange={(e) => setSelectedPeriod(e.target.value)}
+              className="px-6 py-3 bg-white/80 border border-gray-200 rounded-xl text-gray-700 shadow-sm hover:bg-white"
+            >
+              <option value="day">Hôm nay</option>
+              <option value="week">Tuần này</option>
+              <option value="month">Tháng này</option>
+              <option value="year">Năm nay</option>
+            </select>
+            <button className="flex items-center space-x-2 px-6 py-3 bg-gradient-to-r from-blue-500 to-indigo-600 text-white rounded-xl shadow-lg">
+              <Filter className="w-5 h-5" />
+              <span className="font-medium">Lọc</span>
+            </button>
+          </div>
+        </div>
+
+        {/* Stats Cards */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+          {stats.map((stat, index) => {
+            const Icon = stat.icon;
+            return (
+              <div key={index} className="relative group">
+                <div className={`relative ${stat.bgColor} rounded-3xl p-8 border-2 ${stat.borderColor} shadow-xl hover:-translate-y-2 hover:scale-105 transition-all`}>
+                  <div className="flex items-center justify-between mb-6">
                     <div>
-                      <p className="text-gray-600 text-sm">{stat.title}</p>
-                      <p className="text-2xl font-bold">{stat.value}</p>
+                      <p className="text-sm text-gray-600">{stat.title}</p>
+                      <p className="text-4xl font-bold text-gray-800">{stat.value}</p>
                     </div>
-                    <div className={`p-2 rounded-xl ${stat.color}`}><Icon className="text-white w-6 h-6" /></div>
+                    <div className={`${stat.color} p-4 rounded-2xl`}>
+                      <Icon className="w-8 h-8 text-white" />
+                    </div>
                   </div>
-                  <div className="flex justify-between items-center text-sm">
+                  <div className="flex justify-between text-sm">
                     <span className={stat.isPositive ? 'text-green-600' : 'text-red-600'}>{stat.change}</span>
                     <span className="text-gray-500">{stat.description}</span>
                   </div>
                 </div>
-              );
-            })}
-          </div>
+              </div>
+            );
+          })}
+        </div>
 
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mt-12">
-            {features.map((feature, index) => {
-              const Icon = feature.icon;
-              return (
-                <div key={index} className={`rounded-2xl p-6 border ${feature.borderColor} ${feature.bgColor} shadow-lg`}>
-                  <div className="flex items-center mb-4">
-                    <div className={`p-4 rounded-xl bg-gradient-to-br ${feature.color} text-white`}><Icon className="w-6 h-6" /></div>
-                    <h3 className="text-xl font-bold ml-4 text-gray-800">{feature.title}</h3>
+        {/* Features */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+          {features.map((feature, index) => {
+            const Icon = feature.icon;
+            return (
+              <div key={index} className={`relative ${feature.bgColor} rounded-3xl p-10 border-2 ${feature.borderColor} shadow-xl`}>
+                <div className="text-center">
+                  <div className={`w-24 h-24 bg-gradient-to-br ${feature.color} rounded-3xl mx-auto mb-8 flex items-center justify-center`}>
+                    <Icon className="w-12 h-12 text-white" />
                   </div>
-                  <p className="text-gray-600 mb-4">{feature.description}</p>
-                  <div className="grid grid-cols-2 gap-4">
+                  <h3 className="text-2xl font-bold bg-gradient-to-r from-gray-800 to-gray-600 bg-clip-text text-transparent mb-6">
+                    {feature.title}
+                  </h3>
+                  <p className="text-gray-600 mb-8">{feature.description}</p>
+                  <div className="grid grid-cols-2 gap-6">
                     {Object.entries(feature.stats).map(([label, value], i) => (
-                      <div key={i} className="bg-white rounded-xl p-4 border text-center">
-                        <p className="text-gray-500 text-sm capitalize">{label}</p>
-                        <p className="text-lg font-bold text-blue-700">{value}</p>
+                      <div key={i} className="bg-white/60 backdrop-blur-sm rounded-2xl p-6 border border-gray-200 text-center">
+                        <p className="text-sm text-gray-500 capitalize mb-2">{label}</p>
+                        <p className="text-2xl font-bold text-gray-800">{value}</p>
                       </div>
                     ))}
                   </div>
                 </div>
-              );
-            })}
-          </div>
+              </div>
+            );
+          })}
         </div>
-      )}
+      </div>
+
+      {/* Animations */}
+      <style jsx>{`
+        @keyframes float {
+          0%, 100% { transform: translateY(0px); }
+          50% { transform: translateY(-20px); }
+        }
+        @keyframes float-delayed {
+          0%, 100% { transform: translateY(0px); }
+          50% { transform: translateY(-30px); }
+        }
+        @keyframes float-slow {
+          0%, 100% { transform: translateY(0px); }
+          50% { transform: translateY(-15px); }
+        }
+        .animate-float {
+          animation: float 6s ease-in-out infinite;
+        }
+        .animate-float-delayed {
+          animation: float-delayed 8s ease-in-out infinite;
+        }
+        .animate-float-slow {
+          animation: float-slow 10s ease-in-out infinite;
+        }
+      `}</style>
     </div>
   );
 };
