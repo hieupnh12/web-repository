@@ -4,27 +4,27 @@ import com.app.product_warehourse.dto.request.PermissionRequest;
 import com.app.product_warehourse.dto.request.RoleCreateRequest;
 import com.app.product_warehourse.dto.request.RoleUpdateRequest;
 import com.app.product_warehourse.dto.response.RoleResponse;
-import com.app.product_warehourse.entity.Account;
-import com.app.product_warehourse.entity.Functions;
-import com.app.product_warehourse.entity.Permission;
-import com.app.product_warehourse.entity.Role;
+import com.app.product_warehourse.entity.*;
 import com.app.product_warehourse.exception.AppException;
 import com.app.product_warehourse.exception.ErrorCode;
 import com.app.product_warehourse.mapper.RoleMapper;
 import com.app.product_warehourse.mapper.StaffMapper;
-import com.app.product_warehourse.repository.AccountRepository;
-import com.app.product_warehourse.repository.FunctionRepository;
-import com.app.product_warehourse.repository.PermissionRepository;
-import com.app.product_warehourse.repository.RoleRepository;
+import com.app.product_warehourse.repository.*;
 import jakarta.transaction.Transactional;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
+import lombok.experimental.NonFinal;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
+import java.time.Instant;
+import java.time.temporal.ChronoUnit;
+import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -40,6 +40,12 @@ public class RoleService {
     FunctionRepository functionRepository;
     RoleMapper roleMapper;
     AccountRepository accountRepository;
+    RedisTemplate<String, String> redisTemplate;
+    InvalidTokenRepository invalidTokenRepository;
+
+    @NonFinal
+    @Value("${jwt.valid-duration}")
+    protected Long VALID_DURATION;
 
     @PreAuthorize("hasRole('ADMIN')")
     @Transactional
@@ -81,19 +87,19 @@ public class RoleService {
     }
     @Transactional
     public RoleResponse updateRole(Long roleId, RoleUpdateRequest request) {
+        // 1. Tìm Role
         Role role = roleRepository.findById(roleId)
                 .orElseThrow(() -> new AppException(ErrorCode.ROLE_NOT_EXIT));
 
-        // 1. Cập nhật tên và mô tả
+        // 2. Cập nhật tên và mô tả
         role.setRoleName(request.getRoleName());
         role.setDescription(request.getDescription());
 
-        // 2. Xử lý Permission mới
+        // 3. Xử lý Permission mới
         Set<Permission> newPermissions = request.getPermissions().stream()
                 .map(p -> {
                     Functions function = functionRepository.findById(p.getFunctionId())
                             .orElseThrow(() -> new AppException(ErrorCode.FUNCTION_NOT_EXIST));
-
                     return Permission.builder()
                             .functions(function)
                             .canView(p.isCanView())
@@ -104,17 +110,33 @@ public class RoleService {
                 })
                 .collect(Collectors.toSet());
 
-        // 3. Save Permission trước
+        // 4. Save Permission trước
         newPermissions = new HashSet<>(permissionRepository.saveAll(newPermissions));
 
-        // 4. Gán vào Role
+        // 5. Gán vào Role
         role.setPermissions(newPermissions);
 
-        // 5. Lưu lại Role và trả response
+        // 6. Lưu Role
         Role saved = roleRepository.save(role);
+
+        // 7. Hủy token của các user liên quan
+        List<Account> accounts = accountRepository.findByRoleId(roleId);
+        for (Account account : accounts) {
+            String jwtId = redisTemplate.opsForValue().get("jwt:" + account.getUserName());
+            if (jwtId != null) {
+                InvalidToken invalidToken = InvalidToken.builder()
+                        .id(jwtId)
+                        .expiryTime(new Date(Instant.now().plus(VALID_DURATION, ChronoUnit.SECONDS).toEpochMilli())) // Sử dụng VALID_DURATION từ cấu hình
+                        .build();
+                invalidTokenRepository.save(invalidToken);
+                redisTemplate.delete("jwt:" + account.getUserName());
+                redisTemplate.delete("permissions:" + account.getUserName());
+            }
+        }
+
+        // 8. Trả response
         return roleMapper.toRoleResponse(saved);
     }
-
 
     @PreAuthorize("hasRole('ADMIN')")
     public List<RoleResponse> getAllRoles() {
