@@ -4,7 +4,7 @@ import { TablePagination, Typography } from "@mui/material";
 
 const InventoryStatistic = () => {
   const [inventoryData, setInventoryData] = useState([]);
-  const [productId, setProductId] = useState("");
+  const [productVersionId, setProductVersionId] = useState("");
   const [productName, setProductName] = useState("");
   const [startDate, setStartDate] = useState("");
   const [endDate, setEndDate] = useState("");
@@ -35,10 +35,8 @@ const InventoryStatistic = () => {
         ? `${endDate} 23:59:59`
         : `${end.getFullYear()}-${String(end.getMonth() + 1).padStart(2, "0")}-${String(end.getDate()).padStart(2, "0")} 23:59:59`,
       productName: productName || "",
-      productVersionId: ""
+      productVersionId: productVersionId || ""
     };
-
-    if (productId) payload.productId = productId;
 
     fetchFilteredData(payload);
   };
@@ -81,9 +79,9 @@ const InventoryStatistic = () => {
         <div className="grid grid-cols-1 md:grid-cols-5 gap-4">
           <input
             type="text"
-            value={productId}
-            onChange={(e) => setProductId(e.target.value)}
-            placeholder="Nhập ID sản phẩm..."
+            value={productVersionId}
+            onChange={(e) => setProductVersionId(e.target.value)}
+            placeholder="Nhập mã phiên bản sản phẩm..."
             className="px-4 py-2 border border-gray-300 rounded-xl"
           />
           <input
