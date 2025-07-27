@@ -45,7 +45,7 @@ const InventorySummaryPage = () => {
     try {
       await updateInventoryStatus(inventoryId, 2); // Hoàn tất
       setOpenConfirm(false);
-      navigate('/inventory');
+      navigate('/manager/inventory');
     } catch (err) {
       console.error('Lỗi hoàn tất kiểm kê', err);
     }
