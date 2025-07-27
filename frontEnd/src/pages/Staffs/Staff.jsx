@@ -83,7 +83,7 @@ export default function Staff() {
         setStaffs(response.data.result);
       }
     } catch {
-      setSnackbar({ open: true, message: "Error loading employee list", severity: "error" });
+      setSnackbar({ open: true, message: "Lỗi khi tải danh sách nhân viên", severity: "Lỗi" });
     } finally {
       setLoading(false);
     }
@@ -98,10 +98,10 @@ export default function Staff() {
       const response = await createStaff(newStaff);
       if (response.status === 200) {
         setStaffs([...staffs, response.data.result]);
-        setSnackbar({ open: true, message: "Add employee successfully", severity: "success" });
+        setSnackbar({ open: true, message: "Thêm nhân viên thành công", severity: "Thành Công" });
       }
     } catch {
-      setSnackbar({ open: true, message: "Error adding employee", severity: "error" });
+      setSnackbar({ open: true, message: "Lỗi khi thêm nhân viên", severity: "Lỗi" });
     }
   };
 
@@ -114,12 +114,12 @@ export default function Staff() {
             s.staffId === response.data.result.staffId ? response.data.result : s
           )
         );
-        setSnackbar({ open: true, message: "Employee update successful", severity: "success" });
+        setSnackbar({ open: true, message: "Cập nhật nhân viên thành công", severity: "Thành Công" });
         setOpenEdit(false);
         setSelectedStaff(null);
       }
     } catch {
-      setSnackbar({ open: true, message: "Error while updating", severity: "error" });
+      setSnackbar({ open: true, message: "Lỗi khi cập nhật", severity: "Lỗi" });
     }
   };
 
@@ -129,10 +129,10 @@ export default function Staff() {
       const response = await removeStaff(selectedId);
       if (response.status === 200) {
         setStaffs((prev) => prev.filter((s) => s.staffId !== selectedId));
-        setSnackbar({ open: true, message: "Delete successful", severity: "success" });
+        setSnackbar({ open: true, message: "Xóa thành công", severity: "Thành Công" });
       }
     } catch {
-      setSnackbar({ open: true, message: "Staff currently employed", severity: "error" });
+      setSnackbar({ open: true, message: "Nhân viên hiện đang làm việc", severity: "Lỗi" });
     } finally {
       setDeleting(false);
       setConfirmOpen(false);
@@ -156,7 +156,7 @@ export default function Staff() {
         <Box sx={{ display: "flex", width: "40%", alignItems: "center", gap: 1 }}>
           <StyledTextField
             fullWidth
-            placeholder="Search by name, phone number or email..."
+            placeholder="Tìm kiếm theo tên, số điện thoại hoặc email..."
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             InputProps={{
@@ -219,7 +219,7 @@ export default function Staff() {
         onConfirm={handleDeleteStaff}
         onCancel={() => setConfirmOpen(false)}
         loading={deleting}
-        action="delete"
+        action="Xóa"
       />
 
       {/* Snackbar */}

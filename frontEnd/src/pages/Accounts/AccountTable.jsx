@@ -1,188 +1,194 @@
-import React, { useEffect, useState } from "react";
+import React from "react";
 import {
   Box,
-  Container,
-  IconButton,
-  Button,
-  TextField,
-  InputAdornment,
+  Typography,
   Tooltip,
+  IconButton,
+  Paper,
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableRow,
+  TablePagination,
+  Skeleton,
 } from "@mui/material";
 import {
-  Search as SearchIcon,
-  Refresh as RefreshIcon,
-  Add as AddIcon,
+  Edit as EditIcon,
+  Person as PersonIcon,
+  Badge as BadgeIcon,
+  CheckCircle,
+  Cancel,
 } from "@mui/icons-material";
-import { styled } from "@mui/material/styles";
-import { toast } from "react-toastify";
+import { styled, alpha } from "@mui/material/styles";
 
-import CreateAcc from "./CreateAcc";
-import EditAcc from "./EditAcc";
-import AccountTable from "./AccountTable";
-import {
-  fetchAccounts,
-  updateAccount,
-  fetchRoles,
-} from "../../services/accountService";
-
-const StyledButton = styled(Button)(() => ({
-  borderRadius: 8,
-  textTransform: "none",
-  fontWeight: 500,
-  padding: "10px 24px",
-  background: "linear-gradient(45deg, #1976d2 30%, #64b5f6 90%)",
-  boxShadow: "0 3px 15px rgba(25, 118, 210, 0.3)",
-  transition: "all 0.3s ease",
+const StyledPaper = styled(Paper)(({ theme }) => ({
+  background: "linear-gradient(145deg, #ffffff 0%, #f0f7ff 100%)",
+  borderRadius: 16,
+  boxShadow: "0 8px 32px rgba(33, 150, 243, 0.1)",
+  overflow: "hidden",
+  transition: "all 0.3s ease-in-out",
   "&:hover": {
-    transform: "translateY(-2px)",
-    boxShadow: "0 6px 25px rgba(25, 118, 210, 0.4)",
+    boxShadow: "0 12px 48px rgba(33, 150, 243, 0.2)",
   },
 }));
 
-const StyledTextField = styled(TextField)(() => ({
-  "& .MuiOutlinedInput-root": {
-    borderRadius: 10,
-    backgroundColor: "white",
-    transition: "all 0.3s ease",
-    "&:hover": {
-      boxShadow: "0 4px 12px rgba(25, 118, 210, 0.1)",
-    },
-    "&.Mui-focused": {
-      boxShadow: "0 4px 20px rgba(25, 118, 210, 0.2)",
-    },
+const StyledTableHead = styled(TableHead)(({ theme }) => ({
+  backgroundColor: "#2196f3",
+  "& .MuiTableCell-head": {
+    color: "white",
+    fontWeight: 600,
+    fontSize: "0.95rem",
+    borderBottom: "none",
+    padding: "16px",
   },
 }));
 
-export default function Account() {
-  const [accounts, setAccounts] = useState([]);
-  const [roles, setRoles] = useState([]);
-  const [search, setSearch] = useState("");
-  const [loading, setLoading] = useState(true);
-  const [openEdit, setOpenEdit] = useState(false);
-  const [openCreate, setOpenCreate] = useState(false);
-  const [selectedAccount, setSelectedAccount] = useState(null);
+const StyledTableRow = styled(TableRow)(({ theme }) => ({
+  "&:nth-of-type(odd)": {
+    backgroundColor: alpha(theme.palette.primary.light, 0.05),
+  },
+  "&:hover": {
+    backgroundColor: alpha(theme.palette.primary.light, 0.1),
+    boxShadow: "0 4px 20px rgba(33, 150, 243, 0.1)",
+  },
+  transition: "all 0.3s ease",
+}));
 
-  const loadAccounts = async () => {
-    setLoading(true);
-    try {
-      const res = await fetchAccounts();
-      setAccounts(res?.data?.result || []);
-    } catch (err) {
-      toast.error("Không tải được danh sách tài khoản.");
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  useEffect(() => {
-    loadAccounts();
-    fetchRoles().then((res) => setRoles(res?.data?.result || []));
-  }, []);
-
-  const handleEditAccount = async (updatedData) => {
-    try {
-      await updateAccount(selectedAccount.staffId, {
-        userName: updatedData.userName,
-        roleId: parseInt(updatedData.roleId, 10),
-        status: updatedData.status,
-      });
-      toast.success("Cập nhật tài khoản thành công!");
-      loadAccounts();
-    } catch (err) {
-      toast.error(err?.response?.data?.message || "Lỗi cập nhật tài khoản.");
-    } finally {
-      setOpenEdit(false);
-      setSelectedAccount(null);
-    }
-  };
-
-  const filteredAccounts = accounts.filter(
-    (acc) =>
-      acc.userName?.toLowerCase().includes(search.toLowerCase()) ||
-      acc.roleName?.toLowerCase().includes(search.toLowerCase())
-  );
-
+const AccountTable = ({
+  accounts = [],
+  loading,
+  page,
+  rowsPerPage,
+  handleChangePage,
+  handleChangeRowsPerPage,
+  handleEdit,
+}) => {
   return (
-    <Container maxWidth="xl" sx={{ py: 4 }}>
-      {/* Header Controls */}
-      <Box
-        sx={{
-          mb: 4,
-          display: "flex",
-          justifyContent: "space-between",
-          flexWrap: "wrap",
-          alignItems: "center",
-          gap: 2,
-        }}
-      >
-        {/* Nút Thêm Tài Khoản bên trái */}
-        <StyledButton
-          startIcon={<AddIcon />}
-          onClick={() => setOpenCreate(true)}
-        >
-          Thêm tài khoản
-        </StyledButton>
+    <StyledPaper>
+      <TableContainer>
+        <Table>
+          <StyledTableHead>
+            <TableRow>
+              <TableCell>STT</TableCell>
+              <TableCell>Tên đăng nhập</TableCell>
+              <TableCell>Vai trò</TableCell>
+              <TableCell>Trạng thái</TableCell>
+              <TableCell align="center">Chức năng</TableCell>
+            </TableRow>
+          </StyledTableHead>
+          <TableBody>
+            {loading
+              ? [...Array(5)].map((_, index) => (
+                  <TableRow key={index}>
+                    <TableCell colSpan={5}>
+                      <Skeleton animation="wave" height={60} />
+                    </TableCell>
+                  </TableRow>
+                ))
+              : accounts
+                  .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
+                  .map((acc, index) => (
+                    <StyledTableRow key={acc.staffId}>
+                      <TableCell>{page * rowsPerPage + index + 1}</TableCell>
 
-        {/* Tìm kiếm bên phải */}
-        <Box
-          sx={{
-            display: "flex",
-            width: "40%",
-            alignItems: "center",
-            gap: 1,
-          }}
-        >
-          <StyledTextField
-            fullWidth
-            placeholder="Tìm kiếm theo tên đăng nhập hoặc vai trò..."
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-            InputProps={{
-              startAdornment: (
-                <InputAdornment position="start">
-                  <SearchIcon color="primary" />
-                </InputAdornment>
-              ),
-            }}
-          />
-          <Tooltip title="Tải lại">
-            <IconButton onClick={loadAccounts} disabled={loading}>
-              <RefreshIcon color="primary" />
-            </IconButton>
-          </Tooltip>
-        </Box>
-      </Box>
+                      {/* Tên đăng nhập */}
+                      <TableCell>
+                        <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+                          <PersonIcon fontSize="small" color="primary" />
+                          <Typography variant="body2" fontWeight={500}>
+                            {acc.userName}
+                          </Typography>
+                        </Box>
+                      </TableCell>
 
-      {/* Bảng danh sách tài khoản */}
-      <AccountTable
-        accounts={filteredAccounts}
-        loading={loading}
-        onEdit={(acc) => {
-          setSelectedAccount(acc);
-          setOpenEdit(true);
-        }}
+                      {/* Vai trò */}
+                      <TableCell>
+                        <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+                          <BadgeIcon fontSize="small" />
+                          {acc.roleName}
+                        </Box>
+                      </TableCell>
+
+                      {/* Trạng thái mới đẹp */}
+                      <TableCell>
+                        {acc.status ? (
+                          <Box
+                            sx={{
+                              display: "inline-flex",
+                              alignItems: "center",
+                              gap: 1,
+                              px: 1.5,
+                              py: 0.5,
+                              backgroundColor: "#4caf50",
+                              color: "white",
+                              borderRadius: "20px",
+                              fontSize: "0.85rem",
+                              fontWeight: 500,
+                            }}
+                          >
+                            <CheckCircle sx={{ fontSize: 18 }} />
+                            Hoạt động
+                          </Box>
+                        ) : (
+                          <Box
+                            sx={{
+                              display: "inline-flex",
+                              alignItems: "center",
+                              gap: 1,
+                              px: 1.5,
+                              py: 0.5,
+                              backgroundColor: "#f44336",
+                              color: "white",
+                              borderRadius: "20px",
+                              fontSize: "0.85rem",
+                              fontWeight: 500,
+                            }}
+                          >
+                            <Cancel sx={{ fontSize: 18 }} />
+                            Khóa
+                          </Box>
+                        )}
+                      </TableCell>
+
+                      {/* Chức năng */}
+                      <TableCell align="center">
+                        <Tooltip title="Chỉnh sửa">
+                          <IconButton
+                            onClick={() => handleEdit?.(acc)}
+                            sx={{
+                              color: "#2196f3",
+                              "&:hover": {
+                                backgroundColor: "#e3f2fd",
+                                transform: "scale(1.1)",
+                              },
+                              transition: "all 0.3s ease",
+                            }}
+                          >
+                            <EditIcon fontSize="small" />
+                          </IconButton>
+                        </Tooltip>
+                      </TableCell>
+                    </StyledTableRow>
+                  ))}
+          </TableBody>
+        </Table>
+      </TableContainer>
+
+      <TablePagination
+        rowsPerPageOptions={[5, 10, 25]}
+        component="div"
+        count={accounts.length}
+        rowsPerPage={rowsPerPage}
+        page={page}
+        onPageChange={handleChangePage}
+        onRowsPerPageChange={handleChangeRowsPerPage}
+        labelRowsPerPage="Số hàng mỗi trang:"
+        sx={{ borderTop: "1px solid #e0e0e0", backgroundColor: "#fafafa" }}
       />
-
-      {/* Popup tạo tài khoản */}
-      {openCreate && (
-        <CreateAcc
-          onClose={() => setOpenCreate(false)}
-          onCreated={loadAccounts}
-        />
-      )}
-
-      {/* Popup chỉnh sửa tài khoản */}
-      {openEdit && selectedAccount && (
-        <EditAcc
-          account={selectedAccount}
-          roles={roles}
-          onClose={() => {
-            setOpenEdit(false);
-            setSelectedAccount(null);
-          }}
-          onSave={handleEditAccount}
-        />
-      )}
-    </Container>
+    </StyledPaper>
   );
-}
+};
+
+export default AccountTable;
