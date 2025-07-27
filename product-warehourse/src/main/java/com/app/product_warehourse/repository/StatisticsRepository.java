@@ -15,25 +15,37 @@ public interface StatisticsRepository extends JpaRepository<ExportReceipt, Strin
 
     @Query(value = """
             WITH RECURSIVE dates(d) AS (
-                SELECT CURDATE() - INTERVAL 7 DAY
-                UNION ALL
-                SELECT d + INTERVAL 1 DAY
-                FROM dates
-                WHERE d < CURDATE()
-            )
-            SELECT 
-                CAST(d AS CHAR) AS NGAY,
-                COALESCE(SUM(ed.unit_price * ed.quantity), 0) AS danh_thu,
-                COALESCE(SUM(id.unit_price * id.quantity), 0) AS chi_phi,
-                COALESCE(SUM(ed.unit_price * ed.quantity), 0) - COALESCE(SUM(id.unit_price * id.quantity), 0) AS loi_nhuan
-            FROM dates dt
-            LEFT JOIN export e ON DATE(e.export_time) = dt.d
-            LEFT JOIN export_details ed ON ed.export_id = e.export_id
-            LEFT JOIN product_item pi ON pi.export_id = ed.export_id
-            LEFT JOIN import_details id ON id.import_id = pi.import_id
-                AND id.product_version_id = pi.product_version_id
-            GROUP BY dt.d
-            ORDER BY dt.d
+                             SELECT CURDATE() - INTERVAL 7 DAY
+                             UNION ALL
+                             SELECT d + INTERVAL 1 DAY
+                             FROM dates
+                             WHERE d < CURDATE()
+                         ),
+                         doanh_thu_theo_ngay AS (
+                             SELECT\s
+                                 DATE(e.export_time) AS ngay,
+                                 SUM(ed.unit_price * ed.quantity) AS doanh_thu
+                             FROM export e
+                             JOIN export_details ed ON ed.export_id = e.export_id
+                             GROUP BY DATE(e.export_time)
+                         ),
+                         chi_phi_theo_ngay AS (
+                             SELECT\s
+                                 DATE(i.import_time) AS ngay,
+                                 SUM(id.unit_price * id.quantity) AS chi_phi
+                             FROM import i
+                             JOIN import_details id ON id.import_id = i.import_id
+                             GROUP BY DATE(i.import_time)
+                         )              
+                         SELECT
+                             CAST(d.d AS CHAR) AS ngay,
+                             COALESCE(dt.doanh_thu, 0) AS danh_thu,
+                             COALESCE(cp.chi_phi, 0) AS chi_phi,
+                             COALESCE(dt.doanh_thu, 0) - COALESCE(cp.chi_phi, 0) AS loi_nhuan
+                         FROM dates d
+                         LEFT JOIN doanh_thu_theo_ngay dt ON dt.ngay = d.d
+                         LEFT JOIN chi_phi_theo_ngay cp ON cp.ngay = d.d
+                         ORDER BY d.d;
             """, nativeQuery = true)
     List<InTheLast7DaysResponse> getReportInTheLast7Days();
 
@@ -60,192 +72,191 @@ public interface StatisticsRepository extends JpaRepository<ExportReceipt, Strin
     List<ProductInfoResponse> getAllProductInfo();
 
     @Query(value = """
-                        SELECT\s
-                m.month AS month,
-                COALESCE(SUM(i.unit_price * i.quantity), 0) AS expenses,
-                COALESCE(SUM(x.unit_price * x.quantity), 0) AS revenue,
-                COALESCE(SUM(x.unit_price * x.quantity), 0) - COALESCE(SUM(i.unit_price * i.quantity), 0) AS profit                     
-                        FROM (
-                SELECT 1 AS month UNION ALL
-                SELECT 2 UNION ALL
-                SELECT 3 UNION ALL
-                SELECT 4 UNION ALL
-                SELECT 5 UNION ALL
-                SELECT 6 UNION ALL
-                SELECT 7 UNION ALL
-                SELECT 8 UNION ALL
-                SELECT 9 UNION ALL
-                SELECT 10 UNION ALL
-                SELECT 11 UNION ALL
-                SELECT 12
-                        ) AS m
-                        LEFT JOIN export px\s
-                ON MONTH(px.export_time) = m.month\s
-                AND YEAR(px.export_time) = ?
-                        LEFT JOIN export_details x\s
-                ON px.export_id = x.export_id
-                        LEFT JOIN product_item prIt\s
-                ON prIt.export_id = x.export_id\s
-                AND prIt.product_version_id = x.product_version_id
-                        LEFT JOIN import_details i\s
-                ON i.import_id = prIt.import_id\s
-                AND i.product_version_id = prIt.product_version_id
-                        GROUP BY m.month
-                        ORDER BY m.month;
+                        WITH RECURSIVE months(m) AS (
+                                             SELECT 1
+                                             UNION ALL
+                                             SELECT m + 1 FROM months WHERE m < 12
+                                         ),
+                                         doanh_thu_theo_thang AS (
+                                             SELECT\s
+                                                 MONTH(e.export_time) AS thang,
+                                                 SUM(ed.unit_price * ed.quantity) AS doanh_thu
+                                             FROM export e
+                                             JOIN export_details ed ON ed.export_id = e.export_id
+                                             WHERE YEAR(e.export_time) = ?1
+                                             GROUP BY MONTH(e.export_time)
+                                         ),
+                                         chi_phi_theo_thang AS (
+                                             SELECT\s
+                                                 MONTH(i.import_time) AS thang,
+                                                 SUM(id.unit_price * id.quantity) AS chi_phi
+                                             FROM import i
+                                             JOIN import_details id ON id.import_id = i.import_id
+                                             WHERE YEAR(i.import_time) = ?1
+                                             GROUP BY MONTH(i.import_time)
+                                         )
+                                         SELECT\s
+                                             m.m AS month,
+                                             COALESCE(cp.chi_phi, 0) AS expenses,
+                                             COALESCE(dt.doanh_thu, 0) AS revenue,
+                                             COALESCE(dt.doanh_thu, 0) - COALESCE(cp.chi_phi, 0) AS profit
+                                         FROM months m
+                                         LEFT JOIN doanh_thu_theo_thang dt ON dt.thang = m.m
+                                         LEFT JOIN chi_phi_theo_thang cp ON cp.thang = m.m
+                                         ORDER BY m.m;
             """, nativeQuery = true)
     List<MonthInYearResponse> getAllMonthInYear(Long year);
 
     @Query(value = """
-    SELECT
-        dates.date AS date,
-        COALESCE(SUM(id.unit_price * id.quantity), 0) AS expenses,
-        COALESCE(SUM(ed.unit_price * ed.quantity), 0) AS revenue,
-        COALESCE(SUM(ed.unit_price * ed.quantit), 0) - COALESCE(SUM(id.unit_price * id.quantity), 0) AS profits
-    FROM (
-        SELECT DATE(:dates) + INTERVAL c.number DAY AS date
-        FROM (
-            SELECT 0 AS number 
-            UNION ALL SELECT 1 
-            UNION ALL SELECT 2 
-            UNION ALL SELECT 3
-            UNION ALL SELECT 4 
-            UNION ALL SELECT 5 
-            UNION ALL SELECT 6 
-            UNION ALL SELECT 7
-            UNION ALL SELECT 8 
-            UNION ALL SELECT 9 
-            UNION ALL SELECT 10 
-            UNION ALL SELECT 11
-            UNION ALL SELECT 12 
-            UNION ALL SELECT 13 
-            UNION ALL SELECT 14 
-            UNION ALL SELECT 15
-            UNION ALL SELECT 16
-            UNION ALL SELECT 17 
-            UNION ALL SELECT 18 
-            UNION ALL SELECT 19
-            UNION ALL SELECT 20 
-            UNION ALL SELECT 21 
-            UNION ALL SELECT 22 
-            UNION ALL SELECT 23
-            UNION ALL SELECT 24 
-            UNION ALL SELECT 25 
-            UNION ALL SELECT 26 
-            UNION ALL SELECT 27
-            UNION ALL SELECT 28 
-            UNION ALL SELECT 29
-            UNION ALL SELECT 30
-        ) AS c
-        WHERE DATE(:dates) + INTERVAL c.number DAY <= LAST_DAY(:dates)
-    ) AS dates
-    LEFT JOIN export ex
-        ON DATE(ex.export_time) = dates.date
-    LEFT JOIN export_details ed
-        ON ex.export_id = ed.export_id
-    LEFT JOIN product_item pI
-        ON ed.export_id = pI.export_id
-        AND ed.product_version_id = pI.product_version_id
-    LEFT JOIN import_details id
-        ON pI.import_id = id.import_id
-        AND pI.product_version_id = id.product_version_id
-    GROUP BY dates.date
-    ORDER BY dates.date
+  WITH RECURSIVE dates AS (
+                           SELECT DATE(:dates) AS date
+                           UNION ALL
+                           SELECT date + INTERVAL 1 DAY
+                           FROM dates
+                           WHERE date + INTERVAL 1 DAY <= LAST_DAY(:dates)
+                       ),
+                       doanh_thu_theo_ngay AS (
+                           SELECT DATE(e.export_time) AS date, SUM(ed.unit_price * ed.quantity) AS revenue
+                           FROM export e
+                           JOIN export_details ed ON ed.export_id = e.export_id
+                           WHERE DATE(e.export_time) BETWEEN DATE(:dates) AND LAST_DAY(:dates)
+                           GROUP BY DATE(e.export_time)
+                       ),
+                       chi_phi_theo_ngay AS (
+                           SELECT DATE(i.import_time) AS date, SUM(id.unit_price * id.quantity) AS expenses
+                           FROM import i
+                           JOIN import_details id ON id.import_id = i.import_id
+                           WHERE DATE(i.import_time) BETWEEN DATE(:dates) AND LAST_DAY(:dates)
+                           GROUP BY DATE(i.import_time)
+                       )
+                       SELECT\s
+                           d.date,
+                           COALESCE(cp.expenses, 0) AS expenses,
+                           COALESCE(dt.revenue, 0) AS revenue,
+                           COALESCE(dt.revenue, 0) - COALESCE(cp.expenses, 0) AS profits
+                       FROM dates d
+                       LEFT JOIN doanh_thu_theo_ngay dt ON dt.date = d.date
+                       LEFT JOIN chi_phi_theo_ngay cp ON cp.date = d.date
+                       ORDER BY d.date;
 """, nativeQuery = true)
     List<DayInMonthResponse> getAllDayInMonth(String dates);
 
     @Query(value = """
-    WITH RECURSIVE years(year) AS (
-      SELECT ?1
-      UNION ALL
-      SELECT year + 1
-      FROM years
-      WHERE year < ?2
-    )
-    SELECT\s
-      years.year AS year,
-      COALESCE(SUM(id.unit_price * id.quantity), 0) AS expenses,\s
-      COALESCE(SUM(ex.unit_price * ex.quantity), 0) AS revenue,
-      COALESCE(SUM(id.unit_price * id.quantity), 0) - COALESCE(SUM(ex.unit_price * ex.quantity), 0) AS profits
-    FROM years
-    LEFT JOIN export e ON YEAR(e.export_time) = years.year
-    LEFT JOIN export_details ex ON e.export_id = ex.export_id
-    LEFT JOIN product_item pi ON pi.export_id = ex.export_id\s
-                        AND pi.product_version_id = ex.product_version_id
-    LEFT JOIN import_details id ON pi.import_id = id.import_id\s
-                          AND pi.product_version_id = id.product_version_id
-    GROUP BY years.year
-    ORDER BY years.year;
+                        WITH RECURSIVE years(y) AS (
+                            SELECT ?1 AS y 
+                            UNION ALL
+                            SELECT y + 1 FROM years WHERE y + 1 <= ?2 
+                        ),
+                        doanh_thu_theo_nam AS (
+                            SELECT
+                                YEAR(e.export_time) AS nam,
+                                SUM(ed.unit_price * ed.quantity) AS doanh_thu
+                            FROM export e
+                            JOIN export_details ed ON ed.export_id = e.export_id
+                            WHERE YEAR(e.export_time) BETWEEN ?1 AND ?2
+                            GROUP BY YEAR(e.export_time)
+                        ),
+                        chi_phi_theo_nam AS (
+                            SELECT
+                                YEAR(i.import_time) AS nam,
+                                SUM(id.unit_price * id.quantity) AS chi_phi
+                            FROM import i
+                            JOIN import_details id ON id.import_id = i.import_id
+                            WHERE YEAR(i.import_time) BETWEEN ?1 AND ?2
+                            GROUP BY YEAR(i.import_time)
+                        )
+                        SELECT
+                            y.y AS year,
+                            COALESCE(dt.doanh_thu, 0) AS revenue,
+                            COALESCE(cp.chi_phi, 0) AS expenses,
+                            COALESCE(dt.doanh_thu, 0) - COALESCE(cp.chi_phi, 0) AS profit
+                        FROM years y
+                        LEFT JOIN doanh_thu_theo_nam dt ON dt.nam = y.y
+                        LEFT JOIN chi_phi_theo_nam cp ON cp.nam = y.y
+                        ORDER BY y.y;
 """, nativeQuery = true)
     List<YearToYearResponse> getAllYearToYear(int startYear, int endYear);
 
 
     @Query(value = """
-            SELECT
-      dates.date AS Date,
-      COALESCE(SUM(id.unit_price * id.quantit), 0) AS expenses,
-      COALESCE(SUM(ed.unit_price * ed.quantit), 0) AS revenues,
-      COALESCE(SUM(ed.unit_price * ed.quantit), 0) - COALESCE(SUM(id.unit_price * id.quantit), 0)  AS profits
-    FROM (
-      SELECT DATE_ADD(?1, INTERVAL c.number DAY) AS date
-      FROM (
-        SELECT a.number + b.number * 31 AS number
-        FROM (
-          SELECT 0 AS number 
-        UNION ALL SELECT 1 
-        UNION ALL SELECT 2 
-        UNION ALL SELECT 3 
-        UNION ALL SELECT 4
-        UNION ALL SELECT 5 
-        UNION ALL SELECT 6 
-        UNION ALL SELECT 7 
-        UNION ALL SELECT 8 
-        UNION ALL SELECT 9
-        UNION ALL SELECT 10 
-        UNION ALL SELECT 11 
-        UNION ALL SELECT 12 
-        UNION ALL SELECT 13 
-        UNION ALL SELECT 14
-        UNION ALL SELECT 15 
-        UNION ALL SELECT 16 
-        UNION ALL SELECT 17 
-        UNION ALL SELECT 18 
-        UNION ALL SELECT 19
-        UNION ALL SELECT 20 
-        UNION ALL SELECT 21 
-        UNION ALL SELECT 22 
-        UNION ALL SELECT 23 
-        UNION ALL SELECT 24
-        UNION ALL SELECT 25 
-        UNION ALL SELECT 26 
-        UNION ALL SELECT 27 
-        UNION ALL SELECT 28 
-        UNION ALL SELECT 29
-        UNION ALL SELECT 30
-        ) AS a
-        CROSS JOIN (
-          SELECT 0 AS number 
-        UNION ALL SELECT 1 
-        UNION ALL SELECT 2 
-        UNION ALL SELECT 3 
-        UNION ALL SELECT 4
-        UNION ALL SELECT 5 
-        UNION ALL SELECT 6 
-        UNION ALL SELECT 7 
-        UNION ALL SELECT 8 
-        UNION ALL SELECT 9
-        UNION ALL SELECT 10
-        ) AS b
-      ) AS c
-      WHERE DATE_ADD(?1, INTERVAL c.number DAY) <= ?2
-    ) AS dates
-    LEFT JOIN export ex ON DATE(ex.export_time) = dates.date
-    LEFT JOIN export_details ed ON ex.export_id = ed.export_id
-    LEFT JOIN product_item pi ON pi.export_id = ed.export_id\s
-                        AND pi.product_version_id = ed.product_version_id
-    LEFT JOIN import_details id ON pi.import_id = id.import_id\s
-                          AND pi.product_version_id = id.product_version_id
-    GROUP BY dates.date
-    ORDER BY dates.date;
+                    SELECT
+                          d.date AS Date,
+                          COALESCE(expenses.total_expense, 0) AS expenses,
+                          COALESCE(revenues.total_revenue, 0) AS revenues,
+                          COALESCE(revenues.total_revenue, 0) - COALESCE(expenses.total_expense, 0) AS profits
+                        FROM (
+                          -- Generate list of dates
+                          SELECT DATE_ADD(?1, INTERVAL c.number DAY) AS date
+                          FROM (
+                            SELECT a.number + b.number * 31 AS number
+                            FROM (
+                              SELECT 0 AS number 
+                            UNION ALL SELECT 1 
+                            UNION ALL SELECT 2 
+                            UNION ALL SELECT 3 
+                            UNION ALL SELECT 4
+                            UNION ALL SELECT 5 
+                            UNION ALL SELECT 6 
+                            UNION ALL SELECT 7 
+                            UNION ALL SELECT 8 
+                            UNION ALL SELECT 9
+                            UNION ALL SELECT 10 
+                            UNION ALL SELECT 11 
+                            UNION ALL SELECT 12 
+                            UNION ALL SELECT 13 
+                            UNION ALL SELECT 14
+                            UNION ALL SELECT 15 
+                            UNION ALL SELECT 16 
+                            UNION ALL SELECT 17 
+                            UNION ALL SELECT 18 
+                            UNION ALL SELECT 19
+                            UNION ALL SELECT 20 
+                            UNION ALL SELECT 21 
+                            UNION ALL SELECT 22 
+                            UNION ALL SELECT 23 
+                            UNION ALL SELECT 24
+                            UNION ALL SELECT 25 
+                            UNION ALL SELECT 26 
+                            UNION ALL SELECT 27 
+                            UNION ALL SELECT 28 
+                            UNION ALL SELECT 29
+                            UNION ALL SELECT 30
+                            ) a
+                            CROSS JOIN (
+                              SELECT 0 AS number 
+                            UNION ALL SELECT 1 
+                            UNION ALL SELECT 2 
+                            UNION ALL SELECT 3 
+                            UNION ALL SELECT 4
+                            UNION ALL SELECT 5 
+                            UNION ALL SELECT 6 
+                            UNION ALL SELECT 7 
+                            UNION ALL SELECT 8 
+                            UNION ALL SELECT 9
+                            UNION ALL SELECT 10
+                            ) b
+                          ) c
+                          WHERE DATE_ADD(?1, INTERVAL c.number DAY) <= ?2
+                        ) d
+                        LEFT JOIN (
+                          -- Tính tổng chi phí (expenses) theo ngày
+                          SELECT
+                            DATE(i.import_time) AS date,
+                            SUM(id.unit_price * id.quantity) AS total_expense
+                          FROM import i
+                          JOIN import_details id ON i.import_id = id.import_id
+                          GROUP BY DATE(i.import_time)
+                        ) expenses ON expenses.date = d.date
+                        LEFT JOIN (
+                          -- Tính tổng doanh thu (revenues) theo ngày
+                          SELECT
+                            DATE(e.export_time) AS date,
+                            SUM(ed.unit_price * ed.quantity) AS total_revenue
+                          FROM export e
+                          JOIN export_details ed ON e.export_id = ed.export_id
+                          GROUP BY DATE(e.export_time)
+                        ) revenues ON revenues.date = d.date
+                        ORDER BY d.date;
     """, nativeQuery = true)
     List<DateToDateResponse> getAllDateToDate(LocalDate startDate, LocalDate endDate);
 

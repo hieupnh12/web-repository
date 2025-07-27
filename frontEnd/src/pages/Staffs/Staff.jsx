@@ -214,8 +214,8 @@ export default function Staff() {
 
       <ConfirmDialog
         isOpen={confirmOpen}
-        title="Delete Staff"
-        message="Are you sure you want to delete this staff member? This action cannot be undone."
+        title="Xoá nhân viên"
+        message="Bạn có chắc chắn muốn xóa thành viên nhân viên này không? Hành động này không thể hoàn tác."
         onConfirm={handleDeleteStaff}
         onCancel={() => setConfirmOpen(false)}
         loading={deleting}

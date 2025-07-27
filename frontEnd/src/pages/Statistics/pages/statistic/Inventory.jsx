@@ -4,6 +4,7 @@ import { TablePagination, Typography } from "@mui/material";
 
 const InventoryStatistic = () => {
   const [inventoryData, setInventoryData] = useState([]);
+  const [productId, setProductId] = useState("");
   const [productName, setProductName] = useState("");
   const [startDate, setStartDate] = useState("");
   const [endDate, setEndDate] = useState("");
@@ -12,42 +13,42 @@ const InventoryStatistic = () => {
   const [page, setPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(5);
 
-
-
-const handleFilter = () => {
-  const today = new Date();
-  const end = new Date(today.getFullYear(), today.getMonth() + 1, 0); // Ngày cuối tháng hiện tại
-  const start = new Date(today.getFullYear(), today.getMonth() - 3, 1); // Ngày đầu 4 tháng trước
-
-  const payload = {
-    startTime: "",
-    endTime: "",
-    productName: "",
-    productVersionId: ""
+  const handleChangePage = (event, newPage) => {
+    setPage(newPage);
   };
 
-  // Nếu không có ngày nhập, mặc định lấy 4 tháng gần đây
-  payload.startTime = startDate
-    ? `${startDate} 00:00:00`
-    : `${start.getFullYear()}-${String(start.getMonth() + 1).padStart(2, "0")}-01 00:00:00`;
+  const handleChangeRowsPerPage = (event) => {
+    setRowsPerPage(+event.target.value);
+    setPage(0);
+  };
 
-  payload.endTime = endDate
-    ? `${endDate} 23:59:59`
-    : `${end.getFullYear()}-${String(end.getMonth() + 1).padStart(2, "0")}-${String(end.getDate()).padStart(2, "0")} 23:59:59`;
+  const handleFilter = () => {
+    const today = new Date();
+    const end = new Date(today.getFullYear(), today.getMonth() + 1, 0);
+    const start = new Date(today.getFullYear(), today.getMonth() - 3, 1);
 
-  if (productName) payload.productName = productName;
+    const payload = {
+      startTime: startDate
+        ? `${startDate} 00:00:00`
+        : `${start.getFullYear()}-${String(start.getMonth() + 1).padStart(2, "0")}-01 00:00:00`,
+      endTime: endDate
+        ? `${endDate} 23:59:59`
+        : `${end.getFullYear()}-${String(end.getMonth() + 1).padStart(2, "0")}-${String(end.getDate()).padStart(2, "0")} 23:59:59`,
+      productName: productName || "",
+      productVersionId: ""
+    };
 
-  fetchFilteredData(payload);
+    if (productId) payload.productId = productId;
 
-};
+    fetchFilteredData(payload);
+  };
 
-
-  const fetchFilteredData = async (payload) => { console.log("Fetching Inventory Data with payload:", payload);
-  
+  const fetchFilteredData = async (payload) => {
+    console.log("Fetching Inventory Data with payload:", payload);
     try {
       const res = await getInventoryStatistic(payload);
       console.log("Filtered Inventory Data:", res);
-      
+
       if (res?.code === 1000) {
         setInventoryData(res.result || []);
         setError(null);
@@ -65,11 +66,6 @@ const handleFilter = () => {
     handleFilter();
   }, []);
 
-  const handleChangeRowsPerPage = (event) => {
-    setRowsPerPage(+event.target.value);
-    setPage(0);
-  };
-
   const paginatedData = inventoryData.slice(
     page * rowsPerPage,
     page * rowsPerPage + rowsPerPage
@@ -82,7 +78,14 @@ const handleFilter = () => {
           Thống kê tồn kho
         </Typography>
 
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+        <div className="grid grid-cols-1 md:grid-cols-5 gap-4">
+          <input
+            type="text"
+            value={productId}
+            onChange={(e) => setProductId(e.target.value)}
+            placeholder="Nhập ID sản phẩm..."
+            className="px-4 py-2 border border-gray-300 rounded-xl"
+          />
           <input
             type="text"
             value={productName}
@@ -160,7 +163,7 @@ const handleFilter = () => {
             count={inventoryData.length}
             rowsPerPage={rowsPerPage}
             page={page}
-            // onPageChange={handleChangePage}
+            onPageChange={handleChangePage}
             onRowsPerPageChange={handleChangeRowsPerPage}
             labelRowsPerPage="Số dòng mỗi trang:"
           />

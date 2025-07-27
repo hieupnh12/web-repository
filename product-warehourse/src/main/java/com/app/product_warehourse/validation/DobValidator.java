@@ -9,6 +9,7 @@ import java.util.Objects;
 public class DobValidator implements ConstraintValidator<DobConstraint, LocalDate> {
 
     private int min;
+    private int max;
 
     @Override
     public boolean isValid(LocalDate localDate, ConstraintValidatorContext constraintValidatorContext) {
@@ -17,12 +18,14 @@ public class DobValidator implements ConstraintValidator<DobConstraint, LocalDat
             return true;
 
         Long year  =  ChronoUnit.YEARS.between(localDate, LocalDate.now());
-        return year >= min;
+        return year >= min && year <= max;
     }
 
     @Override
     public void initialize(DobConstraint constraintAnnotation) {
         ConstraintValidator.super.initialize(constraintAnnotation);
         min = constraintAnnotation.min();
+        max = constraintAnnotation.max();
+
     }
 }

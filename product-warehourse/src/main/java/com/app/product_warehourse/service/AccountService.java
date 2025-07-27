@@ -7,24 +7,32 @@ import com.app.product_warehourse.dto.request.ChangePasswordRequest;
 import com.app.product_warehourse.dto.response.AccountResponse;
 import com.app.product_warehourse.dto.response.StaffSelectResponse;
 import com.app.product_warehourse.entity.Account;
+import com.app.product_warehourse.entity.InvalidToken;
 import com.app.product_warehourse.entity.Role;
 import com.app.product_warehourse.entity.Staff;
 import com.app.product_warehourse.exception.AppException;
 import com.app.product_warehourse.exception.ErrorCode;
 import com.app.product_warehourse.mapper.AccountMapper;
 import com.app.product_warehourse.repository.AccountRepository;
+import com.app.product_warehourse.repository.InvalidTokenRepository;
 import com.app.product_warehourse.repository.RoleRepository;
 import com.app.product_warehourse.repository.StaffRepository;
 import jakarta.transaction.Transactional;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
+import lombok.experimental.NonFinal;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.cache.annotation.Cacheable;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import java.time.Instant;
+import java.time.temporal.ChronoUnit;
+import java.util.Date;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -39,6 +47,12 @@ public class AccountService {
     RoleRepository roleRepository;
     PasswordEncoder passwordEncoder;
     EmailService emailService;
+    RedisTemplate<String, String> redisTemplate;
+    InvalidTokenRepository invalidTokenRepository;
+
+    @NonFinal
+    @Value("${jwt.valid-duration}")
+    protected Long VALID_DURATION;
 
     @PreAuthorize("hasRole('ADMIN') or hasAuthority('Account_CREATE')")
     @Transactional
@@ -83,11 +97,22 @@ public class AccountService {
         var account = accountRepository.findById(staffId).orElseThrow(() -> new AppException(ErrorCode.ACCOUNT_NOT_EXIST));
 
         boolean checkOldPassword = passwordEncoder.matches(request.getOldPassword(), account.getPassword());
-        if (checkOldPassword) {
+        if (!checkOldPassword) {
+            throw new AppException(ErrorCode.PASSWORD_NOT_MATCH);
+        }
+
             account.setPassword(passwordEncoder.encode(request.getNewPassword()));
             accountRepository.save(account);
-        } else {
-            throw new AppException(ErrorCode.PASSWORD_NOT_MATCH);
+        String jwtId = redisTemplate.opsForValue().get("jwt:" + account.getUserName());
+        if (jwtId != null) {
+            InvalidToken invalidToken = InvalidToken.builder()
+                    .id(jwtId)
+                    .expiryTime(new Date(Instant.now().plus(VALID_DURATION, ChronoUnit.SECONDS).toEpochMilli()))
+                    .build();
+            invalidTokenRepository.save(invalidToken);
+            redisTemplate.delete("jwt:" + account.getUserName());
+            redisTemplate.delete("permissions:" + account.getUserName());
+
         }
     }
     @PreAuthorize("hasRole('ADMIN') or hasAuthority('Account_UPDATE')")
@@ -97,6 +122,19 @@ public class AccountService {
                 account.setStatus(request.getStatus());
                 account.setRole(roleRepository.findById(request.getRoleId()).orElseThrow(()-> new AppException(ErrorCode.ROLE_NOT_EXIT)));
                 accountRepository.save(account);
+
+        String jwtId = redisTemplate.opsForValue().get("jwt:" + account.getUserName());
+        if (jwtId != null) {
+            InvalidToken invalidToken = InvalidToken.builder()
+                    .id(jwtId)
+                    .expiryTime(new Date(Instant.now().plus(VALID_DURATION, ChronoUnit.SECONDS).toEpochMilli()))
+                    .build();
+            invalidTokenRepository.save(invalidToken);
+            redisTemplate.delete("jwt:" + account.getUserName());
+            redisTemplate.delete("permissions:" + account.getUserName());
+        }
+
+
                 return accountMapper.accountToAccountResponse(account,account.getRole().getRoleId(),account.getRole().getRoleName());
         }
 

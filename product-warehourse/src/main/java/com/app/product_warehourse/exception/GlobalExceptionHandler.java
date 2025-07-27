@@ -6,6 +6,7 @@ import jakarta.validation.ConstraintViolation;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageNotReadableException;
+import org.springframework.security.core.AuthenticationException;
 import org.springframework.web.HttpMediaTypeNotSupportedException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
@@ -23,6 +24,7 @@ import java.util.Objects;
 @ControllerAdvice
 public class GlobalExceptionHandler {
     private static final String MIN_ATTRIBUTE = "min";
+    private static final String MAX_ATTRIBUTE = "max";
 
 //    @ExceptionHandler(value = Exception.class)
 //    ResponseEntity<ApiResponse> handlingRuntimeException(RuntimeException exception) {
@@ -127,10 +129,14 @@ public class GlobalExceptionHandler {
 
     private String mapAttribute(String message, Map<String,Object> attributes) {
         String minvalue = String.valueOf(attributes.get(MIN_ATTRIBUTE));
-
-        return message.replace("{"+ MIN_ATTRIBUTE +"}", minvalue);
+        String maxvalue = String.valueOf(attributes.get(MAX_ATTRIBUTE));
+        return message
+                    .replace("{"+ MIN_ATTRIBUTE +"}", minvalue)
+                    .replace("{"+ MAX_ATTRIBUTE +"}", maxvalue);
 
     }
+
+
 
 
 
@@ -214,8 +220,5 @@ public class GlobalExceptionHandler {
                 .status(errorCode.getStatusCode())
                 .body(apiResponse);
     }
-
-
-
 
 }

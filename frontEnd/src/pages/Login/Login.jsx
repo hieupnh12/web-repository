@@ -233,7 +233,7 @@ export default function Login() {
                   onBlur={() => setIsFormFocused(false)}
                 />
                 {errors.username && (
-                  <div className="absolute -bottom-6 left-0 text-red-400 text-sm flex items-center">
+                  <div className="login-error absolute -bottom-6 left-0 text-red-400 text-sm flex items-center">
                     <span className="mr-1">⚠</span>
                     {errors.username}
                   </div>
@@ -273,7 +273,7 @@ export default function Login() {
                   {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
                 </button>
                 {errors.password && (
-                  <div className="absolute -bottom-6 left-0 text-red-400 text-sm flex items-center">
+                  <div className="login-error absolute -bottom-6 left-0 text-red-400 text-sm flex items-center">
                     <span className="mr-1">⚠</span>
                     {errors.password}
                   </div>
@@ -293,7 +293,7 @@ export default function Login() {
 
             {/* Server Error */}
             {serverError && (
-              <div className="mb-3 p-4 bg-red-500/20 border border-red-500/50 rounded-xl text-red-400 text-sm text-center">
+              <div id='login-error' className="login-error mb-3 p-4 bg-red-500/20 border border-red-500/50 rounded-xl text-red-400 text-sm text-center">
                 {serverError}
               </div>
             )}

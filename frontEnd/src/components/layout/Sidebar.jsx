@@ -32,6 +32,7 @@ import {
 import LogoutDialog from "../ui/LogoutDialog";
 
 const MENU_ITEMS = [
+
   // { id: 4, label: "Products", icon: Package, path: "products", color: "text-blue-500" },
   // { id: 1, label: "Attributes", icon: Cpu, path: "attributes", color: "text-blue-500" },
   // { id: 6, label: "Import", icon: Download, path: "import", color: "text-blue-500" },
@@ -44,6 +45,9 @@ const MENU_ITEMS = [
   // { id: 10, label: "Account", icon: Settings, path: "account", color: "text-blue-500" },
   // { id: 11, label: "Permissions", icon: ShieldCheck, path: "permissions", color: "text-blue-500" },
   // { id: 12, label: "Statistics", icon: BarChart3, path: "statistics", color: "text-blue-500" },
+
+
+
   {
     id: 4,
     label: "Sản phẩm",
@@ -128,6 +132,7 @@ const MENU_ITEMS = [
     path: "statistics",
     color: "text-blue-500",
   },
+
 ];
 
 const Sidebar = () => {
