@@ -82,7 +82,7 @@ const ColorModal = ({ open, onClose }) => {
     }
     try {
       setActionLoading(true);
-      await createColor({ name: colorName.trim() });
+      await createColor({ name: colorName.trim(), status: 1, });
       await fetchColors();
       resetForm();
       showNotification("Thêm màu sắc thành công", "success");
@@ -103,7 +103,7 @@ const ColorModal = ({ open, onClose }) => {
 
     try {
       setActionLoading(true);
-      await updateColor(selectedColorId, { name: colorName.trim() });
+      await updateColor(selectedColorId, { name: colorName.trim(), status: 1, });
       await fetchColors();
       resetForm();
       showNotification("Cập nhật màu sắc thành công", "success");

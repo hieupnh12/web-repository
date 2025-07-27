@@ -109,7 +109,7 @@ const BrandModal = ({ open, onClose }) => {
 
     try {
       setActionLoading(true);
-      await updateBrand(selectedBrandId, { name: brandName.trim(), status: 1, });
+      await updateBrand(selectedBrandId, { brandName: brandName.trim(), status: 1, });
       await fetchBrands();
       resetForm();
       showNotification("Cập nhật thương hiệu thành công", "success");
