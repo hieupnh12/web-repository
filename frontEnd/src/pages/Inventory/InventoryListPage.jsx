@@ -59,17 +59,23 @@ const InventoryListPage = () => {
   const fetchData = async () => {
     try {
       setLoading(true);
+      console.log("🔄 Fetching inventory data with filters:", filters);
+      
       const [data, areaList, staffList] = await Promise.all([
         getInventories(filters),
         takeWarehouseAreaInven(),
         fetchStaffList(),
       ]);
 
+      console.log("📋 Raw inventory data:", data);
+      console.log("🏢 Areas data:", areaList);
+      console.log("👥 Staff data:", staffList);
+
       setInventories(Array.isArray(data) ? data : []);
       setAreas(Array.isArray(areaList) ? areaList : []);
       setStaffs(Array.isArray(staffList) ? staffList : []);
     } catch (error) {
-      console.error('Lỗi khi tải danh sách kiểm kê:', error);
+      console.error('❌ Lỗi khi tải danh sách kiểm kê:', error);
       toast.error('Không thể tải danh sách kiểm kê');
       setInventories([]);
       setAreas([]);
@@ -232,7 +238,7 @@ const InventoryListPage = () => {
               transition: 'all 0.3s ease'
             }}
           >
-            Tạo phiếu kiểm kê
+            Tạo phiếu kiểm kê mới
           </Button>
         </Box>
       </Paper>
@@ -429,10 +435,10 @@ const InventoryListPage = () => {
                                 color: '#1976d2'
                               }}
                             >
-                              {getStaffName(inv.createdId).charAt(0).toUpperCase()}
+                              {(inv.staffName || getStaffName(inv.createdId)).charAt(0).toUpperCase()}
                             </Box>
                             <Typography variant="body2">
-                              {getStaffName(inv.createdId)}
+                              {inv.staffName || getStaffName(inv.createdId)}
                             </Typography>
                           </Box>
                         </TableCell>

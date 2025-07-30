@@ -54,6 +54,7 @@ function InventoryDetailsPage() {
   const handleAddRow = () => {
     setRows((prev) => [...prev, { 
       productVersionId: '', 
+      selectedProduct: '', // Thêm field để lưu sản phẩm đã chọn
       systemQuantity: 0, 
       quantity: 0, 
       note: '' 
@@ -189,11 +190,20 @@ function InventoryDetailsPage() {
               Chi tiết kiểm kê - Phiếu #{inventoryId}
             </Typography>
             <Typography variant="body1" sx={{ opacity: 0.9 }}>
-              Nhập thông tin chi tiết các sản phẩm cần kiểm kê
+              Nhập thông tin chi tiết các sản phẩm cần kiểm kê toàn bộ kho hàng
             </Typography>
           </Box>
         </Box>
       </Paper>
+
+      {/* Warehouse Info */}
+      <Alert severity="success" sx={{ mb: 3, borderRadius: 2 }}>
+        <Typography variant="body2">
+          <strong>Phạm vi kiểm kê:</strong> Toàn bộ kho hàng
+          <br />
+          <strong>Số lượng sản phẩm khả dụng:</strong> {productVersions.length} sản phẩm
+        </Typography>
+      </Alert>
 
       {/* Instructions */}
       <Alert severity="info" sx={{ mb: 3, borderRadius: 2 }}>
