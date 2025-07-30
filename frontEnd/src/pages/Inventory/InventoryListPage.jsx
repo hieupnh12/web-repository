@@ -21,7 +21,12 @@ import {
   Fade,
   Skeleton,
   InputAdornment,
-  Tooltip
+  Tooltip,
+  Menu,
+  ListItemIcon,
+  ListItemText,
+  Divider,
+  Alert
 } from '@mui/material';
 import {
   Visibility as VisibilityIcon,
@@ -31,13 +36,25 @@ import {
   Assignment as AssignmentIcon,
   CheckCircle as CheckCircleIcon,
   Schedule as ScheduleIcon,
-  Business as BusinessIcon
+  Business as BusinessIcon,
+  MoreVert as MoreVertIcon,
+  Edit as EditIcon,
+  Delete as DeleteIcon,
+  Clear as ClearIcon,
+  CalendarToday as CalendarIcon,
+  Person as PersonIcon
 } from '@mui/icons-material';
 import { useNavigate } from 'react-router-dom';
-import { getInventories } from '../../services/inventoryService';
+import { 
+  getInventories, 
+  deleteInventory,
+  getStaffList,
+  getWarehouseAreas 
+} from '../../services/inventoryService';
 import { takeWarehouseAreaInven } from '../../services/storage';
 import { fetchStaffList } from '../../services/staffService';
 import { toast } from 'react-toastify';
+import DeleteInventoryModal from './components/DeleteInventoryModal';
 
 const InventoryListPage = () => {
   const navigate = useNavigate();
@@ -46,23 +63,38 @@ const InventoryListPage = () => {
   const [areas, setAreas] = useState([]);
   const [staffs, setStaffs] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [deleteModalOpen, setDeleteModalOpen] = useState(false);
+  const [selectedInventory, setSelectedInventory] = useState(null);
+  const [anchorEl, setAnchorEl] = useState(null);
+  const [menuInventory, setMenuInventory] = useState(null);
+
+  // Enhanced filters
   const [filters, setFilters] = useState({
-    areaId: '',
     status: '',
     search: '',
+    staffId: '',
+    dateFrom: '',
+    dateTo: '',
   });
+
+  const [originalInventories, setOriginalInventories] = useState([]);
 
   useEffect(() => {
     fetchData();
-  }, [filters]);
+  }, []);
+
+
+  useEffect(() => {
+    applyFilters();
+  }, [filters, originalInventories]);
 
   const fetchData = async () => {
     try {
       setLoading(true);
-      console.log("🔄 Fetching inventory data with filters:", filters);
+      console.log("🔄 Fetching inventory data...");
       
       const [data, areaList, staffList] = await Promise.all([
-        getInventories(filters),
+        getInventories(), 
         takeWarehouseAreaInven(),
         fetchStaffList(),
       ]);
@@ -71,13 +103,16 @@ const InventoryListPage = () => {
       console.log("🏢 Areas data:", areaList);
       console.log("👥 Staff data:", staffList);
 
-      setInventories(Array.isArray(data) ? data : []);
+      const inventoryData = Array.isArray(data) ? data : [];
+      setOriginalInventories(inventoryData);
+      setInventories(inventoryData);
       setAreas(Array.isArray(areaList) ? areaList : []);
       setStaffs(Array.isArray(staffList) ? staffList : []);
     } catch (error) {
       console.error('❌ Lỗi khi tải danh sách kiểm kê:', error);
       toast.error('Không thể tải danh sách kiểm kê');
       setInventories([]);
+      setOriginalInventories([]);
       setAreas([]);
       setStaffs([]);
     } finally {
@@ -85,9 +120,69 @@ const InventoryListPage = () => {
     }
   };
 
+  const applyFilters = () => {
+    let filtered = [...originalInventories];
+
+    
+    if (filters.status) {
+      filtered = filtered.filter(inv => inv.status?.toString() === filters.status);
+    }
+
+    
+    if (filters.staffId) {
+      filtered = filtered.filter(inv => inv.createdId?.toString() === filters.staffId);
+    }
+
+    
+    if (filters.search) {
+      const searchLower = filters.search.toLowerCase();
+      filtered = filtered.filter(inv => {
+        const inventoryId = (inv.inventoryId || inv.id || '').toString().toLowerCase();
+        const staffName = getStaffName(inv.createdId).toLowerCase();
+        const areaName = getAreaName(inv.areaId).toLowerCase();
+        
+        return inventoryId.includes(searchLower) || 
+               staffName.includes(searchLower) || 
+               areaName.includes(searchLower);
+      });
+    }
+
+    
+    if (filters.dateFrom) {
+      const fromDate = new Date(filters.dateFrom);
+      filtered = filtered.filter(inv => {
+        if (!inv.createdAt) return false;
+        const invDate = new Date(inv.createdAt);
+        return invDate >= fromDate;
+      });
+    }
+
+    if (filters.dateTo) {
+      const toDate = new Date(filters.dateTo);
+      toDate.setHours(23, 59, 59, 999); 
+      filtered = filtered.filter(inv => {
+        if (!inv.createdAt) return false;
+        const invDate = new Date(inv.createdAt);
+        return invDate <= toDate;
+      });
+    }
+
+    setInventories(filtered);
+  };
+
   const handleFilterChange = (e) => {
     const { name, value } = e.target;
     setFilters((prev) => ({ ...prev, [name]: value }));
+  };
+
+  const clearFilters = () => {
+    setFilters({
+      status: '',
+      search: '',
+      staffId: '',
+      dateFrom: '',
+      dateTo: '',
+    });
   };
 
   const getStatusConfig = (status) => {
@@ -139,6 +234,38 @@ const InventoryListPage = () => {
     }
   };
 
+  const handleMenuOpen = (event, inventory) => {
+    setAnchorEl(event.currentTarget);
+    setMenuInventory(inventory);
+  };
+
+  const handleMenuClose = () => {
+    setAnchorEl(null);
+    setMenuInventory(null);
+  };
+
+  const handleDeleteClick = (inventory) => {
+    setSelectedInventory(inventory);
+    setDeleteModalOpen(true);
+    handleMenuClose();
+  };
+
+  const handleDeleteSuccess = (deletedInventory) => {
+    
+    setOriginalInventories(prev => 
+      prev.filter(inv => 
+        (inv.inventoryId || inv.id) !== (deletedInventory.inventoryId || deletedInventory.id)
+      )
+    );
+    setInventories(prev => 
+      prev.filter(inv => 
+        (inv.inventoryId || inv.id) !== (deletedInventory.inventoryId || deletedInventory.id)
+      )
+    );
+    setDeleteModalOpen(false);
+    setSelectedInventory(null);
+  };
+
   const renderTableSkeleton = () => (
     <>
       {[...Array(5)].map((_, index) => (
@@ -157,26 +284,28 @@ const InventoryListPage = () => {
   const statsData = [
     {
       title: 'Tổng phiếu kiểm kê',
-      value: inventory.length,
+      value: originalInventories.length,
       icon: <AssignmentIcon sx={{ fontSize: 32 }} />,
       color: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
       bgColor: '#e8eaf6'
     },
     {
       title: 'Đang kiểm kê',
-      value: inventory.filter(inv => inv.status === 1).length,
+      value: originalInventories.filter(inv => inv.status === 1).length,
       icon: <ScheduleIcon sx={{ fontSize: 32 }} />,
       color: 'linear-gradient(135deg, #f093fb 0%, #f5576c 100%)',
       bgColor: '#fff3e0'
     },
     {
       title: 'Đã hoàn tất',
-      value: inventory.filter(inv => inv.status === 2).length,
+      value: originalInventories.filter(inv => inv.status === 2).length,
       icon: <CheckCircleIcon sx={{ fontSize: 32 }} />,
       color: 'linear-gradient(135deg, #43e97b 0%, #38f9d7 100%)',
       bgColor: '#e8f5e8'
     }
   ];
+
+  const hasActiveFilters = Object.values(filters).some(value => value !== '');
 
   return (
     <Container maxWidth="xl" sx={{ py: 4 }}>
@@ -292,7 +421,7 @@ const InventoryListPage = () => {
         ))}
       </Grid>
 
-      {/* Main Content */}
+      
       <Paper
         elevation={0}
         sx={{
@@ -301,65 +430,152 @@ const InventoryListPage = () => {
           overflow: 'hidden'
         }}
       >
-        {/* Filters */}
+        
         <Box sx={{ p: 3, borderBottom: '1px solid #e0e0e0', bgcolor: '#f8f9fa' }}>
-          <Typography variant="h6" gutterBottom sx={{ mb: 2, color: '#2c3e50', fontWeight: 'bold' }}>
-            <FilterIcon sx={{ mr: 1, verticalAlign: 'middle' }} />
-            Bộ lọc tìm kiếm
-          </Typography>
+          <Box display="flex" justifyContent="space-between" alignItems="center" mb={2}>
+            <Typography variant="h6" sx={{ color: '#2c3e50', fontWeight: 'bold', display: 'flex', alignItems: 'center', gap: 1 }}>
+              <FilterIcon />
+              Bộ lọc tìm kiếm
+              {hasActiveFilters && (
+                <Chip 
+                  label={`${Object.values(filters).filter(v => v !== '').length} bộ lọc`}
+                  size="small"
+                  color="primary"
+                  sx={{ ml: 1 }}
+                />
+              )}
+            </Typography>
+            
+            {hasActiveFilters && (
+              <Button
+                startIcon={<ClearIcon />}
+                onClick={clearFilters}
+                size="small"
+                sx={{ color: '#666' }}
+              >
+                Xóa bộ lọc
+              </Button>
+            )}
+          </Box>
           
-          <Stack direction={{ xs: 'column', md: 'row' }} spacing={2}>
-            <TextField
-              select
-              name="areaId"
-              label="Khu vực kho"
-              value={filters.areaId}
-              onChange={handleFilterChange}
-              sx={{ minWidth: 200 }}
-              size="small"
-            >
-              <MenuItem value="">Tất cả khu vực</MenuItem>
-              {areas.map((area) => (
-                <MenuItem key={area.id} value={area.id}>
-                  {area.name}
-                </MenuItem>
-              ))}
-            </TextField>
+          <Grid container spacing={2}>
 
-            <TextField
-              select
-              name="status"
-              label="Trạng thái"
-              value={filters.status}
-              onChange={handleFilterChange}
-              sx={{ minWidth: 180 }}
-              size="small"
-            >
-              <MenuItem value="">Tất cả trạng thái</MenuItem>
-              <MenuItem value="1">Đang kiểm kê</MenuItem>
-              <MenuItem value="2">Đã hoàn tất</MenuItem>
-            </TextField>
+            <Grid item xs={12} md={3}>
+              <TextField
+                name="search"
+                label="Tìm kiếm"
+                value={filters.search}
+                onChange={handleFilterChange}
+                placeholder="Mã phiếu"
+                fullWidth
+                size="small"
+                InputProps={{
+                  startAdornment: (
+                    <InputAdornment position="start">
+                      <SearchIcon sx={{ color: '#666' }} />
+                    </InputAdornment>
+                  ),
+                }}
+              />
+            </Grid>
 
-            <TextField
-              name="search"
-              label="Tìm kiếm"
-              value={filters.search}
-              onChange={handleFilterChange}
-              placeholder="Tìm theo mã phiếu hoặc nhân viên..."
-              sx={{ flexGrow: 1 }}
-              size="small"
-              InputProps={{
-                startAdornment: (
-                  <InputAdornment position="start">
-                    <SearchIcon sx={{ color: '#666' }} />
-                  </InputAdornment>
-                ),
-              }}
-            />
-          </Stack>
+   
+            {/* <Grid item xs={12} md={2}>
+              <TextField
+                select
+                name="areaId"
+                label="Khu vực kho"
+                value={filters.areaId}
+                onChange={handleFilterChange}
+                fullWidth
+                size="small"
+              >
+                <MenuItem value="">Tất cả khu vực</MenuItem>
+                {areas.map((area) => (
+                  <MenuItem key={area.id} value={area.id}>
+                    {area.name}
+                  </MenuItem>
+                ))}
+              </TextField>
+            </Grid> */}
+
+        
+            <Grid item xs={12} md={2}>
+              <TextField
+                select
+                name="status"
+                label="Trạng thái"
+                value={filters.status}
+                onChange={handleFilterChange}
+                fullWidth
+                size="small"
+              >
+                <MenuItem value="">Tất cả trạng thái</MenuItem>
+                <MenuItem value="1">Đang kiểm kê</MenuItem>
+                <MenuItem value="2">Đã hoàn tất</MenuItem>
+              </TextField>
+            </Grid>
+
+           
+            <Grid item xs={12} md={2}>
+              <TextField
+                select
+                name="staffId"
+                label="Nhân viên"
+                value={filters.staffId}
+                onChange={handleFilterChange}
+                fullWidth
+                size="small"
+              >
+                <MenuItem value="">Tất cả nhân viên</MenuItem>
+                {staffs.map((staff) => (
+                  <MenuItem key={staff.id || staff.staffId} value={staff.id || staff.staffId}>
+                    {staff.fullName || staff.name}
+                  </MenuItem>
+                ))}
+              </TextField>
+            </Grid>
+
+      
+            <Grid item xs={12} md={1.5}>
+              <TextField
+                name="dateFrom"
+                label="Từ ngày"
+                type="date"
+                value={filters.dateFrom}
+                onChange={handleFilterChange}
+                fullWidth
+                size="small"
+                InputLabelProps={{ shrink: true }}
+              />
+            </Grid>
+
+
+            <Grid item xs={12} md={1.5}>
+              <TextField
+                name="dateTo"
+                label="Đến ngày"
+                type="date"
+                value={filters.dateTo}
+                onChange={handleFilterChange}
+                fullWidth
+                size="small"
+                InputLabelProps={{ shrink: true }}
+              />
+            </Grid>
+          </Grid>
+
+       
+          {hasActiveFilters && (
+            <Alert severity="info" sx={{ mt: 2, borderRadius: 2 }}>
+              <Typography variant="body2">
+                Hiển thị <strong>{inventory.length}</strong> kết quả từ tổng số <strong>{originalInventories.length}</strong> phiếu kiểm kê
+              </Typography>
+            </Alert>
+          )}
         </Box>
 
-        {/* Table */}
+       
         <Box sx={{ overflow: 'auto' }}>
           <Table stickyHeader>
             <TableHead>
@@ -392,10 +608,13 @@ const InventoryListPage = () => {
                   <TableCell colSpan={6} align="center" sx={{ py: 8 }}>
                     <AssignmentIcon sx={{ fontSize: 60, color: '#bdbdbd', mb: 2 }} />
                     <Typography variant="h6" color="text.secondary" gutterBottom>
-                      Chưa có phiếu kiểm kê nào
+                      {hasActiveFilters ? 'Không tìm thấy kết quả' : 'Chưa có phiếu kiểm kê nào'}
                     </Typography>
                     <Typography variant="body2" color="text.secondary">
-                      Hãy tạo phiếu kiểm kê đầu tiên để bắt đầu
+                      {hasActiveFilters 
+                        ? 'Thử thay đổi bộ lọc để tìm kiếm phiếu kiểm kê khác'
+                        : 'Hãy tạo phiếu kiểm kê đầu tiên để bắt đầu'
+                      }
                     </Typography>
                   </TableCell>
                 </TableRow>
@@ -414,12 +633,14 @@ const InventoryListPage = () => {
                             transform: 'scale(1.001)'
                           }
                         }}
-                        onClick={() => handleViewDetails(inv)}
                       >
-                        <TableCell sx={{ fontWeight: 600, color: '#1976d2' }}>
+                        <TableCell 
+                          sx={{ fontWeight: 600, color: '#1976d2' }}
+                          onClick={() => handleViewDetails(inv)}
+                        >
                           #{inv.inventoryId || inv.id}
                         </TableCell>
-                        <TableCell>
+                        <TableCell onClick={() => handleViewDetails(inv)}>
                           <Box display="flex" alignItems="center" gap={1}>
                             <Box
                               sx={{
@@ -442,7 +663,7 @@ const InventoryListPage = () => {
                             </Typography>
                           </Box>
                         </TableCell>
-                        <TableCell>
+                        <TableCell onClick={() => handleViewDetails(inv)}>
                           <Chip
                             label={getAreaName(inv.areaId)}
                             size="small"
@@ -453,12 +674,12 @@ const InventoryListPage = () => {
                             }}
                           />
                         </TableCell>
-                        <TableCell>
+                        <TableCell onClick={() => handleViewDetails(inv)}>
                           <Typography variant="body2" color="text.secondary">
                             {inv.createdAt ? new Date(inv.createdAt).toLocaleDateString('vi-VN') : 'N/A'}
                           </Typography>
                         </TableCell>
-                        <TableCell>
+                        <TableCell onClick={() => handleViewDetails(inv)}>
                           <Chip
                             icon={statusConfig.icon}
                             label={statusConfig.text}
@@ -472,12 +693,9 @@ const InventoryListPage = () => {
                           />
                         </TableCell>
                         <TableCell align="center">
-                          <Tooltip title="Xem chi tiết" arrow>
+                          <Tooltip title="Thêm hành động" arrow>
                             <IconButton
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                handleViewDetails(inv);
-                              }}
+                              onClick={(e) => handleMenuOpen(e, inv)}
                               sx={{
                                 bgcolor: '#e3f2fd',
                                 color: '#1976d2',
@@ -488,7 +706,7 @@ const InventoryListPage = () => {
                                 transition: 'all 0.2s ease'
                               }}
                             >
-                              <VisibilityIcon fontSize="small" />
+                              <MoreVertIcon fontSize="small" />
                             </IconButton>
                           </Tooltip>
                         </TableCell>
@@ -506,10 +724,64 @@ const InventoryListPage = () => {
           <Box sx={{ p: 2, bgcolor: '#f8f9fa', borderTop: '1px solid #e0e0e0' }}>
             <Typography variant="body2" color="text.secondary">
               Hiển thị {inventory.length} phiếu kiểm kê
+              {hasActiveFilters && ` (đã lọc từ ${originalInventories.length} phiếu)`}
             </Typography>
           </Box>
         )}
       </Paper>
+
+      {/* Action Menu */}
+      <Menu
+        anchorEl={anchorEl}
+        open={Boolean(anchorEl)}
+        onClose={handleMenuClose}
+        PaperProps={{
+          sx: {
+            borderRadius: 2,
+            minWidth: 200,
+            boxShadow: '0 8px 25px rgba(0,0,0,0.1)'
+          }
+        }}
+      >
+        <MenuItem onClick={() => handleViewDetails(menuInventory)}>
+          <ListItemIcon>
+            <VisibilityIcon fontSize="small" />
+          </ListItemIcon>
+          <ListItemText>Xem chi tiết</ListItemText>
+        </MenuItem>
+        
+        {menuInventory?.status === 1 && (
+          <MenuItem onClick={() => {
+            navigate(`/manager/inventory/details/${menuInventory.inventoryId || menuInventory.id}`);
+            handleMenuClose();
+          }}>
+            <ListItemIcon>
+              <EditIcon fontSize="small" />
+            </ListItemIcon>
+            <ListItemText>Tiếp tục kiểm kê</ListItemText>
+          </MenuItem>
+        )}
+        
+        <Divider />
+        
+        <MenuItem 
+          onClick={() => handleDeleteClick(menuInventory)}
+          sx={{ color: 'error.main' }}
+        >
+          <ListItemIcon>
+            <DeleteIcon fontSize="small" color="error" />
+          </ListItemIcon>
+          <ListItemText>Xóa phiếu kiểm kê</ListItemText>
+        </MenuItem>
+      </Menu>
+
+      {/* Delete Modal */}
+      <DeleteInventoryModal
+        open={deleteModalOpen}
+        onClose={() => setDeleteModalOpen(false)}
+        inventory={selectedInventory}
+        onSuccess={handleDeleteSuccess}
+      />
     </Container>
   );
 };
