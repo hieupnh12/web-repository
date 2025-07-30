@@ -129,7 +129,7 @@ const MENU_ITEMS = [
     id: 12,
     label: "Thống kê",
     icon: BarChart3,
-    path: "statistics",
+    path: "statistics/overview",
     color: "text-blue-500",
   },
 
