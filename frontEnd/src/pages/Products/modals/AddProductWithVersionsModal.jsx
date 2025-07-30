@@ -1,5 +1,6 @@
 import React, { useState, useEffect, Fragment } from "react";
 import { Dialog, Transition } from "@headlessui/react";
+import { toast } from "react-toastify";
 import Button from "../../../components/ui/Button";
 import {
   getAllBrands,
@@ -111,6 +112,8 @@ const AddProductWithVersionsModal = ({ onSuccess, onClose }) => {
       romId: "",
       ramId: "",
       colorId: "",
+      importPrice: "",
+      exportPrice: "",
     },
   ]);
 
@@ -204,6 +207,8 @@ const AddProductWithVersionsModal = ({ onSuccess, onClose }) => {
         romId: "",
         ramId: "",
         colorId: "",
+        importPrice: "",
+        exportPrice: "",
       },
     ]);
   };
@@ -247,8 +252,8 @@ const AddProductWithVersionsModal = ({ onSuccess, onClose }) => {
         romId: Number(v.romId),
         ramId: Number(v.ramId),
         colorId: Number(v.colorId),
-        importPrice: 0, // Mặc định là 0
-        exportPrice: 0, // Mặc định là 0
+        importPrice: Number(v.importPrice) || 0,
+        exportPrice: Number(v.exportPrice) || 0,
         status: true, // Mặc định là true
       }));
 
@@ -258,10 +263,18 @@ const AddProductWithVersionsModal = ({ onSuccess, onClose }) => {
         productData.image
       );
 
-      setSuccessMessage("Tạo sản phẩm và phiên bản thành công!");
+      // Show success toast notification
+      toast.success("🎉 Tạo sản phẩm và phiên bản thành công!");
+      
       if (onSuccess) onSuccess();
-      setTimeout(() => onClose && onClose(), 3000);
+      
+      // Close modal after a short delay
+      setTimeout(() => {
+        if (onClose) onClose();
+      }, 1500);
     } catch (err) {
+      // Show error toast notification
+      toast.error(`❌ ${err.message || "Không thể tạo sản phẩm"}`);
       setApiError(err.message || "Không thể tạo sản phẩm.");
     } finally {
       setIsSubmitting(false);
@@ -516,6 +529,12 @@ const AddProductWithVersionsModal = ({ onSuccess, onClose }) => {
                               <th className="border border-gray-200 px-4 py-3 text-left text-sm font-semibold text-gray-700">
                                 Màu sắc
                               </th>
+                              <th className="border border-gray-200 px-4 py-3 text-left text-sm font-semibold text-gray-700">
+                                Giá nhập (VNĐ)
+                              </th>
+                              <th className="border border-gray-200 px-4 py-3 text-left text-sm font-semibold text-gray-700">
+                                Giá xuất (VNĐ)
+                              </th>
                               <th className="border border-gray-200 px-4 py-3 text-center text-sm font-semibold text-gray-700">
                                 Thao tác
                               </th>
@@ -568,6 +587,28 @@ const AddProductWithVersionsModal = ({ onSuccess, onClose }) => {
                                       </option>
                                     ))}
                                   </select>
+                                </td>
+                                <td className="border border-gray-200 px-4 py-3">
+                                  <input
+                                    type="number"
+                                    value={version.importPrice}
+                                    onChange={(e) => handleVersionChange(index, 'importPrice', e.target.value)}
+                                    placeholder="0"
+                                    min="0"
+                                    step="1000"
+                                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                  />
+                                </td>
+                                <td className="border border-gray-200 px-4 py-3">
+                                  <input
+                                    type="number"
+                                    value={version.exportPrice}
+                                    onChange={(e) => handleVersionChange(index, 'exportPrice', e.target.value)}
+                                    placeholder="0"
+                                    min="0"
+                                    step="1000"
+                                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                  />
                                 </td>
                                 <td className="border border-gray-200 px-4 py-3 text-center">
                                   {versions.length > 1 && (
