@@ -76,6 +76,11 @@ export const takeResetPass = async (data) => {
     return response;
 };
 
+export const takeChangePass = async (data, id) => {
+    const response = await BASE_URL[POST](`account/change/${id}`, data);
+    
+    return response;
+};
 
 /**
  * Lấy data từ cookie và lưu vào redux
