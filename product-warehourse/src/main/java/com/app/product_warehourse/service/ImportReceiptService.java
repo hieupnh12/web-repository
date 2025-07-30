@@ -264,7 +264,7 @@ public class ImportReceiptService {
 //                          .collect(Collectors.toList());
 //    }
 
-    @PreAuthorize("hasRole('ADMIN') or hasAuthority('Purchase Orders_VIEW')")
+
     public Page<ImportReceiptFULLResponse> getAllImportReceipts(Pageable pageable) {
         return importrepo.findAll(pageable)
                 .map(importReceipt -> {
