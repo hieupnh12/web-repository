@@ -17,8 +17,8 @@ const ProductList = ({
     setSearchText(value);
 
     // Tìm local trước
-    const localResults = products.filter((product) =>
-      product.productName.toLowerCase().includes(value.toLowerCase())
+    const localResults = products?.filter((product) =>
+      product?.productName?.toLowerCase().includes(value.toLowerCase())
     );
 
     // Nếu không có kết quả local và value đủ dài thì gọi API tìm
@@ -27,8 +27,8 @@ const ProductList = ({
     }
   };
 
-  const filteredProducts = products.filter((product) =>
-    product.productName.toLowerCase().includes(searchText.toLowerCase())
+  const filteredProducts = products?.filter((product) =>
+    product?.productName?.toLowerCase().includes(searchText.toLowerCase())
   );
 
   // console.log("check product", onSelect);

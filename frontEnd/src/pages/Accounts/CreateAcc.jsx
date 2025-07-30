@@ -54,39 +54,37 @@ export default function CreateAcc({ open, onClose, onSuccess, accounts = [], rol
   };
 
   const handleSubmit = async () => {
-  const { staffId, userName, password, roleId } = form;
-  if (!staffId || !userName || !password || !roleId) {
-    alert("Vui lòng điền đầy đủ thông tin.");
-    return;
-  }
-
-  try {
-    const res = await createAccount(form.staffId, {
-  userName: form.userName,
-  password: form.password,
-  roleId: parseInt(form.roleId, 10),
-})
-
-    if (res.status === 200) {
-      onSuccess?.();
-      onClose();
-      setForm({ staffId: "", userName: "", password: "", roleId: "" });
+    const { staffId, userName, password, roleId } = form;
+    if (!staffId || !userName || !password || !roleId) {
+      alert("Vui lòng điền đầy đủ thông tin.");
+      return;
     }
-  } catch (err) {
-    console.error("Tạo tài khoản thất bại:", err.response?.data || err);
-    alert("Tạo tài khoản thất bại: " + (err.response?.data?.message || ""));
-  }
-};
 
+    try {
+      const res = await createAccount(staffId, {
+        userName,
+        password,
+        roleId: parseInt(roleId, 10),
+      });
 
-  // Lọc nhân viên chưa có account
+      if (res.status === 200) {
+        onSuccess?.();
+        onClose();
+        setForm({ staffId: "", userName: "", password: "", roleId: "" });
+      }
+    } catch (err) {
+      console.error("Tạo tài khoản thất bại:", err.response?.data || err);
+      alert("Tạo tài khoản thất bại: " + (err.response?.data?.message || ""));
+    }
+  };
+
+  // Chỉ hiện nhân viên chưa có tài khoản
   const availableStaffs = staffs.filter(
     (staff) => !accounts.some((acc) => acc.staffId === staff.staffId)
   );
 
   return (
     <Dialog open={open} onClose={onClose} maxWidth="sm" fullWidth>
-      {/* Header */}
       <Box
         sx={{
           background: "linear-gradient(to right, #16a34a, #4ade80)",
@@ -129,7 +127,6 @@ export default function CreateAcc({ open, onClose, onSuccess, accounts = [], rol
         </IconButton>
       </Box>
 
-      {/* Form content */}
       <DialogContent dividers sx={{ p: 3 }}>
         <Stack spacing={3}>
           <TextField
@@ -185,7 +182,6 @@ export default function CreateAcc({ open, onClose, onSuccess, accounts = [], rol
         </Stack>
       </DialogContent>
 
-      {/* Footer */}
       <DialogActions sx={{ p: 2 }}>
         <Button onClick={onClose} variant="outlined">
           Hủy

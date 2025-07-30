@@ -26,6 +26,7 @@ import {
   CartesianGrid,
   Tooltip,
   ResponsiveContainer,
+  Legend,
 } from "recharts";
 import * as XLSX from "xlsx";
 import { getRevenueByDay } from "../../../../services/statisticService";
@@ -178,38 +179,92 @@ const RevenueByDay = () => {
       </StyledPaper>
 
       {/* Biểu đồ */}
-      <StyledPaper sx={{ mb: 3, p: 3 }}>
-        <Typography variant="h6" fontWeight={600} sx={{ mb: 2 }}>
-          Biểu đồ doanh thu theo ngày
-        </Typography>
-        <Box sx={{ width: "100%", height: 400 }}>
-          <ResponsiveContainer width="100%" height="100%">
-            <AreaChart data={data}>
-              <defs>
-                <linearGradient id="revenueColor" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="5%" stopColor="#3b82f6" stopOpacity={0.8} />
-                  <stop offset="95%" stopColor="#3b82f6" stopOpacity={0} />
-                </linearGradient>
-                <linearGradient id="costColor" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="5%" stopColor="#f97316" stopOpacity={0.8} />
-                  <stop offset="95%" stopColor="#f97316" stopOpacity={0} />
-                </linearGradient>
-                <linearGradient id="profitColor" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="5%" stopColor="#22c55e" stopOpacity={0.8} />
-                  <stop offset="95%" stopColor="#22c55e" stopOpacity={0} />
-                </linearGradient>
-              </defs>
-              <CartesianGrid strokeDasharray="3 3" />
-              <XAxis dataKey="date" />
-              <YAxis />
-              <Tooltip />
-              <Area type="monotone" dataKey="revenues" stroke="#3b82f6" fill="url(#revenueColor)" name="Doanh thu" />
-              <Area type="monotone" dataKey="expenses" stroke="#f97316" fill="url(#costColor)" name="Chi phí" />
-              <Area type="monotone" dataKey="profits" stroke="#22c55e" fill="url(#profitColor)" name="Lợi nhuận" />
-            </AreaChart>
-          </ResponsiveContainer>
-        </Box>
-      </StyledPaper>
+<StyledPaper sx={{ mb: 3, p: 3 }}>
+  <Typography variant="h6" fontWeight={600} sx={{ mb: 2 }}>
+    Biểu đồ doanh thu theo ngày
+  </Typography>
+  <Box sx={{ width: "100%", height: 400 }}>
+    <ResponsiveContainer width="100%" height="100%">
+      <AreaChart
+        data={data}
+        margin={{ top: 10, right: 30, left: 0, bottom: 36 }} // tăng khoảng trống cho legend
+      >
+        <defs>
+          <linearGradient id="revenueColor" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="5%" stopColor="#3b82f6" stopOpacity={0.8} />
+            <stop offset="95%" stopColor="#3b82f6" stopOpacity={0} />
+          </linearGradient>
+          <linearGradient id="costColor" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="5%" stopColor="#f97316" stopOpacity={0.8} />
+            <stop offset="95%" stopColor="#f97316" stopOpacity={0} />
+          </linearGradient>
+          <linearGradient id="profitColor" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="5%" stopColor="#22c55e" stopOpacity={0.8} />
+            <stop offset="95%" stopColor="#22c55e" stopOpacity={0} />
+          </linearGradient>
+        </defs>
+
+        <CartesianGrid strokeDasharray="3 3" />
+        <XAxis
+          dataKey="date"
+          tickFormatter={(dateStr) => {
+            const date = new Date(dateStr);
+            return `${date.getDate()}/${date.getMonth() + 1}`;
+          }}
+        />
+        <YAxis
+          tickFormatter={(value) =>
+            new Intl.NumberFormat("vi-VN", {
+              notation: "compact",
+              compactDisplay: "short",
+            }).format(value)
+          }
+        />
+        <Tooltip
+          formatter={(value, name) => {
+            const labelMap = {
+              revenues: "Doanh thu",
+              expenses: "Chi phí",
+              profits: "Lợi nhuận",
+            };
+            return [
+              new Intl.NumberFormat("vi-VN", {
+                style: "currency",
+                currency: "VND",
+              }).format(value),
+              labelMap[name] || name,
+            ];
+          }}
+          labelFormatter={(label) => `Ngày: ${label}`}
+        />
+        <Legend verticalAlign="bottom" height={36} /> {/* Đặt legend phía dưới */}
+        <Area
+          type="monotone"
+          dataKey="revenues"
+          stroke="#3b82f6"
+          fill="url(#revenueColor)"
+          name="Doanh thu"
+        />
+        <Area
+          type="monotone"
+          dataKey="expenses"
+          stroke="#f97316"
+          fill="url(#costColor)"
+          name="Chi phí"
+        />
+        <Area
+          type="monotone"
+          dataKey="profits"
+          stroke="#22c55e"
+          fill="url(#profitColor)"
+          name="Lợi nhuận"
+        />
+      </AreaChart>
+    </ResponsiveContainer>
+  </Box>
+</StyledPaper>
+
+
 
       {/* Bảng chi tiết */}
       <StyledPaper>

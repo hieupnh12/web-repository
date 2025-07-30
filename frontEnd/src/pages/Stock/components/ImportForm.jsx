@@ -42,6 +42,10 @@ export default function ImportForm({
         toast.warning("Vui lòng chọn một phiếu nhập để xóa.");
         return;
       }
+      if (!selectProduct?.supplierName || !selectProduct?.totalAmount) {
+        toast.warning("Vui lòng hoàn thành phiếu nhập để xóa.");
+        return;
+      }
 
       const resp = await takeDeleteImportReceipt(selectProduct.import_id);
       if (resp.status === 200) {

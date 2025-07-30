@@ -1,4 +1,4 @@
-// Account.jsx
+// Account.jsx - Đã cập nhật theo yêu cầu
 import React, { useEffect, useState } from "react";
 import {
   Box,
@@ -8,20 +8,23 @@ import {
   TextField,
   InputAdornment,
   Tooltip,
+  Snackbar,
+  Alert,
 } from "@mui/material";
 import {
+  Add as AddIcon,
   Search as SearchIcon,
   Refresh as RefreshIcon,
 } from "@mui/icons-material";
 import { styled } from "@mui/material/styles";
-import { toast } from "react-toastify"; // ✅ dùng toast thay Snackbar
-import ConfirmDialog from "../../components/ui/ConfirmDialog";
+
+import CreateAcc from "./CreateAcc";
 import EditAcc from "./EditAcc";
 import AccountTable from "./AccountTable";
 import {
   fetchAccounts,
+  createAccount,
   updateAccount,
-  deleteAccount,
   fetchRoles,
 } from "../../services/accountService";
 
@@ -30,12 +33,12 @@ const StyledButton = styled(Button)(() => ({
   textTransform: "none",
   fontWeight: 500,
   padding: "10px 24px",
-  background: "linear-gradient(45deg, #1976d2 30%, #64b5f6 90%)",
-  boxShadow: "0 3px 15px rgba(25, 118, 210, 0.3)",
+  background: "linear-gradient(45deg, #2196f3 30%, #64b5f6 90%)",
+  boxShadow: "0 3px 15px rgba(33, 150, 243, 0.3)",
   transition: "all 0.3s ease",
   "&:hover": {
     transform: "translateY(-2px)",
-    boxShadow: "0 6px 25px rgba(25, 118, 210, 0.4)",
+    boxShadow: "0 6px 25px rgba(33, 150, 243, 0.4)",
   },
 }));
 
@@ -45,10 +48,10 @@ const StyledTextField = styled(TextField)(() => ({
     backgroundColor: "white",
     transition: "all 0.3s ease",
     "&:hover": {
-      boxShadow: "0 4px 12px rgba(25, 118, 210, 0.1)",
+      boxShadow: "0 4px 12px rgba(33, 150, 243, 0.1)",
     },
     "&.Mui-focused": {
-      boxShadow: "0 4px 20px rgba(25, 118, 210, 0.2)",
+      boxShadow: "0 4px 20px rgba(33, 150, 243, 0.2)",
     },
   },
 }));
@@ -58,11 +61,17 @@ export default function Account() {
   const [roles, setRoles] = useState([]);
   const [search, setSearch] = useState("");
   const [loading, setLoading] = useState(true);
+  const [page, setPage] = useState(0);
+  const [rowsPerPage, setRowsPerPage] = useState(10);
+  const [openCreate, setOpenCreate] = useState(false);
   const [openEdit, setOpenEdit] = useState(false);
   const [selectedAccount, setSelectedAccount] = useState(null);
-  const [selectedId, setSelectedId] = useState(null);
-  const [confirmOpen, setConfirmOpen] = useState(false);
-  const [deleting, setDeleting] = useState(false);
+
+  const [snackbar, setSnackbar] = useState({
+    open: false,
+    message: "",
+    severity: "success",
+  });
 
   const loadAccounts = async () => {
     setLoading(true);
@@ -70,7 +79,7 @@ export default function Account() {
       const res = await fetchAccounts();
       setAccounts(res?.data?.result || []);
     } catch (err) {
-      toast.error("Không tải được danh sách tài khoản.");
+      setSnackbar({ open: true, message: "Không tải được tài khoản", severity: "error" });
     } finally {
       setLoading(false);
     }
@@ -88,31 +97,17 @@ export default function Account() {
         roleId: parseInt(updatedData.roleId, 10),
         status: updatedData.status,
       });
-      toast.success("Cập nhật tài khoản thành công!");
+      setSnackbar({ open: true, message: "Cập nhật thành công", severity: "success" });
       loadAccounts();
     } catch (err) {
-      toast.error(err?.response?.data?.message || "Lỗi cập nhật tài khoản.");
+      setSnackbar({ open: true, message: err?.response?.data?.message || "Lỗi cập nhật", severity: "error" });
     } finally {
       setOpenEdit(false);
       setSelectedAccount(null);
     }
   };
 
-  const handleDeleteAccount = async () => {
-    try {
-      setDeleting(true);
-      await deleteAccount(selectedId);
-      setAccounts((prev) => prev.filter((acc) => acc.staffId !== selectedId));
-      toast.success("Xoá tài khoản thành công!");
-    } catch (err) {
-      toast.error("Lỗi khi xoá tài khoản: " + err.toString());
-    } finally {
-      setDeleting(false);
-      setConfirmOpen(false);
-    }
-  };
-
-  const filteredAccounts = accounts.filter(
+  const filtered = accounts.filter(
     (acc) =>
       acc.userName?.toLowerCase().includes(search.toLowerCase()) ||
       acc.roleName?.toLowerCase().includes(search.toLowerCase())
@@ -120,23 +115,12 @@ export default function Account() {
 
   return (
     <Container maxWidth="xl" sx={{ py: 4 }}>
-      <Box
-        sx={{
-          mb: 4,
-          display: "flex",
-          justifyContent: "space-between",
-          flexWrap: "wrap",
-          gap: 2,
-        }}
-      >
-        <Box
-          sx={{
-            display: "flex",
-            width: "40%",
-            alignItems: "center",
-            gap: 1,
-          }}
-        >
+      {/* Header */}
+      <Box sx={{ mb: 4, display: "flex", justifyContent: "space-between", gap: 2, flexWrap: "wrap" }}>
+        <StyledButton variant="contained" startIcon={<AddIcon />} onClick={() => setOpenCreate(true)}>
+          Thêm tài khoản
+        </StyledButton>
+        <Box sx={{ display: "flex", width: "40%", alignItems: "center", gap: 1 }}>
           <StyledTextField
             fullWidth
             placeholder="Tìm kiếm theo tên đăng nhập hoặc vai trò..."
@@ -158,19 +142,41 @@ export default function Account() {
         </Box>
       </Box>
 
+      {/* Table */}
       <AccountTable
-        accounts={filteredAccounts}
+        accounts={filtered}
         loading={loading}
-        onEdit={(acc) => {
+        page={page}
+        rowsPerPage={rowsPerPage}
+        handleChangePage={(e, newPage) => setPage(newPage)}
+        handleChangeRowsPerPage={(e) => {
+          setRowsPerPage(parseInt(e.target.value, 10));
+          setPage(0);
+        }}
+        handleEdit={(acc) => {
           setSelectedAccount(acc);
           setOpenEdit(true);
         }}
-        onDeleteRequest={(id) => {
-          setSelectedId(id);
-          setConfirmOpen(true);
-        }}
       />
 
+      {/* Create Dialog */}
+      {openCreate && (
+        <CreateAcc
+          open={openCreate}
+          onClose={() => setOpenCreate(false)}
+          onSuccess={(newAcc) => {
+            if (newAcc) {
+              setAccounts((prev) => [newAcc, ...prev]);
+              setSnackbar({ open: true, message: "Tạo tài khoản thành công", severity: "success" });
+              setPage(0);
+            }
+          }}
+          accounts={accounts}
+          roles={roles}
+        />
+      )}
+
+      {/* Edit Dialog */}
       {openEdit && selectedAccount && (
         <EditAcc
           account={selectedAccount}
@@ -183,15 +189,17 @@ export default function Account() {
         />
       )}
 
-      <ConfirmDialog
-        isOpen={confirmOpen}
-        title="Xoá tài khoản"
-        message="Bạn có chắc muốn xoá tài khoản này không?"
-        onConfirm={handleDeleteAccount}
-        onCancel={() => setConfirmOpen(false)}
-        loading={deleting}
-        action="delete"
-      />
+      {/* Snackbar */}
+      <Snackbar
+        open={snackbar.open}
+        autoHideDuration={3000}
+        onClose={() => setSnackbar({ ...snackbar, open: false })}
+        anchorOrigin={{ vertical: "top", horizontal: "right" }}
+      >
+        <Alert severity={snackbar.severity} sx={{ width: "100%" }}>
+          {snackbar.message}
+        </Alert>
+      </Snackbar>
     </Container>
   );
 }

@@ -153,7 +153,7 @@ const Suppliers = () => {
   const handleCreateSupplier = async (newSupplier) => {
     try {
       const response = await takeCreateSupplier(newSupplier);
-      console.log("sup", newSupplier);
+      // console.log("sup", newSupplier);
 
       if (response.status === 200) {
         if (isSearching) {
@@ -177,9 +177,11 @@ const Suppliers = () => {
   };
 
   const handleDeleteSupplier = async () => {
-    try {
-      const deleteSupplier = await takeDeleteSupplier(selectedId);
+    try {     
       setConfirmOpen(false);
+      const deleteSupplier = await takeDeleteSupplier(selectedId);
+      // console.log("xóa", deleteSupplier);
+      
       if (deleteSupplier.status === 200) {
         if (isSearching) {
           searchSuppliers(searchTerm, page, rowsPerPage);
@@ -256,7 +258,7 @@ const Suppliers = () => {
   const fetchPermission = async () => {
     try {
       const result = await takeFunctionOfFeature(5);
-      console.log("Quyền", result);
+      // console.log("Quyền", result);
 
       setPermission(result.data.result[0]);
     } catch (err) {
@@ -265,7 +267,7 @@ const Suppliers = () => {
   };
 
   const staffInfo = useSelector((state) => state.auth.userInfo);
-  console.log("dd", staffInfo);
+  // console.log("dd", staffInfo);
   useEffect(() => {
     if (staffInfo && staffInfo.roleName === "ADMIN") {
       // Admin có toàn quyền, gán trực tiếp

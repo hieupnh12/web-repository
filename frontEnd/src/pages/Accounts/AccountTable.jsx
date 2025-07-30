@@ -1,25 +1,25 @@
-// AccountTable.jsx
-import React, { useState } from "react";
+import React from "react";
 import {
+  Box,
+  Typography,
+  Tooltip,
+  IconButton,
+  Paper,
   Table,
   TableBody,
   TableCell,
+  TableContainer,
   TableHead,
   TableRow,
-  IconButton,
-  TableContainer,
-  Tooltip,
-  Box,
   TablePagination,
   Skeleton,
-  Paper,
-  Typography,
 } from "@mui/material";
 import {
   Edit as EditIcon,
-  Delete as DeleteIcon,
   Person as PersonIcon,
-  Shield as ShieldIcon,
+  Badge as BadgeIcon,
+  CheckCircle,
+  Cancel,
 } from "@mui/icons-material";
 import { styled, alpha } from "@mui/material/styles";
 
@@ -56,27 +56,15 @@ const StyledTableRow = styled(TableRow)(({ theme }) => ({
   transition: "all 0.3s ease",
 }));
 
-export default function AccountTable({
-  accounts,
+const AccountTable = ({
+  accounts = [],
   loading,
-  onEdit,
-  onDeleteRequest,
-}) {
-  const [page, setPage] = useState(0);
-  const [rowsPerPage, setRowsPerPage] = useState(5);
-
-  const handleChangePage = (event, newPage) => setPage(newPage);
-
-  const handleChangeRowsPerPage = (event) => {
-    setRowsPerPage(parseInt(event.target.value, 10));
-    setPage(0);
-  };
-
-  const pagedAccounts = accounts.slice(
-    page * rowsPerPage,
-    page * rowsPerPage + rowsPerPage
-  );
-
+  page,
+  rowsPerPage,
+  handleChangePage,
+  handleChangeRowsPerPage,
+  handleEdit,
+}) => {
   return (
     <StyledPaper>
       <TableContainer>
@@ -99,95 +87,108 @@ export default function AccountTable({
                     </TableCell>
                   </TableRow>
                 ))
-              : pagedAccounts.length === 0 ? (
-                  <TableRow>
-                    <TableCell colSpan={5} align="center">
-                      Không có tài khoản nào.
-                    </TableCell>
-                  </TableRow>
-                ) : (
-                  pagedAccounts.map((acc, index) => (
+              : accounts
+                  .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
+                  .map((acc, index) => (
                     <StyledTableRow key={acc.staffId}>
                       <TableCell>{page * rowsPerPage + index + 1}</TableCell>
+
+                      {/* Tên đăng nhập */}
                       <TableCell>
                         <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
-                          <PersonIcon color="primary" fontSize="small" />
+                          <PersonIcon fontSize="small" color="primary" />
                           <Typography variant="body2" fontWeight={500}>
                             {acc.userName}
                           </Typography>
                         </Box>
                       </TableCell>
+
+                      {/* Vai trò */}
                       <TableCell>
                         <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
-                          <ShieldIcon fontSize="small" />
-                          <Typography variant="body2">
-                            {acc.roleName}
-                          </Typography>
+                          <BadgeIcon fontSize="small" />
+                          {acc.roleName}
                         </Box>
                       </TableCell>
+
+                      {/* Trạng thái mới đẹp */}
                       <TableCell>
-                        <Typography
-                          variant="body2"
-                          sx={{
-                            fontWeight: 600,
-                            color: acc.status === true || acc.status === 1 ? "green" : "red",
-                          }}
-                        >
-                          {acc.status === true || acc.status === 1 ? "Hoạt động" : "Ngừng"}
-                        </Typography>
+                        {acc.status ? (
+                          <Box
+                            sx={{
+                              display: "inline-flex",
+                              alignItems: "center",
+                              gap: 1,
+                              px: 1.5,
+                              py: 0.5,
+                              backgroundColor: "#4caf50",
+                              color: "white",
+                              borderRadius: "20px",
+                              fontSize: "0.85rem",
+                              fontWeight: 500,
+                            }}
+                          >
+                            <CheckCircle sx={{ fontSize: 18 }} />
+                            Hoạt động
+                          </Box>
+                        ) : (
+                          <Box
+                            sx={{
+                              display: "inline-flex",
+                              alignItems: "center",
+                              gap: 1,
+                              px: 1.5,
+                              py: 0.5,
+                              backgroundColor: "#f44336",
+                              color: "white",
+                              borderRadius: "20px",
+                              fontSize: "0.85rem",
+                              fontWeight: 500,
+                            }}
+                          >
+                            <Cancel sx={{ fontSize: 18 }} />
+                            Khóa
+                          </Box>
+                        )}
                       </TableCell>
+
+                      {/* Chức năng */}
                       <TableCell align="center">
-                        <Box sx={{ display: "flex", justifyContent: "center", gap: 1 }}>
-                          <Tooltip title="Sửa">
-                            <IconButton
-                              onClick={() => onEdit(acc)}
-                              sx={{
-                                color: "#2196f3",
-                                "&:hover": {
-                                  backgroundColor: "#e3f2fd",
-                                  transform: "scale(1.1)",
-                                },
-                                transition: "all 0.3s ease",
-                              }}
-                            >
-                              <EditIcon fontSize="small" />
-                            </IconButton>
-                          </Tooltip>
-                          <Tooltip title="Xoá">
-                            <IconButton
-                              onClick={() => onDeleteRequest(acc.staffId)}
-                              sx={{
-                                color: "#f44336",
-                                "&:hover": {
-                                  backgroundColor: "#ffebee",
-                                  transform: "scale(1.1)",
-                                },
-                                transition: "all 0.3s ease",
-                              }}
-                            >
-                              <DeleteIcon fontSize="small" />
-                            </IconButton>
-                          </Tooltip>
-                        </Box>
+                        <Tooltip title="Chỉnh sửa">
+                          <IconButton
+                            onClick={() => handleEdit?.(acc)}
+                            sx={{
+                              color: "#2196f3",
+                              "&:hover": {
+                                backgroundColor: "#e3f2fd",
+                                transform: "scale(1.1)",
+                              },
+                              transition: "all 0.3s ease",
+                            }}
+                          >
+                            <EditIcon fontSize="small" />
+                          </IconButton>
+                        </Tooltip>
                       </TableCell>
                     </StyledTableRow>
-                  ))
-                )}
+                  ))}
           </TableBody>
         </Table>
       </TableContainer>
 
       <TablePagination
+        rowsPerPageOptions={[5, 10, 25]}
         component="div"
         count={accounts.length}
-        page={page}
         rowsPerPage={rowsPerPage}
+        page={page}
         onPageChange={handleChangePage}
         onRowsPerPageChange={handleChangeRowsPerPage}
-        rowsPerPageOptions={[5, 10, 25]}
         labelRowsPerPage="Số hàng mỗi trang:"
         sx={{ borderTop: "1px solid #e0e0e0", backgroundColor: "#fafafa" }}
       />
     </StyledPaper>
   );
-}
+};
+
+export default AccountTable;

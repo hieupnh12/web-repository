@@ -10,7 +10,7 @@ import java.lang.annotation.*;
 @Target({ ElementType.FIELD })
 @Retention(RetentionPolicy.RUNTIME)
 public @interface StrongPassword {
-    String message() default "Mật khẩu phải có ít nhất 8 ký tự, gồm chữ in hoa, chữ thường, chữ số và ký tự đặc biệt.";
+    String message() default "PASSWORD_WEAK";
     Class<?>[] groups() default {};
     Class<? extends Payload>[] payload() default {};
 }

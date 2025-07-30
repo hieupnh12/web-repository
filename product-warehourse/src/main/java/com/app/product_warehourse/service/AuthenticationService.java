@@ -25,6 +25,7 @@ import lombok.experimental.FieldDefaults;
 import lombok.experimental.NonFinal;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
@@ -35,6 +36,7 @@ import java.time.temporal.ChronoUnit;
 import java.util.Date;
 import java.util.StringJoiner;
 import java.util.UUID;
+import java.util.concurrent.TimeUnit;
 
 @Service
 @RequiredArgsConstructor
@@ -44,6 +46,7 @@ public class AuthenticationService {
     AccountRepository accountRepository;
     PasswordEncoder passwordEncoder;
     InvalidTokenRepository invalidTokenRepository;
+    RedisTemplate<String, String> redisTemplate;
 
     @NonFinal
     @Value("${jwt.signerKey}")
@@ -77,6 +80,7 @@ public class AuthenticationService {
     private String generateToken(Account account) {
         JWSHeader jwsHeader = new JWSHeader(JWSAlgorithm.HS512);
 
+        String jwtId = UUID.randomUUID().toString();
         JWTClaimsSet jwtClaimsSet = new JWTClaimsSet.Builder()
                 .subject(account.getUserName())
                 .issuer("sinh.com")
@@ -84,7 +88,7 @@ public class AuthenticationService {
                 .expirationTime(new Date(
                         Instant.now().plus(VALID_DURATION, ChronoUnit.SECONDS).toEpochMilli()
                 ))
-                .jwtID(UUID.randomUUID().toString())
+                .jwtID(jwtId)
                 .claim("scope", buildScope(account))
                 .build();
         Payload payload = new Payload(jwtClaimsSet.toJSONObject());
@@ -93,7 +97,14 @@ public class AuthenticationService {
 
         try {
             jwsObject.sign(new MACSigner(SIGNER_KEY.getBytes()));
-            return jwsObject.serialize();
+            String token = jwsObject.serialize();
+            redisTemplate.opsForValue().set(
+                    "jwt:" + account.getUserName(),
+                    jwtId,
+                    VALID_DURATION,
+                    TimeUnit.SECONDS
+            );
+            return token;
         } catch (JOSEException e) {
             log.error("Cannot creat token", e);
             throw new RuntimeException(e);
@@ -157,7 +168,8 @@ public class AuthenticationService {
                     .build();
 
             invalidTokenRepository.save(invalidToken);
-
+            String username = signToken.getJWTClaimsSet().getSubject();
+            redisTemplate.delete("jwt:" + username);
         } catch (AppException e) {
             log.info("Token already expired");
         }
@@ -197,6 +209,7 @@ public class AuthenticationService {
         invalidTokenRepository.save(invalidToken);
 
         var username = signedJWT.getJWTClaimsSet().getSubject();
+        redisTemplate.delete("jwt:" + username);
         var account = accountRepository.findByUserName(username).orElseThrow(
                 () -> new AppException(ErrorCode.ACCOUNT_NOT_EXIST));
         if (!account.getStatus()) {

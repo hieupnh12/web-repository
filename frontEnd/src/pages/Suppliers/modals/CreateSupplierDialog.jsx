@@ -40,7 +40,6 @@ const SupplierDialog = ({ open, onClose, onSubmit, editData = null }) => {
   const handleChange = (e) => {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
-
     if (errors[name]) {
       setErrors((prev) => ({ ...prev, [name]: "" }));
     }
@@ -52,27 +51,23 @@ const SupplierDialog = ({ open, onClose, onSubmit, editData = null }) => {
 
   const validateForm = () => {
     const newErrors = {};
-
     if (!formData.name.trim()) {
-      newErrors.name = "Supplier name is required";
+      newErrors.name = "Tên nhà cung cấp không được để trống";
     }
-
     if (formData.email && !/\S+@\S+\.\S+/.test(formData.email)) {
-      newErrors.email = "Invalid email format";
+      newErrors.email = "Email không hợp lệ";
     }
-
     if (formData.phone && !/^[\d\s()+-]+$/.test(formData.phone)) {
-      newErrors.phone = "Invalid phone number format";
+      newErrors.phone = "Số điện thoại không hợp lệ";
     }
-
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
 
   const handleSubmit = () => {
     if (validateForm()) {
-      onSubmit(formData);
       onClose();
+      onSubmit(formData);
     }
   };
 
@@ -98,12 +93,12 @@ const SupplierDialog = ({ open, onClose, onSubmit, editData = null }) => {
             </div>
             <div>
               <h2 className="text-2xl font-bold">
-                {isEditMode ? "Edit Supplier" : "Add New Supplier"}
+                {isEditMode ? "Cập nhật nhà cung cấp" : "Thêm nhà cung cấp mới"}
               </h2>
               <p className="text-sm opacity-90">
                 {isEditMode
-                  ? "Update supplier information"
-                  : "Fill in all required fields to add a new supplier"}
+                  ? "Chỉnh sửa thông tin nhà cung cấp"
+                  : "Điền đầy đủ thông tin để thêm mới nhà cung cấp"}
               </p>
             </div>
           </div>
@@ -122,7 +117,7 @@ const SupplierDialog = ({ open, onClose, onSubmit, editData = null }) => {
             <div>
               <div className="flex items-center mb-2">
                 <BusinessIcon className="text-blue-600 mr-2" size={20} />
-                <span className="text-sm text-gray-600">Basic Information</span>
+                <span className="text-sm text-gray-600">Thông tin cơ bản</span>
               </div>
               <div className="relative">
                 <input
@@ -130,7 +125,7 @@ const SupplierDialog = ({ open, onClose, onSubmit, editData = null }) => {
                   name="name"
                   value={formData.name}
                   onChange={handleChange}
-                  placeholder="Supplier name *"
+                  placeholder="Tên nhà cung cấp *"
                   className={`w-full p-3 border ${
                     errors.name ? "border-red-500" : "border-gray-300"
                   } rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition`}
@@ -147,7 +142,7 @@ const SupplierDialog = ({ open, onClose, onSubmit, editData = null }) => {
               <div>
                 <div className="flex items-center mb-2">
                   <EmailIcon className="text-blue-600 mr-2" size={20} />
-                  <span className="text-sm text-gray-600">Contact Email</span>
+                  <span className="text-sm text-gray-600">Email liên hệ</span>
                 </div>
                 <div className="relative">
                   <input
@@ -168,7 +163,7 @@ const SupplierDialog = ({ open, onClose, onSubmit, editData = null }) => {
               <div>
                 <div className="flex items-center mb-2">
                   <PhoneIcon className="text-blue-600 mr-2" size={20} />
-                  <span className="text-sm text-gray-600">Phone Number</span>
+                  <span className="text-sm text-gray-600">Số điện thoại</span>
                 </div>
                 <div className="relative">
                   <input
@@ -176,7 +171,7 @@ const SupplierDialog = ({ open, onClose, onSubmit, editData = null }) => {
                     name="phone"
                     value={formData.phone}
                     onChange={handleChange}
-                    placeholder="Phone number"
+                    placeholder="Số điện thoại"
                     className={`w-full p-3 border ${
                       errors.phone ? "border-red-500" : "border-gray-300"
                     } rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition`}
@@ -192,13 +187,13 @@ const SupplierDialog = ({ open, onClose, onSubmit, editData = null }) => {
             <div>
               <div className="flex items-center mb-2">
                 <LocationIcon className="text-blue-600 mr-2" size={20} />
-                <span className="text-sm text-gray-600">Address</span>
+                <span className="text-sm text-gray-600">Địa chỉ chi tiết</span>
               </div>
               <textarea
                 name="address"
                 value={formData.address}
                 onChange={handleChange}
-                placeholder="Full address"
+                placeholder="Địa chỉ cụ thể (số nhà, đường...)"
                 className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition resize-y"
                 rows={1}
               />
@@ -220,7 +215,9 @@ const SupplierDialog = ({ open, onClose, onSubmit, editData = null }) => {
             >
               <div className="flex items-center justify-between">
                 <div>
-                  <h3 className="text-base font-semibold">Active Status</h3>
+                  <h3 className="text-base font-semibold">
+                    Trạng thái hoạt động
+                  </h3>
                 </div>
                 <div className="flex items-center gap-4">
                   <label className="flex items-center cursor-pointer">
@@ -231,7 +228,7 @@ const SupplierDialog = ({ open, onClose, onSubmit, editData = null }) => {
                       className="w-5 h-5 text-green-600 rounded focus:ring-green-500"
                     />
                     <span className="ml-2 text-sm">
-                      {formData.status ? "Active" : "Inactive"}
+                      {formData.status ? "Đang hoạt động" : "Ngừng hoạt động"}
                     </span>
                   </label>
                 </div>
@@ -247,13 +244,13 @@ const SupplierDialog = ({ open, onClose, onSubmit, editData = null }) => {
             onClick={onClose}
             className="px-6 py-2 border border-gray-300 rounded-lg text-gray-700 font-semibold hover:bg-gray-100 transition"
           >
-            Cancel
+            Hủy
           </button>
           <button
             onClick={handleSubmit}
             className="px-8 py-2 bg-gradient-to-r from-blue-600 to-blue-400 text-white rounded-lg font-semibold hover:from-blue-700 hover:to-blue-500 transition"
           >
-            {isEditMode ? "Update" : "Add"}
+            {isEditMode ? "Cập nhật" : "Thêm"}
           </button>
         </div>
       </div>

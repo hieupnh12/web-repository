@@ -166,25 +166,51 @@ const RevenueByMonth = () => {
       </StyledPaper>
 
       {/* Biểu đồ */}
-      <StyledPaper sx={{ mb: 3, p: 3 }}>
-        <Typography variant="h6" fontWeight={600} sx={{ mb: 2 }}>
-          Biểu đồ doanh thu theo tháng
-        </Typography>
-        <Box sx={{ width: "100%", height: 400 }}>
-          <ResponsiveContainer width="100%" height="100%">
-            <BarChart data={data}>
-              <CartesianGrid strokeDasharray="3 3" />
-              <XAxis dataKey="month" tickFormatter={(m) => `Tháng ${m}`} />
-              <YAxis />
-              <Tooltip />
-              <Legend />
-              <Bar dataKey="expenses" fill="#f97316" name="Chi phí" />
-              <Bar dataKey="revenues" fill="#3b82f6" name="Doanh thu" />
-              <Bar dataKey="profits" fill="#22c55e" name="Lợi nhuận" />
-            </BarChart>
-          </ResponsiveContainer>
-        </Box>
-      </StyledPaper>
+ <StyledPaper sx={{ mb: 3, p: 3 }}>
+  <Typography variant="h6" fontWeight={600} sx={{ mb: 2 }}>
+    Biểu đồ doanh thu theo tháng
+  </Typography>
+  <Box sx={{ width: "100%", height: 400 }}>
+    <ResponsiveContainer width="100%" height="100%">
+      <BarChart data={data} margin={{ top: 10, right: 30, left: 0, bottom: 0 }}>
+        <CartesianGrid strokeDasharray="3 3" />
+        <XAxis dataKey="month" tickFormatter={(m) => `Tháng ${m}`} />
+        
+        <YAxis
+          tickFormatter={(value) =>
+            new Intl.NumberFormat("vi-VN", {
+              notation: "compact",
+              compactDisplay: "short",
+            }).format(value)
+          }
+        />
+        
+        <Tooltip
+          formatter={(value, name) => {
+            const labelMap = {
+              revenues: "Doanh thu",
+              expenses: "Chi phí",
+              profits: "Lợi nhuận",
+            };
+            return [
+              new Intl.NumberFormat("vi-VN", {
+                style: "currency",
+                currency: "VND",
+              }).format(value),
+              labelMap[name] || name,
+            ];
+          }}
+          labelFormatter={(label) => `Tháng ${label}`}
+        />
+        
+        <Legend />
+        <Bar dataKey="expenses" fill="#f97316" name="Chi phí" />
+        <Bar dataKey="revenues" fill="#3b82f6" name="Doanh thu" />
+        <Bar dataKey="profits" fill="#22c55e" name="Lợi nhuận" />
+      </BarChart>
+    </ResponsiveContainer>
+  </Box>
+</StyledPaper>
 
       {/* Bảng dữ liệu */}
       <StyledPaper>
