@@ -341,8 +341,8 @@ export default function ImportPage() {
 
   //Load listProductSelected nếu bạn vẫn muốn lưu riêng
   useEffect(() => {
-    if (staffInfo?.fullName) {
-      dispatch({ type: "SET_STAFF", payload: staffInfo.fullName });
+    if (staffInfo?.staff.fullName) {
+      dispatch({ type: "SET_STAFF", payload: staffInfo.staff.fullName });
     }
     loadIdImport();
   }, []);

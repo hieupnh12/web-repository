@@ -1,5 +1,6 @@
 import axios from "axios";
 import Cookie from "js-cookie";
+import { toast } from "react-toastify";
 
 const BASE_URL = axios.create({
   baseURL: "http://localhost:8080/warehouse/",
@@ -59,8 +60,12 @@ BASE_URL.interceptors.response.use(
         // Dọn dẹp & chuyển về trang login
         Cookie.remove("token");
         Cookie.remove("refreshToken");
-        // dispatch(logout()); // nếu có dùng redux
-        window.location.href = "/";
+        toast.info("Phiên đăng nhập đã hết hạn! Hệ thống đăng xuất sau 3s.");
+
+        setTimeout(function () {
+          // dispatch(logout()); // nếu có dùng redux
+          window.location.href = "/";
+        }, 3000);
       }
     }
 

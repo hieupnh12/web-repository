@@ -15,7 +15,6 @@ import {
 import * as dashboardService from '../../services/dashboardService';
 
 const Dashboard = () => {
-  const [isLoading, setIsLoading] = useState(true);
   const [stats, setStats] = useState([]);
   const [features, setFeatures] = useState([]);
   const [selectedPeriod, setSelectedPeriod] = useState('month');
@@ -32,8 +31,9 @@ const Dashboard = () => {
       const verifyData = await dashboardService.getProductItemVerify();
       const revenueData = await dashboardService.getRevenueByMonth(new Date().getFullYear());
 
-      const latestRevenue = revenueData.at(-1);
-
+      const latestRevenue = revenueData;
+      console.log(exportData);
+      
       setStats([
         {
           title: 'Tổng sản phẩm',
@@ -76,13 +76,13 @@ const Dashboard = () => {
         },
         {
           title: 'Doanh thu tháng',
-          value: `₫${(latestRevenue.revenues / 1_000_000).toFixed(1)}M`,
-          change: '+0%',
+          value: `₫${(latestRevenue.currentRevenue / 1_000_000).toFixed(1)}M`,
+          change: latestRevenue.growthPercentage +'%',
           isPositive: true,
           icon: TrendingUp,
           color: 'bg-gradient-to-br from-rose-500 to-pink-600',
           glowColor: 'shadow-rose-500/20',
-          description: `Tăng ₫${latestRevenue.profits.toLocaleString()}`,
+          description: `Tăng ₫ ${latestRevenue.revenueIncrease.toLocaleString()}`,
           progress: 58,
           bgColor: 'bg-rose-50',
           borderColor: 'border-rose-200'
@@ -104,23 +104,15 @@ const Dashboard = () => {
           description: 'Ngăn chặn việc sử dụng thiết bị điện thoại giả mạo hoặc bị đánh cắp.',
           icon: Shield,
           color: 'from-green-500 to-emerald-600',
-          stats: { security: '100%', blocked: '0' },
+          stats: { security: '%', blocked: '0' },
           bgColor: 'bg-green-50',
           borderColor: 'border-green-200'
         }
       ]);
     } catch (err) {
       console.error('Error fetching dashboard data:', err);
-    } finally {
-      setIsLoading(false);
-    }
+    } 
   };
-
-  if (isLoading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center text-xl text-gray-500">Đang tải dữ liệu...</div>
-    );
-  }
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 via-gray-50 to-blue-50 relative overflow-hidden">
@@ -186,7 +178,7 @@ const Dashboard = () => {
             <Sparkles className="w-8 h-8 mr-3 text-blue-500 animate-pulse" />
             Tổng quan hệ thống
           </h2>
-          <div className="flex items-center space-x-4">
+          {/* <div className="flex items-center space-x-4">
             <select
               value={selectedPeriod}
               onChange={(e) => setSelectedPeriod(e.target.value)}
@@ -201,7 +193,7 @@ const Dashboard = () => {
               <Filter className="w-5 h-5" />
               <span className="font-medium">Lọc</span>
             </button>
-          </div>
+          </div> */}
         </div>
 
         {/* Stats Cards */}
