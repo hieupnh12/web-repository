@@ -407,7 +407,7 @@ const IMEIScanPage = () => {
                     }
                   }}
                 >
-                  Quay l���i chi tiết
+                  Quay lại chi tiết phiếu
                 </Button>
 
                 <Stack direction={{ xs: 'column', sm: 'row' }} spacing={2}>
