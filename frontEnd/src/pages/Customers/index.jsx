@@ -221,7 +221,7 @@ const Customers = () => {
   const fetchPermission = async () => {
     try {
       const result = await takeFunctionOfFeature(8);
-      const info = await takeRoleVer1();
+      // const info = await takeRoleVer1();
       setPermission(result.data.result[0]);
     } catch (err) {
       setPermission(null);

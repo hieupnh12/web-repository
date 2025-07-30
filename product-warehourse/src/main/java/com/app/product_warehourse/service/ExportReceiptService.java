@@ -47,7 +47,6 @@ public class ExportReceiptService {
 
 
 
-    @PreAuthorize("hasRole('ADMIN') or hasRole('STAFF')") // Giữ nếu vẫn sử dụng Spring Security, nếu không thì xóa
     public ExportReceiptFULLResponse initExportReceipt(ExportReceiptFullRequest request) {
 
 

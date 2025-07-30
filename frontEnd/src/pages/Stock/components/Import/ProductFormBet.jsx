@@ -362,6 +362,7 @@ const ProductForm = ({
                   <input
                     type="number"
                     name="soLuongImei"
+                    maxLength={99}
                     value={selectedItemVersion?.quantity || ""}
                     onChange={handleQuantityChange}
                     placeholder="Số lượng"

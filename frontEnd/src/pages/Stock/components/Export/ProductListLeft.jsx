@@ -50,6 +50,7 @@ const ProductList = ({
             <input
               value={searchText}
               onChange={handleSearchChange}
+              maxLength={30}
               type="text"
               placeholder="Find name of products"
               className="w-full px-3 py-2 border border-gray-700 rounded"

@@ -54,6 +54,7 @@ public class ExportReceiptController {
 //       }
 
     @PostMapping("/init")
+    @PreAuthorize("hasRole('ADMIN') or hasAuthority('Sales_Orders_CREATE')")
     public ApiResponse<ExportReceiptFULLResponse> initExportReceipt(@Valid @RequestBody ExportReceiptFullRequest request) {
         return ApiResponse.<ExportReceiptFULLResponse>builder()
                 .result(exportReceiptService.initExportReceipt(request))
@@ -61,7 +62,6 @@ public class ExportReceiptController {
     }
 
     @PostMapping("/full/confirm")
-    @PreAuthorize("hasRole('ADMIN') or hasAuthority('Sales_Orders_CREATE')")
     public ApiResponse<ExportReceiptFULLResponse> createExportReceipt(@Valid @RequestBody ExportReceiptFullRequest request) {
           return ApiResponse.<ExportReceiptFULLResponse>builder()
                   .result(exportReceiptService.createImportReceiptFull(request))

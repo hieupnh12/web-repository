@@ -9,7 +9,7 @@ import {
 import ConfirmDialog from "../../components/ui/ConfirmDialog";
 import { toast } from "react-toastify";
 
-const PerInfoDetail = ({ onClose, role, data, existingRoles }) => {
+const PerInfoDetail = ({ onClose, role, data, existingRoles , isPermission}) => {
   const [functions, setFunctions] = useState([]);
   const [loading, setLoading] = useState(false);
   const [description, setDescription] = useState("");
@@ -130,7 +130,7 @@ const PerInfoDetail = ({ onClose, role, data, existingRoles }) => {
         </button>
         <div className="flex justify-between gap-4">
           <div className="mb-4 w-2/4">
-            <label className="block font-medium mb-1">Role Name</label>
+            <label className="block font-medium mb-1">Tên quyền</label>
             <input
               value={role.roleName}
               disabled
@@ -140,9 +140,10 @@ const PerInfoDetail = ({ onClose, role, data, existingRoles }) => {
           </div>
 
           <div className="mb-4 w-2/4">
-            <label className="block font-medium mb-1">Description</label>
+            <label className="block font-medium mb-1">Mô tả</label>
             <input
               value={description}
+              maxLength={50}
               onChange={(e) => setDescription(e.target.value)}
               className="w-full border rounded-md p-2"
               placeholder="Enter description"
@@ -162,11 +163,11 @@ const PerInfoDetail = ({ onClose, role, data, existingRoles }) => {
             <table className="w-full border">
               <thead className="bg-gray-100 text-sm">
                 <tr>
-                  <th className="p-2 text-left">Function</th>
-                  <th className="p-2 text-center">View</th>
-                  <th className="p-2 text-center">Create</th>
-                  <th className="p-2 text-center">Update</th>
-                  <th className="p-2 text-center">Delete</th>
+                  <th className="p-2 text-left">Tính năng</th>
+                  <th className="p-2 text-center">Xem</th>
+                  <th className="p-2 text-center">Tạo</th>
+                  <th className="p-2 text-center">Cập nhật</th>
+                  <th className="p-2 text-center">Xóa</th>
                 </tr>
               </thead>
               <tbody>
@@ -204,54 +205,61 @@ const PerInfoDetail = ({ onClose, role, data, existingRoles }) => {
         )}
 
         <div className="mt-6 flex justify-end gap-3">
-          <div>
-            <Button
-              onClick={() => {
-                if (isEditing) {
-                  setShowConfirmUpdate(true);
-                }
-                setIsEditing(!isEditing);
-              }}
-              className={`group flex items-center gap-2 ${
-                isEditing
-                  ? "bg-green-600 hover:bg-green-700"
-                  : "bg-yellow-500 hover:bg-yellow-600"
-              } text-white hover:scale-105 transform transition-all duration-300 shadow-lg hover:shadow-xl px-3 py-2 text-sm`}
-            >
-              <Edit className="w-4 h-4 group-hover:scale-110 transition-transform duration-300" />
-              <span className="hidden sm:inline">
-                {isEditing ? "Update" : "Edit"}
-              </span>
-            </Button>
-            <ConfirmDialog
-              isOpen={showConfirmUpdate}
-              title="Confirm Update"
-              message="Do you want to update this permission?"
-              action="update"
-              onConfirm={() => {
-                handleUpdate();
-                setShowConfirmUpdate(false);
-              }}
-              onCancel={() => setShowConfirmUpdate(false)}
-            />
-          </div>
-          <div>
-            <Button
-              onClick={() => setShowConfirm(true)}
-              className="group flex items-center gap-2 bg-red-600 text-white hover:bg-red-700 hover:scale-105 transform transition-all duration-300 shadow-lg hover:shadow-xl px-3 py-2 text-sm"
-            >
-              <Trash className="w-4 h-4 group-hover:scale-110 transition-transform duration-300" />
-              <span className="hidden sm:inline">Delete</span>
-            </Button>
-            <ConfirmDialog
-              isOpen={showConfirm}
-              title="Delete"
-              message="Do you want to delete this permission?"
-              onConfirm={handleDeleteRole}
-              onCancel={() => setShowConfirm(false)}
-            />
-          </div>
-        </div>
+  {isPermission?.canUpdate && (
+    <div>
+      <Button
+        onClick={() => {
+          if (isEditing) {
+            setShowConfirmUpdate(true);
+          }
+          setIsEditing(!isEditing);
+        }}
+        className={`group flex items-center gap-2 ${
+          isEditing
+            ? "bg-green-600 hover:bg-green-700"
+            : "bg-yellow-500 hover:bg-yellow-600"
+        } text-white hover:scale-105 transform transition-all duration-300 shadow-lg hover:shadow-xl px-3 py-2 text-sm`}
+      >
+        <Edit className="w-4 h-4 group-hover:scale-110 transition-transform duration-300" />
+        <span className="hidden sm:inline">
+          {isEditing ? "Update" : "Edit"}
+        </span>
+      </Button>
+
+      <ConfirmDialog
+        isOpen={showConfirmUpdate}
+        title="Confirm Update"
+        message="Do you want to update this permission?"
+        action="update"
+        onConfirm={() => {
+          handleUpdate();
+          setShowConfirmUpdate(false);
+        }}
+        onCancel={() => setShowConfirmUpdate(false)}
+      />
+    </div>
+  )}
+
+  {isPermission?.canDelete && (
+    <div>
+      <Button
+        onClick={() => setShowConfirm(true)}
+        className="group flex items-center gap-2 bg-red-600 text-white hover:bg-red-700 hover:scale-105 transform transition-all duration-300 shadow-lg hover:shadow-xl px-3 py-2 text-sm"
+      >
+        <Trash className="w-4 h-4 group-hover:scale-110 transition-transform duration-300" />
+        <span className="hidden sm:inline">Delete</span>
+      </Button>
+
+      <ConfirmDialog
+        isOpen={showConfirm}
+        title="Delete"
+        message="Do you want to delete this permission?"
+        onConfirm={handleDeleteRole}
+        onCancel={() => setShowConfirm(false)}
+      />
+    </div>
+  )}
+</div>
       </div>
     </div>
   );

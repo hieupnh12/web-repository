@@ -3,6 +3,7 @@ import { X, Loader2 } from "lucide-react";
 import Button from "../../components/ui/Button";
 import { takeFunctions } from "../../services/permissionService";
 import { toast } from "react-toastify";
+import { td } from "framer-motion/client";
 
 const AddRoleModal = ({ onClose, onSubmit, existingRoles }) => {
   const [functions, setFunctions] = useState([]);
@@ -94,9 +95,10 @@ const AddRoleModal = ({ onClose, onSubmit, existingRoles }) => {
             <input
               value={roleName}
               required={true}
+              maxLength={30}
               onChange={(e) => setRoleName(e.target.value)}
-              className="w-full border rounded-md p-2"
-              placeholder="Enter role name"
+              className="w-full border rounded-md p-1"
+              placeholder="Nhập tên quyền"
             />
           </div>
 
@@ -104,9 +106,10 @@ const AddRoleModal = ({ onClose, onSubmit, existingRoles }) => {
             <label className="block mb-1">Mô tả</label>
             <input
               value={description}
+              maxLength={50}
               onChange={(e) => setDescription(e.target.value)}
-              className="w-full border rounded-md p-2"
-              placeholder="Enter description"
+              className="w-full border rounded-md p-1"
+              placeholder="Nhập mô tả"
             />
           </div>
         </div>
@@ -122,11 +125,11 @@ const AddRoleModal = ({ onClose, onSubmit, existingRoles }) => {
             <table className="w-full border">
               <thead className="bg-gray-100 text-sm">
                 <tr>
-                  <th className="p-2 text-left">Function Group</th>
-                  <th className="p-2 text-center">View</th>
-                  <th className="p-2 text-center">Create</th>
-                  <th className="p-2 text-center">Update</th>
-                  <th className="p-2 text-center">Delete</th>
+                  <th className="p-2 text-left">Tính năng</th>
+                  <th className="p-2 text-center">Xem</th>
+                  <th className="p-2 text-center">Tạo</th>
+                  <th className="p-2 text-center">Cập nhật</th>
+                  <th className="p-2 text-center">Xóa</th>
                 </tr>
               </thead>
               <tbody>
@@ -163,13 +166,13 @@ const AddRoleModal = ({ onClose, onSubmit, existingRoles }) => {
             onClick={handleSubmit}
             className="bg-blue-600 hover:bg-blue-700 text-white"
           >
-            Add Role
+            Thêm quyền
           </Button>
           <Button
             onClick={onClose}
             className="bg-red-500 hover:bg-red-600 text-white"
           >
-            Cancel
+            Hủy
           </Button>
         </div>
       </div>

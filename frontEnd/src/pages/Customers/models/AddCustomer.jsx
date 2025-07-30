@@ -36,7 +36,15 @@ const CustomerDialog = ({ open, onClose, onSubmit, editData = null }) => {
 
   const handleChange = (e) => {
     const { name, value } = e.target;
+    if (name === "phone") {
+    // Chỉ cho phép số và tối đa 10 chữ số
+    const digitsOnly = value.replace(/\D/g, "");
+    if (digitsOnly.length <= 10) {
+      setFormData((prev) => ({ ...prev, phone: digitsOnly }));
+    }
+  } else {
     setFormData((prev) => ({ ...prev, [name]: value }));
+  }
 
     if (errors[name]) {
       setErrors((prev) => ({ ...prev, [name]: "" }));
@@ -123,6 +131,7 @@ const CustomerDialog = ({ open, onClose, onSubmit, editData = null }) => {
                 <input
                   type="text"
                   name="customerName"
+                  maxLength={30}
                   value={formData.customerName}
                   onChange={handleChange}
                   placeholder="Tên khách hàng *"
@@ -149,6 +158,8 @@ const CustomerDialog = ({ open, onClose, onSubmit, editData = null }) => {
                 <input
                   type="text"
                   name="phone"
+                  maxLength={10}
+                  inputMode="numeric"
                   value={formData.phone}
                   onChange={handleChange}
                   placeholder="Số điện thoại"
@@ -171,6 +182,7 @@ const CustomerDialog = ({ open, onClose, onSubmit, editData = null }) => {
               <textarea
                 name="address"
                 value={formData.address}
+                maxLength={100}
                 onChange={handleChange}
                 placeholder="Địa chỉ đầy đủ"
                 className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition resize-y"

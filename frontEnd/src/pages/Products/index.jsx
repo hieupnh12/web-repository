@@ -16,6 +16,8 @@ import SearchFilter from "./components/SearchFilter";
 import DeleteProductModal from "./modals/DeleteProductModal";
 import * as XLSX from 'xlsx';
 import { toast } from "react-toastify";
+import { takeFunctionOfFeature } from "../../services/permissionService";
+import { useSelector } from "react-redux";
 
 const ProductsPage = () => {
   const [products, setProducts] = useState([]);
@@ -317,7 +319,33 @@ const ProductsPage = () => {
     const outOfStock = allProducts.filter((p) => p.stockQuantity === 0).length;
     return { totalProducts, inStock, lowStock, outOfStock };
   }, [allProducts]);
+const [permission, setPermission] = useState(null);
 
+  const fetchPermission = async () => {
+    try {
+      const result = await takeFunctionOfFeature(4);
+      // const info = await takeRoleVer1();
+      setPermission(result.data.result[0]);
+    } catch (err) {
+      setPermission(null);
+    }
+  };
+
+  const staffInfo = useSelector((state) => state.auth.userInfo);
+
+  useEffect(() => {
+    if (staffInfo && staffInfo.roleName === "ADMIN") {
+      setPermission(() => ({
+        functionId: 8,
+        canView: true,
+        canCreate: true,
+        canUpdate: true,
+        canDelete: true,
+      }));
+    } else {
+      fetchPermission();
+    }
+  }, []);
   return (
     <div className="min-h-screen w-full bg-gradient-to-br from-gray-50 to-blue-100 flex flex-col">
       <div className="flex-grow w-full px-4 py-6">
@@ -325,10 +353,20 @@ const ProductsPage = () => {
           <div className="flex flex-col gap-4">
             <div className="flex flex-wrap sm:flex-row sm:items-center sm:justify-between gap-4">
               <div className="flex flex-wrap gap-3 items-center">
-                <Button onClick={() => setShowAddModal(true)} className="group flex items-center gap-2 bg-blue-600 text-white hover:bg-blue-700 hover:scale-105 transform transition-all duration-300 shadow-lg hover:shadow-xl px-4 py-2 text-sm">
-                  <Plus className="w-4 h-4 group-hover:rotate-90 transition-transform duration-300" />
-                  <span className="hidden sm:inline">Thêm mới</span>
-                </Button>
+                <span>
+  <Button
+    onClick={() => setShowAddModal(true)}
+    disabled={!permission?.canCreate}
+    className={`group flex items-center gap-2 text-white px-4 py-2 text-sm transition-all duration-300 shadow-lg hover:shadow-xl ${
+      permission?.canCreate
+        ? "bg-blue-600 hover:bg-blue-700 hover:scale-105"
+        : "bg-blue-300 cursor-not-allowed"
+    }`}
+  >
+    <Plus className="w-4 h-4 group-hover:rotate-90 transition-transform duration-300" />
+    <span className="hidden sm:inline">Thêm mới</span>
+  </Button>
+</span>
                 <Button onClick={handleExportExcel} className="group flex items-center gap-2 bg-gradient-to-r from-emerald-500 to-emerald-600 text-white hover:from-emerald-600 hover:to-emerald-700 hover:scale-105 transform transition-all duration-200 shadow-lg hover:shadow-xl px-4 py-2 text-sm">
                   <FileSpreadsheet className="w-4 h-4 group-hover:scale-110 transition-all duration-200" />
                   <span className="hidden sm:inline">Xuất Excel</span>
