@@ -96,15 +96,15 @@ const AddProductVersionModal = ({ productId, onSuccess, onClose }) => {
 
     versions.forEach(version => {
       if (!version.romId) {
-        newErrors[`rom_${version.id}`] = "Chọn ROM";
+        newErrors[`rom_${version.id}`] = "ROM";
         hasErrors = true;
       }
       if (!version.ramId) {
-        newErrors[`ram_${version.id}`] = "Chọn RAM";
+        newErrors[`ram_${version.id}`] = "RAM";
         hasErrors = true;
       }
       if (!version.colorId) {
-        newErrors[`color_${version.id}`] = "Chọn màu";
+        newErrors[`color_${version.id}`] = "Màu";
         hasErrors = true;
       }
     });

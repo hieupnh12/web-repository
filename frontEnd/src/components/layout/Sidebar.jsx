@@ -276,7 +276,7 @@ const Sidebar = () => {
   const filteredMenuItems = useMemo(() => {
     const defaultDashboard = {
       id: "dashboard",
-      label: "Bảng điều khiển",
+      label: "Trang chủ",
       icon: Home,
       path: "dashboard",
       color: "text-blue-500",
@@ -416,12 +416,12 @@ const Sidebar = () => {
             className="w-full flex items-center space-x-3 px-3 py-2.5 rounded-lg text-left text-red-600 hover:bg-red-50 transition-all duration-200"
           >
             <LogOut className="w-5 h-5" />
-            <span className="font-medium">Log Out</span>
+            <span className="font-medium">Đăng xuất</span>
           </button>
           <LogoutDialog
             isOpen={showConfirm}
-            title="Log Out"
-            message="Are you sure you want to log out?"
+            title="Đăng xuất"
+            message="Bạn có muốn đăng xuất?"
             onConfirm={handleLogout}
             onCancel={() => setShowConfirm(false)}
           />
