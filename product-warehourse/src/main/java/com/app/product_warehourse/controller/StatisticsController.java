@@ -6,6 +6,7 @@ import com.app.product_warehourse.dto.request.DayInMonthRequest;
 import com.app.product_warehourse.dto.request.InventoryStatisticsRequest;
 import com.app.product_warehourse.dto.request.YearToYearRequest;
 import com.app.product_warehourse.dto.response.*;
+import com.app.product_warehourse.service.CountQuantityOfAll;
 import com.app.product_warehourse.service.StatisticsService;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
@@ -14,6 +15,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/statistic")
@@ -22,6 +24,7 @@ import java.util.List;
 @Slf4j
 public class StatisticsController {
     StatisticsService statisticsService;
+    CountQuantityOfAll countQuantityOfAll;
 
     @GetMapping("/count")
     public ApiResponse<StatisticsCountsResponse> countProductItemIn() {
@@ -87,6 +90,13 @@ public class StatisticsController {
     public ApiResponse<List<InventoryStatisticsResponse>> inventoryStatistics(@RequestBody InventoryStatisticsRequest request) {
         return ApiResponse.<List<InventoryStatisticsResponse>>builder()
                 .result(statisticsService.getReportInventory(request))
+                .build();
+    }
+
+    @GetMapping("/countMonth/{year}")
+    public ApiResponse<Map<String, Object>> CountMonthStatistics(@PathVariable("year") Long year) {
+        return ApiResponse.<Map<String, Object>>builder()
+                .result(countQuantityOfAll.calculateCurrentMonthRevenue(year))
                 .build();
     }
 

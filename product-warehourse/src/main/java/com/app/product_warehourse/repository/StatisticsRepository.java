@@ -95,6 +95,8 @@ public interface StatisticsRepository extends JpaRepository<ExportReceipt, Strin
             """, nativeQuery = true)
     List<MonthInYearResponse> getAllMonthInYear(Long year);
 
+
+
     @Query(value = """
     SELECT
         dates.date AS date,
@@ -319,6 +321,57 @@ public interface StatisticsRepository extends JpaRepository<ExportReceipt, Strin
             LocalDateTime startTime ,LocalDateTime endTime,
             String productName, String productVersionId
             );
+
+
+
+
+
+
+
+
+    // caí riêng của lộc
+
+
+
+    //tinh doanh thu thang thu duoc
+        @Query(value = """
+            SELECT
+                m.month AS month,
+                COALESCE(SUM(i.unit_price * i.quantity), 0) AS expenses,
+                COALESCE(SUM(x.unit_price * x.quantity), 0) AS revenues,
+                COALESCE(SUM(x.unit_price * x.quantity), 0) - COALESCE(SUM(i.unit_price * i.quantity), 0) AS profit                     
+            FROM (
+                SELECT 1 AS month UNION ALL
+                SELECT 2 UNION ALL
+                SELECT 3 UNION ALL
+                SELECT 4 UNION ALL
+                SELECT 5 UNION ALL
+                SELECT 6 UNION ALL
+                SELECT 7 UNION ALL
+                SELECT 8 UNION ALL
+                SELECT 9 UNION ALL
+                SELECT 10 UNION ALL
+                SELECT 11 UNION ALL
+                SELECT 12
+            ) AS m
+            LEFT JOIN export px
+                ON MONTH(px.export_time) = m.month
+                AND YEAR(px.export_time) = ?
+            LEFT JOIN export_details x
+                ON px.export_id = x.export_id
+            LEFT JOIN product_item prIt
+                ON prIt.export_id = x.export_id
+                AND prIt.product_version_id = x.product_version_id
+            LEFT JOIN import_details i
+                ON i.import_id = prIt.import_id
+                AND i.product_version_id = prIt.product_version_id
+            GROUP BY m.month
+            ORDER BY m.month;
+        """, nativeQuery = true)
+    List<MonthInYearResponse> getAllMonthInYear2(Long year);
+
+
+
 
 
 }
