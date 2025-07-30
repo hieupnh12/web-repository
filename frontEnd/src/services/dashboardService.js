@@ -27,16 +27,6 @@ export const getProductItemVerify = async () => {
 
 // Lấy dữ liệu doanh thu theo tháng
 export const getRevenueByMonth = async (year) => {
-  try {
-    const res = await BASE_URL[GET](`statistic/revenue/moth/${year}`);
+    const res = await BASE_URL[GET](`statistic/countMonth/${year}`);
     return res.data.result;
-  } catch (error) {
-    console.error('Error fetching revenue data:', {
-      message: error.message,
-      code: error.code,
-      response: error.response ? error.response.data : null,
-      url: `statistic/revenue/moth/${year}`
-    });
-    throw error;
-  }
 };

@@ -9,15 +9,25 @@ const getHeaders = () => ({
   'Authorization': `Bearer ${getAuthToken()}`
 });
 
-export const fetchStaffList = () => {
-  return BASE_URL[GET]("staff");
+export const fetchStaffList = async () => {
+  try {
+    const response = await BASE_URL[GET]("staff");
+    return Array.isArray(response.data?.result) ? response.data.result : [];
+  } catch (error) {
+    console.error("Error fetching staff list:", error);
+    return [];
+  }
 };
 
 export const fetchStaffListInven = async () => {
-  const response = await BASE_URL[GET]("staff");
-  return Array.isArray(response.data?.result) ? response.data.result : [];
+  try {
+    const response = await BASE_URL[GET]("staff");
+    return Array.isArray(response.data?.result) ? response.data.result : [];
+  } catch (error) {
+    console.error("Error fetching staff list for inventory:", error);
+    return [];
+  }
 };
-
 
 export const createStaff = async (staff) => {
   try {
@@ -52,15 +62,11 @@ export const editStaff = async (id, staff) => {
       status: staff.status === '1' || staff.status === 1 ? 1 : 0,
     };
 
-    console.log(`Calling API to: /staff/${id}`);
-    console.log('Payload:', payload);
-
     const res = await BASE_URL.put(`/staff/${id}`, payload, {
       headers: getHeaders(),
     });
     return res.data.result;
   } catch (error) {
-    console.log('Error response:', error.response); // Debug the full response
     throw error.response?.data?.message || "Failed to update staff";
   }
 };

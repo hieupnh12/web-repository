@@ -53,7 +53,7 @@ export const deleteProductVersion = async (versionId) => {
 
 export const getVersionsByProductId = async (productId) => {
   try {
-    const response = await BASE_URL[GET](`/product_version/by-product/${productId}`);
+    const response = await BASE_URL[GET](`/productVersion/${productId}`);
     return response.data?.result || [];
   } catch (error) {
     handleApiError(error, "Không thể lấy danh sách phiên bản sản phẩm");

@@ -15,14 +15,16 @@ import {
   Download,
   Upload,
   ShieldCheck,
+  SearchCheck,
   Menu,
   X,
   KeyRound,
 } from "lucide-react";
-import { useDispatch } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import { logout, setFunctionIds, setUserInfo } from "../../context/authSlide";
 import { toast } from "react-toastify";
 import {
+  takeChangePass,
   takeFunction,
   takeInfo,
   takeResetPass,
@@ -31,6 +33,21 @@ import {
 import LogoutDialog from "../ui/LogoutDialog";
 
 const MENU_ITEMS = [
+
+  // { id: 4, label: "Products", icon: Package, path: "products", color: "text-blue-500" },
+  // { id: 1, label: "Attributes", icon: Cpu, path: "attributes", color: "text-blue-500" },
+  // { id: 6, label: "Import", icon: Download, path: "import", color: "text-blue-500" },
+  // { id: 7, label: "Export", icon: Upload, path: "export", color: "text-blue-500" },
+  // { id: 3, label: "Inventory", icon: SearchCheck, path: "inventory", color: "text-blue-500" },
+  // { id: 2, label: "Areas", icon: MapPin, path: "storage", color: "text-blue-500" },
+  // { id: 8, label: "Customers", icon: Users, path: "customers", color: "text-blue-500" },
+  // { id: 5, label: "Suppliers", icon: Building2, path: "suppliers", color: "text-blue-500" },
+  // { id: 9, label: "Staff", icon: UserCircle, path: "staff", color: "text-blue-500" },
+  // { id: 10, label: "Account", icon: Settings, path: "account", color: "text-blue-500" },
+  // { id: 11, label: "Permissions", icon: ShieldCheck, path: "permissions", color: "text-blue-500" },
+  // { id: 12, label: "Statistics", icon: BarChart3, path: "statistics", color: "text-blue-500" },
+
+
 
   {
     id: 4,
@@ -58,6 +75,13 @@ const MENU_ITEMS = [
     label: "Xuất hàng",
     icon: Upload,
     path: "export",
+    color: "text-blue-500",
+  },
+  {
+    id: 3,
+    label: "Kiểm kê",
+    icon: SearchCheck,
+    path: "inventory",
     color: "text-blue-500",
   },
   {
@@ -106,7 +130,7 @@ const MENU_ITEMS = [
     id: 12,
     label: "Thống kê",
     icon: BarChart3,
-    path: "statistics",
+    path: "statistics/overview",
     color: "text-blue-500",
   },
 
@@ -119,7 +143,7 @@ const Sidebar = () => {
   const [showConfirm, setShowConfirm] = useState(false);
   const [allowedFunctionIds, setAllowedFunctionIds] = useState([]);
   const [infoAccount, setInfoAccount] = useState({
-    fullName: "",
+    staff: "",
     roleName: "",
   });
 
@@ -178,16 +202,18 @@ const Sidebar = () => {
   // Xử lý đổi mật khẩu
   const handleSubmitChangePassword = async () => {
     if (error) return; // nếu đang có lỗi thì không submit
-
+    
     // Gọi API đổi mật khẩu ở đây
     try {
-      const response = await takeResetPass({
+      const response = await takeChangePass({
         oldPassword: passwordData.oldPassword,
         newPassword: passwordData.newPassword,
-      });
-
+      }, infoAccount.staff.staffId);
+      console.log("doi mk", response);
+      
       if (response.status === 200) {
         toast.success("Đổi mật khẩu thành công!");
+        toast.info("Chờ 3 giây để logout!");
         setShowPasswordPopup(false);
         setPasswordData({
           oldPassword: "",
@@ -195,13 +221,17 @@ const Sidebar = () => {
           confirmPassword: "",
         });
         setError("");
+        setTimeout(function () {
+          window.location.href = "/";
+        }, 5000);
+        // dispatch(logout()); // nếu có dùng redux
       } else {
         setError(response.data?.message || "Đổi mật khẩu thất bại");
       }
     } catch (err) {
       setError(
         err.response?.data?.message || "Có lỗi xảy ra, vui lòng thử lại"
-      );
+      );      
     }
   };
 
@@ -225,13 +255,13 @@ const Sidebar = () => {
           takeFunction(),
         ]);
 
-        const { fullName } = infoRes.data.result;
+        const staff = infoRes.data.result;
         const { roleName } = roleRes.data.result;
         const functionIds = funcRes.data.result.map((f) => f.functionId);
 
-        dispatch(setUserInfo({ fullName, roleName }));
+        dispatch(setUserInfo({ staff, roleName }));
         dispatch(setFunctionIds(functionIds));
-        setInfoAccount({ fullName, roleName });
+        setInfoAccount({ staff, roleName });
         setAllowedFunctionIds(functionIds);
         setIsLoading(false);
       } catch (err) {
@@ -311,7 +341,7 @@ const Sidebar = () => {
             </div>
             <div>
               <h3 className="font-semibold text-gray-800">
-                {infoAccount.fullName}
+                {infoAccount?.staff.fullName}
               </h3>
               <p className="text-sm text-gray-500">{infoAccount.roleName}</p>
             </div>

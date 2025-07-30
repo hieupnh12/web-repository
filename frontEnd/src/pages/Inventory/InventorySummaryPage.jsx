@@ -43,9 +43,9 @@ const InventorySummaryPage = () => {
 
   const handleFinish = async () => {
     try {
-      await updateInventoryStatus(inventoryId, 2); // Hoàn tất
+      await updateInventoryStatus(inventoryId, 2); 
       setOpenConfirm(false);
-      navigate('/inventory');
+      navigate('/manager/inventory');
     } catch (err) {
       console.error('Lỗi hoàn tất kiểm kê', err);
     }
@@ -115,7 +115,7 @@ const InventorySummaryPage = () => {
       </Paper>
 
       <Stack direction="row" spacing={2} sx={{ mt: 4 }}>
-        <Button variant="outlined" onClick={() => navigate(`/inventory/scan/${inventoryId}`)}>
+        <Button variant="outlined" onClick={() => navigate(`/manager/inventory/scan/${inventoryId}`)}>
           Quay lại quét IMEI
         </Button>
         <Button variant="contained" onClick={() => setOpenConfirm(true)}>

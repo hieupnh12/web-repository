@@ -192,7 +192,7 @@ const ExportPage = () => {
   useEffect(() => {
     setForm((prev) => ({
       ...prev,
-      user: staffInfo?.fullName, // thay đổi mã code tại đây
+      user: staffInfo?.staff.fullName, // thay đổi mã code tại đây
     }));
     loadIdImport();
   }, []);

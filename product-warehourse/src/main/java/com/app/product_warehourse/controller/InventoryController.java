@@ -22,11 +22,11 @@ import java.util.List;
 public class InventoryController {
     InventoryService inventoryService;
 
-
     @PostMapping
-    public ApiResponse<Void> addInventory(@RequestBody InventoryRequest request) {
-        inventoryService.createFullInventory(request);
-        return ApiResponse.<Void>builder()
+    public ApiResponse<InventoryResponse> addInventory(@RequestBody InventoryRequest request) {
+        InventoryResponse inventory = inventoryService.createFullInventory(request);
+        return ApiResponse.<InventoryResponse>builder()
+                .result(inventory)
                 .message("Successfully added inventory")
                 .build();
     }
@@ -53,6 +53,7 @@ public class InventoryController {
                 .message("Update inventory has successful")
                 .build();
     }
+    
     @GetMapping("/{id}")
     public ApiResponse<InventoryResponse> getInventoryById(@PathVariable Long id) {
         return ApiResponse.<InventoryResponse>builder()
@@ -60,4 +61,11 @@ public class InventoryController {
                 .build();
     }
 
+    @PutMapping("/update-stocks/{inventoryId}")
+    public ApiResponse<Void> updateProductVersionStocks(@PathVariable Long inventoryId) {
+        inventoryService.updateProductVersionStocks(inventoryId);
+        return ApiResponse.<Void>builder()
+                .message("Product version stocks updated successfully")
+                .build();
+    }
 }

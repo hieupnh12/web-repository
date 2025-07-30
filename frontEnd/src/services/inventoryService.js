@@ -18,26 +18,18 @@ const handleApiError = (error, defaultMessage) => {
   throw new Error(errorMessage);
 };
 
-
-
 export const createInventory = async (inventoryRequest) => {
   try {
     const response = await BASE_URL[POST]("/inventory", inventoryRequest);
-    console.log("Create inventory response:", response.data);
-    return response.data?.result;
+    return response.data?.result || response.data;
   } catch (error) {
     handleApiError(error, "Không thể tạo phiếu kiểm kê");
   }
 };
 
-
 export const getInventories = async (params = {}) => {
   try {
     const response = await BASE_URL[GET]("/inventory", { params });
-    
-    // Log toàn bộ response để kiểm tra dữ liệu trả về
-    console.log("API /inventory response:", response.data);
-
     return response.data?.result || [];
   } catch (error) {
     handleApiError(error, "Không thể tải danh sách phiếu kiểm kê");
@@ -71,8 +63,6 @@ export const updateProductVersionStocks = async (inventoryId) => {
   }
 };
 
-
-
 export const saveInventoryDetails = async (inventoryId, details) => {
   try {
     const request = details.map((d) => ({
@@ -81,7 +71,8 @@ export const saveInventoryDetails = async (inventoryId, details) => {
       quantity: d.quantity,
       note: d.note || "",
     }));
-    await BASE_URL[POST](`/inventory-details/${inventoryId}`, request);
+    const response = await BASE_URL[POST](`/inventory-details/${inventoryId}`, request);
+    return response.data?.result;
   } catch (error) {
     handleApiError(error, "Không thể lưu chi tiết kiểm kê");
   }
@@ -89,10 +80,16 @@ export const saveInventoryDetails = async (inventoryId, details) => {
 
 export const getInventoryDetailsById = async (inventoryId) => {
   try {
+    console.log("🔍 Fetching inventory details for ID:", inventoryId);
+    
     const [detailsRes, imeiRes] = await Promise.all([
       BASE_URL[GET](`/inventory-details/${inventoryId}`),
-      BASE_URL[POST](`/inventory-product-details`, { inventoryId }), // đổi sang POST vì backend dùng @RequestBody
+      BASE_URL[POST](`/inventory-product-details`, { inventoryId: parseInt(inventoryId) }),
     ]);
+    
+    console.log("📋 Details response:", detailsRes.data);
+    console.log("📱 IMEI response:", imeiRes.data);
+    
     return {
       inventoryDetails: detailsRes.data?.result || [],
       inventoryProductDetails: imeiRes.data?.result || [],
@@ -102,7 +99,6 @@ export const getInventoryDetailsById = async (inventoryId) => {
   }
 };
 
-
 export const saveInventoryProductDetails = async (inventoryId, imeiList) => {
   try {
     const payload = imeiList.map((i) => ({
@@ -110,7 +106,8 @@ export const saveInventoryProductDetails = async (inventoryId, imeiList) => {
       productVersionId: i.productVersionId,
       status: i.status,
     }));
-    await BASE_URL[POST](`/inventory-product-details/${inventoryId}`, payload);
+    const response = await BASE_URL[POST](`/inventory-product-details/${inventoryId}`, payload);
+    return response.data?.result;
   } catch (error) {
     handleApiError(error, "Không thể lưu danh sách IMEI");
   }
@@ -118,19 +115,40 @@ export const saveInventoryProductDetails = async (inventoryId, imeiList) => {
 
 export const markMissingIMEI = async (inventoryId, productVersionId) => {
   try {
-    await BASE_URL[POST](`/inventory-product-details/mark-missing/${inventoryId}/${productVersionId}`);
+    const response = await BASE_URL[POST](`/inventory-product-details/mark-missing/${inventoryId}/${productVersionId}`);
+    return response.data?.result;
   } catch (error) {
     handleApiError(error, "Không thể đánh dấu IMEI thiếu");
   }
 };
 
-
-
 export const getProductVersions = async () => {
   try {
-    const res = await BASE_URL[GET]("/product-versions");
+    const res = await BASE_URL[GET]("/productVersion");
     return res.data?.result || [];
   } catch (error) {
     handleApiError(error, "Không thể lấy danh sách phiên bản sản phẩm");
+  }
+};
+
+export const getProductVersionsByInventory = async (inventoryId) => {
+  try {
+    // Lấy tất cả product versions vì hiện tại backend chưa có API filter theo inventory
+    // Trong tương lai có thể tạo API riêng: /productVersion/by-inventory/{inventoryId}
+    const res = await BASE_URL[GET]("/productVersion");
+    return res.data?.result || [];
+  } catch (error) {
+    handleApiError(error, "Không thể lấy danh sách phiên bản sản phẩm cho kiểm kê");
+  }
+};
+
+export const getImeisByProductVersion = async (productVersionId) => {
+  try {
+    console.log("🔍 Fetching IMEIs for product version:", productVersionId);
+    const res = await BASE_URL[GET](`/product-item/available/by-version/${productVersionId}`);
+    console.log("📱 IMEI response:", res.data);
+    return res.data?.result || [];
+  } catch (error) {
+    handleApiError(error, "Không thể lấy danh sách IMEI");
   }
 };
