@@ -1,5 +1,5 @@
 import BASE_URL from "../api";
-import { GET, POST, PUT } from "../constants/httpMethod";
+import { GET, POST, PUT, DELETE } from "../constants/httpMethod";
 
 // 📦 Hàm xử lý lỗi dùng chung
 const handleApiError = (error, defaultMessage) => {
@@ -133,8 +133,7 @@ export const getProductVersions = async () => {
 
 export const getProductVersionsByInventory = async (inventoryId) => {
   try {
-    // Lấy tất cả product versions vì hiện tại backend chưa có API filter theo inventory
-    // Trong tương lai có thể tạo API riêng: /productVersion/by-inventory/{inventoryId}
+
     const res = await BASE_URL[GET]("/productVersion");
     return res.data?.result || [];
   } catch (error) {
@@ -142,13 +141,49 @@ export const getProductVersionsByInventory = async (inventoryId) => {
   }
 };
 
+
 export const getImeisByProductVersion = async (productVersionId) => {
   try {
     console.log("🔍 Fetching IMEIs for product version:", productVersionId);
-    const res = await BASE_URL[GET](`/product-item/available/by-version/${productVersionId}`);
+    
+    const res = await BASE_URL[GET](`/productItem/available/by-version/${productVersionId}`);
     console.log("📱 IMEI response:", res.data);
     return res.data?.result || [];
   } catch (error) {
+    console.error("❌ Error fetching IMEIs:", error);
     handleApiError(error, "Không thể lấy danh sách IMEI");
+  }
+};
+
+// 🗑️ Xóa phiếu kiểm kê
+export const deleteInventory = async (inventoryId) => {
+  try {
+    console.log("🗑️ Deleting inventory:", inventoryId);
+    const response = await BASE_URL[DELETE](`/inventory/${inventoryId}`);
+    console.log("✅ Delete response:", response.data);
+    return response.data?.result;
+  } catch (error) {
+    console.error("❌ Error deleting inventory:", error);
+    handleApiError(error, "Không thể xóa phiếu kiểm kê");
+  }
+};
+
+// 📊 Lấy danh sách nhân viên cho bộ lọc
+export const getStaffList = async () => {
+  try {
+    const response = await BASE_URL[GET]("/staff");
+    return response.data?.result || [];
+  } catch (error) {
+    handleApiError(error, "Không thể lấy danh sách nhân viên");
+  }
+};
+
+// 🏢 Lấy danh sách khu vực kho cho bộ lọc
+export const getWarehouseAreas = async () => {
+  try {
+    const response = await BASE_URL[GET]("/warehouse-area");
+    return response.data?.result || [];
+  } catch (error) {
+    handleApiError(error, "Không thể lấy danh sách khu vực kho");
   }
 };

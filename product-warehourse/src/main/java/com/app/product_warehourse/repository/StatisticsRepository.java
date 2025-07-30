@@ -171,7 +171,7 @@ public interface StatisticsRepository extends JpaRepository<ExportReceipt, Strin
                             y.y AS year,
                             COALESCE(dt.doanh_thu, 0) AS revenue,
                             COALESCE(cp.chi_phi, 0) AS expenses,
-                            COALESCE(cp.chi_phi, 0) - COALESCE(dt.doanh_thu, 0) AS profit
+                            COALESCE(dt.doanh_thu, 0) - COALESCE(cp.chi_phi, 0) AS profit
                         FROM years y
                         LEFT JOIN doanh_thu_theo_nam dt ON dt.nam = y.y
                         LEFT JOIN chi_phi_theo_nam cp ON cp.nam = y.y
@@ -187,6 +187,7 @@ public interface StatisticsRepository extends JpaRepository<ExportReceipt, Strin
                           COALESCE(revenues.total_revenue, 0) AS revenues,
                           COALESCE(revenues.total_revenue, 0) - COALESCE(expenses.total_expense, 0) AS profits
                         FROM (
+                          -- Generate list of dates
                           SELECT DATE_ADD(?1, INTERVAL c.number DAY) AS date
                           FROM (
                             SELECT a.number + b.number * 31 AS number
@@ -240,6 +241,7 @@ public interface StatisticsRepository extends JpaRepository<ExportReceipt, Strin
                           WHERE DATE_ADD(?1, INTERVAL c.number DAY) <= ?2
                         ) d
                         LEFT JOIN (
+                          -- Tính tổng chi phí (expenses) theo ngày
                           SELECT
                             DATE(i.import_time) AS date,
                             SUM(id.unit_price * id.quantity) AS total_expense
@@ -248,6 +250,7 @@ public interface StatisticsRepository extends JpaRepository<ExportReceipt, Strin
                           GROUP BY DATE(i.import_time)
                         ) expenses ON expenses.date = d.date
                         LEFT JOIN (
+                          -- Tính tổng doanh thu (revenues) theo ngày
                           SELECT
                             DATE(e.export_time) AS date,
                             SUM(ed.unit_price * ed.quantity) AS total_revenue

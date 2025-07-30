@@ -60,24 +60,6 @@ const InventoryCreatePage = () => {
 
   return (
     <Container maxWidth="md" sx={{ py: 4 }}>
-      {/* Breadcrumbs */}
-      <Breadcrumbs 
-        separator={<NavigateNextIcon fontSize="small" />} 
-        sx={{ mb: 3 }}
-      >
-        <Link 
-          color="inherit" 
-          href="/manager/inventory"
-          sx={{ display: 'flex', alignItems: 'center', textDecoration: 'none' }}
-        >
-          <HomeIcon sx={{ mr: 0.5 }} fontSize="inherit" />
-          Kiểm kê
-        </Link>
-        <Typography color="text.primary" sx={{ display: 'flex', alignItems: 'center' }}>
-          <AssignmentIcon sx={{ mr: 0.5 }} fontSize="inherit" />
-          Tạo phiếu mới
-        </Typography>
-      </Breadcrumbs>
 
       {/* Header */}
       <Paper
