@@ -39,7 +39,7 @@ public class InventoryService {
     ProductItemRepository productItemRepository;
 
     @Transactional
-    public void createFullInventory(InventoryRequest request) {
+    public InventoryResponse createFullInventory(InventoryRequest request) {
         var context =  SecurityContextHolder.getContext();
         String name = context.getAuthentication().getName();
 
@@ -97,37 +97,36 @@ public class InventoryService {
             }
         }
 
-     //   return "Create "
-//                InventoryResponse.builder()
-//                .inventoryId(inventory.getInventoryId())
-//                .createdId(account.getStaffId())
-//                .areaId(area != null ? area.getId() : null)
-//                .status(inventory.getStatus())
-//                .createdAt(inventory.getCreatedAt())
-//                .updatedAt(inventory.getUpdatedAt())
-//                .inventoryDetailsList(
-//                        inventoryDetailsRepository.findByInventory_InventoryId(inventoryId)
-//                                .stream()
-//                                .map(d -> InventoryDetailsResponse.builder()
-//                                        .inventoryId(d.getId().getInventoryId())
-//                                        .productVersionId(d.getId().getProductVersionId())
-//                                        .systemQuantity(d.getSystemQuantity())
-//                                        .quantity(d.getQuantity())
-//                                        .note(d.getNote())
-//                                        .build())
-//                                .collect(Collectors.toSet())
-//                )
-//                .inventoryProductDetailsList(
-//                        inventoryProductDetailsRepository.findByInventory_InventoryId(inventoryId)
-//                                .stream()
-//                                .map(d -> InventoryProductDetailsResponse.builder()
-//                                        .inventoryId(d.getId().getInventoryId())
-//                                        .imei(d.getId().getImei())
-//                                        .status(d.getStatus())
-//                                        .build())
-//                                .collect(Collectors.toSet())
-//                )
-//                .build();
+        return InventoryResponse.builder()
+                .inventoryId(inventory.getInventoryId())
+                .createdId(account.getStaffId())
+                .areaId(area != null ? area.getId() : null)
+                .status(inventory.getStatus())
+                .createdAt(inventory.getCreatedAt())
+                .updatedAt(inventory.getUpdatedAt())
+                .inventoryDetailsList(
+                        inventoryDetailsRepository.findByInventoryId(inventoryId)
+                                .stream()
+                                .map(d -> InventoryDetailsResponse.builder()
+                                        .inventoryId(d.getId().getInventoryId())
+                                        .productVersionId(d.getId().getProductVersionId())
+                                        .systemQuantity(d.getSystemQuantity())
+                                        .quantity(d.getQuantity())
+                                        .note(d.getNote())
+                                        .build())
+                                .collect(Collectors.toSet())
+                )
+                .inventoryProductDetailsList(
+                        inventoryProductDetailsRepository.findByInventoryId(inventoryId)
+                                .stream()
+                                .map(d -> InventoryProductDetailsResponse.builder()
+                                        .inventoryId(d.getId().getInventoryId())
+                                        .imei(d.getId().getImei())
+                                        .status(d.getStatus())
+                                        .build())
+                                .collect(Collectors.toSet())
+                )
+                .build();
     }
 
     public List<ReportInventoryResponse> getInventoryReport() {
@@ -270,6 +269,16 @@ public class InventoryService {
                                 .collect(Collectors.toSet())
                 )
                 .build();
+    }
+
+    @Transactional
+    public void updateProductVersionStocks(Long inventoryId) {
+        // This method would update product version stocks based on inventory results
+        // Implementation depends on business logic
+        log.info("Updating product version stocks for inventory {}", inventoryId);
+        
+        // You might want to implement specific logic here based on requirements
+        // For example, updating stock quantities based on inventory differences
     }
 
 }

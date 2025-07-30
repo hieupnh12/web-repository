@@ -15,6 +15,7 @@ import {
   Download,
   Upload,
   ShieldCheck,
+  SearchCheck,
   Menu,
   X,
   KeyRound,
@@ -31,6 +32,21 @@ import {
 import LogoutDialog from "../ui/LogoutDialog";
 
 const MENU_ITEMS = [
+
+  // { id: 4, label: "Products", icon: Package, path: "products", color: "text-blue-500" },
+  // { id: 1, label: "Attributes", icon: Cpu, path: "attributes", color: "text-blue-500" },
+  // { id: 6, label: "Import", icon: Download, path: "import", color: "text-blue-500" },
+  // { id: 7, label: "Export", icon: Upload, path: "export", color: "text-blue-500" },
+  // { id: 3, label: "Inventory", icon: SearchCheck, path: "inventory", color: "text-blue-500" },
+  // { id: 2, label: "Areas", icon: MapPin, path: "storage", color: "text-blue-500" },
+  // { id: 8, label: "Customers", icon: Users, path: "customers", color: "text-blue-500" },
+  // { id: 5, label: "Suppliers", icon: Building2, path: "suppliers", color: "text-blue-500" },
+  // { id: 9, label: "Staff", icon: UserCircle, path: "staff", color: "text-blue-500" },
+  // { id: 10, label: "Account", icon: Settings, path: "account", color: "text-blue-500" },
+  // { id: 11, label: "Permissions", icon: ShieldCheck, path: "permissions", color: "text-blue-500" },
+  // { id: 12, label: "Statistics", icon: BarChart3, path: "statistics", color: "text-blue-500" },
+
+
 
   {
     id: 4,
@@ -58,6 +74,13 @@ const MENU_ITEMS = [
     label: "Xuất hàng",
     icon: Upload,
     path: "export",
+    color: "text-blue-500",
+  },
+  {
+    id: 3,
+    label: "Kiểm kê",
+    icon: SearchCheck,
+    path: "inventory",
     color: "text-blue-500",
   },
   {
@@ -106,7 +129,7 @@ const MENU_ITEMS = [
     id: 12,
     label: "Thống kê",
     icon: BarChart3,
-    path: "statistics",
+    path: "statistics/overview",
     color: "text-blue-500",
   },
 

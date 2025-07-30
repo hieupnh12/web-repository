@@ -45,7 +45,7 @@ const IMEIScanPage = () => {
   const handleSave = async () => {
     try {
       await saveInventoryProductDetails(inventoryId, imeiList);
-      navigate(`/inventory/summary/${inventoryId}`);
+      navigate(`/manager/inventory/summary/${inventoryId}`);
     } catch (err) {
       console.error('Lỗi khi lưu IMEI', err);
     }
@@ -71,7 +71,7 @@ const IMEIScanPage = () => {
       <ImeiScanner productVersions={productVersions} onAddImei={handleAddImei} />
       <ImeiListTable imeiList={imeiList} onDelete={handleDeleteImei} />
       <Stack direction="row" spacing={2} sx={{ mt: 3 }}>
-        <Button variant="outlined" onClick={() => navigate(`/inventory/details/${inventoryId}`)}>
+        <Button variant="outlined" onClick={() => navigate(`/manager/inventory/details/${inventoryId}`)}>
           Quay lại
         </Button>
         <Button variant="contained" color="warning" onClick={handleMarkMissing}>

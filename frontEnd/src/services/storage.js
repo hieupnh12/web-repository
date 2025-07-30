@@ -10,17 +10,20 @@ export const takeWarehouseArea = () => {
 };
 
 export const takeWarehouseAreaInven = async () => {
-  const response = await BASE_URL[GET]("warehouse_area");
-  console.log("Warehouse Area API response:", response.data);
-
-  // Nếu response.data là array trực tiếp, return luôn
-  if (Array.isArray(response.data)) {
-    return response.data;
+  try {
+    const response = await BASE_URL[GET]("warehouse_area");
+    
+    // Nếu response.data là array trực tiếp, return luôn
+    if (Array.isArray(response.data)) {
+      return response.data;
+    }
+    // Nếu vẫn dùng key result
+    return Array.isArray(response.data?.result) ? response.data.result : [];
+  } catch (error) {
+    console.error("Error fetching warehouse areas:", error);
+    return [];
   }
-  // Nếu vẫn dùng key result
-  return Array.isArray(response.data?.result) ? response.data.result : [];
 };
-
 
 /**
  * Lấy thông tin chi tiết khu vực kho theo ID

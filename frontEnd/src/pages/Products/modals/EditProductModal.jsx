@@ -9,6 +9,7 @@ import {
 } from "../../../services/attributeService";
 import { takeWarehouseArea } from "../../../services/storage";
 import DeleteProductModal from "./DeleteProductModal";
+import { toast } from "react-toastify";
 
 const FormInput = ({
   label,
@@ -26,7 +27,8 @@ const FormInput = ({
       htmlFor={name}
       className="block text-sm font-semibold text-gray-800 mb-2"
     >
-      {label} {unit && <span className="text-gray-500 font-normal">({unit})</span>}
+      {label}{" "}
+      {unit && <span className="text-gray-500 font-normal">({unit})</span>}
     </label>
     <div className="relative">
       <input
@@ -37,7 +39,9 @@ const FormInput = ({
         onChange={onChange}
         placeholder={placeholder}
         className={`w-full px-4 py-3 border-2 rounded-xl transition-all focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent ${
-          error ? "border-red-400 bg-red-50" : "border-gray-200 hover:border-gray-300"
+          error
+            ? "border-red-400 bg-red-50"
+            : "border-gray-200 hover:border-gray-300"
         } bg-white ${className || ""}`}
         aria-describedby={error ? `${name}-error` : undefined}
       />
@@ -66,10 +70,6 @@ const FormSelect = ({
   error,
   placeholder = "-- Chọn --",
 }) => {
-  if (process.env.NODE_ENV === "development") {
-    console.log(`Options for ${name}:`, options);
-    console.log(`Value for ${name}:`, value);
-  }
   const validValue = options.some((opt) => String(getId(opt)) === String(value))
     ? value
     : "";
@@ -88,7 +88,9 @@ const FormSelect = ({
         value={validValue}
         onChange={onChange}
         className={`w-full px-4 py-3 border-2 rounded-xl transition-all focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent ${
-          error ? "border-red-400 bg-red-50" : "border-gray-200 hover:border-gray-300"
+          error
+            ? "border-red-400 bg-red-50"
+            : "border-gray-200 hover:border-gray-300"
         } bg-white`}
         aria-describedby={error ? `${name}-error` : undefined}
         disabled={options.length === 0}
@@ -123,7 +125,6 @@ const EditProductModal = ({ product, onClose, onSave, onDelete }) => {
 
   useEffect(() => {
     if (product) {
-      console.log("Initial product:", product);
       setEditedProduct({
         ...product,
         productName: product.productName || "",
@@ -147,6 +148,7 @@ const EditProductModal = ({ product, onClose, onSave, onDelete }) => {
     ])
       .then(([brandRes, originRes, osRes, areaRes]) => {
         const getData = (res) => {
+          if (Array.isArray(res)) return res;
           if (Array.isArray(res.data)) return res.data;
           return res.data?.content || res.data?.data || [];
         };
@@ -202,10 +204,6 @@ const EditProductModal = ({ product, onClose, onSave, onDelete }) => {
     const selected = options.find((o) => String(getId(o)) === String(value));
     setEditedProduct((prev) => {
       const newState = { ...prev, [name]: selected || null };
-      if (process.env.NODE_ENV === "development") {
-        console.log(`Updated ${name} in editedProduct:`, newState[name]);
-        console.log("Current editedProduct:", newState);
-      }
       return newState;
     });
     setErrors((prev) => ({ ...prev, [name]: "" }));
@@ -237,7 +235,7 @@ const EditProductModal = ({ product, onClose, onSave, onDelete }) => {
     }
   };
 
-  const handleSave = () => {
+  const handleSave = async () => {
     setIsSubmitting(true);
     const newErrors = {};
     if (!editedProduct.productName)
@@ -256,18 +254,26 @@ const EditProductModal = ({ product, onClose, onSave, onDelete }) => {
     if (Object.keys(newErrors).length > 0) {
       setErrors(newErrors);
       setIsSubmitting(false);
+      toast.error("Vui lòng điền đầy đủ thông tin bắt buộc!");
       return;
     }
 
-    if (process.env.NODE_ENV === "development") {
-      console.log("Data to save:", editedProduct);
+    try {
+      if (onSave) {
+        await onSave(editedProduct);
+        toast.success("Cập nhật sản phẩm thành công!");
+        onClose();
+      }
+    } catch (error) {
+      toast.error("Có lỗi xảy ra khi cập nhật sản phẩm!");
+    } finally {
+      setIsSubmitting(false);
     }
-    if (onSave) onSave(editedProduct);
-    setIsSubmitting(false);
   };
 
   const handleDeleteSuccess = () => {
     if (onDelete) onDelete(product);
+    toast.success("Xóa sản phẩm thành công!");
     onClose();
   };
 
@@ -339,12 +345,21 @@ const EditProductModal = ({ product, onClose, onSave, onDelete }) => {
               leaveTo="opacity-0 scale-95"
             >
               <Dialog.Panel className="bg-white rounded-2xl w-full max-w-6xl shadow-2xl overflow-hidden">
-                {/* Header */}
                 <div className="bg-gradient-to-r from-emerald-600 to-teal-600 px-8 py-6">
                   <Dialog.Title className="text-2xl font-bold text-white flex items-center">
                     <div className="w-8 h-8 bg-white bg-opacity-20 rounded-lg flex items-center justify-center mr-3">
-                      <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                      <svg
+                        className="w-5 h-5 text-white"
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth={2}
+                          d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"
+                        />
                       </svg>
                     </div>
                     Chỉnh sửa sản phẩm
@@ -363,7 +378,6 @@ const EditProductModal = ({ product, onClose, onSave, onDelete }) => {
                     )}
 
                     <div className="space-y-8">
-                      {/* Product ID */}
                       <div className="bg-gray-50 rounded-xl p-6">
                         <FormInput
                           label="Mã sản phẩm (ID)"
@@ -374,7 +388,6 @@ const EditProductModal = ({ product, onClose, onSave, onDelete }) => {
                         />
                       </div>
 
-                      {/* Basic Information */}
                       <div className="bg-white border border-gray-200 rounded-xl p-6">
                         <h3 className="text-lg font-semibold text-gray-800 mb-6 flex items-center">
                           <div className="w-2 h-6 bg-blue-500 rounded-full mr-3"></div>
@@ -459,7 +472,6 @@ const EditProductModal = ({ product, onClose, onSave, onDelete }) => {
                         </div>
                       </div>
 
-                      {/* Attributes */}
                       <div className="bg-white border border-gray-200 rounded-xl p-6">
                         <h3 className="text-lg font-semibold text-gray-800 mb-6 flex items-center">
                           <div className="w-2 h-6 bg-green-500 rounded-full mr-3"></div>
@@ -513,37 +525,6 @@ const EditProductModal = ({ product, onClose, onSave, onDelete }) => {
                         </div>
                       </div>
 
-                      {/* Status */}
-                      <div className="bg-white border border-gray-200 rounded-xl p-6">
-                        <h3 className="text-lg font-semibold text-gray-800 mb-6 flex items-center">
-                          <div className="w-2 h-6 bg-amber-500 rounded-full mr-3"></div>
-                          Trạng thái
-                        </h3>
-                        <div className="flex items-center">
-                          <label className="inline-flex items-center cursor-pointer">
-                            <input
-                              id="status"
-                              type="checkbox"
-                              name="status"
-                              checked={editedProduct.status ?? false}
-                              onChange={handleChange}
-                              className="sr-only"
-                            />
-                            <div className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 ${
-                              editedProduct.status ? "bg-blue-600" : "bg-gray-200"
-                            }`}>
-                              <span className={`inline-block h-4 w-4 transform rounded-full bg-white transition ${
-                                editedProduct.status ? "translate-x-6" : "translate-x-1"
-                              }`} />
-                            </div>
-                            <span className="ml-3 text-gray-700 font-medium">
-                              {editedProduct.status ? "Hoạt động" : "Không hoạt động"}
-                            </span>
-                          </label>
-                        </div>
-                      </div>
-
-                      {/* Image Upload */}
                       <div className="bg-white border border-gray-200 rounded-xl p-6">
                         <h3 className="text-lg font-semibold text-gray-800 mb-6 flex items-center">
                           <div className="w-2 h-6 bg-purple-500 rounded-full mr-3"></div>
@@ -559,7 +540,9 @@ const EditProductModal = ({ product, onClose, onSave, onDelete }) => {
                               className="w-full px-4 py-3 border-2 border-dashed border-gray-300 rounded-xl text-gray-600 hover:border-gray-400 transition-colors file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100"
                             />
                             {errors.image && (
-                              <p className="text-red-500 text-xs mt-2">{errors.image}</p>
+                              <p className="text-red-500 text-xs mt-2">
+                                {errors.image}
+                              </p>
                             )}
                           </div>
                           <div className="w-32 h-32 border-2 border-gray-200 rounded-xl overflow-hidden">
@@ -571,8 +554,18 @@ const EditProductModal = ({ product, onClose, onSave, onDelete }) => {
                               />
                             ) : (
                               <div className="w-full h-full bg-gray-100 flex items-center justify-center text-gray-400">
-                                <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                                <svg
+                                  className="w-8 h-8"
+                                  fill="none"
+                                  stroke="currentColor"
+                                  viewBox="0 0 24 24"
+                                >
+                                  <path
+                                    strokeLinecap="round"
+                                    strokeLinejoin="round"
+                                    strokeWidth={2}
+                                    d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"
+                                  />
                                 </svg>
                               </div>
                             )}
@@ -580,7 +573,6 @@ const EditProductModal = ({ product, onClose, onSave, onDelete }) => {
                         </div>
                       </div>
 
-                      {/* Action Buttons */}
                       <div className="flex justify-between items-center pt-6 border-t border-gray-200">
                         <Button
                           onClick={() => setShowDeleteModal(true)}
@@ -589,7 +581,7 @@ const EditProductModal = ({ product, onClose, onSave, onDelete }) => {
                           <TrashIcon className="w-5 h-5" />
                           Xóa sản phẩm
                         </Button>
-                        
+
                         <div className="flex gap-4">
                           <Button
                             onClick={onClose}
@@ -604,9 +596,25 @@ const EditProductModal = ({ product, onClose, onSave, onDelete }) => {
                           >
                             {isSubmitting ? (
                               <div className="flex items-center">
-                                <svg className="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                                  <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                                  <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                                <svg
+                                  className="animate-spin -ml-1 mr-3 h-5 w-5 text-white"
+                                  xmlns="http://www.w3.org/2000/svg"
+                                  fill="none"
+                                  viewBox="0 0 24 24"
+                                >
+                                  <circle
+                                    className="opacity-25"
+                                    cx="12"
+                                    cy="12"
+                                    r="10"
+                                    stroke="currentColor"
+                                    strokeWidth="4"
+                                  ></circle>
+                                  <path
+                                    className="opacity-75"
+                                    fill="currentColor"
+                                    d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                                  ></path>
                                 </svg>
                                 Đang lưu...
                               </div>
