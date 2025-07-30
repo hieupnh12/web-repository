@@ -256,6 +256,7 @@ export default function ImportForm({
 
           <input
             type="text"
+            maxLength={20}
             placeholder="Tìm kiếm..."
             value={searchInput}
             onChange={handleSearchChange}

@@ -15,8 +15,8 @@ const TableViewPer = ({
   }, [data, search]);
 
   return (
-    <div className="bg-white rounded-2xl shadow-xl h-[530px]">
-      <div className="overflow-y-auto max-h-[520px] custom-scroll">
+    <div className="bg-white rounded-2xl shadow-xl h-[90vh] max-h-[90vh] md:h-auto">
+      <div className="overflow-y-auto max-h-[75vh] md:min-h-[500px] custom-scroll">
         <table className="min-w-full text-center">
           <thead className="bg-gradient-to-r from-blue-50 to-indigo-50 sticky top-0 z-10">
             <tr>
@@ -24,7 +24,7 @@ const TableViewPer = ({
                 ID
               </th>
               <th className="px-6 py-3 text-xs font-semibold text-gray-700 uppercase">
-                Permission
+                Tên quyền
               </th>
             </tr>
           </thead>

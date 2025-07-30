@@ -67,6 +67,7 @@ const StaffTable = ({
   handleChangeRowsPerPage,
   handleEdit,
   handleDeleteRequest,
+  isPermission
 }) => {
   return (
     <StyledPaper>
@@ -125,39 +126,51 @@ const StaffTable = ({
                         </Box>
                       </TableCell>
                       <TableCell align="center">
-                        <Box sx={{ display: "flex", justifyContent: "center", gap: 1 }}>
-                          <Tooltip title="Sửa">
-                            <IconButton
-                              onClick={() => handleEdit(staff)}
-                              sx={{
-                                color: "#2196f3",
-                                "&:hover": {
-                                  backgroundColor: "#e3f2fd",
-                                  transform: "scale(1.1)",
-                                },
-                                transition: "all 0.3s ease",
-                              }}
-                            >
-                              <EditIcon fontSize="small" />
-                            </IconButton>
-                          </Tooltip>
-                          <Tooltip title="Xoá">
-                            <IconButton
-                              onClick={() => handleDeleteRequest(staff.staffId)}
-                              sx={{
-                                color: "#f44336",
-                                "&:hover": {
-                                  backgroundColor: "#ffebee",
-                                  transform: "scale(1.1)",
-                                },
-                                transition: "all 0.3s ease",
-                              }}
-                            >
-                              <DeleteIcon fontSize="small" />
-                            </IconButton>
-                          </Tooltip>
-                        </Box>
-                      </TableCell>
+  <Box sx={{ display: "flex", justifyContent: "center", gap: 1 }}>
+    <Tooltip title="Sửa">
+      <span>
+        <IconButton
+          onClick={() => handleEdit(staff)}
+          disabled={!isPermission?.canUpdate}
+          sx={{
+            color: "#2196f3",
+            opacity: isPermission?.canUpdate ? 1 : 0.4,
+            cursor: isPermission?.canUpdate ? "pointer" : "not-allowed",
+            "&:hover": {
+              backgroundColor: isPermission?.canUpdate ? "#e3f2fd" : "transparent",
+              transform: isPermission?.canUpdate ? "scale(1.1)" : "none",
+            },
+            transition: "all 0.3s ease",
+          }}
+        >
+          <EditIcon fontSize="small" />
+        </IconButton>
+      </span>
+    </Tooltip>
+
+    <Tooltip title="Xoá">
+      <span>
+        <IconButton
+          onClick={() => handleDeleteRequest(staff.staffId)}
+          disabled={!isPermission?.canDelete}
+          sx={{
+            color: "#f44336",
+            opacity: isPermission?.canDelete ? 1 : 0.4,
+            cursor: isPermission?.canDelete ? "pointer" : "not-allowed",
+            "&:hover": {
+              backgroundColor: isPermission?.canDelete ? "#ffebee" : "transparent",
+              transform: isPermission?.canDelete ? "scale(1.1)" : "none",
+            },
+            transition: "all 0.3s ease",
+          }}
+        >
+          <DeleteIcon fontSize="small" />
+        </IconButton>
+      </span>
+    </Tooltip>
+  </Box>
+</TableCell>
+
                     </StyledTableRow>
                   ))}
           </TableBody>

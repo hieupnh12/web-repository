@@ -39,7 +39,15 @@ const SupplierDialog = ({ open, onClose, onSubmit, editData = null }) => {
 
   const handleChange = (e) => {
     const { name, value } = e.target;
+    if (name === "phone") {
+    // Chỉ cho phép số và tối đa 10 chữ số
+    const digitsOnly = value.replace(/\D/g, "");
+    if (digitsOnly.length <= 10) {
+      setFormData((prev) => ({ ...prev, phone: digitsOnly }));
+    }
+  } else {
     setFormData((prev) => ({ ...prev, [name]: value }));
+  }
     if (errors[name]) {
       setErrors((prev) => ({ ...prev, [name]: "" }));
     }
@@ -124,6 +132,7 @@ const SupplierDialog = ({ open, onClose, onSubmit, editData = null }) => {
                   type="text"
                   name="name"
                   value={formData.name}
+                  maxLength={30}
                   onChange={handleChange}
                   placeholder="Tên nhà cung cấp *"
                   className={`w-full p-3 border ${
@@ -148,6 +157,7 @@ const SupplierDialog = ({ open, onClose, onSubmit, editData = null }) => {
                   <input
                     type="email"
                     name="email"
+                    maxLength={40}
                     value={formData.email}
                     onChange={handleChange}
                     placeholder="Email"
@@ -169,6 +179,8 @@ const SupplierDialog = ({ open, onClose, onSubmit, editData = null }) => {
                   <input
                     type="text"
                     name="phone"
+                    maxLength={10}
+                  inputMode="numeric"
                     value={formData.phone}
                     onChange={handleChange}
                     placeholder="Số điện thoại"
@@ -192,6 +204,7 @@ const SupplierDialog = ({ open, onClose, onSubmit, editData = null }) => {
               <textarea
                 name="address"
                 value={formData.address}
+                maxLength={100}
                 onChange={handleChange}
                 placeholder="Địa chỉ cụ thể (số nhà, đường...)"
                 className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition resize-y"

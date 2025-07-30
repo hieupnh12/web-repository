@@ -63,6 +63,7 @@ const DateRangeButton = ({
     return date.toISOString().split('T')[0]; // Returns YYYY-MM-DD
   };
 
+
   return (
     <div className="relative" ref={dateRangeRef}>
       {/* Date Range Button */}
@@ -92,6 +93,7 @@ const DateRangeButton = ({
                 type="date"
                 id="start-date"
                 value={formatDateForInput(startDate)}
+                max={formatDateForInput(endDate)} 
                 onChange={(e) => handleStartDateChange(e.target.value)}
                 className="border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-teal-500 focus:border-teal-500"
               />
@@ -104,6 +106,8 @@ const DateRangeButton = ({
               <input
                 type="date"
                 id="end-date"
+                 min={formatDateForInput(startDate)}
+                 max={formatDateForInput(new Date())}
                 value={formatDateForInput(endDate)}
                 onChange={(e) => handleEndDateChange(e.target.value)}
                 className="border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-teal-500 focus:border-teal-500"

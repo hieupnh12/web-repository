@@ -27,6 +27,8 @@ import {
   editStaff,
   removeStaff,
 } from "../../services/staffService";
+import { takeFunctionOfFeature } from "../../services/permissionService";
+import { useSelector } from "react-redux";
 
 const StyledButton = styled(Button)(() => ({
   borderRadius: 8,
@@ -148,13 +150,52 @@ export default function Staff() {
       staff.email?.toLowerCase().includes(search.toLowerCase())
   );
 
+   const [permission, setPermission] = useState(null);
+
+  const fetchPermission = async () => {
+    try {
+      const result = await takeFunctionOfFeature(9);
+      // const info = await takeRoleVer1();
+      setPermission(result.data.result[0]);
+    } catch (err) {
+      setPermission(null);
+    }
+  };
+
+  const staffInfo = useSelector((state) => state.auth.userInfo);
+
+  useEffect(() => {
+    if (staffInfo && staffInfo.roleName === "ADMIN") {
+      setPermission(() => ({
+        functionId: 8,
+        canView: true,
+        canCreate: true,
+        canUpdate: true,
+        canDelete: true,
+      }));
+    } else {
+      fetchPermission();
+    }
+  }, []);
+
   return (
     <Container maxWidth="xl" sx={{ py: 4 }}>
       {/* Header */}
       <Box sx={{ mb: 4, display: "flex", justifyContent: "space-between", gap: 2, flexWrap: "wrap" }}>
-        <StyledButton variant="contained" startIcon={<AddIcon />} onClick={() => setOpenCreate(true)}>
-          Thêm
-        </StyledButton>
+        <StyledButton
+  variant="contained"
+  startIcon={<AddIcon />}
+  onClick={() => setOpenCreate(true)}
+  disabled={!permission?.canCreate}
+  sx={{
+    opacity: permission?.canCreate ? 1 : 0.4,
+    cursor: permission?.canCreate ? "pointer" : "not-allowed",
+    pointerEvents: permission?.canCreate ? "auto" : "none", // Ngăn hover/focus nếu bị disable
+    transition: "all 0.3s ease",
+  }}
+>
+  Thêm
+</StyledButton>
         <Box sx={{ display: "flex", width: "40%", alignItems: "center", gap: 1 }}>
           <StyledTextField
             fullWidth
@@ -180,6 +221,7 @@ export default function Staff() {
       {/* Table */}
       <StaffTable
         loading={loading}
+        isPermission={permission}
         filteredStaffs={filtered}
         page={page}
         rowsPerPage={rowsPerPage}

@@ -64,6 +64,7 @@ const AccountTable = ({
   handleChangePage,
   handleChangeRowsPerPage,
   handleEdit,
+  isPermission
 }) => {
   return (
     <StyledPaper>
@@ -154,22 +155,28 @@ const AccountTable = ({
 
                       {/* Chức năng */}
                       <TableCell align="center">
-                        <Tooltip title="Chỉnh sửa">
-                          <IconButton
-                            onClick={() => handleEdit?.(acc)}
-                            sx={{
-                              color: "#2196f3",
-                              "&:hover": {
-                                backgroundColor: "#e3f2fd",
-                                transform: "scale(1.1)",
-                              },
-                              transition: "all 0.3s ease",
-                            }}
-                          >
-                            <EditIcon fontSize="small" />
-                          </IconButton>
-                        </Tooltip>
-                      </TableCell>
+  <Tooltip title={isPermission?.canUpdate ? "Chỉnh sửa" : "Bạn không có quyền chỉnh sửa"}>
+    <span>
+      <IconButton
+        onClick={() => handleEdit?.(acc)}
+        disabled={!isPermission?.canUpdate}
+        sx={{
+          color: "#2196f3",
+          opacity: isPermission?.canUpdate ? 1 : 0.4,
+          cursor: isPermission?.canUpdate ? "pointer" : "not-allowed",
+          "&:hover": {
+            backgroundColor: isPermission?.canUpdate ? "#e3f2fd" : "transparent",
+            transform: isPermission?.canUpdate ? "scale(1.1)" : "none",
+          },
+          transition: "all 0.3s ease",
+        }}
+      >
+        <EditIcon fontSize="small" />
+      </IconButton>
+    </span>
+  </Tooltip>
+</TableCell>
+
                     </StyledTableRow>
                   ))}
           </TableBody>
