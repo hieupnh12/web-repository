@@ -60,7 +60,19 @@ public class ProductItemController {
         return response;
     }
 
-
+    // ✅ THÊM ENDPOINT MỚI - AN TOÀN
+    // Endpoint để lấy danh sách IMEI theo product version cho tính năng inventory scanning
+    @GetMapping("/available/by-version/{productVersionId}")
+    public ApiResponse<List<ProductItemResponse>> getAvailableImeisByProductVersion(@PathVariable("productVersionId") String productVersionId) {
+        log.info("🔍 API call: Get IMEIs for product version {}", productVersionId);
+        
+        ApiResponse<List<ProductItemResponse>> response = new ApiResponse<>();
+        response.setResult(productItemService.getImeisByProductVersionId(productVersionId));
+        response.setCode(1000);
+        response.setMessage("Successfully retrieved IMEIs for product version");
+        
+        return response;
+    }
 
     @GetMapping("/verifyCount")
     public ApiResponse<Map<String, Object>> verifyCount() {

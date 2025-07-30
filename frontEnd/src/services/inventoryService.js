@@ -133,8 +133,7 @@ export const getProductVersions = async () => {
 
 export const getProductVersionsByInventory = async (inventoryId) => {
   try {
-    // Lấy tất cả product versions vì hiện tại backend chưa có API filter theo inventory
-    // Trong tương lai có thể tạo API riêng: /productVersion/by-inventory/{inventoryId}
+
     const res = await BASE_URL[GET]("/productVersion");
     return res.data?.result || [];
   } catch (error) {
@@ -142,13 +141,16 @@ export const getProductVersionsByInventory = async (inventoryId) => {
   }
 };
 
+
 export const getImeisByProductVersion = async (productVersionId) => {
   try {
     console.log("🔍 Fetching IMEIs for product version:", productVersionId);
-    const res = await BASE_URL[GET](`/product-item/available/by-version/${productVersionId}`);
+    
+    const res = await BASE_URL[GET](`/productItem/available/by-version/${productVersionId}`);
     console.log("📱 IMEI response:", res.data);
     return res.data?.result || [];
   } catch (error) {
+    console.error("❌ Error fetching IMEIs:", error);
     handleApiError(error, "Không thể lấy danh sách IMEI");
   }
 };
