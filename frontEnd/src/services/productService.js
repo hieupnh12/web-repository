@@ -96,7 +96,7 @@ const payload = {
     formData.append("product", new Blob([JSON.stringify(payload)], { type: "application/json" }));
     if (imageFile) formData.append("image", imageFile);
     const text = await formData.get("product").text();
-    console.log("👉 Payload gửi lên backend:", payload);
+    console.log("Payload gửi lên backend:", payload);
 
     const response = await BASE_URL[POST]("/product/full/confirm", formData, {
       headers: { "Content-Type": "multipart/form-data" },
@@ -111,9 +111,31 @@ const payload = {
 
 
 
+// export const updateProduct = async (productId, productUpdateData) => {
+//   try {
+//     const response = await BASE_URL[PUT](`/product/${productId}`, productUpdateData, {
+//       headers: { "Content-Type": "application/json" },
+//     });
+//     return response.data?.result;
+//   } catch (error) {
+//     handleApiError(error, "Không thể cập nhật sản phẩm");
+//   }
+// };
+
 export const updateProduct = async (productId, productUpdateData) => {
   try {
-    const response = await BASE_URL[PUT](`/product/${productId}`, productUpdateData, {
+    const updateData = {
+      ...productUpdateData,
+      originId: productUpdateData.originId ? Number(productUpdateData.originId) : null,
+      operatingSystemId: productUpdateData.operatingSystemId ? Number(productUpdateData.operatingSystemId) : null,
+      brandId: productUpdateData.brandId ? Number(productUpdateData.brandId) : null,
+      warehouseAreaId: productUpdateData.warehouseAreaId ? Number(productUpdateData.warehouseAreaId) : null,
+    };
+    
+    delete updateData.stockQuantity;
+    delete updateData.status;
+    
+    const response = await BASE_URL[PUT](`/product/${productId}`, updateData, {
       headers: { "Content-Type": "application/json" },
     });
     return response.data?.result;

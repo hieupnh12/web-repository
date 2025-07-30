@@ -75,19 +75,21 @@ export default function Staff() {
     severity: "success",
   });
 
-  const loadStaffs = async () => {
-    setLoading(true);
-    try {
-      const response = await fetchStaffList();
-      if (response.status === 200) {
-        setStaffs(response.data.result);
-      }
-    } catch {
-      setSnackbar({ open: true, message: "Error loading employee list", severity: "error" });
-    } finally {
-      setLoading(false);
-    }
-  };
+ const loadStaffs = async () => {
+  setLoading(true);
+  try {
+    const staffList = await fetchStaffList();
+    setStaffs(staffList);
+  } catch {
+    setSnackbar({
+      open: true,
+      message: "Lỗi khi tải danh sách nhân viên",
+      severity: "error",
+    });
+  } finally {
+    setLoading(false);
+  }
+};
 
   useEffect(() => {
     loadStaffs();
@@ -214,8 +216,8 @@ export default function Staff() {
 
       <ConfirmDialog
         isOpen={confirmOpen}
-        title="Xoá nhân viên"
-        message="Bạn có chắc chắn muốn xóa thành viên nhân viên này không? Hành động này không thể hoàn tác."
+        title="Delete Staff"
+        message="Are you sure you want to delete this staff member? This action cannot be undone."
         onConfirm={handleDeleteStaff}
         onCancel={() => setConfirmOpen(false)}
         loading={deleting}

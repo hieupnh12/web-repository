@@ -272,4 +272,14 @@ public class InventoryService {
                 .build();
     }
 
+    @Transactional
+    public void updateProductVersionStocks(Long inventoryId) {
+        // This method would update product version stocks based on inventory results
+        // Implementation depends on business logic
+        log.info("Updating product version stocks for inventory {}", inventoryId);
+
+        // You might want to implement specific logic here based on requirements
+        // For example, updating stock quantities based on inventory differences
+    }
+
 }

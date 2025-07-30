@@ -238,7 +238,7 @@ public class ImportReceiptService {
                 throw new AppException(ErrorCode.IMEI_NOT_FOUND);
             }
             updateStockOnImport(savedImportEntity);
-            updatePrices(detailRequest);
+//            updatePrices(detailRequest);
         }
 
         ImportReceiptFULLResponse savedImportReceipt = importmapper.toImportReceiptFULLResponse(savedImportEntity);

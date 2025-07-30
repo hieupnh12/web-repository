@@ -53,6 +53,7 @@ public class InventoryController {
                 .message("Update inventory has successful")
                 .build();
     }
+
     @GetMapping("/{id}")
     public ApiResponse<InventoryResponse> getInventoryById(@PathVariable Long id) {
         return ApiResponse.<InventoryResponse>builder()
@@ -60,4 +61,11 @@ public class InventoryController {
                 .build();
     }
 
+    @PutMapping("/update-stocks/{inventoryId}")
+    public ApiResponse<Void> updateProductVersionStocks(@PathVariable Long inventoryId) {
+        inventoryService.updateProductVersionStocks(inventoryId);
+        return ApiResponse.<Void>builder()
+                .message("Product version stocks updated successfully")
+                .build();
+    }
 }

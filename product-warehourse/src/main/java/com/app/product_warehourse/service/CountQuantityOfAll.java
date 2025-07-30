@@ -1,6 +1,7 @@
 package com.app.product_warehourse.service;
 
 
+import com.app.product_warehourse.dto.response.MonthInYearResponse;
 import com.app.product_warehourse.entity.ProductItem;
 import com.app.product_warehourse.mapper.ImportReceiptMapper;
 import com.app.product_warehourse.mapper.ProductItemMapper;
@@ -11,6 +12,8 @@ import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
+import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
@@ -38,9 +41,7 @@ public class CountQuantityOfAll {
     ProductItemRepository productItemRepo;
     ProductItemService productItemService;
    CustomerRepository customerRepository;
-
-
-
+    private final StatisticsRepository statisticsRepository;
 
 
     public Map<String, Object> calculateImeiStats() {
@@ -160,6 +161,60 @@ public class CountQuantityOfAll {
         return stats;
     }
 
+
+
+
+    public Map<String, Object> calculateCurrentMonthRevenue(Long year) {
+        // Lấy tháng và năm hiện tại
+        LocalDate currentDate = LocalDate.now();
+        int currentMonth = currentDate.getMonthValue();
+        int currentYear = currentDate.getYear();
+
+        // Kiểm tra nếu năm yêu cầu không phải năm hiện tại
+        if (!year.equals((long) currentYear)) {
+            throw new IllegalArgumentException("Dữ liệu chỉ tính cho năm hiện tại: " + currentYear);
+        }
+
+        // Lấy dữ liệu từ repository
+        List<MonthInYearResponse> monthlyData = statisticsRepository.getAllMonthInYear2(year);
+
+        // Tạo Map để lưu doanh thu theo tháng
+        Map<Long, BigDecimal> revenueByMonth = new HashMap<>();
+        for (MonthInYearResponse data : monthlyData) {
+            revenueByMonth.put(data.getMonth(), data.getRevenues() != null ? data.getRevenues() : BigDecimal.ZERO);
+            System.out.println("Month: " + data.getMonth() + ", Revenue: " + (data.getRevenues() != null ? data.getRevenues() : BigDecimal.ZERO));
+        }
+
+        // Lấy doanh thu tháng hiện tại
+        BigDecimal currentRevenue = revenueByMonth.getOrDefault((long) currentMonth, BigDecimal.ZERO);
+        System.out.println("Revenue data current (Month " + currentMonth + "): " + currentRevenue);
+        // Lấy doanh thu tháng trước
+        BigDecimal previousRevenue = revenueByMonth.getOrDefault((long) (currentMonth - 1), BigDecimal.ZERO);
+        System.out.println("Revenue data before (Month " + (currentMonth - 1) + "): " + previousRevenue);
+
+        // Tính số tiền tăng
+        BigDecimal revenueIncrease = currentRevenue.subtract(previousRevenue);
+
+        // Tính phần trăm tăng trưởng
+        BigDecimal growthPercentage;
+        if (previousRevenue.compareTo(BigDecimal.ZERO) == 0) {
+            growthPercentage = BigDecimal.ZERO;
+        } else {
+            growthPercentage = currentRevenue.subtract(previousRevenue)
+                    .divide(previousRevenue, 4, RoundingMode.HALF_UP)
+                    .multiply(BigDecimal.valueOf(100));
+        }
+
+        // Tạo Map để trả về kết quả
+        Map<String, Object> result = new HashMap<>();
+        result.put("currentMonth", currentMonth);
+        result.put("year", year);
+        result.put("currentRevenue", currentRevenue);
+        result.put("revenueIncrease", revenueIncrease);
+        result.put("growthPercentage", growthPercentage.setScale(2, RoundingMode.HALF_UP));
+
+        return result;
+    }
 
 
 }
