@@ -52,7 +52,7 @@ public class ImportReceiptController {
 
 
         @PostMapping("/init")
-        @PreAuthorize("hasRole('ADMIN') or hasRole('STAFF')")
+        @PreAuthorize("hasRole('ADMIN') or hasAuthority('Purchase_Orders_CREATE')")
         public ApiResponse<ImportReceiptFULLResponse> initImportReceipt(@Valid @RequestBody ImportReceiptFullRequest request) {
                 return ApiResponse.<ImportReceiptFULLResponse>builder()
                         .result(importservice.initImportReceipt(request))
@@ -63,6 +63,7 @@ public class ImportReceiptController {
 
 
         @GetMapping
+        @PreAuthorize("hasRole('ADMIN') or hasAuthority('Purchase_Orders_VIEW')")
         public ApiResponse<Page<ImportReceiptFULLResponse>> getAllImportReceipts(
                 @RequestParam(defaultValue = "0") int page,
                 @RequestParam(defaultValue = "10") int size) {
@@ -74,6 +75,7 @@ public class ImportReceiptController {
 
 
         @DeleteMapping("/{id}")
+        @PreAuthorize("hasRole('ADMIN') or hasAuthority('Purchase_Orders_DELETE')")
         public ApiResponse<ImportReceiptResponse> deleteImportReceipt(@PathVariable("id") String id) {
                 ApiResponse<ImportReceiptResponse> response = new ApiResponse<>();
                 importservice.deleteImportReceipt(id);

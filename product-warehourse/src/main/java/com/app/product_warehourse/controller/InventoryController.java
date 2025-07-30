@@ -10,6 +10,7 @@ import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -24,6 +25,7 @@ public class InventoryController {
 
 
     @PostMapping
+    @PreAuthorize("hasRole('ADMIN') or hasAuthority('Inventory_CREATE')")
     public ApiResponse<InventoryResponse> addInventory(@RequestBody InventoryRequest request) {
         inventoryService.createFullInventory(request);
         return ApiResponse.<InventoryResponse>builder()
@@ -32,6 +34,7 @@ public class InventoryController {
     }
 
     @GetMapping
+    @PreAuthorize("hasRole('ADMIN') or hasAuthority('Inventory_VIEW')")
     public ApiResponse<List<ReportInventoryResponse>> getAllInventory() {
         return ApiResponse.<List<ReportInventoryResponse>>builder()
                 .result(inventoryService.getInventoryReport())
@@ -39,6 +42,7 @@ public class InventoryController {
     }
 
     @DeleteMapping("/{id}")
+    @PreAuthorize("hasRole('ADMIN') or hasAuthority('Inventory_DELETE')")
     public ApiResponse<Void> deleteInventory(@PathVariable Long id) {
         inventoryService.deleteInventoryById(id);
         return ApiResponse.<Void>builder()
@@ -62,6 +66,7 @@ public class InventoryController {
     }
 
     @PutMapping("/update-stocks/{inventoryId}")
+    @PreAuthorize("hasRole('ADMIN') or hasAuthority('Inventory_UPDATE')")
     public ApiResponse<Void> updateProductVersionStocks(@PathVariable Long inventoryId) {
         inventoryService.updateProductVersionStocks(inventoryId);
         return ApiResponse.<Void>builder()

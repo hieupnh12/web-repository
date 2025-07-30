@@ -19,6 +19,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.format.annotation.DateTimeFormat;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
@@ -60,6 +61,7 @@ public class ExportReceiptController {
     }
 
     @PostMapping("/full/confirm")
+    @PreAuthorize("hasRole('ADMIN') or hasAuthority('Sales_Orders_CREATE')")
     public ApiResponse<ExportReceiptFULLResponse> createExportReceipt(@Valid @RequestBody ExportReceiptFullRequest request) {
           return ApiResponse.<ExportReceiptFULLResponse>builder()
                   .result(exportReceiptService.createImportReceiptFull(request))
@@ -68,7 +70,8 @@ public class ExportReceiptController {
 
 
      @GetMapping
-    public ApiResponse<Page<ExportReceiptFULLResponse>> getAllExportReceipts(
+     @PreAuthorize("hasRole('ADMIN') or hasAuthority('Sales_Orders_VIEW')")
+     public ApiResponse<Page<ExportReceiptFULLResponse>> getAllExportReceipts(
              @RequestParam(defaultValue = "0") int page,
              @RequestParam(defaultValue = "10") int size) {
          Pageable pageable = PageRequest.of(page, size);
@@ -80,6 +83,7 @@ public class ExportReceiptController {
 
 
      @DeleteMapping("/{id}")
+     @PreAuthorize("hasRole('ADMIN') or hasAuthority('Sales_Orders_DELETE')")
     public ApiResponse<Void> deleteAllExportReceipts(@PathVariable String id) {
            exportReceiptService.deleteExportReceipt(id);
            return ApiResponse.<Void>builder()

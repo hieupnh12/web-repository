@@ -51,7 +51,7 @@ public class ImportReceiptService {
     private final ProductVersionRepository productVersionRepository;
 
 
-    @PreAuthorize("hasRole('ADMIN') or hasRole('STAFF')") // Giữ nếu vẫn sử dụng Spring Security, nếu không thì xóa
+    // Giữ nếu vẫn sử dụng Spring Security, nếu không thì xóa
     public ImportReceiptFULLResponse initImportReceipt(ImportReceiptFullRequest request) {
         log.info("Creating import receipt with request: {}", request);
 
@@ -109,7 +109,6 @@ public class ImportReceiptService {
 
 
     @Transactional
-    @PreAuthorize("hasRole('ADMIN') or hasRole('STAFF')")
     public ImportReceiptFULLResponse createImportReceiptFull(ImportReceiptFullRequest request) {
         if (request == null || request.getImportReceipt() == null || request.getProduct() == null) {
             throw new AppException(ErrorCode.INVALID_REQUEST);
@@ -265,7 +264,7 @@ public class ImportReceiptService {
 //                          .collect(Collectors.toList());
 //    }
 
-
+    @PreAuthorize("hasRole('ADMIN') or hasAuthority('Purchase Orders_VIEW')")
     public Page<ImportReceiptFULLResponse> getAllImportReceipts(Pageable pageable) {
         return importrepo.findAll(pageable)
                 .map(importReceipt -> {

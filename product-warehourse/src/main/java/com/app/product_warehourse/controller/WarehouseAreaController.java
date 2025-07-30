@@ -12,6 +12,7 @@ import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -27,6 +28,7 @@ public class WarehouseAreaController {
     private final WarehouseAreaRepository warehouseAreaRepository;
 
     @PostMapping
+    @PreAuthorize("hasRole('ADMIN') or hasAuthority('Warehouse_Area_CREATE')")
     public ApiResponse<WarehouseArea> createWarehouseArea(@RequestBody @Valid WarehouseAreaRequest request) {
         ApiResponse<WarehouseArea> response = new ApiResponse<>();
         response.setResult(warehouseAreaService.createWarehouseArea(request));
@@ -34,6 +36,7 @@ public class WarehouseAreaController {
     }
 
     @GetMapping
+    @PreAuthorize("hasRole('ADMIN') or hasAuthority('Warehouse_Area_VIEW')")
     public List<WarehouseAreaResponse> getAllWarehouseAreas() {
         return warehouseAreaService.getAllWarehouseAreas();
     }
@@ -44,12 +47,14 @@ public class WarehouseAreaController {
     }
 
     @DeleteMapping("/{id}")
+    @PreAuthorize("hasRole('ADMIN') or hasAuthority('Warehouse_Area_DELETE')")
     public void deleteWarehouseArea(@PathVariable Long id) {
         warehouseAreaService.deleteWarehouseAreaById(id);
         System.out.println("Successfully deleted warehouse area");
     }
 
     @PutMapping("/{id}")
+    @PreAuthorize("hasRole('ADMIN') or hasAuthority('Warehouse_Area_UPDATE')")
     public WarehouseAreaResponse updateWarehouseArea(@PathVariable Long id, @RequestBody WarehouseUpdateRequest request) {
         return warehouseAreaService.UpdateWarehouseAreaAttribute(id , request);
     }

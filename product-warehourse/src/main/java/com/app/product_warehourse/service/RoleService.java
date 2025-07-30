@@ -47,7 +47,7 @@ public class RoleService {
     @Value("${jwt.valid-duration}")
     protected Long VALID_DURATION;
 
-    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasRole('ADMIN') or hasAuthority('Permission_CREATE')")
     @Transactional
     public RoleResponse createRole(RoleCreateRequest request) {
         if (roleRepository.existsByRoleName(request.getRoleName())) {
@@ -85,6 +85,7 @@ public class RoleService {
         var s = roleRepository.save(role);
         return roleMapper.toRoleResponse(s);
     }
+    @PreAuthorize("hasRole('ADMIN') or hasAuthority('Permission_UPDATE')")
     @Transactional
     public RoleResponse updateRole(Long roleId, RoleUpdateRequest request) {
         // 1. Tìm Role
@@ -138,7 +139,7 @@ public class RoleService {
         return roleMapper.toRoleResponse(saved);
     }
 
-    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasRole('ADMIN') or hasAuthority('Permission_VIEW')")
     public List<RoleResponse> getAllRoles() {
         return roleRepository.findAll().stream()
                 .map(roleMapper::toRoleResponseName)
@@ -156,7 +157,7 @@ public class RoleService {
         return roleMapper.toRoleResponseName(role);
 
     }
-    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasRole('ADMIN') or hasAuthority('Permission_DELETE')")
     public void deleteRoleById(Long roleId) {
         roleRepository.deleteById(roleId);
     }

@@ -23,6 +23,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.http.MediaType;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -46,11 +47,12 @@ public class ProductController {
                      .result(productService.initProduct())
                      .build();
         }
-    
-    
-    
-        // Tạo mới Product với ảnh, sử dụng multipart/form-data
+
+
+
+
         @PostMapping(value="/full/confirm",consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+        @PreAuthorize("hasRole('ADMIN') or hasAuthority('Product_CREATE')")
         public ApiResponse<ProductFULLResponse> addProduct(
                 @RequestPart(value = "product") @Valid ProductFullRequest request,
                 @RequestPart(value = "image", required = false) MultipartFile image) throws IOException {
@@ -61,6 +63,7 @@ public class ProductController {
 
 
     @PutMapping(value = "/upload_image/{id}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    @PreAuthorize("hasRole('ADMIN') or hasAuthority('Product_UPDATE')")
     public ApiResponse<ProductResponse> updateImageProduct(@PathVariable("id") Long id,
                                                            @RequestPart("image") MultipartFile image) {
         ApiResponse<ProductResponse> api = new ApiResponse<>();
@@ -84,6 +87,7 @@ public class ProductController {
 
 
     @GetMapping
+    @PreAuthorize("hasRole('ADMIN') or hasAuthority('Product_VIEW')")
     ApiResponse<Page<ProductFULLResponse>> getAll( @RequestParam(defaultValue = "0") int page,
                                                    @RequestParam(defaultValue = "10") int size) { //Thêm @PageableDefault để mặc định trả về 10 bản ghi mỗi trang. Người dùng có thể truyền
         ApiResponse<Page<ProductFULLResponse>> resp = new ApiResponse<>();

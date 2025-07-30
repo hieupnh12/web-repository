@@ -90,7 +90,6 @@ public class ExportReceiptService {
 
 
     @Transactional
-    @PreAuthorize("hasRole('ADMIN') or hasRole('STAFF')")
     public ExportReceiptFULLResponse createImportReceiptFull(ExportReceiptFullRequest request) {
         if (request == null || request.getExportReceipt() == null || request.getProduct() == null) {
             throw new AppException(ErrorCode.REQUEST_FIRST_NOT_FOUND);
@@ -185,7 +184,6 @@ public class ExportReceiptService {
 
         return savedExportReceipt;
     }
-
 
 
 

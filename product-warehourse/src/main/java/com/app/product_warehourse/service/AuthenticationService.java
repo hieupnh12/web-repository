@@ -121,7 +121,9 @@ public class AuthenticationService {
 
             if (!CollectionUtils.isEmpty(role.getPermissions())) {
                 for (Permission permission : role.getPermissions()) {
-                    String functionName = permission.getFunctions().getFunctionName(); // Lấy tên chức năng
+                    String functionName = permission.getFunctions()
+                            .getFunctionName()
+                            .replace(" ", "_"); // << thêm dòng này
 
                     if (permission.isCanView()) stringJoiner.add(functionName + "_VIEW");
                     if (permission.isCanCreate()) stringJoiner.add(functionName + "_CREATE");

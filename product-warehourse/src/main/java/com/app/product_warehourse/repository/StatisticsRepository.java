@@ -171,7 +171,7 @@ public interface StatisticsRepository extends JpaRepository<ExportReceipt, Strin
                             y.y AS year,
                             COALESCE(dt.doanh_thu, 0) AS revenue,
                             COALESCE(cp.chi_phi, 0) AS expenses,
-                            COALESCE(dt.doanh_thu, 0) - COALESCE(cp.chi_phi, 0) AS profit
+                            COALESCE(cp.chi_phi, 0) - COALESCE(dt.doanh_thu, 0) AS profit
                         FROM years y
                         LEFT JOIN doanh_thu_theo_nam dt ON dt.nam = y.y
                         LEFT JOIN chi_phi_theo_nam cp ON cp.nam = y.y
@@ -331,17 +331,6 @@ public interface StatisticsRepository extends JpaRepository<ExportReceipt, Strin
             );
 
 
-
-
-
-
-
-
-    // caí riêng của lộc
-
-
-
-    //tinh doanh thu thang thu duoc
         @Query(value = """
             SELECT
                 m.month AS month,
