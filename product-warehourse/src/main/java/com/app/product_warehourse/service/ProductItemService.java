@@ -125,6 +125,30 @@ public class ProductItemService {
 //        return imeis;
 //    }
 
+    
+    public List<ProductItemResponse> getImeisByProductVersionId(String productVersionId) {
+        try {
+            log.info("🔍 Fetching IMEIs for product version: {}", productVersionId);
+            
+            // Lấy tất cả ProductItem cho version này
+            List<ProductItem> productItems = productItemRepo.findAll().stream()
+                    .filter(item -> item.getVersionId() != null && 
+                                   productVersionId.equals(item.getVersionId().getVersionId()))
+                    .collect(Collectors.toList());
+            
+            log.info("📱 Found {} IMEIs for version {}", productItems.size(), productVersionId);
+            
+            // Convert sang response format
+            return productItems.stream()
+                    .map(productItemMapper::toProductItemResponse)
+                    .collect(Collectors.toList());
+                    
+        } catch (Exception e) {
+            log.error("❌ Error fetching IMEIs for version {}: {}", productVersionId, e.getMessage());
+            return List.of(); // Trả về list rỗng thay vì throw exception
+        }
+    }
+
 
 
 

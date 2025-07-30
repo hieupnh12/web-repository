@@ -6,25 +6,21 @@ import {
   Box,
   Button,
   Alert,
-  Breadcrumbs,
-  Link,
   CircularProgress,
   Grid,
   Card,
   CardContent,
-  Chip,
   Stack,
-  Fade
+  Fade,
+  LinearProgress
 } from '@mui/material';
 import {
-  Assignment as AssignmentIcon,
-  Home as HomeIcon,
-  NavigateNext as NavigateNextIcon,
   QrCodeScanner as QrCodeScannerIcon,
   ArrowBack as ArrowBackIcon,
   CheckCircle as CheckCircleIcon,
   Warning as WarningIcon,
-  Phone as PhoneIcon
+  Visibility as VisibilityIcon,
+  Error as ErrorIcon
 } from '@mui/icons-material';
 import { useParams, useNavigate } from 'react-router-dom';
 import {
@@ -81,7 +77,7 @@ const IMEIScanPage = () => {
       
     } catch (error) {
       console.error('❌ Error fetching data:', error);
-      toast.error('Không thể tải dữ liệu');
+      toast.error('❌ Không thể tải dữ liệu');
     } finally {
       setLoading(false);
     }
@@ -110,7 +106,7 @@ const IMEIScanPage = () => {
       
     } catch (error) {
       console.error("❌ Error fetching IMEIs:", error);
-      toast.error("Không thể tải danh sách IMEI");
+      toast.error("❌ Không thể tải danh sách IMEI");
     }
     
     // Reset states
@@ -121,7 +117,7 @@ const IMEIScanPage = () => {
 
   const handleImeiScanned = (imeiCode) => {
     if (!selectedVersionId) {
-      toast.warning('Vui lòng chọn phiên bản sản phẩm trước');
+      toast.warning('⚠️ Vui lòng chọn phiên bản sản phẩm trước');
       return;
     }
 
@@ -129,7 +125,7 @@ const IMEIScanPage = () => {
     
     // Kiểm tra IMEI đã được quét chưa
     if (scannedImeis.includes(imeiCode) || newImeis.some(item => item.imei === imeiCode)) {
-      toast.info('IMEI này đã được quét');
+      toast.info('ℹ️ IMEI này đã được quét');
       return;
     }
 
@@ -198,31 +194,38 @@ const IMEIScanPage = () => {
     try {
       setSaving(true);
       
-      // Tạo danh sách IMEI để lưu
+      // Tạo danh sách IMEI để lưu - chỉ gửi IMEI mới và thiếu
       const imeiList = [
-        // IMEI đã quét (có trong hệ thống)
-        ...scannedImeis.map(imei => ({
-          imei,
-          productVersionId: selectedVersionId,
-          status: 'FOUND'
-        })),
-        // IMEI mới
+        // IMEI mới được quét
         ...newImeis.map(item => ({
           imei: item.imei,
           productVersionId: item.productVersionId,
           status: 'NEW'
+        })),
+        // IMEI thiếu (nếu có)
+        ...missingImeis.map(imei => ({
+          imei,
+          productVersionId: selectedVersionId,
+          status: 'MISSING'
         }))
       ];
       
       console.log("💾 Saving IMEI list:", imeiList);
+      console.log("📊 Scanned existing IMEIs (not saved):", scannedImeis);
       
-      await saveInventoryProductDetails(inventoryId, imeiList);
-      toast.success('Lưu danh sách IMEI thành công!');
+      // Chỉ lưu nếu có IMEI mới hoặc thiếu
+      if (imeiList.length > 0) {
+        await saveInventoryProductDetails(inventoryId, imeiList);
+        toast.success(`🎉 Lưu thành công ${imeiList.length} IMEI!`);
+      } else {
+        toast.info('ℹ️ Không có IMEI mới hoặc thiếu để lưu');
+      }
+      
       navigate(`/manager/inventory/summary/${inventoryId}`);
       
     } catch (error) {
       console.error('❌ Error saving IMEI:', error);
-      toast.error('Không thể lưu danh sách IMEI');
+      toast.error('❌ Không thể lưu danh sách IMEI');
     } finally {
       setSaving(false);
     }
@@ -239,15 +242,27 @@ const IMEIScanPage = () => {
   const versionImeis = selectedVersionId ? existingImeis.filter(imei => imei.productVersionId === selectedVersionId) : [];
   const systemQuantity = selectedInfo?.detail?.systemQuantity || 0;
   const totalScanned = scannedImeis.length + newImeis.length;
+  const scanProgress = systemQuantity > 0 ? (totalScanned / systemQuantity) * 100 : 0;
+
+  // Statistics
+  const stats = {
+    systemImeis: versionImeis.length,
+    scannedImeis: scannedImeis.length,
+    newImeis: newImeis.length,
+    missingImeis: missingImeis.length
+  };
 
   if (loading) {
     return (
-      <Container maxWidth="lg" sx={{ py: 4 }}>
-        <Box display="flex" justifyContent="center" alignItems="center" minHeight="400px">
+      <Container maxWidth="lg" sx={{ py: 3 }}>
+        <Box display="flex" justifyContent="center" alignItems="center" minHeight="60vh">
           <Box textAlign="center">
-            <CircularProgress size={60} />
-            <Typography variant="h6" sx={{ mt: 2 }}>
+            <CircularProgress size={48} sx={{ color: '#667eea' }} />
+            <Typography variant="h6" sx={{ mt: 2, color: '#667eea' }}>
               Đang tải dữ liệu...
+            </Typography>
+            <Typography variant="body2" color="text.secondary" sx={{ mt: 1 }}>
+              Vui lòng chờ trong giây lát
             </Typography>
           </Box>
         </Box>
@@ -256,71 +271,204 @@ const IMEIScanPage = () => {
   }
 
   return (
-    <Container maxWidth="lg" sx={{ py: 4 }}>
-      {/* Breadcrumbs */}
-      <Breadcrumbs 
-        separator={<NavigateNextIcon fontSize="small" />} 
-        sx={{ mb: 3 }}
-      >
-        <Link 
-          color="inherit" 
-          href="/manager/inventory"
-          sx={{ display: 'flex', alignItems: 'center', textDecoration: 'none' }}
-        >
-          <HomeIcon sx={{ mr: 0.5 }} fontSize="inherit" />
-          Kiểm kê
-        </Link>
-        <Link 
-          color="inherit" 
-          href={`/manager/inventory/details/${inventoryId}`}
-          sx={{ display: 'flex', alignItems: 'center', textDecoration: 'none' }}
-        >
-          <AssignmentIcon sx={{ mr: 0.5 }} fontSize="inherit" />
-          Chi tiết phiếu #{inventoryId}
-        </Link>
-        <Typography color="text.primary" sx={{ display: 'flex', alignItems: 'center' }}>
-          <QrCodeScannerIcon sx={{ mr: 0.5 }} fontSize="inherit" />
-          Quét IMEI
-        </Typography>
-      </Breadcrumbs>
-
+    <Container maxWidth="lg" sx={{ py: 3 }}>
       {/* Header */}
       <Paper
         elevation={0}
         sx={{
           background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
           borderRadius: 3,
-          p: 4,
-          mb: 4,
+          p: 3,
+          mb: 3,
           color: 'white',
           position: 'relative',
           overflow: 'hidden'
         }}
       >
+        {/* Decorative elements */}
         <Box
           sx={{
             position: 'absolute',
             top: -30,
             right: -30,
-            width: 120,
-            height: 120,
+            width: 100,
+            height: 100,
             background: 'rgba(255,255,255,0.1)',
             borderRadius: '50%',
             zIndex: 1
           }}
         />
+        
         <Box display="flex" alignItems="center" gap={2} sx={{ position: 'relative', zIndex: 2 }}>
-          <QrCodeScannerIcon sx={{ fontSize: 40 }} />
-          <Box>
+          <Box
+            sx={{
+              p: 1.5,
+              bgcolor: 'rgba(255,255,255,0.2)',
+              borderRadius: 2,
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center'
+            }}
+          >
+            <QrCodeScannerIcon sx={{ fontSize: 32 }} />
+          </Box>
+          <Box flex={1}>
             <Typography variant="h4" fontWeight="bold" gutterBottom>
               Quét IMEI - Phiếu #{inventoryId}
             </Typography>
             <Typography variant="body1" sx={{ opacity: 0.9 }}>
-              Quét và kiểm tra IMEI thực tế của các sản phẩm
+              Quét và kiểm tra IMEI thực tế của các sản phẩm trong kho
             </Typography>
           </Box>
+          
+          {/* Progress indicator */}
+          {selectedVersionId && (
+            <Box sx={{ minWidth: 120, textAlign: 'center' }}>
+              <Typography variant="h5" fontWeight="bold">
+                {Math.round(scanProgress)}%
+              </Typography>
+              <Typography variant="body2" sx={{ opacity: 0.8 }}>
+                Tiến độ quét
+              </Typography>
+              <LinearProgress 
+                variant="determinate" 
+                value={scanProgress} 
+                sx={{ 
+                  mt: 1, 
+                  height: 6, 
+                  borderRadius: 3,
+                  bgcolor: 'rgba(255,255,255,0.2)',
+                  '& .MuiLinearProgress-bar': {
+                    bgcolor: 'white'
+                  }
+                }} 
+              />
+              <Typography variant="caption" sx={{ opacity: 0.7, mt: 0.5, display: 'block' }}>
+                {totalScanned}/{systemQuantity} IMEI
+              </Typography>
+            </Box>
+          )}
         </Box>
       </Paper>
+
+      {/* Statistics Cards */}
+      <Grid container spacing={2} sx={{ mb: 3 }}>
+        <Grid item xs={6} md={3}>
+          <Card elevation={0} sx={{ border: '1px solid #e0e0e0', borderRadius: 2, height: '100%' }}>
+            <CardContent sx={{ textAlign: 'center', py: 2 }}>
+              <Box
+                sx={{
+                  width: 48,
+                  height: 48,
+                  borderRadius: '50%',
+                  bgcolor: '#e3f2fd',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  mx: 'auto',
+                  mb: 1
+                }}
+              >
+                <VisibilityIcon sx={{ fontSize: 24, color: '#1976d2' }} />
+              </Box>
+              <Typography variant="h5" fontWeight="bold" color="primary">
+                {stats.systemImeis}
+              </Typography>
+              <Typography variant="body2" color="text.secondary">
+                IMEI hệ thống
+              </Typography>
+            </CardContent>
+          </Card>
+        </Grid>
+
+        <Grid item xs={6} md={3}>
+          <Card elevation={0} sx={{ border: '1px solid #e0e0e0', borderRadius: 2, height: '100%' }}>
+            <CardContent sx={{ textAlign: 'center', py: 2 }}>
+              <Box
+                sx={{
+                  width: 48,
+                  height: 48,
+                  borderRadius: '50%',
+                  bgcolor: '#e8f5e8',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  mx: 'auto',
+                  mb: 1
+                }}
+              >
+                <CheckCircleIcon sx={{ fontSize: 24, color: '#4caf50' }} />
+              </Box>
+              <Typography variant="h5" fontWeight="bold" color="success.main">
+                {stats.scannedImeis}
+              </Typography>
+              <Typography variant="body2" color="text.secondary">
+                Đã quét
+              </Typography>
+            </CardContent>
+          </Card>
+        </Grid>
+
+        <Grid item xs={6} md={3}>
+          <Card elevation={0} sx={{ border: '1px solid #e0e0e0', borderRadius: 2, height: '100%' }}>
+            <CardContent sx={{ textAlign: 'center', py: 2 }}>
+              <Box
+                sx={{
+                  width: 48,
+                  height: 48,
+                  borderRadius: '50%',
+                  bgcolor: '#fff3e0',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  mx: 'auto',
+                  mb: 1
+                }}
+              >
+                <WarningIcon sx={{ fontSize: 24, color: '#ff9800' }} />
+              </Box>
+              <Typography variant="h5" fontWeight="bold" color="warning.main">
+                {stats.newImeis}
+              </Typography>
+              <Typography variant="body2" color="text.secondary">
+                IMEI mới
+              </Typography>
+            </CardContent>
+          </Card>
+        </Grid>
+
+        <Grid item xs={6} md={3}>
+          <Card elevation={0} sx={{ border: '1px solid #e0e0e0', borderRadius: 2, height: '100%' }}>
+            <CardContent sx={{ textAlign: 'center', py: 2 }}>
+              <Box
+                sx={{
+                  width: 48,
+                  height: 48,
+                  borderRadius: '50%',
+                  bgcolor: stats.missingImeis > 0 ? '#ffebee' : '#e8f5e8',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  mx: 'auto',
+                  mb: 1
+                }}
+              >
+                <ErrorIcon sx={{ fontSize: 24, color: stats.missingImeis > 0 ? '#f44336' : '#4caf50' }} />
+              </Box>
+              <Typography 
+                variant="h5" 
+                fontWeight="bold" 
+                color={stats.missingImeis > 0 ? 'error.main' : 'success.main'}
+              >
+                {stats.missingImeis}
+              </Typography>
+              <Typography variant="body2" color="text.secondary">
+                IMEI thiếu
+              </Typography>
+            </CardContent>
+          </Card>
+        </Grid>
+      </Grid>
 
       {/* Product Version Selector */}
       <ProductVersionSelector
@@ -335,16 +483,41 @@ const IMEIScanPage = () => {
         <Fade in={true} timeout={500}>
           <Box>
             {/* Version Info */}
-            <Alert severity="info" sx={{ mb: 3, borderRadius: 2 }}>
-              <Typography variant="body2">
-                <strong>Đang quét cho:</strong> {selectedInfo?.version?.productName}
-                <br />
-                <strong>Cấu hình:</strong> {selectedInfo?.version?.ramName} | {selectedInfo?.version?.romName} | {selectedInfo?.version?.colorName}
-                <br />
-                <strong>Số lượng hệ thống:</strong> {systemQuantity} | 
-                <strong> Đã quét:</strong> {totalScanned} | 
-                <strong> Còn lại:</strong> {Math.max(0, systemQuantity - totalScanned)}
+            <Alert 
+              severity="info" 
+              sx={{ 
+                mb: 3, 
+                borderRadius: 2,
+                border: '1px solid #e3f2fd'
+              }}
+            >
+              <Typography variant="body2" fontWeight="600" gutterBottom>
+                📱 Thông tin sản phẩm đang quét
               </Typography>
+              <Grid container spacing={2}>
+                <Grid item xs={12} md={8}>
+                  <Typography variant="body2">
+                    <strong>Sản phẩm:</strong> {selectedInfo?.version?.productName}
+                    <br />
+                    <strong>Cấu hình:</strong> {selectedInfo?.version?.ramName} | {selectedInfo?.version?.romName} | {selectedInfo?.version?.colorName}
+                  </Typography>
+                </Grid>
+                <Grid item xs={12} md={4}>
+                  <Typography variant="body2">
+                    <strong>Hệ thống:</strong> {systemQuantity} | <strong>Đã quét:</strong> {totalScanned} | <strong>Còn lại:</strong> {Math.max(0, systemQuantity - totalScanned)}
+                  </Typography>
+                  <LinearProgress 
+                    variant="determinate" 
+                    value={scanProgress} 
+                    sx={{ 
+                      mt: 1, 
+                      height: 4, 
+                      borderRadius: 2,
+                      bgcolor: '#e0e0e0'
+                    }} 
+                  />
+                </Grid>
+              </Grid>
             </Alert>
 
             {/* Scanner Component */}
@@ -356,7 +529,7 @@ const IMEIScanPage = () => {
             />
 
             {/* IMEI Lists */}
-            <Grid container spacing={3} sx={{ mt: 2 }}>
+            <Grid container spacing={2} sx={{ mb: 3 }}>
               {/* Existing IMEIs */}
               <Grid item xs={12} md={4}>
                 <ImeiListDisplay
@@ -389,8 +562,21 @@ const IMEIScanPage = () => {
             </Grid>
 
             {/* Action Buttons */}
-            <Paper elevation={0} sx={{ p: 3, border: '1px solid #e0e0e0', borderRadius: 3, mt: 4 }}>
-              <Stack direction={{ xs: 'column', md: 'row' }} spacing={2} justifyContent="space-between">
+            <Paper 
+              elevation={0} 
+              sx={{ 
+                p: 3, 
+                border: '1px solid #e0e0e0', 
+                borderRadius: 2,
+                background: 'linear-gradient(135deg, #f8f9fa 0%, #ffffff 100%)'
+              }}
+            >
+              <Stack 
+                direction={{ xs: 'column', sm: 'row' }} 
+                spacing={2} 
+                justifyContent="space-between" 
+                alignItems="center"
+              >
                 <Button
                   variant="outlined"
                   startIcon={<ArrowBackIcon />}
@@ -410,28 +596,27 @@ const IMEIScanPage = () => {
                   Quay lại chi tiết phiếu
                 </Button>
 
-                <Stack direction={{ xs: 'column', sm: 'row' }} spacing={2}>
-                  <Button
-                    variant="contained"
-                    startIcon={saving ? <CircularProgress size={18} color="inherit" /> : <CheckCircleIcon />}
-                    onClick={handleSave}
-                    disabled={saving || (scannedImeis.length === 0 && newImeis.length === 0)}
-                    sx={{
-                      borderRadius: 2,
-                      px: 3,
-                      py: 1.5,
-                      background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
-                      '&:hover': {
-                        background: 'linear-gradient(135deg, #5a67d8 0%, #6b46c1 100%)',
-                        transform: 'translateY(-1px)',
-                        boxShadow: '0 8px 25px rgba(0,0,0,0.2)'
-                      },
-                      transition: 'all 0.3s ease'
-                    }}
-                  >
-                    {saving ? 'Đang lưu...' : 'Hoàn tất quét IMEI'}
-                  </Button>
-                </Stack>
+                <Button
+                  variant="contained"
+                  startIcon={saving ? <CircularProgress size={18} color="inherit" /> : <CheckCircleIcon />}
+                  onClick={handleSave}
+                  disabled={saving}
+                  sx={{
+                    borderRadius: 2,
+                    px: 3,
+                    py: 1.5,
+                    background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+                    '&:hover': {
+                      background: 'linear-gradient(135deg, #5a67d8 0%, #6b46c1 100%)'
+                    },
+                    '&:disabled': {
+                      background: '#e0e0e0',
+                      color: '#9e9e9e'
+                    }
+                  }}
+                >
+                  {saving ? 'Đang lưu...' : 'Hoàn tất quét IMEI'}
+                </Button>
               </Stack>
             </Paper>
           </Box>

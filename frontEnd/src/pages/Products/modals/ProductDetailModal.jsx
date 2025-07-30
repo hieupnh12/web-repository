@@ -24,6 +24,7 @@ const ProductDetailModal = ({ product, onClose, onEdit, onDelete }) => {
         setLoadingVersions(true);
         const productId = product.id || product.productId;
         const versionsData = await getVersionsByProductId(productId);
+        console.log("🔍 Product versions data:", versionsData);
         setVersions(versionsData || []);
       } catch (error) {
         console.error('Error fetching versions:', error);
@@ -239,7 +240,7 @@ const ProductDetailModal = ({ product, onClose, onEdit, onDelete }) => {
                                       <TagIcon className="w-4 h-4 text-gray-500" />
                                       <span className="text-xs text-gray-600">ROM:</span>
                                       <span className="text-xs font-medium text-gray-800">
-                                        {version.romSize || version.rom?.romSize || 'N/A'}GB
+                                        {version.romName || version.rom?.romSize || version.romSize || 'N/A'}
                                       </span>
                                     </div>
                                     
@@ -247,7 +248,7 @@ const ProductDetailModal = ({ product, onClose, onEdit, onDelete }) => {
                                       <TagIcon className="w-4 h-4 text-gray-500" />
                                       <span className="text-xs text-gray-600">RAM:</span>
                                       <span className="text-xs font-medium text-gray-800">
-                                        {version.ramSize || version.ram?.name || 'N/A'}GB
+                                        {version.ramName || version.ram?.name || version.ramSize || 'N/A'}
                                       </span>
                                     </div>
 

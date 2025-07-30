@@ -91,13 +91,14 @@ const ImeiListDisplay = ({
     const { icon, color, bgColor } = getIconAndColor(imei, isScanned);
     
     return (
-      <Fade in={true} timeout={300 + index * 100} key={imei}>
+      <Fade in={true} timeout={300 + index * 50} key={imei}>
         <ListItem
           sx={{
             border: '1px solid #e0e0e0',
             borderRadius: 2,
             mb: 1,
             bgcolor: bgColor,
+            minHeight: 56,
             transition: 'all 0.3s ease',
             '&:hover': {
               transform: 'translateX(4px)',
@@ -105,7 +106,7 @@ const ImeiListDisplay = ({
             }
           }}
         >
-          <ListItemIcon sx={{ color }}>
+          <ListItemIcon sx={{ color, minWidth: 40 }}>
             {icon}
           </ListItemIcon>
           <ListItemText
@@ -123,7 +124,9 @@ const ImeiListDisplay = ({
               sx={{
                 bgcolor: '#4caf50',
                 color: 'white',
-                fontWeight: 'bold'
+                fontWeight: 'bold',
+                width: 28,
+                height: 28
               }}
             />
           )}
@@ -136,13 +139,14 @@ const ImeiListDisplay = ({
     const { icon, color, bgColor } = getIconAndColor();
     
     return (
-      <Fade in={true} timeout={300 + index * 100} key={imeiItem.imei}>
+      <Fade in={true} timeout={300 + index * 50} key={imeiItem.imei}>
         <ListItem
           sx={{
             border: '1px solid #ff9800',
             borderRadius: 2,
             mb: 1,
             bgcolor: bgColor,
+            minHeight: 56,
             transition: 'all 0.3s ease',
             '&:hover': {
               transform: 'translateX(4px)',
@@ -150,7 +154,7 @@ const ImeiListDisplay = ({
             }
           }}
         >
-          <ListItemIcon sx={{ color }}>
+          <ListItemIcon sx={{ color, minWidth: 40 }}>
             {icon}
           </ListItemIcon>
           <ListItemText
@@ -170,7 +174,9 @@ const ImeiListDisplay = ({
               sx={{
                 bgcolor: '#4caf50',
                 '&:hover': { bgcolor: '#45a049' },
-                borderRadius: 1
+                borderRadius: 1,
+                minWidth: 'auto',
+                px: 1
               }}
             >
               Thêm
@@ -180,7 +186,9 @@ const ImeiListDisplay = ({
               onClick={() => onRemove && onRemove(imeiItem.imei)}
               sx={{
                 color: '#f44336',
-                '&:hover': { bgcolor: '#ffebee' }
+                '&:hover': { bgcolor: '#ffebee' },
+                width: 32,
+                height: 32
               }}
             >
               <DeleteIcon fontSize="small" />
@@ -195,13 +203,14 @@ const ImeiListDisplay = ({
     const { icon, color, bgColor } = getIconAndColor();
     
     return (
-      <Fade in={true} timeout={300 + index * 100} key={imei}>
+      <Fade in={true} timeout={300 + index * 50} key={imei}>
         <ListItem
           sx={{
             border: '1px solid #f44336',
             borderRadius: 2,
             mb: 1,
             bgcolor: bgColor,
+            minHeight: 56,
             transition: 'all 0.3s ease',
             '&:hover': {
               transform: 'translateX(4px)',
@@ -209,7 +218,7 @@ const ImeiListDisplay = ({
             }
           }}
         >
-          <ListItemIcon sx={{ color }}>
+          <ListItemIcon sx={{ color, minWidth: 40 }}>
             {icon}
           </ListItemIcon>
           <ListItemText
@@ -218,7 +227,7 @@ const ImeiListDisplay = ({
                 {imei}
               </Typography>
             }
-            secondary="Không tìm thấy trong kho thực tế"
+            secondary="Không tìm thấy"
           />
           <Chip
             label="Thiếu"
@@ -263,14 +272,22 @@ const ImeiListDisplay = ({
   };
 
   return (
-    <Paper elevation={0} sx={{ border: '1px solid #e0e0e0', borderRadius: 3, height: 'fit-content' }}>
+    <Paper 
+      elevation={0} 
+      sx={{ 
+        border: '1px solid #e0e0e0', 
+        borderRadius: 2, 
+        height: 'fit-content',
+        maxHeight: 400
+      }}
+    >
       {/* Header */}
       <Box
         sx={{
           p: 2,
           bgcolor: getHeaderColor(),
           color: 'white',
-          borderRadius: '12px 12px 0 0'
+          borderRadius: '8px 8px 0 0'
         }}
       >
         <Box display="flex" alignItems="center" justifyContent="space-between">
@@ -290,7 +307,7 @@ const ImeiListDisplay = ({
       </Box>
 
       {/* Content */}
-      <Box sx={{ p: 2, maxHeight: 400, overflow: 'auto' }}>
+      <Box sx={{ p: 2, maxHeight: 320, overflow: 'auto' }}>
         {imeis.length === 0 ? (
           <Alert severity="info" sx={{ borderRadius: 2 }}>
             <Typography variant="body2">
@@ -306,11 +323,10 @@ const ImeiListDisplay = ({
 
       {/* Footer */}
       {type === 'missing' && imeis.length > 0 && (
-        <Box sx={{ p: 2, bgcolor: '#ffebee', borderRadius: '0 0 12px 12px' }}>
+        <Box sx={{ p: 2, bgcolor: '#ffebee', borderRadius: '0 0 8px 8px' }}>
           <Alert severity="error" sx={{ borderRadius: 2 }}>
             <Typography variant="body2">
               <strong>Cảnh báo:</strong> Có {imeis.length} IMEI không tìm thấy trong kho thực tế.
-              Cần kiểm tra lại hoặc báo cáo mất hàng.
             </Typography>
           </Alert>
         </Box>
