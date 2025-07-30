@@ -1,4 +1,3 @@
-// ... các import giữ nguyên như bạn đã viết
 import React, { useState, useEffect } from 'react';
 import {
   Package,
@@ -164,9 +163,9 @@ const Dashboard = () => {
                 </span>
               </h1>
               <p className="text-blue-100 text-lg leading-relaxed mb-3 max-w-2xl">
-                Hãy hướng về phía mặt trời, nơi mà bóng tối luôn ở phía sau lưng bạn.
+                "Quản lý kho giống như chơi trốn tìm — hàng thì trốn, mình thì tìm!"
                 <br />
-                Điều mà hoa hướng dương vẫn làm mỗi ngày.
+                D11-03
               </p>
             </div>
           </div>

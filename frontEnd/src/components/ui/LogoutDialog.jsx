@@ -5,8 +5,8 @@ const actionStyles = {
   Logout: {
     bg: "from-red-500 to-red-400",
     hover: "hover:from-red-700 hover:to-red-600",
-    text: "Log Out",
-    loading: "Loging Out...",
+    text: "Đăng xuất",
+    loading: "Đang đăng xuất...",
   },
   update: {
     bg: "from-blue-600 to-blue-500",
