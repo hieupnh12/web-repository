@@ -24,10 +24,10 @@ public class InventoryController {
 
 
     @PostMapping
-    public ApiResponse<Void> addInventory(@RequestBody InventoryRequest request) {
+    public ApiResponse<InventoryResponse> addInventory(@RequestBody InventoryRequest request) {
         inventoryService.createFullInventory(request);
-        return ApiResponse.<Void>builder()
-                .message("Successfully added inventory")
+        return ApiResponse.<InventoryResponse>builder()
+                .result(inventoryService.createFullInventory(request))
                 .build();
     }
 
