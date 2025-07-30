@@ -43,7 +43,7 @@ const InventorySummaryPage = () => {
 
   const handleFinish = async () => {
     try {
-      await updateInventoryStatus(inventoryId, 2); // Hoàn tất
+      await updateInventoryStatus(inventoryId, 2); 
       setOpenConfirm(false);
       navigate('/manager/inventory');
     } catch (err) {
