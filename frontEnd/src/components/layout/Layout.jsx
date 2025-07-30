@@ -14,7 +14,14 @@ const pageConfig = {
   },
   "/inventory": {
     title: "Inventory Management",
-    breadcrumb: [{ label: "Attributes" }],
+    breadcrumb: [{ label: "Inventory" }],
+  },
+  "/inventory/create": {
+    title: "Create Inventory",
+    breadcrumb: [
+      { label: "Inventory", href: "inventory" },
+      { label: "Create Inventory" },
+    ],
   },
   "/storage": {
     title: "Warehouse Areas",
