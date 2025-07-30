@@ -47,7 +47,7 @@ public interface ProductItemRepository extends JpaRepository<ProductItem, String
 
 
 
-    @Query("SELECT COUNT(p) FROM ProductItem p WHERE p.status = true")
+    @Query("SELECT COUNT(p) FROM ProductItem p WHERE p.status = false")
     Long countActiveProducts();
 
 }

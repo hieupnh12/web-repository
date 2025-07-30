@@ -277,61 +277,63 @@ public interface StatisticsRepository extends JpaRepository<ExportReceipt, Strin
     List<CustomerStatisticsResponse> getCustomerStatistics();
 
     @Query(value = """
-            WITH Imports AS (
-      SELECT id.product_version_id, SUM(id.quantity) AS import_quantity
-      FROM import_details id
-      JOIN import i ON i.import_id = id.import_id
-      WHERE i.import_time BETWEEN ?1 AND ?2
-      GROUP BY id.product_version_id
-    ),
-    Exports AS (
-      SELECT ed.product_version_id, SUM(ed.quantity) AS export_quantity
-      FROM export_details ed
-      JOIN export e ON e.export_id = ed.export_id
-      WHERE e.export_time BETWEEN ?1 AND ?2
-      GROUP BY ed.product_version_id
-    ),
-    BeginImport AS (
-      SELECT id.product_version_id, SUM(id.quantity) AS beginning_import_quantity
-      FROM import i
-      JOIN import_details id ON i.import_id = id.import_id
-      WHERE i.import_time < ?1
-      GROUP BY id.product_version_id
-    ),
-    BeginExport AS (
-      SELECT ed.product_version_id, SUM(ed.quantity) AS beginning_export_quantity
-      FROM export e
-      JOIN export_details ed ON e.export_id = ed.export_id
-      WHERE e.export_time < ?1
-      GROUP BY ed.product_version_id
-    ),
-    Beginning AS (
-      SELECT
-        pv.version_id,
-        COALESCE(bi.beginning_import_quantity, 0) - COALESCE(be.beginning_export_quantity, 0) AS beginning_inventory
-      FROM product_version pv
-      LEFT JOIN BeginImport bi ON pv.version_id = bi.product_version_id
-      LEFT JOIN BeginExport be ON pv.version_id = be.product_version_id
-    ),
-    temp_table AS (
-      SELECT p.product_id, p.product_name, pv.version_id, bg.beginning_inventory,
-             COALESCE(ims.import_quantity, 0) AS purchases_period,
-             COALESCE(exs.export_quantity, 0) AS goods_issued,
-             (bg.beginning_inventory + COALESCE(ims.import_quantity, 0) - COALESCE(exs.export_quantity, 0)) AS ending_inventory
-      FROM Beginning bg
-      LEFT JOIN Imports ims ON bg.version_id = ims.product_version_id
-      LEFT JOIN Exports exs ON bg.version_id = exs.product_version_id
-      JOIN product_version pv ON pv.version_id = bg.version_id
-      JOIN product p ON pv.product_id = p.product_id
-    )
-    SELECT * FROM temp_table p
-    WHERE p.product_name LIKE CONCAT('%', ?3, '%') OR p.version_id LIKE CONCAT('%', ?4, '%')
-    ORDER BY p.product_id;
-    """, nativeQuery = true)
+        WITH Imports AS (
+  SELECT id.product_version_id, SUM(id.quantity) AS import_quantity
+  FROM import_details id
+  JOIN import i ON i.import_id = id.import_id
+  WHERE i.import_time BETWEEN ?1 AND ?2
+  GROUP BY id.product_version_id
+),
+Exports AS (
+  SELECT pi.product_version_id, SUM(ed.quantity) AS export_quantity
+  FROM export_details ed
+  JOIN export e ON e.export_id = ed.export_id
+  JOIN product_item pi ON ed.product_version_id = pi.imei
+  WHERE e.export_time BETWEEN ?1 AND ?2
+  GROUP BY pi.product_version_id
+),
+BeginImport AS (
+  SELECT id.product_version_id, SUM(id.quantity) AS beginning_import_quantity
+  FROM import i
+  JOIN import_details id ON i.import_id = id.import_id
+  WHERE i.import_time < ?1
+  GROUP BY id.product_version_id
+),
+BeginExport AS (
+  SELECT pi.product_version_id, SUM(ed.quantity) AS beginning_export_quantity
+  FROM export e
+  JOIN export_details ed ON e.export_id = ed.export_id
+  JOIN product_item pi ON ed.product_version_id = pi.imei
+  WHERE e.export_time < ?1
+  GROUP BY pi.product_version_id
+),
+Beginning AS (
+  SELECT
+    pv.version_id,
+    COALESCE(bi.beginning_import_quantity, 0) - COALESCE(be.beginning_export_quantity, 0) AS beginning_inventory
+  FROM product_version pv
+  LEFT JOIN BeginImport bi ON pv.version_id = bi.product_version_id
+  LEFT JOIN BeginExport be ON pv.version_id = be.product_version_id
+),
+temp_table AS (
+  SELECT p.product_id, p.product_name, pv.version_id, bg.beginning_inventory,
+         COALESCE(ims.import_quantity, 0) AS purchases_period,
+         COALESCE(exs.export_quantity, 0) AS goods_issued,
+         (bg.beginning_inventory + COALESCE(ims.import_quantity, 0) - COALESCE(exs.export_quantity, 0)) AS ending_inventory
+  FROM Beginning bg
+  LEFT JOIN Imports ims ON bg.version_id = ims.product_version_id
+  LEFT JOIN Exports exs ON bg.version_id = exs.product_version_id
+  JOIN product_version pv ON pv.version_id = bg.version_id
+  JOIN product p ON pv.product_id = p.product_id
+)
+SELECT * FROM temp_table p
+WHERE p.product_name LIKE CONCAT('%', ?3, '%') OR p.version_id LIKE CONCAT('%', ?4, '%')
+ORDER BY p.product_id;
+""", nativeQuery = true)
     List<InventoryStatisticsResponse> getInventoryStatistics(
-            LocalDateTime startTime ,LocalDateTime endTime,
+            LocalDateTime startTime, LocalDateTime endTime,
             String productName, String productVersionId
-            );
+    );
 
 
 
@@ -345,39 +347,41 @@ public interface StatisticsRepository extends JpaRepository<ExportReceipt, Strin
 
 
     //tinh doanh thu thang thu duoc
-        @Query(value = """
-            SELECT
-                m.month AS month,
-                COALESCE(SUM(i.unit_price * i.quantity), 0) AS expenses,
-                COALESCE(SUM(x.unit_price * x.quantity), 0) AS revenues,
-                COALESCE(SUM(x.unit_price * x.quantity), 0) - COALESCE(SUM(i.unit_price * i.quantity), 0) AS profit                     
-            FROM (
-                SELECT 1 AS month UNION ALL
-                SELECT 2 UNION ALL
-                SELECT 3 UNION ALL
-                SELECT 4 UNION ALL
-                SELECT 5 UNION ALL
-                SELECT 6 UNION ALL
-                SELECT 7 UNION ALL
-                SELECT 8 UNION ALL
-                SELECT 9 UNION ALL
-                SELECT 10 UNION ALL
-                SELECT 11 UNION ALL
-                SELECT 12
-            ) AS m
-            LEFT JOIN export px
-                ON MONTH(px.export_time) = m.month
-                AND YEAR(px.export_time) = ?
-            LEFT JOIN export_details x
-                ON px.export_id = x.export_id
-            LEFT JOIN product_item prIt
-                ON prIt.export_id = x.export_id
-                AND prIt.product_version_id = x.product_version_id
-            LEFT JOIN import_details i
-                ON i.import_id = prIt.import_id
-                AND i.product_version_id = prIt.product_version_id
-            GROUP BY m.month
-            ORDER BY m.month;
+    @Query(value = """
+        SELECT
+            m.month AS month,
+            COALESCE(SUM(id.unit_price * id.quantity), 0) AS expenses,
+            COALESCE(SUM(xd.unit_price * xd.quantity), 0) AS revenues,
+            COALESCE(SUM(xd.unit_price * xd.quantity), 0) - COALESCE(SUM(id.unit_price * id.quantity), 0) AS profit
+        FROM (
+            SELECT 1 AS month UNION ALL
+            SELECT 2 UNION ALL
+            SELECT 3 UNION ALL
+            SELECT 4 UNION ALL
+            SELECT 5 UNION ALL
+            SELECT 6 UNION ALL
+            SELECT 7 UNION ALL
+            SELECT 8 UNION ALL
+            SELECT 9 UNION ALL
+            SELECT 10 UNION ALL
+            SELECT 11 UNION ALL
+            SELECT 12
+        ) AS m
+        LEFT JOIN (
+            SELECT px.export_id, px.export_time
+            FROM export px
+            WHERE YEAR(px.export_time) = ?1
+        ) px ON MONTH(px.export_time) = m.month
+        LEFT JOIN export_details xd ON px.export_id = xd.export_id
+        LEFT JOIN product_item pi ON xd.product_version_id = pi.imei
+        LEFT JOIN (
+            SELECT i.import_id, i.import_time, id.unit_price, id.quantity, id.product_version_id
+            FROM import i
+            JOIN import_details id ON i.import_id = id.import_id
+            WHERE YEAR(i.import_time) = ?1
+        ) id ON pi.import_id = id.import_id AND pi.product_version_id = id.product_version_id
+        GROUP BY m.month
+        ORDER BY m.month;
         """, nativeQuery = true)
     List<MonthInYearResponse> getAllMonthInYear2(Long year);
 
